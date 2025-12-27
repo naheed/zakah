@@ -23,6 +23,165 @@ interface ZakatCalculations {
   };
 }
 
+// Color palette
+const COLORS = {
+  primary: [34, 139, 84] as [number, number, number], // Emerald green
+  primaryLight: [240, 253, 244] as [number, number, number],
+  secondary: [59, 130, 246] as [number, number, number], // Blue
+  accent: [139, 92, 246] as [number, number, number], // Purple
+  warning: [234, 88, 12] as [number, number, number], // Orange
+  danger: [220, 38, 38] as [number, number, number],
+  text: [17, 24, 39] as [number, number, number],
+  textMuted: [107, 114, 128] as [number, number, number],
+  border: [229, 231, 235] as [number, number, number],
+  background: [249, 250, 251] as [number, number, number],
+  white: [255, 255, 255] as [number, number, number],
+  chart1: [34, 139, 84] as [number, number, number],
+  chart2: [59, 130, 246] as [number, number, number],
+  chart3: [168, 85, 247] as [number, number, number],
+  chart4: [251, 146, 60] as [number, number, number],
+  chart5: [236, 72, 153] as [number, number, number],
+};
+
+function drawRoundedRect(
+  doc: jsPDF, 
+  x: number, 
+  y: number, 
+  w: number, 
+  h: number, 
+  r: number, 
+  fillColor: [number, number, number],
+  strokeColor?: [number, number, number]
+) {
+  doc.setFillColor(...fillColor);
+  if (strokeColor) {
+    doc.setDrawColor(...strokeColor);
+    doc.roundedRect(x, y, w, h, r, r, 'FD');
+  } else {
+    doc.roundedRect(x, y, w, h, r, r, 'F');
+  }
+}
+
+function drawSankeyVisualization(
+  doc: jsPDF,
+  breakdown: ZakatCalculations['assetBreakdown'],
+  zakatDue: number,
+  netZakatableWealth: number,
+  currency: string,
+  startY: number,
+  pageWidth: number
+): number {
+  const chartX = 25;
+  const chartWidth = pageWidth - 50;
+  const chartHeight = 80;
+  const barHeight = 12;
+  
+  // Filter out zero-value assets
+  const assets = [
+    { name: 'Cash & Liquid', value: breakdown.liquidAssets, color: COLORS.chart1 },
+    { name: 'Investments', value: breakdown.investments, color: COLORS.chart2 },
+    { name: 'Retirement', value: breakdown.retirement, color: COLORS.chart3 },
+    { name: 'Real Estate', value: breakdown.realEstate, color: COLORS.chart4 },
+    { name: 'Business', value: breakdown.business, color: COLORS.chart5 },
+    { name: 'Other Assets', value: breakdown.otherAssets, color: COLORS.accent },
+  ].filter(a => a.value > 0);
+  
+  if (assets.length === 0) return startY;
+  
+  const total = assets.reduce((sum, a) => sum + a.value, 0);
+  
+  // Draw title
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.text);
+  doc.text('Asset Flow to Zakat', chartX, startY);
+  
+  let currentY = startY + 8;
+  
+  // Draw stacked horizontal bar
+  let currentX = chartX;
+  assets.forEach((asset, i) => {
+    const barWidth = (asset.value / total) * chartWidth;
+    doc.setFillColor(...asset.color);
+    if (i === 0) {
+      // First segment - rounded left corners
+      doc.roundedRect(currentX, currentY, barWidth + 3, barHeight, 3, 3, 'F');
+    } else if (i === assets.length - 1) {
+      // Last segment - rounded right corners
+      doc.roundedRect(currentX - 3, currentY, barWidth + 3, barHeight, 3, 3, 'F');
+    } else {
+      doc.rect(currentX, currentY, barWidth, barHeight, 'F');
+    }
+    currentX += barWidth;
+  });
+  
+  currentY += barHeight + 8;
+  
+  // Draw legend grid
+  const legendCols = 3;
+  const legendColWidth = chartWidth / legendCols;
+  doc.setFontSize(8);
+  
+  assets.forEach((asset, i) => {
+    const col = i % legendCols;
+    const row = Math.floor(i / legendCols);
+    const x = chartX + col * legendColWidth;
+    const y = currentY + row * 14;
+    
+    // Color dot
+    doc.setFillColor(...asset.color);
+    doc.circle(x + 3, y + 2, 2, 'F');
+    
+    // Label
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...COLORS.textMuted);
+    doc.text(asset.name, x + 8, y + 3.5);
+    
+    // Value
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...COLORS.text);
+    doc.text(formatCurrency(asset.value, currency), x + 8, y + 10);
+  });
+  
+  const legendRows = Math.ceil(assets.length / legendCols);
+  currentY += legendRows * 14 + 8;
+  
+  // Draw flow arrow to Zakat
+  const arrowY = currentY;
+  doc.setDrawColor(...COLORS.primary);
+  doc.setLineWidth(0.5);
+  
+  // Draw flow lines from bar to Zakat box
+  const centerX = pageWidth / 2;
+  doc.line(chartX, arrowY, centerX - 30, arrowY);
+  doc.line(centerX + 30, arrowY, chartX + chartWidth, arrowY);
+  
+  // Arrow pointing down
+  doc.line(centerX, arrowY - 5, centerX, arrowY + 5);
+  doc.line(centerX - 3, arrowY + 2, centerX, arrowY + 5);
+  doc.line(centerX + 3, arrowY + 2, centerX, arrowY + 5);
+  
+  currentY += 12;
+  
+  // Draw Zakat Due box
+  const zakatBoxWidth = 100;
+  const zakatBoxHeight = 28;
+  const zakatBoxX = (pageWidth - zakatBoxWidth) / 2;
+  
+  drawRoundedRect(doc, zakatBoxX, currentY, zakatBoxWidth, zakatBoxHeight, 4, COLORS.primary);
+  
+  doc.setTextColor(...COLORS.white);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Zakat Due (2.5%)', pageWidth / 2, currentY + 10, { align: 'center' });
+  
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(formatCurrency(zakatDue, currency), pageWidth / 2, currentY + 22, { align: 'center' });
+  
+  return currentY + zakatBoxHeight + 10;
+}
+
 export function generateZakatPDF(
   data: ZakatFormData,
   calculations: ZakatCalculations,
@@ -31,118 +190,105 @@ export function generateZakatPDF(
   const doc = new jsPDF();
   const { currency } = data;
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   
-  // Header
-  doc.setFontSize(24);
-  doc.setTextColor(41, 98, 255);
-  doc.text('Zakat Calculation Report', pageWidth / 2, 25, { align: 'center' });
+  // === HEADER SECTION ===
+  // Background gradient effect (simulated with overlapping rectangles)
+  doc.setFillColor(...COLORS.primaryLight);
+  doc.rect(0, 0, pageWidth, 65, 'F');
   
-  // Subtitle
-  doc.setFontSize(12);
-  doc.setTextColor(100, 100, 100);
-  doc.text('Based on Sheikh Joe Bradford\'s methodology', pageWidth / 2, 33, { align: 'center' });
+  // Decorative accent line
+  doc.setFillColor(...COLORS.primary);
+  doc.rect(0, 0, pageWidth, 4, 'F');
   
-  // Calculation name and date
+  // Title
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.text);
+  doc.text('Zakat Calculation Report', pageWidth / 2, 22, { align: 'center' });
+  
+  // Subtitle with mosque emoji (using text)
   doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text('Your personalized Zakat calculation', pageWidth / 2, 30, { align: 'center' });
+  
+  // Calculation name and date row
   const dateStr = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+  
+  doc.setFontSize(9);
   if (calculationName) {
-    doc.text(`Calculation: ${calculationName}`, pageWidth / 2, 42, { align: 'center' });
-    doc.text(`Generated: ${dateStr}`, pageWidth / 2, 48, { align: 'center' });
+    doc.text(`${calculationName}  •  ${dateStr}`, pageWidth / 2, 40, { align: 'center' });
   } else {
-    doc.text(`Generated: ${dateStr}`, pageWidth / 2, 42, { align: 'center' });
+    doc.text(dateStr, pageWidth / 2, 40, { align: 'center' });
   }
   
-  let yPos = calculationName ? 58 : 52;
-  
-  // Main Result Box
-  doc.setFillColor(41, 98, 255);
-  doc.roundedRect(20, yPos, pageWidth - 40, 35, 3, 3, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14);
+  // === MAIN RESULT CARD ===
+  const mainCardY = 50;
+  const mainCardHeight = 50;
   
   if (calculations.isAboveNisab) {
-    doc.text('Your Zakat Due', pageWidth / 2, yPos + 12, { align: 'center' });
+    drawRoundedRect(doc, 20, mainCardY, pageWidth - 40, mainCardHeight, 6, COLORS.primary);
+    
+    doc.setTextColor(...COLORS.white);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Your Zakat Due', pageWidth / 2, mainCardY + 14, { align: 'center' });
+    
     doc.setFontSize(28);
-    doc.text(formatCurrency(calculations.zakatDue, currency), pageWidth / 2, yPos + 26, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.text(formatCurrency(calculations.zakatDue, currency), pageWidth / 2, mainCardY + 32, { align: 'center' });
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      `${formatPercent(calculations.zakatRate)} of ${formatCurrency(calculations.netZakatableWealth, currency)} net zakatable wealth`,
+      pageWidth / 2, 
+      mainCardY + 43, 
+      { align: 'center' }
+    );
   } else {
-    doc.text('Below Nisab Threshold', pageWidth / 2, yPos + 14, { align: 'center' });
-    doc.setFontSize(16);
-    doc.text('No Zakat Due This Year', pageWidth / 2, yPos + 26, { align: 'center' });
+    drawRoundedRect(doc, 20, mainCardY, pageWidth - 40, mainCardHeight, 6, COLORS.background, COLORS.border);
+    
+    doc.setTextColor(...COLORS.textMuted);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Below Nisab Threshold', pageWidth / 2, mainCardY + 16, { align: 'center' });
+    
+    doc.setTextColor(...COLORS.text);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('No Zakat Due This Year', pageWidth / 2, mainCardY + 32, { align: 'center' });
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...COLORS.textMuted);
+    doc.text(`Your wealth is below ${formatCurrency(calculations.nisab, currency)}`, pageWidth / 2, mainCardY + 43, { align: 'center' });
   }
   
-  yPos += 45;
+  let yPos = mainCardY + mainCardHeight + 15;
   
-  // Calculation Settings
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(14);
-  doc.text('Calculation Settings', 20, yPos);
-  yPos += 5;
+  // === SANKEY-STYLE ASSET FLOW ===
+  yPos = drawSankeyVisualization(
+    doc,
+    calculations.assetBreakdown,
+    calculations.zakatDue,
+    calculations.netZakatableWealth,
+    currency,
+    yPos,
+    pageWidth
+  );
   
-  autoTable(doc, {
-    startY: yPos,
-    head: [['Setting', 'Value']],
-    body: [
-      ['Calendar Type', data.calendarType === 'lunar' ? 'Lunar (Hijri)' : 'Solar (Gregorian)'],
-      ['Nisab Standard', data.nisabStandard === 'silver' ? 'Silver' : 'Gold'],
-      ['Calculation Mode', data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'],
-      ['Household Calculation', data.isHousehold ? 'Yes' : 'No'],
-    ],
-    theme: 'striped',
-    headStyles: { fillColor: [41, 98, 255] },
-    margin: { left: 20, right: 20 },
-  });
-  
-  yPos = (doc as any).lastAutoTable.finalY + 10;
-  
-  // Asset Breakdown
-  doc.setFontSize(14);
-  doc.text('Asset Breakdown', 20, yPos);
-  yPos += 5;
-  
-  const assetRows: [string, string][] = [];
-  if (calculations.assetBreakdown.liquidAssets > 0) {
-    assetRows.push(['Liquid Assets', formatCurrency(calculations.assetBreakdown.liquidAssets, currency)]);
-  }
-  if (calculations.assetBreakdown.investments > 0) {
-    assetRows.push(['Investments', formatCurrency(calculations.assetBreakdown.investments, currency)]);
-  }
-  if (calculations.assetBreakdown.retirement > 0) {
-    assetRows.push(['Retirement Accounts', formatCurrency(calculations.assetBreakdown.retirement, currency)]);
-  }
-  if (calculations.assetBreakdown.realEstate > 0) {
-    assetRows.push(['Real Estate', formatCurrency(calculations.assetBreakdown.realEstate, currency)]);
-  }
-  if (calculations.assetBreakdown.business > 0) {
-    assetRows.push(['Business Assets', formatCurrency(calculations.assetBreakdown.business, currency)]);
-  }
-  if (calculations.assetBreakdown.otherAssets > 0) {
-    assetRows.push(['Other Assets', formatCurrency(calculations.assetBreakdown.otherAssets, currency)]);
-  }
-  if (calculations.assetBreakdown.exemptAssets > 0) {
-    assetRows.push(['Exempt Assets (Not Zakatable)', formatCurrency(calculations.assetBreakdown.exemptAssets, currency)]);
-  }
-  
-  if (assetRows.length > 0) {
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Category', 'Amount']],
-      body: assetRows,
-      theme: 'striped',
-      headStyles: { fillColor: [41, 98, 255] },
-      margin: { left: 20, right: 20 },
-    });
-    yPos = (doc as any).lastAutoTable.finalY + 10;
-  }
-  
-  // Calculation Summary
-  doc.setFontSize(14);
-  doc.text('Calculation Summary', 20, yPos);
-  yPos += 5;
+  // === CALCULATION SUMMARY TABLE ===
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.text);
+  doc.text('Calculation Summary', 25, yPos);
+  yPos += 3;
   
   autoTable(doc, {
     startY: yPos,
@@ -151,30 +297,67 @@ export function generateZakatPDF(
       ['Total Zakatable Assets', formatCurrency(calculations.totalAssets, currency)],
       ['Total Deductions', `-${formatCurrency(calculations.totalLiabilities, currency)}`],
       ['Net Zakatable Wealth', formatCurrency(calculations.netZakatableWealth, currency)],
-      [`Nisab (${data.nisabStandard})`, formatCurrency(calculations.nisab, currency)],
-      [`Zakat Rate (${data.calendarType})`, formatPercent(calculations.zakatRate)],
+      [`Nisab (${data.nisabStandard === 'silver' ? 'Silver' : 'Gold'})`, formatCurrency(calculations.nisab, currency)],
+      [`Zakat Rate (${data.calendarType === 'lunar' ? 'Lunar' : 'Solar'})`, formatPercent(calculations.zakatRate)],
       ['Zakat Due', formatCurrency(calculations.zakatDue, currency)],
     ],
-    theme: 'striped',
-    headStyles: { fillColor: [41, 98, 255] },
-    margin: { left: 20, right: 20 },
+    theme: 'plain',
+    headStyles: { 
+      fillColor: COLORS.background,
+      textColor: COLORS.textMuted,
+      fontStyle: 'bold',
+      fontSize: 8,
+    },
+    bodyStyles: {
+      fontSize: 9,
+      textColor: COLORS.text,
+    },
+    alternateRowStyles: {
+      fillColor: COLORS.background,
+    },
+    columnStyles: {
+      0: { cellWidth: 100 },
+      1: { cellWidth: 'auto', halign: 'right', fontStyle: 'bold' },
+    },
+    margin: { left: 25, right: 25 },
+    tableLineColor: COLORS.border,
+    tableLineWidth: 0.1,
   });
   
   yPos = (doc as any).lastAutoTable.finalY + 10;
   
-  // Purification Section (if applicable)
+  // === SETTINGS SUMMARY (compact) ===
+  drawRoundedRect(doc, 25, yPos, pageWidth - 50, 22, 4, COLORS.background, COLORS.border);
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...COLORS.textMuted);
+  
+  const settings = [
+    `Calendar: ${data.calendarType === 'lunar' ? 'Lunar' : 'Solar'}`,
+    `Nisab: ${data.nisabStandard === 'silver' ? 'Silver' : 'Gold'}`,
+    `Mode: ${data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}`,
+    `Household: ${data.isHousehold ? 'Yes' : 'No'}`,
+  ];
+  
+  doc.text('Settings: ' + settings.join('  •  '), 30, yPos + 13);
+  
+  yPos += 30;
+  
+  // === PURIFICATION SECTION ===
   const totalPurification = calculations.interestToPurify + calculations.dividendsToPurify;
   if (totalPurification > 0) {
-    doc.setFillColor(255, 235, 235);
-    doc.roundedRect(20, yPos, pageWidth - 40, 30, 3, 3, 'F');
+    drawRoundedRect(doc, 25, yPos, pageWidth - 50, 28, 4, [255, 243, 243] as [number, number, number], [252, 165, 165] as [number, number, number]);
     
-    doc.setTextColor(180, 0, 0);
-    doc.setFontSize(12);
-    doc.text('Purification Required', 25, yPos + 10);
-    
+    doc.setTextColor(...COLORS.danger);
     doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    let purifyText = 'The following must be donated to charity: ';
+    doc.setFont('helvetica', 'bold');
+    doc.text('Purification Required', 30, yPos + 10);
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...COLORS.textMuted);
+    let purifyText = 'Must donate (without reward): ';
     if (calculations.interestToPurify > 0) {
       purifyText += `Interest: ${formatCurrency(calculations.interestToPurify, currency)}`;
     }
@@ -182,17 +365,30 @@ export function generateZakatPDF(
       if (calculations.interestToPurify > 0) purifyText += ', ';
       purifyText += `Non-Halal Dividends: ${formatCurrency(calculations.dividendsToPurify, currency)}`;
     }
-    doc.text(purifyText, 25, yPos + 20);
-    yPos += 40;
+    doc.text(purifyText, 30, yPos + 20);
+    yPos += 36;
   }
   
-  // Footer
-  doc.setTextColor(150, 150, 150);
-  doc.setFontSize(8);
+  // === FOOTER ===
+  // Decorative bottom line
+  doc.setFillColor(...COLORS.primary);
+  doc.rect(0, pageHeight - 20, pageWidth, 2, 'F');
+  
+  doc.setTextColor(...COLORS.textMuted);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'italic');
   doc.text(
     'This report is for personal reference only. Consult a qualified scholar for complex situations.',
     pageWidth / 2,
-    doc.internal.pageSize.getHeight() - 10,
+    pageHeight - 12,
+    { align: 'center' }
+  );
+  
+  doc.setFont('helvetica', 'normal');
+  doc.text(
+    'Built by Naheed Vora • zakatcalculator.app',
+    pageWidth / 2,
+    pageHeight - 7,
     { align: 'center' }
   );
   

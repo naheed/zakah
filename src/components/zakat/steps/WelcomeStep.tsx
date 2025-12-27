@@ -2,24 +2,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Lock, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { ZakatSankeyMock } from "../ZakatSankeyChart";
 
 interface WelcomeStepProps {
   onNext: () => void;
 }
-
-// Mock report data for the preview
-const mockReportData = {
-  zakatDue: 2847,
-  totalAssets: 142350,
-  totalLiabilities: 8500,
-  netWorth: 133850,
-  breakdown: [
-    { label: "Cash & Bank", value: 24500, color: "bg-primary" },
-    { label: "Investments", value: 67800, color: "bg-chart-1" },
-    { label: "Retirement (net)", value: 38200, color: "bg-chart-2" },
-    { label: "Other Assets", value: 11850, color: "bg-chart-3" },
-  ],
-};
 
 function MockReportPreview() {
   return (
@@ -27,35 +14,27 @@ function MockReportPreview() {
       {/* Glassmorphic card effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl blur-xl" />
       
-      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-lg">
+      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 shadow-lg">
         {/* Header */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-3">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Your Zakat Due</p>
-          <p className="text-3xl font-bold text-primary">${mockReportData.zakatDue.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-primary">$2,847</p>
           <p className="text-xs text-muted-foreground mt-1">2.5% of zakatable wealth</p>
         </div>
 
-        {/* Mini breakdown */}
-        <div className="space-y-2 mb-4">
-          {mockReportData.breakdown.map((item, i) => (
-            <div key={i} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${item.color}`} />
-                <span className="text-muted-foreground">{item.label}</span>
-              </div>
-              <span className="text-foreground font-medium">${item.value.toLocaleString()}</span>
-            </div>
-          ))}
+        {/* Sankey Chart */}
+        <div className="my-2 -mx-2">
+          <ZakatSankeyMock />
         </div>
 
         {/* Summary row */}
         <div className="pt-3 border-t border-border flex justify-between text-sm">
           <span className="text-muted-foreground">Net Zakatable</span>
-          <span className="font-semibold text-foreground">${mockReportData.netWorth.toLocaleString()}</span>
+          <span className="font-semibold text-foreground">$133,850</span>
         </div>
 
         {/* Overlay hint */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent rounded-2xl flex items-end justify-center pb-4">
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent rounded-2xl flex items-end justify-center pb-4 pointer-events-none">
           <p className="text-xs text-muted-foreground">See your personalized report →</p>
         </div>
       </div>
