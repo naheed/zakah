@@ -158,7 +158,7 @@ export function ZakatWizard() {
       case 'hawl':
         return <HawlStep data={formData} updateData={updateFormData} />;
       case 'family':
-        return <FamilyStep />;
+        return <FamilyStep data={formData} updateData={updateFormData} />;
       case 'categories':
         return <CategorySelectionStep data={formData} updateData={updateFormData} />;
       case 'email':
