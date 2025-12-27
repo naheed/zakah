@@ -3,112 +3,172 @@ import { StepHeader } from "../StepHeader";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Banknote, TrendingUp, Landmark, CheckCircle2 } from "lucide-react";
 
 interface CategorySelectionStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
 }
 
-const categories = [
+const defaultCategories = [
+  {
+    icon: Banknote,
+    label: 'Cash & Bank Accounts',
+    description: 'Checking, savings, digital wallets',
+  },
+  {
+    icon: TrendingUp,
+    label: 'Stocks & Investments',
+    description: 'Brokerage accounts, dividends',
+  },
+  {
+    icon: Landmark,
+    label: 'Retirement Accounts',
+    description: '401(k), IRA, HSA, Roth',
+  },
+];
+
+const optionalCategories = [
   {
     id: 'hasPreciousMetals' as const,
     emoji: '💍',
     label: 'Precious Metals',
-    description: 'Gold, silver, or other precious metals',
+    description: 'Gold, silver, or jewelry',
   },
   {
     id: 'hasCrypto' as const,
     emoji: '₿',
-    label: 'Cryptocurrency & Digital Assets',
-    description: 'Bitcoin, Ethereum, altcoins, staking, DeFi, or NFTs',
+    label: 'Cryptocurrency',
+    description: 'Bitcoin, Ethereum, staking, DeFi',
   },
   {
     id: 'hasTrusts' as const,
     emoji: '📜',
-    label: 'Trusts & Estate Planning',
-    description: 'Revocable trusts, irrevocable trusts, or CLATs',
+    label: 'Trusts & Estates',
+    description: 'Revocable or irrevocable trusts',
   },
   {
     id: 'hasRealEstate' as const,
     emoji: '🏘️',
-    label: 'Real Estate for Business',
-    description: 'Investment properties or real estate for sale',
+    label: 'Investment Property',
+    description: 'Real estate for sale or rental income',
   },
   {
     id: 'hasBusiness' as const,
     emoji: '🏪',
-    label: 'Business Ownership',
-    description: 'Own a business with inventory or receivables',
+    label: 'Business Assets',
+    description: 'Inventory, receivables, business cash',
   },
   {
     id: 'hasIlliquidAssets' as const,
     emoji: '🖼️',
-    label: 'Illiquid Assets or Livestock',
-    description: 'Art, collectibles, or livestock for sale',
+    label: 'Collectibles & Livestock',
+    description: 'Art, antiques, or animals for sale',
   },
   {
     id: 'hasDebtOwedToYou' as const,
     emoji: '🤝',
-    label: 'Debt Owed to You',
-    description: 'Money others owe you that you expect to collect',
+    label: 'Money Owed to You',
+    description: 'Personal loans you expect to collect',
   },
   {
     id: 'hasTaxPayments' as const,
     emoji: '📋',
-    label: 'Property Tax or Late Payments',
-    description: 'Property taxes, late tax payments, or fines due',
+    label: 'Outstanding Taxes',
+    description: 'Property tax or late payments due',
   },
 ];
 
 export function CategorySelectionStep({ data, updateData }: CategorySelectionStepProps) {
+  const selectedCount = optionalCategories.filter(cat => data[cat.id]).length;
+
   return (
     <div className="max-w-2xl">
       <StepHeader
         questionNumber={5}
-        title="Which of these apply to your financial picture?"
-        subtitle="Select all that apply. This helps us ask the right questions."
+        title="Let's personalize your calculation"
+        subtitle="We'll ask about the essentials, then only what applies to you."
       />
       
-      <div className="space-y-3">
-        {categories.map((category) => {
-          const isChecked = data[category.id];
-          
-          return (
-            <label
-              key={category.id}
-              className={cn(
-                "flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-all",
-                isChecked 
-                  ? "bg-primary/5 border-primary" 
-                  : "bg-card border-border hover:border-primary/50"
-              )}
+      {/* Always Included Section */}
+      <div className="mb-8">
+        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+          We'll always ask about
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {defaultCategories.map((category) => (
+            <div
+              key={category.label}
+              className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20"
             >
-              <Checkbox
-                checked={isChecked}
-                onCheckedChange={(checked) => 
-                  updateData({ [category.id]: checked === true })
-                }
-                className="mt-1"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span>{category.emoji}</span>
-                  <Label className="font-medium text-foreground cursor-pointer">
-                    {category.label}
-                  </Label>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {category.description}
-                </p>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <category.icon className="w-4 h-4 text-primary" />
               </div>
-            </label>
-          );
-        })}
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{category.label}</p>
+                <p className="text-xs text-muted-foreground truncate">{category.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Optional Categories */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+            Do any of these apply?
+          </p>
+          {selectedCount > 0 && (
+            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+              {selectedCount} selected
+            </span>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {optionalCategories.map((category) => {
+            const isChecked = data[category.id];
+            
+            return (
+              <label
+                key={category.id}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all group",
+                  isChecked 
+                    ? "bg-primary/5 border-primary ring-1 ring-primary/20" 
+                    : "bg-card border-border hover:border-primary/40 hover:bg-accent/50"
+                )}
+              >
+                <Checkbox
+                  checked={isChecked}
+                  onCheckedChange={(checked) => 
+                    updateData({ [category.id]: checked === true })
+                  }
+                  className="flex-shrink-0"
+                />
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="text-lg flex-shrink-0">{category.emoji}</span>
+                  <div className="min-w-0">
+                    <Label className="font-medium text-foreground cursor-pointer block truncate">
+                      {category.label}
+                    </Label>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {category.description}
+                    </p>
+                  </div>
+                </div>
+                {isChecked && (
+                  <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                )}
+              </label>
+            );
+          })}
+        </div>
       </div>
       
-      <p className="text-sm text-muted-foreground mt-6">
-        If you're not sure, select the box and you can leave the question blank 
-        later when we provide explanations.
+      <p className="text-sm text-muted-foreground mt-6 text-center">
+        Not sure? Select it anyway — you can skip any question later.
       </p>
     </div>
   );
