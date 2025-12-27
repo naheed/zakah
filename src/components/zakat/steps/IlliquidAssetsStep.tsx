@@ -1,36 +1,44 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { illiquidAssetsContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
+import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
-import { StepDocumentsDisplay } from "../DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-interface IlliquidAssetsStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
+export function IlliquidAssetsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+  const isHousehold = data.isHousehold;
 
-export function IlliquidAssetsStep({ data, updateData, uploadedDocuments, onRemoveDocument }: IlliquidAssetsStepProps) {
   return (
-    <QuestionLayout content={illiquidAssetsContent}>
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="illiquid-assets" onRemoveDocument={onRemoveDocument} />
-      
+    <AssetStepWrapper
+      content={illiquidAssetsContent}
+      stepId="illiquid-assets"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      showUpload={false}
+      householdReminder="Include illiquid assets owned by yourself, spouse, and children."
+    >
       <CurrencyInput
         label="Illiquid Assets Value"
         description="Art, antiques, collectibles held for sale"
+        householdDescription="Combined illiquid assets for all family members"
+        isHousehold={isHousehold}
         value={data.illiquidAssetsValue}
         onChange={(value) => updateData({ illiquidAssetsValue: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'illiquidAssetsValue')}
       />
       
       <CurrencyInput
         label="Livestock Value"
         description="Animals raised for sale"
+        householdDescription="Combined livestock value for all family members"
+        isHousehold={isHousehold}
         value={data.livestockValue}
         onChange={(value) => updateData({ livestockValue: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'livestockValue')}
       />
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }

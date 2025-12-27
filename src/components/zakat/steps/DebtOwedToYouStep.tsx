@@ -1,36 +1,44 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { debtOwedContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
+import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
-import { StepDocumentsDisplay } from "../DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-interface DebtOwedToYouStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
+export function DebtOwedToYouStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+  const isHousehold = data.isHousehold;
 
-export function DebtOwedToYouStep({ data, updateData, uploadedDocuments, onRemoveDocument }: DebtOwedToYouStepProps) {
   return (
-    <QuestionLayout content={debtOwedContent}>
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="debt-owed" onRemoveDocument={onRemoveDocument} />
-      
+    <AssetStepWrapper
+      content={debtOwedContent}
+      stepId="debt-owed"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      showUpload={false}
+      householdReminder="Include debts owed to yourself, spouse, and children."
+    >
       <CurrencyInput
         label="Good Debt (Collectible)"
         description="Borrower is willing and able to pay"
+        householdDescription="Combined good debt owed to all family members"
+        isHousehold={isHousehold}
         value={data.goodDebtOwedToYou}
         onChange={(value) => updateData({ goodDebtOwedToYou: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'goodDebtOwedToYou')}
       />
       
       <CurrencyInput
         label="Bad Debt Recovered This Year"
         description="Previously uncollectible debt you actually received"
+        householdDescription="Combined recovered debt for all family members"
+        isHousehold={isHousehold}
         value={data.badDebtRecovered}
         onChange={(value) => updateData({ badDebtRecovered: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'badDebtRecovered')}
       />
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }

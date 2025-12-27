@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { parseMathExpression } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
 import { FileText, ChevronDown } from "lucide-react";
-import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
 import {
   Collapsible,
   CollapsibleContent,
@@ -154,22 +153,4 @@ export function CurrencyInput({
       )}
     </div>
   );
-}
-
-// Helper function to get document contributions for a specific field
-export function getDocumentContributionsForField(
-  documents: UploadedDocument[],
-  fieldName: keyof typeof fieldDisplayNames
-): DocumentContribution[] {
-  return documents
-    .filter(doc => {
-      const value = doc.extractedData[fieldName as keyof typeof doc.extractedData];
-      return typeof value === 'number' && value > 0;
-    })
-    .map(doc => ({
-      documentId: doc.id,
-      documentName: doc.fileName,
-      institutionName: doc.institutionName,
-      amount: doc.extractedData[fieldName as keyof typeof doc.extractedData] as number,
-    }));
 }

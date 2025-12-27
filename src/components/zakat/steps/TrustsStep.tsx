@@ -1,30 +1,35 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { trustsContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
+import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
-import { StepDocumentsDisplay } from "../DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-interface TrustsStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
+export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+  const isHousehold = data.isHousehold;
 
-export function TrustsStep({ data, updateData, uploadedDocuments, onRemoveDocument }: TrustsStepProps) {
   return (
-    <QuestionLayout content={trustsContent}>
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="trusts" onRemoveDocument={onRemoveDocument} />
-      
+    <AssetStepWrapper
+      content={trustsContent}
+      stepId="trusts"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      showUpload={false}
+      householdReminder="Include trusts benefiting yourself, spouse, and children."
+    >
       <CurrencyInput
         label="Revocable Trust Value"
         description="You retain control—fully Zakatable"
+        householdDescription="Combined revocable trust value for all family members"
+        isHousehold={isHousehold}
         value={data.revocableTrustValue}
         onChange={(value) => updateData({ revocableTrustValue: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'revocableTrustValue')}
       />
       
       <div className="space-y-3 pt-4 border-t border-border">
@@ -32,8 +37,12 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onRemoveDocume
         
         <CurrencyInput
           label="Irrevocable Trust Value"
+          description="Trust value if accessible"
+          householdDescription="Combined irrevocable trust value for all family members"
+          isHousehold={isHousehold}
           value={data.irrevocableTrustValue}
           onChange={(value) => updateData({ irrevocableTrustValue: value })}
+          documentContributions={getDocumentContributionsForField(uploadedDocuments, 'irrevocableTrustValue')}
         />
         
         <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
@@ -64,6 +73,7 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onRemoveDocume
           description="Not Zakatable during annuity term"
           value={data.clatValue}
           onChange={(value) => updateData({ clatValue: value })}
+          documentContributions={getDocumentContributionsForField(uploadedDocuments, 'clatValue')}
         />
         {data.clatValue > 0 && (
           <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
@@ -71,6 +81,6 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onRemoveDocume
           </div>
         )}
       </div>
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }
