@@ -6,7 +6,6 @@ import { NisabStep } from "./steps/NisabStep";
 import { HawlStep } from "./steps/HawlStep";
 import { FamilyStep } from "./steps/FamilyStep";
 import { CategorySelectionStep } from "./steps/CategorySelectionStep";
-import { EmailStep } from "./steps/EmailStep";
 import { LiquidAssetsStep } from "./steps/LiquidAssetsStep";
 import { PreciousMetalsStep } from "./steps/PreciousMetalsStep";
 import { CryptoStep } from "./steps/CryptoStep";
@@ -40,7 +39,6 @@ type StepId =
   | 'hawl'
   | 'family'
   | 'categories'
-  | 'email'
   | 'liquid-assets'
   | 'precious-metals'
   | 'crypto'
@@ -68,7 +66,6 @@ const allSteps: Step[] = [
   { id: 'hawl', title: 'Ḥawl', section: 'intro' },
   { id: 'family', title: 'Family', section: 'intro' },
   { id: 'categories', title: 'Categories', section: 'intro' },
-  { id: 'email', title: 'Email', section: 'intro' },
   { id: 'liquid-assets', title: 'Liquid Assets', section: 'assets' },
   { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => data.hasPreciousMetals },
   { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => data.hasCrypto },
@@ -188,8 +185,6 @@ export function ZakatWizard() {
         return <FamilyStep data={formData} updateData={updateFormData} />;
       case 'categories':
         return <CategorySelectionStep data={formData} updateData={updateFormData} />;
-      case 'email':
-        return <EmailStep data={formData} updateData={updateFormData} />;
       case 'liquid-assets':
         return <LiquidAssetsStep {...assetStepProps} />;
       case 'precious-metals':
