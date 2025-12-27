@@ -1,5 +1,6 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { StepHeader } from "../StepHeader";
+import { categoriesContent } from "@/lib/zakatContent";
+import { QuestionLayout } from "../QuestionLayout";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -83,15 +84,9 @@ export function CategorySelectionStep({ data, updateData }: CategorySelectionSte
   const selectedCount = optionalCategories.filter(cat => data[cat.id]).length;
 
   return (
-    <div className="max-w-2xl">
-      <StepHeader
-        questionNumber={5}
-        title="Let's personalize your calculation"
-        subtitle="We'll ask about the essentials, then only what applies to you."
-      />
-      
+    <QuestionLayout content={categoriesContent}>
       {/* Always Included Section */}
-      <div className="mb-8">
+      <div>
         <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
           We'll always ask about
         </p>
@@ -167,9 +162,9 @@ export function CategorySelectionStep({ data, updateData }: CategorySelectionSte
         </div>
       </div>
       
-      <p className="text-sm text-muted-foreground mt-6 text-center">
+      <p className="text-sm text-muted-foreground text-center">
         Not sure? Select it anyway — you can skip any question later.
       </p>
-    </div>
+    </QuestionLayout>
   );
 }
