@@ -2,12 +2,14 @@ import { ZakatFormData, formatCurrency, formatPercent, CalculationMode } from "@
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Download, Mail, RotateCcw, Settings2, Save } from "lucide-react";
+import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -37,6 +39,8 @@ interface ResultsStepProps {
 
 export function ResultsStep({ data, updateData, calculations, calculationName }: ResultsStepProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { currency } = data;
@@ -54,12 +58,9 @@ export function ResultsStep({ data, updateData, calculations, calculationName }:
   } = calculations;
   
   const totalPurification = interestToPurify + dividendsToPurify;
-  
-  const handleEmailReceipt = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Email functionality will be available soon. Please download the PDF for now.",
-    });
+
+  const handleSignIn = () => {
+    navigate('/auth');
   };
   
   const handleDownload = () => {
@@ -239,19 +240,31 @@ export function ResultsStep({ data, updateData, calculations, calculationName }:
             </p>
           </InfoCard>
         )}
+
+        {/* Save Your Work Prompt - for non-authenticated users */}
+        {!user && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center space-y-4">
+            <div>
+              <h3 className="font-semibold text-lg text-foreground mb-2">Save Your Calculation</h3>
+              <p className="text-muted-foreground text-sm">
+                Create a free account to save this calculation and access it anytime. 
+                You can also track your Zakat history across multiple years.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={handleSignIn} className="gap-2">
+                <LogIn className="w-4 h-4" />
+                Sign In / Create Account
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Don't worry — your calculation is saved locally and will be available when you return.
+            </p>
+          </div>
+        )}
         
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
-          {data.email && (
-            <Button 
-              variant="outline" 
-              className="flex-1 gap-2"
-              onClick={handleEmailReceipt}
-            >
-              <Mail className="w-4 h-4" />
-              Email Receipt
-            </Button>
-          )}
           <Button 
             variant="outline" 
             className="flex-1 gap-2"
@@ -261,15 +274,17 @@ export function ResultsStep({ data, updateData, calculations, calculationName }:
             <Download className="w-4 h-4" />
             {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
-          <SaveCalculationDialog 
-            formData={data}
-            trigger={
-              <Button variant="outline" className="flex-1 gap-2">
-                <Save className="w-4 h-4" />
-                Save
-              </Button>
-            }
-          />
+          {user && (
+            <SaveCalculationDialog 
+              formData={data}
+              trigger={
+                <Button variant="outline" className="flex-1 gap-2">
+                  <Save className="w-4 h-4" />
+                  Save
+                </Button>
+              }
+            />
+          )}
           <Button 
             variant="outline" 
             className="flex-1 gap-2"
