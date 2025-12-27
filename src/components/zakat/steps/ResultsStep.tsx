@@ -4,9 +4,8 @@ import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Download, Mail, RotateCcw, Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -127,10 +126,10 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
                 </p>
               )}
             </div>
-          </div>
+        </div>
         )}
         
-        {/* Asset Breakdown */}
+        {/* Asset Breakdown Chart */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="p-4 border-b border-border bg-accent flex items-center justify-between">
             <h3 className="font-semibold text-foreground">Asset Breakdown</h3>
@@ -140,24 +139,29 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
             </Button>
           </div>
           
-          <div className="divide-y divide-border">
+          {/* Donut Chart */}
+          <div className="p-4">
+            <AssetDonutChart breakdown={assetBreakdown} currency={currency} />
+          </div>
+          
+          <div className="divide-y divide-border border-t border-border">
             {assetBreakdown.liquidAssets > 0 && (
-              <BreakdownRow label="Liquid Assets" value={formatCurrency(assetBreakdown.liquidAssets, currency)} />
+              <BreakdownRow label="Liquid Assets" value={formatCurrency(assetBreakdown.liquidAssets, currency)} color="hsl(var(--chart-1))" />
             )}
             {assetBreakdown.investments > 0 && (
-              <BreakdownRow label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} />
+              <BreakdownRow label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} color="hsl(var(--chart-2))" />
             )}
             {assetBreakdown.retirement > 0 && (
-              <BreakdownRow label="Retirement Accounts" value={formatCurrency(assetBreakdown.retirement, currency)} />
+              <BreakdownRow label="Retirement Accounts" value={formatCurrency(assetBreakdown.retirement, currency)} color="hsl(var(--chart-3))" />
             )}
             {assetBreakdown.realEstate > 0 && (
-              <BreakdownRow label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} />
+              <BreakdownRow label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} color="hsl(var(--chart-4))" />
             )}
             {assetBreakdown.business > 0 && (
-              <BreakdownRow label="Business Assets" value={formatCurrency(assetBreakdown.business, currency)} />
+              <BreakdownRow label="Business Assets" value={formatCurrency(assetBreakdown.business, currency)} color="hsl(var(--chart-5))" />
             )}
             {assetBreakdown.otherAssets > 0 && (
-              <BreakdownRow label="Other Assets" value={formatCurrency(assetBreakdown.otherAssets, currency)} />
+              <BreakdownRow label="Other Assets" value={formatCurrency(assetBreakdown.otherAssets, currency)} color="hsl(var(--primary))" />
             )}
             {assetBreakdown.exemptAssets > 0 && (
               <BreakdownRow label="Exempt Assets" value={formatCurrency(assetBreakdown.exemptAssets, currency)} variant="muted" />
@@ -247,11 +251,13 @@ function BreakdownRow({
   value, 
   variant = 'neutral',
   bold = false,
+  color,
 }: { 
   label: string; 
   value: string; 
   variant?: 'positive' | 'negative' | 'neutral' | 'muted';
   bold?: boolean;
+  color?: string;
 }) {
   const valueColors = {
     positive: 'text-chart-1',
@@ -262,12 +268,87 @@ function BreakdownRow({
   
   return (
     <div className="flex items-center justify-between p-4">
-      <span className={`${bold ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
-        {label}
-      </span>
+      <div className="flex items-center gap-2">
+        {color && (
+          <span 
+            className="w-3 h-3 rounded-full flex-shrink-0" 
+            style={{ backgroundColor: color }}
+          />
+        )}
+        <span className={`${bold ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+          {label}
+        </span>
+      </div>
       <span className={`font-mono ${bold ? 'font-bold text-lg' : ''} ${valueColors[variant]}`}>
         {value}
       </span>
+    </div>
+  );
+}
+
+interface ChartData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+function AssetDonutChart({ 
+  breakdown, 
+  currency 
+}: { 
+  breakdown: ResultsStepProps['calculations']['assetBreakdown'];
+  currency: string;
+}) {
+  const chartData: ChartData[] = [
+    { name: 'Liquid Assets', value: breakdown.liquidAssets, color: 'hsl(var(--chart-1))' },
+    { name: 'Investments', value: breakdown.investments, color: 'hsl(var(--chart-2))' },
+    { name: 'Retirement', value: breakdown.retirement, color: 'hsl(var(--chart-3))' },
+    { name: 'Real Estate', value: breakdown.realEstate, color: 'hsl(var(--chart-4))' },
+    { name: 'Business', value: breakdown.business, color: 'hsl(var(--chart-5))' },
+    { name: 'Other', value: breakdown.otherAssets, color: 'hsl(var(--primary))' },
+  ].filter(item => item.value > 0);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-48 flex items-center justify-center text-muted-foreground">
+        No assets to display
+      </div>
+    );
+  }
+
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  return (
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={90}
+            paddingAngle={2}
+            dataKey="value"
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value: number) => formatCurrency(value, currency)}
+            contentStyle={{
+              backgroundColor: 'hsl(var(--card))',
+              borderColor: 'hsl(var(--border))',
+              borderRadius: '8px',
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="text-center -mt-4">
+        <p className="text-sm text-muted-foreground">Total Zakatable</p>
+        <p className="text-xl font-bold text-foreground">{formatCurrency(total, currency)}</p>
+      </div>
     </div>
   );
 }

@@ -17,6 +17,18 @@ const categories = [
     description: 'Gold, silver, or other precious metals',
   },
   {
+    id: 'hasCrypto' as const,
+    emoji: '₿',
+    label: 'Cryptocurrency & Digital Assets',
+    description: 'Bitcoin, Ethereum, altcoins, staking, DeFi, or NFTs',
+  },
+  {
+    id: 'hasTrusts' as const,
+    emoji: '📜',
+    label: 'Trusts & Estate Planning',
+    description: 'Revocable trusts, irrevocable trusts, or CLATs',
+  },
+  {
     id: 'hasRealEstate' as const,
     emoji: '🏘️',
     label: 'Real Estate for Business',
