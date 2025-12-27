@@ -3,10 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { useSavedCalculations, generateYearName, SavedCalculation } from '@/hooks/useSavedCalculations';
+import { useSharedCalculations } from '@/hooks/useCalculationShares';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/zakatCalculations';
-import { ArrowLeft, Plus, Trash2, Calendar, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Calendar, CheckCircle, XCircle, Loader2, Users } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,11 +19,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SavedCalculations() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { calculations, loading, deleteCalculation } = useSavedCalculations();
+  const { calculations: sharedCalculations, loading: sharedLoading } = useSharedCalculations();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -97,103 +100,180 @@ export default function SavedCalculations() {
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : calculations.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-xl font-semibold mb-2">No Saved Calculations</h2>
-              <p className="text-muted-foreground mb-6">
-                Start a new Zakat calculation and save it to view it here.
-              </p>
-              <Button onClick={() => navigate('/')}>
-                Start New Calculation
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {calculations.map((calc) => (
-              <Card 
-                key={calc.id} 
-                className="hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleLoadCalculation(calc)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {calc.name}
-                        {calc.is_above_nisab ? (
-                          <CheckCircle className="w-4 h-4 text-chart-1" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
-                        <Calendar className="w-3 h-3" />
-                        {generateYearName(calc.year_type, calc.year_value)}
-                        <span className="text-xs">•</span>
-                        <span className="text-xs">
-                          Updated {new Date(calc.updated_at).toLocaleDateString()}
-                        </span>
-                      </CardDescription>
-                    </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {deletingId === calc.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Calculation?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete "{calc.name}". This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => handleDelete(calc.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </CardHeader>
+        <Tabs defaultValue="my-calculations" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="my-calculations">My Calculations</TabsTrigger>
+            <TabsTrigger value="shared-with-me" className="gap-2">
+              <Users className="w-4 h-4" />
+              Shared with Me
+              {sharedCalculations.length > 0 && (
+                <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full px-2">
+                  {sharedCalculations.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="my-calculations">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : calculations.length === 0 ? (
+              <Card className="text-center py-12">
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      {calc.is_above_nisab ? 'Zakat Due' : 'Below Nisab'}
-                    </div>
-                    <div className={`text-xl font-bold ${calc.is_above_nisab ? 'text-primary' : 'text-muted-foreground'}`}>
-                      {calc.is_above_nisab 
-                        ? formatCurrency(calc.zakat_due, calc.form_data.currency) 
-                        : 'No Zakat Due'}
-                    </div>
-                  </div>
+                  <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h2 className="text-xl font-semibold mb-2">No Saved Calculations</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Start a new Zakat calculation and save it to view it here.
+                  </p>
+                  <Button onClick={() => navigate('/')}>
+                    Start New Calculation
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="grid gap-4">
+                {calculations.map((calc) => (
+                  <CalculationCard 
+                    key={calc.id}
+                    calc={calc}
+                    onLoad={handleLoadCalculation}
+                    onDelete={handleDelete}
+                    deletingId={deletingId}
+                    isOwner={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="shared-with-me">
+            {sharedLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : sharedCalculations.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h2 className="text-xl font-semibold mb-2">No Shared Calculations</h2>
+                  <p className="text-muted-foreground">
+                    When someone shares a Zakat calculation with you, it will appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {sharedCalculations.map((calc) => (
+                  <CalculationCard 
+                    key={calc.id}
+                    calc={calc}
+                    onLoad={handleLoadCalculation}
+                    onDelete={() => {}}
+                    deletingId={null}
+                    isOwner={false}
+                    isShared={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
+  );
+}
+
+interface CalculationCardProps {
+  calc: SavedCalculation;
+  onLoad: (calc: SavedCalculation) => void;
+  onDelete: (id: string) => void;
+  deletingId: string | null;
+  isOwner: boolean;
+  isShared?: boolean;
+}
+
+function CalculationCard({ calc, onLoad, onDelete, deletingId, isOwner, isShared }: CalculationCardProps) {
+  return (
+    <Card 
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => onLoad(calc)}
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="text-lg flex items-center gap-2">
+              {calc.name}
+              {isShared && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  Shared
+                </span>
+              )}
+              {calc.is_above_nisab ? (
+                <CheckCircle className="w-4 h-4 text-chart-1" />
+              ) : (
+                <XCircle className="w-4 h-4 text-muted-foreground" />
+              )}
+            </CardTitle>
+            <CardDescription className="flex items-center gap-2 mt-1">
+              <Calendar className="w-3 h-3" />
+              {generateYearName(calc.year_type, calc.year_value)}
+              <span className="text-xs">•</span>
+              <span className="text-xs">
+                Updated {new Date(calc.updated_at).toLocaleDateString()}
+              </span>
+            </CardDescription>
+          </div>
+          {isOwner && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-muted-foreground hover:text-destructive"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {deletingId === calc.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Calculation?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete "{calc.name}". This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => onDelete(calc.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            {calc.is_above_nisab ? 'Zakat Due' : 'Below Nisab'}
+          </div>
+          <div className={`text-xl font-bold ${calc.is_above_nisab ? 'text-primary' : 'text-muted-foreground'}`}>
+            {calc.is_above_nisab 
+              ? formatCurrency(calc.zakat_due, calc.form_data.currency) 
+              : 'No Zakat Due'}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

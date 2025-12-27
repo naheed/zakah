@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Share2, Copy, Mail, Check, Users } from "lucide-react";
+import { Users, Mail, Trash2, LogIn, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -11,59 +11,185 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
+import { ZakatFormData } from "@/lib/zakatCalculations";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useCalculationShares } from "@/hooks/useCalculationShares";
+import { z } from "zod";
 
 interface ShareDrawerProps {
   formData: ZakatFormData;
   zakatDue?: number;
+  calculationId?: string;
   children: React.ReactNode;
 }
 
-export function ShareDrawer({ formData, zakatDue, children }: ShareDrawerProps) {
+const emailSchema = z.string().email("Please enter a valid email address");
+
+export function ShareDrawer({ formData, zakatDue, calculationId, children }: ShareDrawerProps) {
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
+  const [isSharing, setIsSharing] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { shares, loading: sharesLoading, createShare, removeShare } = useCalculationShares(calculationId);
 
-  const generateShareText = () => {
-    if (zakatDue !== undefined && zakatDue > 0) {
-      return `Assalamu Alaikum,\n\nI calculated our Zakat for this year using a comprehensive calculator based on Sheikh Joe Bradford's methodology.\n\nEstimated Zakat Due: ${formatCurrency(zakatDue, formData.currency)}\n\nWould you like to review the calculation together? You can use the same calculator here: ${window.location.origin}\n\nJazakAllah Khair`;
-    }
-    return `Assalamu Alaikum,\n\nI'm calculating our Zakat for this year using a comprehensive calculator based on Sheikh Joe Bradford's methodology.\n\nWould you like to help me complete it? You can use the same calculator here: ${window.location.origin}\n\nJazakAllah Khair`;
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.origin);
-      setCopied(true);
-      toast.success("Link copied to clipboard");
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error("Failed to copy link");
-    }
-  };
-
-  const handleEmailShare = () => {
-    const subject = encodeURIComponent("Let's Calculate Our Zakat Together");
-    const body = encodeURIComponent(generateShareText());
-    const mailto = `mailto:${email}?subject=${subject}&body=${body}`;
-    window.open(mailto, '_blank');
+  const handleSignIn = () => {
     setOpen(false);
-    toast.success("Opening email client...");
+    navigate('/auth');
   };
 
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Zakat Calculator",
-          text: generateShareText(),
-          url: window.location.origin,
-        });
-      } catch (e) {
-        // User cancelled share
+  const validateEmail = (value: string) => {
+    try {
+      emailSchema.parse(value);
+      setEmailError(null);
+      return true;
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setEmailError(err.errors[0].message);
       }
+      return false;
     }
   };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (value) {
+      validateEmail(value);
+    } else {
+      setEmailError(null);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!calculationId) {
+      toast.error("Please save your calculation first before sharing");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      await createShare(calculationId, email);
+      toast.success(
+        "Invitation sent!",
+        { description: `${email} will be able to view this calculation once they create an account with this email.` }
+      );
+      setEmail("");
+    } catch (err: any) {
+      console.error('Share error:', err);
+      toast.error(err.message || "Failed to share calculation");
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleRemoveShare = async (shareId: string, email: string) => {
+    try {
+      await removeShare(shareId);
+      toast.success(`Removed access for ${email}`);
+    } catch (err: any) {
+      toast.error("Failed to remove share");
+    }
+  };
+
+  // If not logged in, show login prompt
+  if (!user) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          {children}
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Share with Spouse
+            </DrawerTitle>
+            <DrawerDescription>
+              Sign in to securely share your Zakat calculation
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 pb-8 space-y-6">
+            <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="font-medium text-foreground">Account Required</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    To protect your financial data, sharing requires both you and your spouse to have verified accounts.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">How secure sharing works:</h4>
+              <ul className="text-sm text-muted-foreground space-y-2">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>You sign in and save your calculation</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>Enter your spouse's email to invite them</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>They create an account with that email (must verify)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>They can view the shared calculation securely</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Button onClick={handleSignIn} className="w-full gap-2">
+              <LogIn className="w-4 h-4" />
+              Sign In to Share
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // If no calculation saved yet
+  if (!calculationId) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          {children}
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Share with Spouse
+            </DrawerTitle>
+            <DrawerDescription>
+              Save your calculation first to enable sharing
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 pb-8">
+            <div className="bg-muted/50 border border-border rounded-xl p-4 text-center">
+              <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                You need to save your calculation before you can share it with your spouse. 
+                Complete the calculation and use the "Save" button on the results page.
+              </p>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -77,60 +203,91 @@ export function ShareDrawer({ formData, zakatDue, children }: ShareDrawerProps) 
             Share with Spouse
           </DrawerTitle>
           <DrawerDescription>
-            Invite your partner to review or help complete your Zakat calculation
+            Invite your partner to view this Zakat calculation securely
           </DrawerDescription>
         </DrawerHeader>
         <div className="px-4 pb-8 space-y-4">
-          {/* Native share (mobile) */}
-          {typeof navigator !== 'undefined' && navigator.share && (
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 h-12"
-              onClick={handleNativeShare}
-            >
-              <Share2 className="w-5 h-5" />
-              Share via...
-            </Button>
+          {/* Existing shares */}
+          {shares.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">Shared with:</p>
+              <div className="space-y-2">
+                {shares.map((share) => (
+                  <div 
+                    key={share.id} 
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      {share.accepted_at ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <div>
+                        <p className="text-sm font-medium">{share.shared_with_email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {share.accepted_at ? "Joined" : "Pending verification"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveShare(share.id, share.shared_with_email)}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
-          {/* Copy link */}
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-3 h-12"
-            onClick={handleCopyLink}
-          >
-            {copied ? (
-              <Check className="w-5 h-5 text-green-500" />
-            ) : (
-              <Copy className="w-5 h-5" />
-            )}
-            {copied ? "Copied!" : "Copy calculator link"}
-          </Button>
-
-          {/* Email share */}
+          {/* Add new share */}
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Or send via email:</p>
+            <p className="text-sm font-medium text-foreground">
+              {shares.length > 0 ? "Invite another person:" : "Enter spouse's email:"}
+            </p>
             <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="spouse@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1"
-              />
+              <div className="flex-1">
+                <Input
+                  type="email"
+                  placeholder="spouse@email.com"
+                  value={email}
+                  onChange={handleEmailChange}
+                  className={emailError ? "border-destructive" : ""}
+                />
+                {emailError && (
+                  <p className="text-xs text-destructive mt-1">{emailError}</p>
+                )}
+              </div>
               <Button
-                onClick={handleEmailShare}
-                disabled={!email || !email.includes('@')}
+                onClick={handleShare}
+                disabled={!email || !!emailError || isSharing}
               >
-                <Mail className="w-4 h-4 mr-2" />
-                Send
+                {isSharing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Invite
+                  </>
+                )}
               </Button>
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground text-center pt-2">
-            Your data stays on your device and is never shared
-          </p>
+          <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
+            <p className="text-xs text-muted-foreground">
+              <strong>How it works:</strong> Your spouse will need to create an account 
+              using the email address you specify. Once they verify their email, 
+              they'll automatically have access to view this calculation.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              <strong>Security:</strong> No financial data is exposed in any links or emails. 
+              Only verified account holders with matching emails can view shared calculations.
+            </p>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

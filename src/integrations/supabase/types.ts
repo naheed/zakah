@@ -44,6 +44,44 @@ export type Database = {
         }
         Relationships: []
       }
+      zakat_calculation_shares: {
+        Row: {
+          accepted_at: string | null
+          calculation_id: string
+          created_at: string
+          id: string
+          owner_id: string
+          shared_with_email: string
+          shared_with_user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          calculation_id: string
+          created_at?: string
+          id?: string
+          owner_id: string
+          shared_with_email: string
+          shared_with_user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          calculation_id?: string
+          created_at?: string
+          id?: string
+          owner_id?: string
+          shared_with_email?: string
+          shared_with_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zakat_calculation_shares_calculation_id_fkey"
+            columns: ["calculation_id"]
+            isOneToOne: false
+            referencedRelation: "zakat_calculations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zakat_calculations: {
         Row: {
           created_at: string

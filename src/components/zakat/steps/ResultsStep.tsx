@@ -35,9 +35,11 @@ interface ResultsStepProps {
     };
   };
   calculationName?: string;
+  savedCalculationId?: string;
+  onCalculationSaved?: (id: string) => void;
 }
 
-export function ResultsStep({ data, updateData, calculations, calculationName }: ResultsStepProps) {
+export function ResultsStep({ data, updateData, calculations, calculationName, savedCalculationId, onCalculationSaved }: ResultsStepProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -277,10 +279,11 @@ export function ResultsStep({ data, updateData, calculations, calculationName }:
           {user && (
             <SaveCalculationDialog 
               formData={data}
+              onSaved={onCalculationSaved}
               trigger={
                 <Button variant="outline" className="flex-1 gap-2">
                   <Save className="w-4 h-4" />
-                  Save
+                  {savedCalculationId ? 'Save As New' : 'Save'}
                 </Button>
               }
             />
