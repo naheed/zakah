@@ -1,9 +1,12 @@
-import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
+import { ZakatFormData, formatCurrency, formatPercent, CalculationMode } from "@/lib/zakatCalculations";
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Download, Mail, RotateCcw } from "lucide-react";
+import { CheckCircle, AlertCircle, Download, Mail, RotateCcw, Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useState } from "react";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -14,11 +17,24 @@ interface ResultsStepProps {
     nisab: number;
     isAboveNisab: boolean;
     zakatDue: number;
+    zakatRate: number;
+    interestToPurify: number;
+    dividendsToPurify: number;
+    assetBreakdown: {
+      liquidAssets: number;
+      investments: number;
+      retirement: number;
+      realEstate: number;
+      business: number;
+      otherAssets: number;
+      exemptAssets: number;
+    };
   };
 }
 
 export function ResultsStep({ data, calculations }: ResultsStepProps) {
   const { toast } = useToast();
+  const [showSettings, setShowSettings] = useState(false);
   const { currency } = data;
   const {
     totalAssets,
@@ -27,7 +43,13 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
     nisab,
     isAboveNisab,
     zakatDue,
+    zakatRate,
+    interestToPurify,
+    dividendsToPurify,
+    assetBreakdown,
   } = calculations;
+  
+  const totalPurification = interestToPurify + dividendsToPurify;
   
   const handleEmailReceipt = () => {
     toast({
@@ -69,7 +91,7 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
                 {formatCurrency(zakatDue, currency)}
               </p>
               <p className="text-sm opacity-80">
-                2.5% of your net Zakatable wealth
+                {formatPercent(zakatRate)} of your net Zakatable wealth ({data.calendarType} year)
               </p>
             </>
           ) : (
@@ -86,45 +108,76 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
           )}
         </div>
         
-        {/* Breakdown */}
+        {/* Purification Alert */}
+        {totalPurification > 0 && (
+          <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
+            <h3 className="font-semibold text-destructive mb-2">⚠️ Purification Required</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              The following amounts must be donated to charity (without reward expectation):
+            </p>
+            <div className="space-y-1">
+              {interestToPurify > 0 && (
+                <p className="text-sm">
+                  Interest (Riba): <strong>{formatCurrency(interestToPurify, currency)}</strong>
+                </p>
+              )}
+              {dividendsToPurify > 0 && (
+                <p className="text-sm">
+                  Non-Halal Dividends: <strong>{formatCurrency(dividendsToPurify, currency)}</strong>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Asset Breakdown */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-border bg-accent">
-            <h3 className="font-semibold text-foreground">Calculation Breakdown</h3>
+          <div className="p-4 border-b border-border bg-accent flex items-center justify-between">
+            <h3 className="font-semibold text-foreground">Asset Breakdown</h3>
+            <Button variant="ghost" size="sm" onClick={() => setShowSettings(!showSettings)}>
+              <Settings2 className="w-4 h-4 mr-1" />
+              {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
+            </Button>
           </div>
           
           <div className="divide-y divide-border">
-            <BreakdownRow
-              label="Total Zakatable Assets"
-              value={formatCurrency(totalAssets, currency)}
-              variant="neutral"
-            />
-            <BreakdownRow
-              label="Total Deductions"
-              value={`-${formatCurrency(totalLiabilities, currency)}`}
-              variant="negative"
-            />
-            <BreakdownRow
-              label="Net Zakatable Wealth"
-              value={formatCurrency(netZakatableWealth, currency)}
-              variant="neutral"
-              bold
-            />
-            <BreakdownRow
-              label="Niṣāb Threshold"
-              value={formatCurrency(nisab, currency)}
-              variant="neutral"
-            />
-            <BreakdownRow
-              label="Zakat Rate"
-              value="2.5%"
-              variant="neutral"
-            />
-            <BreakdownRow
-              label="Zakat Due"
-              value={formatCurrency(zakatDue, currency)}
-              variant="positive"
-              bold
-            />
+            {assetBreakdown.liquidAssets > 0 && (
+              <BreakdownRow label="Liquid Assets" value={formatCurrency(assetBreakdown.liquidAssets, currency)} />
+            )}
+            {assetBreakdown.investments > 0 && (
+              <BreakdownRow label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} />
+            )}
+            {assetBreakdown.retirement > 0 && (
+              <BreakdownRow label="Retirement Accounts" value={formatCurrency(assetBreakdown.retirement, currency)} />
+            )}
+            {assetBreakdown.realEstate > 0 && (
+              <BreakdownRow label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} />
+            )}
+            {assetBreakdown.business > 0 && (
+              <BreakdownRow label="Business Assets" value={formatCurrency(assetBreakdown.business, currency)} />
+            )}
+            {assetBreakdown.otherAssets > 0 && (
+              <BreakdownRow label="Other Assets" value={formatCurrency(assetBreakdown.otherAssets, currency)} />
+            )}
+            {assetBreakdown.exemptAssets > 0 && (
+              <BreakdownRow label="Exempt Assets" value={formatCurrency(assetBreakdown.exemptAssets, currency)} variant="muted" />
+            )}
+          </div>
+        </div>
+        
+        {/* Calculation Summary */}
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-border bg-accent">
+            <h3 className="font-semibold text-foreground">Calculation Summary</h3>
+          </div>
+          
+          <div className="divide-y divide-border">
+            <BreakdownRow label="Total Zakatable Assets" value={formatCurrency(totalAssets, currency)} />
+            <BreakdownRow label="Total Deductions" value={`-${formatCurrency(totalLiabilities, currency)}`} variant="negative" />
+            <BreakdownRow label="Net Zakatable Wealth" value={formatCurrency(netZakatableWealth, currency)} bold />
+            <BreakdownRow label={`Niṣāb (${data.nisabStandard})`} value={formatCurrency(nisab, currency)} />
+            <BreakdownRow label={`Zakat Rate (${data.calendarType})`} value={formatPercent(zakatRate)} />
+            <BreakdownRow label="Zakat Due" value={formatCurrency(zakatDue, currency)} variant="positive" bold />
           </div>
         </div>
         
@@ -192,23 +245,24 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
 function BreakdownRow({ 
   label, 
   value, 
-  variant,
+  variant = 'neutral',
   bold = false,
 }: { 
   label: string; 
   value: string; 
-  variant: 'positive' | 'negative' | 'neutral';
+  variant?: 'positive' | 'negative' | 'neutral' | 'muted';
   bold?: boolean;
 }) {
   const valueColors = {
     positive: 'text-chart-1',
     negative: 'text-destructive',
     neutral: 'text-foreground',
+    muted: 'text-muted-foreground',
   };
   
   return (
     <div className="flex items-center justify-between p-4">
-      <span className={`text-muted-foreground ${bold ? 'font-medium' : ''}`}>
+      <span className={`${bold ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
         {label}
       </span>
       <span className={`font-mono ${bold ? 'font-bold text-lg' : ''} ${valueColors[variant]}`}>
