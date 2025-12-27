@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { UploadedDocument, fieldToStepMapping } from "@/lib/documentTypes";
 
@@ -33,14 +33,21 @@ export function useDocumentExtraction(
   updateData: (updates: Partial<ZakatFormData>) => void
 ) {
   const stepFields = getFieldsForStep(stepId);
+  
+  // Use ref to avoid stale closures - always have access to latest data
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   const handleDataExtracted = useCallback((extractedData: Partial<ZakatFormData>) => {
     const updates: Partial<ZakatFormData> = {};
+    const currentData = dataRef.current;
     
     for (const field of stepFields) {
       const extractedValue = extractedData[field];
       if (typeof extractedValue === 'number' && extractedValue > 0) {
-        const currentValue = (data[field] as number) || 0;
+        const currentValue = (currentData[field] as number) || 0;
         (updates as any)[field] = currentValue + extractedValue;
       }
     }
@@ -48,7 +55,7 @@ export function useDocumentExtraction(
     if (Object.keys(updates).length > 0) {
       updateData(updates);
     }
-  }, [stepFields, data, updateData]);
+  }, [stepFields, updateData]);
 
   return { handleDataExtracted, stepFields };
 }
