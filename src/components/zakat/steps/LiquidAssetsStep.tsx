@@ -3,13 +3,24 @@ import { liquidAssetsContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "../QuestionLayout";
 import { CurrencyInput } from "../CurrencyInput";
 import { DocumentUpload } from "../DocumentUpload";
+import { StepDocumentsDisplay } from "../DocumentsManager";
+import { UploadedDocument } from "@/lib/documentTypes";
 
 interface LiquidAssetsStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  uploadedDocuments: UploadedDocument[];
+  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
+  onRemoveDocument: (id: string) => void;
 }
 
-export function LiquidAssetsStep({ data, updateData }: LiquidAssetsStepProps) {
+export function LiquidAssetsStep({ 
+  data, 
+  updateData, 
+  uploadedDocuments, 
+  onDocumentAdded,
+  onRemoveDocument 
+}: LiquidAssetsStepProps) {
   const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
     const updates: Partial<ZakatFormData> = {};
     const fields = ['checkingAccounts', 'savingsAccounts', 'cashOnHand', 'digitalWallets', 'foreignCurrency', 'interestEarned'] as const;
@@ -27,8 +38,16 @@ export function LiquidAssetsStep({ data, updateData }: LiquidAssetsStepProps) {
 
   return (
     <QuestionLayout content={liquidAssetsContent}>
+      {/* Show previously uploaded documents with relevant data */}
+      <StepDocumentsDisplay 
+        documents={uploadedDocuments} 
+        stepId="liquid-assets"
+        onRemoveDocument={onRemoveDocument}
+      />
+
       <DocumentUpload
         onDataExtracted={handleDataExtracted}
+        onDocumentAdded={onDocumentAdded}
         label="Upload Bank Statement"
         description="Auto-fill from your bank statement"
       />

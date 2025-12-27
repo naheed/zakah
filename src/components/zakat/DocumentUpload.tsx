@@ -1,12 +1,13 @@
 import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { Upload, FileText, Image, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ZakatFormData } from "@/lib/zakatCalculations";
+import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
 
 interface DocumentUploadProps {
   onDataExtracted: (data: Partial<ZakatFormData>) => void;
+  onDocumentAdded?: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
   acceptedTypes?: string;
   label?: string;
   description?: string;
@@ -26,12 +27,13 @@ interface ExtractedResult {
 
 export function DocumentUpload({
   onDataExtracted,
+  onDocumentAdded,
   acceptedTypes = ".pdf,.png,.jpg,.jpeg,.webp",
   label = "Upload Statement",
   description = "Upload a bank statement, brokerage statement, or retirement account statement",
 }: DocumentUploadProps) {
   const [status, setStatus] = useState<UploadStatus>("idle");
-  const [result, setResult] = useState<ExtractedResult | null>(null);
+  const [lastResult, setLastResult] = useState<ExtractedResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -61,7 +63,7 @@ export function DocumentUpload({
     }
 
     setStatus("uploading");
-    setResult(null);
+    setLastResult(null);
 
     try {
       // Convert file to base64
@@ -90,7 +92,7 @@ export function DocumentUpload({
       }
 
       setStatus("success");
-      setResult(data);
+      setLastResult(data);
 
       // Extract numeric fields from the response
       const extractedFields: Partial<ZakatFormData> = {};
@@ -99,7 +101,7 @@ export function DocumentUpload({
         "foreignCurrency", "interestEarned", "activeInvestments", "passiveInvestmentsValue",
         "dividends", "rothIRAContributions", "rothIRAEarnings", "fourOhOneKVestedBalance",
         "traditionalIRABalance", "hsaBalance", "cryptoCurrency", "cryptoTrading",
-        "goldValue", "silverValue"
+        "goldValue", "silverValue", "stakedAssets", "stakedRewardsVested", "liquidityPoolValue"
       ];
 
       for (const field of numericFields) {
@@ -108,17 +110,31 @@ export function DocumentUpload({
         }
       }
 
+      // Call the extraction callback (updates form values)
       onDataExtracted(extractedFields);
+
+      // Store the document with all its data
+      if (onDocumentAdded) {
+        onDocumentAdded({
+          fileName: file.name,
+          institutionName: data.institutionName || file.name,
+          documentDate: data.documentDate,
+          summary: data.summary || "Financial data extracted",
+          notes: data.notes,
+          extractedData: extractedFields,
+          mimeType: file.type,
+        });
+      }
 
       toast({
         title: "Document processed",
-        description: data.summary || "Financial data extracted successfully",
+        description: `Data extracted from ${data.institutionName || file.name}`,
       });
 
     } catch (error) {
       console.error("Document upload error:", error);
       setStatus("error");
-      setResult({
+      setLastResult({
         success: false,
         extractedData: {},
         summary: "",
@@ -132,7 +148,7 @@ export function DocumentUpload({
       });
     }
 
-    // Reset file input
+    // Reset file input for next upload
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -163,7 +179,7 @@ export function DocumentUpload({
       case "processing":
         return "Extracting data with AI...";
       case "success":
-        return "Data extracted!";
+        return "Upload another document";
       case "error":
         return "Try again";
       default:
@@ -185,18 +201,16 @@ export function DocumentUpload({
         onClick={handleClick}
         className={`
           border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
-          ${status === "idle" ? "border-border hover:border-primary hover:bg-primary/5" : ""}
-          ${status === "uploading" || status === "processing" ? "border-primary bg-primary/5" : ""}
-          ${status === "success" ? "border-chart-1 bg-chart-1/5" : ""}
+          ${status === "idle" || status === "success" ? "border-border hover:border-primary hover:bg-primary/5" : ""}
+          ${status === "uploading" || status === "processing" ? "border-primary bg-primary/5 pointer-events-none" : ""}
           ${status === "error" ? "border-destructive bg-destructive/5" : ""}
         `}
       >
         <div className="flex flex-col items-center gap-2">
           <div className={`
             w-12 h-12 rounded-full flex items-center justify-center
-            ${status === "idle" ? "bg-muted" : ""}
+            ${status === "idle" || status === "success" ? "bg-muted" : ""}
             ${status === "uploading" || status === "processing" ? "bg-primary/20" : ""}
-            ${status === "success" ? "bg-chart-1/20" : ""}
             ${status === "error" ? "bg-destructive/20" : ""}
           `}>
             {getStatusIcon()}
@@ -217,51 +231,23 @@ export function DocumentUpload({
         </div>
       </div>
 
-      {/* Result summary */}
-      {result && result.success && (
-        <div className="bg-chart-1/10 border border-chart-1/30 rounded-lg p-4 space-y-2">
-          <div className="flex items-start gap-2">
-            <CheckCircle className="w-4 h-4 text-chart-1 mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">
-                {result.institutionName || "Document"} processed
-              </p>
-              <p className="text-sm text-muted-foreground">{result.summary}</p>
-              {result.documentDate && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Statement date: {result.documentDate}
-                </p>
-              )}
-              {result.notes && (
-                <p className="text-xs text-muted-foreground mt-1 italic">
-                  Note: {result.notes}
-                </p>
-              )}
-            </div>
-          </div>
-          
-          {/* Show extracted values */}
-          <div className="pt-2 border-t border-chart-1/20">
-            <p className="text-xs text-muted-foreground mb-1">Values added to your calculation:</p>
-            <div className="flex flex-wrap gap-1">
-              {Object.entries(result.extractedData).map(([key, value]) => {
-                if (typeof value !== "number" || value === 0) return null;
-                return (
-                  <span key={key} className="text-xs bg-chart-1/20 text-chart-1 px-2 py-0.5 rounded">
-                    {formatFieldName(key)}: ${value.toLocaleString()}
-                  </span>
-                );
-              })}
-            </div>
+      {/* Show last upload result briefly */}
+      {lastResult && lastResult.success && status === "success" && (
+        <div className="bg-chart-1/10 border border-chart-1/30 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-chart-1 shrink-0" />
+            <p className="text-sm text-foreground">
+              <span className="font-medium">{lastResult.institutionName}</span> added successfully
+            </p>
           </div>
         </div>
       )}
 
-      {result && !result.success && result.error && (
+      {lastResult && !lastResult.success && lastResult.error && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-sm text-destructive">{result.error}</p>
+            <p className="text-sm text-destructive">{lastResult.error}</p>
           </div>
         </div>
       )}
@@ -293,28 +279,4 @@ function getDocumentType(filename: string): string {
   if (lower.includes("bank") || lower.includes("checking") || lower.includes("savings")) return "bank statement";
   if (lower.includes("crypto")) return "cryptocurrency statement";
   return "financial statement";
-}
-
-function formatFieldName(field: string): string {
-  const names: Record<string, string> = {
-    checkingAccounts: "Checking",
-    savingsAccounts: "Savings",
-    cashOnHand: "Cash",
-    digitalWallets: "Digital Wallets",
-    foreignCurrency: "Foreign Currency",
-    interestEarned: "Interest",
-    activeInvestments: "Active Investments",
-    passiveInvestmentsValue: "Passive Investments",
-    dividends: "Dividends",
-    rothIRAContributions: "Roth IRA",
-    rothIRAEarnings: "Roth Earnings",
-    fourOhOneKVestedBalance: "401(k)",
-    traditionalIRABalance: "Traditional IRA",
-    hsaBalance: "HSA",
-    cryptoCurrency: "Crypto",
-    cryptoTrading: "Crypto Trading",
-    goldValue: "Gold",
-    silverValue: "Silver",
-  };
-  return names[field] || field;
 }

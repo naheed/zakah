@@ -3,15 +3,20 @@ import { investmentsContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "../QuestionLayout";
 import { CurrencyInput } from "../CurrencyInput";
 import { DocumentUpload } from "../DocumentUpload";
+import { StepDocumentsDisplay } from "../DocumentsManager";
+import { UploadedDocument } from "@/lib/documentTypes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface InvestmentsStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  uploadedDocuments: UploadedDocument[];
+  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
+  onRemoveDocument: (id: string) => void;
 }
 
-export function InvestmentsStep({ data, updateData }: InvestmentsStepProps) {
+export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: InvestmentsStepProps) {
   const passiveZakatable = data.calculationMode === 'conservative' 
     ? data.passiveInvestmentsValue 
     : data.passiveInvestmentsValue * 0.30;
@@ -35,13 +40,15 @@ export function InvestmentsStep({ data, updateData }: InvestmentsStepProps) {
   
   return (
     <QuestionLayout content={investmentsContent}>
+      <StepDocumentsDisplay documents={uploadedDocuments} stepId="investments" onRemoveDocument={onRemoveDocument} />
+      
       <DocumentUpload
         onDataExtracted={handleDataExtracted}
+        onDocumentAdded={onDocumentAdded}
         label="Upload Brokerage Statement"
         description="Auto-fill from your investment statement"
       />
       
-      {/* Active Investments */}
       <div className="space-y-2">
         <h3 className="font-medium text-foreground">Active Investments (Trading)</h3>
         <CurrencyInput
@@ -52,7 +59,6 @@ export function InvestmentsStep({ data, updateData }: InvestmentsStepProps) {
         />
       </div>
       
-      {/* Passive Investments */}
       <div className="space-y-3">
         <h3 className="font-medium text-foreground">Passive Investments (Long-Term)</h3>
         <CurrencyInput
@@ -74,7 +80,6 @@ export function InvestmentsStep({ data, updateData }: InvestmentsStepProps) {
         )}
       </div>
       
-      {/* Dividends */}
       <div className="space-y-3 pt-4 border-t border-border">
         <h3 className="font-medium text-foreground">Dividends & Purification</h3>
         
