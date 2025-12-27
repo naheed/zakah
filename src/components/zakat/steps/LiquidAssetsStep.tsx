@@ -2,6 +2,7 @@ import { ZakatFormData } from "@/lib/zakatCalculations";
 import { StepHeader } from "../StepHeader";
 import { CurrencyInput } from "../CurrencyInput";
 import { InfoCard } from "../InfoCard";
+import { DocumentUpload } from "../DocumentUpload";
 
 interface LiquidAssetsStepProps {
   data: ZakatFormData;
@@ -9,6 +10,22 @@ interface LiquidAssetsStepProps {
 }
 
 export function LiquidAssetsStep({ data, updateData }: LiquidAssetsStepProps) {
+  const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
+    // Merge extracted data with existing data (don't overwrite with 0s)
+    const updates: Partial<ZakatFormData> = {};
+    const fields = ['checkingAccounts', 'savingsAccounts', 'cashOnHand', 'digitalWallets', 'foreignCurrency', 'interestEarned'] as const;
+    
+    for (const field of fields) {
+      if (extractedData[field] && extractedData[field]! > 0) {
+        updates[field] = (data[field] || 0) + extractedData[field]!;
+      }
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      updateData(updates);
+    }
+  };
+
   return (
     <div className="max-w-xl">
       <StepHeader
@@ -18,6 +35,11 @@ export function LiquidAssetsStep({ data, updateData }: LiquidAssetsStepProps) {
       />
       
       <div className="space-y-8">
+        <DocumentUpload
+          onDataExtracted={handleDataExtracted}
+          label="Upload Bank Statement"
+          description="Upload a bank statement to auto-fill your account balances"
+        />
         <CurrencyInput
           label="💵 Checking Accounts"
           description="What is the total value of all of your checking account(s)?"

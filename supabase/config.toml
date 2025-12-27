@@ -1,0 +1,4 @@
+project_id = "pcwdpsoheoiiavkeyeyx"
+
+[functions.parse-financial-document]
+verify_jwt = false
