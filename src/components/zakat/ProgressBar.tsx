@@ -3,14 +3,15 @@ import { cn } from "@/lib/utils";
 interface ProgressBarProps {
   currentStep: number;
   totalSteps: number;
-  section: 'intro' | 'assets' | 'liabilities' | 'results';
+  section: 'intro' | 'assets' | 'liabilities' | 'results' | 'settings';
 }
 
 const sectionLabels = {
   intro: 'Getting Started',
   assets: 'Zakatable Assets',
-  liabilities: 'Expenses & Liabilities',
+  liabilities: 'Deductions',
   results: 'Your Zakat',
+  settings: 'Settings',
 };
 
 const sectionColors = {
@@ -18,6 +19,7 @@ const sectionColors = {
   assets: 'bg-chart-1',
   liabilities: 'bg-chart-2',
   results: 'bg-chart-5',
+  settings: 'bg-muted-foreground',
 };
 
 export function ProgressBar({ currentStep, totalSteps, section }: ProgressBarProps) {
@@ -28,7 +30,7 @@ export function ProgressBar({ currentStep, totalSteps, section }: ProgressBarPro
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-foreground">{sectionLabels[section]}</span>
         <span className="text-muted-foreground">
-          Step {currentStep + 1} of {totalSteps}
+          {currentStep + 1} of {totalSteps}
         </span>
       </div>
       <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
