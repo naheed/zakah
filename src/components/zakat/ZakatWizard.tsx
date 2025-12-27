@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ZakatFormData, defaultFormData, calculateZakat, SILVER_PRICE_PER_OUNCE } from "@/lib/zakatCalculations";
+import { ZakatFormData, defaultFormData, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from "@/lib/zakatCalculations";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { CurrencyStep } from "./steps/CurrencyStep";
 import { NisabStep } from "./steps/NisabStep";
@@ -9,8 +9,10 @@ import { CategorySelectionStep } from "./steps/CategorySelectionStep";
 import { EmailStep } from "./steps/EmailStep";
 import { LiquidAssetsStep } from "./steps/LiquidAssetsStep";
 import { PreciousMetalsStep } from "./steps/PreciousMetalsStep";
+import { CryptoStep } from "./steps/CryptoStep";
 import { InvestmentsStep } from "./steps/InvestmentsStep";
 import { RetirementStep } from "./steps/RetirementStep";
+import { TrustsStep } from "./steps/TrustsStep";
 import { RealEstateStep } from "./steps/RealEstateStep";
 import { BusinessStep } from "./steps/BusinessStep";
 import { IlliquidAssetsStep } from "./steps/IlliquidAssetsStep";
@@ -31,8 +33,10 @@ type StepId =
   | 'email'
   | 'liquid-assets'
   | 'precious-metals'
+  | 'crypto'
   | 'investments'
   | 'retirement'
+  | 'trusts'
   | 'real-estate'
   | 'business'
   | 'illiquid-assets'
@@ -58,8 +62,10 @@ const allSteps: Step[] = [
   { id: 'email', title: 'Email', section: 'intro' },
   { id: 'liquid-assets', title: 'Liquid Assets', section: 'assets' },
   { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => data.hasPreciousMetals },
+  { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => data.hasCrypto },
   { id: 'investments', title: 'Investments', section: 'assets' },
   { id: 'retirement', title: 'Retirement', section: 'assets' },
+  { id: 'trusts', title: 'Trusts', section: 'assets', condition: (data) => data.hasTrusts },
   { id: 'real-estate', title: 'Real Estate', section: 'assets', condition: (data) => data.hasRealEstate },
   { id: 'business', title: 'Business', section: 'assets', condition: (data) => data.hasBusiness },
   { id: 'illiquid-assets', title: 'Illiquid Assets', section: 'assets', condition: (data) => data.hasIlliquidAssets },
@@ -98,7 +104,7 @@ export function ZakatWizard() {
     }
   };
   
-  const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE);
+  const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
   
   const renderStep = () => {
     switch (currentStep.id) {
@@ -107,9 +113,9 @@ export function ZakatWizard() {
       case 'currency':
         return <CurrencyStep data={formData} updateData={updateFormData} />;
       case 'nisab':
-        return <NisabStep currency={formData.currency} />;
+        return <NisabStep data={formData} updateData={updateFormData} />;
       case 'hawl':
-        return <HawlStep />;
+        return <HawlStep data={formData} updateData={updateFormData} />;
       case 'family':
         return <FamilyStep />;
       case 'categories':
@@ -120,10 +126,14 @@ export function ZakatWizard() {
         return <LiquidAssetsStep data={formData} updateData={updateFormData} />;
       case 'precious-metals':
         return <PreciousMetalsStep data={formData} updateData={updateFormData} />;
+      case 'crypto':
+        return <CryptoStep data={formData} updateData={updateFormData} />;
       case 'investments':
         return <InvestmentsStep data={formData} updateData={updateFormData} />;
       case 'retirement':
         return <RetirementStep data={formData} updateData={updateFormData} />;
+      case 'trusts':
+        return <TrustsStep data={formData} updateData={updateFormData} />;
       case 'real-estate':
         return <RealEstateStep data={formData} updateData={updateFormData} />;
       case 'business':

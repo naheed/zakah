@@ -20,25 +20,46 @@ export function DebtOwedToYouStep({ data, updateData }: DebtOwedToYouStepProps) 
       <div className="space-y-8">
         <InfoCard variant="info">
           <p>
-            Include money that is owed to you that you <strong>expect to collect</strong>. 
-            This is called "good debt" (dayn qawiyy) — the borrower is willing and able to pay.
+            Islamic jurisprudence distinguishes between <strong>"Good Debt" (Dayn Qawiyy)</strong> and 
+            <strong> "Bad Debt" (Dayn Da'if)</strong>. Only good debt is treated as Zakatable 
+            wealth annually.
           </p>
         </InfoCard>
         
-        <CurrencyInput
-          label="💰 Debt Owed to You"
-          description="Total amount of collectible debts owed to you by others"
-          value={data.debtOwedToYou}
-          onChange={(value) => updateData({ debtOwedToYou: value })}
-        />
+        <div className="space-y-4">
+          <CurrencyInput
+            label="💰 Good Debt Owed to You"
+            description="Money owed by borrowers who are willing and able to pay. You can collect this at will."
+            value={data.goodDebtOwedToYou}
+            onChange={(value) => updateData({ goodDebtOwedToYou: value })}
+          />
+          
+          <InfoCard variant="tip" title="Good Debt (Dayn Qawiyy)">
+            <p>
+              This is like cash in your pocket. The borrower is reliable, and you could 
+              request repayment at any time. Include personal loans you've given where 
+              repayment is expected.
+            </p>
+          </InfoCard>
+        </div>
         
-        <InfoCard variant="warning" title="Bad Debts">
-          <p>
-            If the borrower is delinquent, bankrupt, or denying the debt, <strong>do not 
-            include it</strong>. You only pay Zakat on bad debt once it's actually recovered, 
-            for one year only.
-          </p>
-        </InfoCard>
+        <div className="space-y-4">
+          <CurrencyInput
+            label="💸 Bad Debt Recovered This Year"
+            description="Money from previously uncollectible debts that you actually recovered this year"
+            value={data.badDebtRecovered}
+            onChange={(value) => updateData({ badDebtRecovered: value })}
+          />
+          
+          <InfoCard variant="warning" title="Bad Debt (Dayn Da'if)">
+            <p>
+              If the borrower is <strong>delinquent, bankrupt, or denying the debt</strong>, 
+              do not include it in Good Debt. You only pay Zakat on bad debt once it's 
+              actually recovered, and for <strong>one year only</strong> (even if the debt 
+              was outstanding for ten years).
+            </p>
+          </InfoCard>
+        </div>
       </div>
     </div>
   );

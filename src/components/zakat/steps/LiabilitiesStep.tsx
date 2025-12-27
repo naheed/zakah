@@ -20,9 +20,9 @@ export function LiabilitiesStep({ data, updateData }: LiabilitiesStepProps) {
       <div className="space-y-8">
         <InfoCard variant="info">
           <p>
-            When calculating your Zakat, you can reduce your assets by living expenses, 
-            bills that are <strong>immediately due</strong>, and money you owe to others. 
-            Only include upcoming payments, not total loan balances.
+            <strong>Only IMMEDIATE debts</strong> due within the Zakat period are deductible. 
+            This is based on the AMJA/Bradford fatwa. Long-term debts (like a 30-year mortgage 
+            balance) are NOT fully deductible.
           </p>
         </InfoCard>
         
@@ -31,6 +31,13 @@ export function LiabilitiesStep({ data, updateData }: LiabilitiesStepProps) {
           description="Rent/mortgage, medical expenses, utilities, groceries, transport, upkeep, etc."
           value={data.monthlyLivingExpenses}
           onChange={(value) => updateData({ monthlyLivingExpenses: value })}
+        />
+        
+        <CurrencyInput
+          label="🏠 Monthly Mortgage/Rent Payment"
+          description="Your monthly housing payment. We'll deduct 12 months per the AMJA opinion."
+          value={data.monthlyMortgage}
+          onChange={(value) => updateData({ monthlyMortgage: value })}
         />
         
         <div className="space-y-4">
@@ -51,18 +58,34 @@ export function LiabilitiesStep({ data, updateData }: LiabilitiesStepProps) {
         
         <div className="space-y-4">
           <CurrencyInput
-            label="💳 Debts You Owe"
-            description="Student debts, credit card debts, secondary mortgage payments due"
-            value={data.debtsYouOwe}
-            onChange={(value) => updateData({ debtsYouOwe: value })}
+            label="💳 Credit Card Balance"
+            description="Total credit card balance due immediately"
+            value={data.creditCardBalance}
+            onChange={(value) => updateData({ creditCardBalance: value })}
+          />
+        </div>
+        
+        <CurrencyInput
+          label="📋 Unpaid Bills"
+          description="Utility, medical, or other bills currently due"
+          value={data.unpaidBills}
+          onChange={(value) => updateData({ unpaidBills: value })}
+        />
+        
+        <div className="space-y-4">
+          <CurrencyInput
+            label="🎓 Student Loan Payments Due"
+            description="Only the upcoming installment that is due, not total loan balance"
+            value={data.studentLoansDue}
+            onChange={(value) => updateData({ studentLoansDue: value })}
           />
           
-          <InfoCard variant="warning" title="Important">
-            <p>
-              Only include the <strong>upcoming installment</strong> that is due, even if 
-              you plan to pay more. <strong>Primary mortgage payments</strong> should be 
-              in Monthly Expenses above, not here.
-            </p>
+          <InfoCard variant="warning" title="Important: Non-Deductible Debts">
+            <ul className="list-disc pl-4 space-y-1 text-sm">
+              <li>Remaining mortgage principal (only 12 months deductible)</li>
+              <li>Student loans not currently due (deferred)</li>
+              <li>401(k) loans (you owe this to yourself)</li>
+            </ul>
           </InfoCard>
         </div>
       </div>
