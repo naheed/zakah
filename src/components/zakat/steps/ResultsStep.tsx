@@ -2,11 +2,12 @@ import { ZakatFormData, formatCurrency, formatPercent, CalculationMode } from "@
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Download, Mail, RotateCcw, Settings2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Download, Mail, RotateCcw, Settings2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
+import { SaveCalculationDialog } from "../SaveCalculationDialog";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -260,6 +261,15 @@ export function ResultsStep({ data, updateData, calculations, calculationName }:
             <Download className="w-4 h-4" />
             {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
+          <SaveCalculationDialog 
+            formData={data}
+            trigger={
+              <Button variant="outline" className="flex-1 gap-2">
+                <Save className="w-4 h-4" />
+                Save
+              </Button>
+            }
+          />
           <Button 
             variant="outline" 
             className="flex-1 gap-2"

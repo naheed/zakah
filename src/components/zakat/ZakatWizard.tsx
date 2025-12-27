@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { WelcomeStep } from "./steps/WelcomeStep";
@@ -25,9 +26,12 @@ import { ContinueSessionDialog } from "./ContinueSessionDialog";
 import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
 import { ShareDrawer } from "./ShareDrawer";
 import { DocumentsManager } from "./DocumentsManager";
+import { UserMenu } from "./UserMenu";
+import { SaveCalculationDialog } from "./SaveCalculationDialog";
 import { Menu, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { SavedCalculation } from "@/hooks/useSavedCalculations";
 
 type StepId = 
   | 'welcome'
@@ -94,7 +98,30 @@ export function ZakatWizard() {
     continueSession,
     startFresh,
     isLoaded,
+    setFormData,
   } = useZakatPersistence();
+
+  const [calculationName, setCalculationName] = useState<string | undefined>();
+  
+  // Check for loaded calculation from saved calculations page
+  useEffect(() => {
+    const loadedCalc = localStorage.getItem('zakat-load-calculation');
+    if (loadedCalc) {
+      try {
+        const calc: SavedCalculation = JSON.parse(loadedCalc);
+        setFormData(calc.form_data);
+        setCalculationName(calc.name);
+        // Go to results step
+        const resultsIndex = allSteps.findIndex(s => s.id === 'results');
+        if (resultsIndex >= 0) {
+          setCurrentStepIndex(resultsIndex);
+        }
+      } catch (e) {
+        console.error('Error loading calculation:', e);
+      }
+      localStorage.removeItem('zakat-load-calculation');
+    }
+  }, [setFormData, setCurrentStepIndex]);
   
   const getActiveSteps = () => {
     return allSteps.filter(step => !step.condition || step.condition(formData));
@@ -188,7 +215,7 @@ export function ZakatWizard() {
       case 'tax':
         return <TaxStep {...assetStepProps} />;
       case 'results':
-        return <ResultsStep data={formData} updateData={updateFormData} calculations={calculations} />;
+        return <ResultsStep data={formData} updateData={updateFormData} calculations={calculations} calculationName={calculationName} />;
       default:
         return null;
     }
@@ -237,11 +264,14 @@ export function ZakatWizard() {
 
             {/* Share Button */}
             <ShareDrawer formData={formData} zakatDue={calculations.zakatDue}>
-              <Button variant="ghost" size="icon" className="shrink-0 -mr-2">
+              <Button variant="ghost" size="icon" className="shrink-0">
                 <Share2 className="h-5 w-5" />
                 <span className="sr-only">Share with spouse</span>
               </Button>
             </ShareDrawer>
+
+            {/* User Menu */}
+            <UserMenu />
           </div>
         </div>
       </div>

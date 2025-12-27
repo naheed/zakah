@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      zakat_calculations: {
+        Row: {
+          created_at: string
+          form_data: Json
+          id: string
+          is_above_nisab: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+          year_type: string
+          year_value: number
+          zakat_due: number | null
+        }
+        Insert: {
+          created_at?: string
+          form_data: Json
+          id?: string
+          is_above_nisab?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+          year_type: string
+          year_value: number
+          zakat_due?: number | null
+        }
+        Update: {
+          created_at?: string
+          form_data?: Json
+          id?: string
+          is_above_nisab?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+          year_type?: string
+          year_value?: number
+          zakat_due?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
