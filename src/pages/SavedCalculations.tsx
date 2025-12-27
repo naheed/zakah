@@ -1,0 +1,199 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { useAuth } from '@/hooks/useAuth';
+import { useSavedCalculations, generateYearName, SavedCalculation } from '@/hooks/useSavedCalculations';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatCurrency } from '@/lib/zakatCalculations';
+import { ArrowLeft, Plus, Trash2, Calendar, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
+export default function SavedCalculations() {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { calculations, loading, deleteCalculation } = useSavedCalculations();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    await deleteCalculation(id);
+    setDeletingId(null);
+  };
+
+  const handleLoadCalculation = (calc: SavedCalculation) => {
+    // Store the calculation to load in localStorage and navigate home
+    localStorage.setItem('zakat-load-calculation', JSON.stringify(calc));
+    navigate('/');
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <Helmet>
+          <title>Saved Calculations - ZakatFlow</title>
+        </Helmet>
+        <div className="max-w-2xl mx-auto pt-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
+          <p className="text-muted-foreground mb-6">
+            Please sign in to view and manage your saved Zakat calculations.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Calculator
+            </Button>
+            <Button onClick={() => navigate('/auth')}>
+              Sign In
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Saved Calculations - ZakatFlow</title>
+      </Helmet>
+
+      {/* Header */}
+      <header className="border-b border-border bg-card">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Saved Calculations</h1>
+              <p className="text-sm text-muted-foreground">View and manage your Zakat records</p>
+            </div>
+          </div>
+          <Button onClick={() => navigate('/')}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Calculation
+          </Button>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : calculations.length === 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h2 className="text-xl font-semibold mb-2">No Saved Calculations</h2>
+              <p className="text-muted-foreground mb-6">
+                Start a new Zakat calculation and save it to view it here.
+              </p>
+              <Button onClick={() => navigate('/')}>
+                Start New Calculation
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {calculations.map((calc) => (
+              <Card 
+                key={calc.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleLoadCalculation(calc)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {calc.name}
+                        {calc.is_above_nisab ? (
+                          <CheckCircle className="w-4 h-4 text-chart-1" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Calendar className="w-3 h-3" />
+                        {generateYearName(calc.year_type, calc.year_value)}
+                        <span className="text-xs">•</span>
+                        <span className="text-xs">
+                          Updated {new Date(calc.updated_at).toLocaleDateString()}
+                        </span>
+                      </CardDescription>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {deletingId === calc.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Calculation?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete "{calc.name}". This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDelete(calc.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      {calc.is_above_nisab ? 'Zakat Due' : 'Below Nisab'}
+                    </div>
+                    <div className={`text-xl font-bold ${calc.is_above_nisab ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {calc.is_above_nisab 
+                        ? formatCurrency(calc.zakat_due, calc.form_data.currency) 
+                        : 'No Zakat Due'}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

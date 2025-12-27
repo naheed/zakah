@@ -98,6 +98,7 @@ export function useZakatPersistence() {
 
   return {
     formData,
+    setFormData,
     stepIndex,
     setStepIndex,
     updateFormData,
