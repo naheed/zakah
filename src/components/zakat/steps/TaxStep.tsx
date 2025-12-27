@@ -1,7 +1,7 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { StepHeader } from "../StepHeader";
+import { taxContent } from "@/lib/zakatContent";
+import { QuestionLayout } from "../QuestionLayout";
 import { CurrencyInput } from "../CurrencyInput";
-import { InfoCard } from "../InfoCard";
 
 interface TaxStepProps {
   data: ZakatFormData;
@@ -10,35 +10,20 @@ interface TaxStepProps {
 
 export function TaxStep({ data, updateData }: TaxStepProps) {
   return (
-    <div className="max-w-xl">
-      <StepHeader
-        emoji="📋"
-        title="Taxes & Fines"
-        subtitle="Property taxes, late payments, and penalties"
+    <QuestionLayout content={taxContent}>
+      <CurrencyInput
+        label="Property Tax Due"
+        description="Property taxes currently due"
+        value={data.propertyTax}
+        onChange={(value) => updateData({ propertyTax: value })}
       />
       
-      <div className="space-y-8">
-        <InfoCard variant="info">
-          <p>
-            Taxes and fines that are <strong>currently due</strong> can be deducted 
-            from your Zakatable wealth.
-          </p>
-        </InfoCard>
-        
-        <CurrencyInput
-          label="🏠 Property Tax Due"
-          description="Property tax payments that are currently due"
-          value={data.propertyTax}
-          onChange={(value) => updateData({ propertyTax: value })}
-        />
-        
-        <CurrencyInput
-          label="⚠️ Late Tax Payments or Fines"
-          description="Any overdue taxes, penalties, or fines you owe"
-          value={data.lateTaxPayments}
-          onChange={(value) => updateData({ lateTaxPayments: value })}
-        />
-      </div>
-    </div>
+      <CurrencyInput
+        label="Late Tax Payments or Fines"
+        description="Overdue taxes, penalties, or fines"
+        value={data.lateTaxPayments}
+        onChange={(value) => updateData({ lateTaxPayments: value })}
+      />
+    </QuestionLayout>
   );
 }
