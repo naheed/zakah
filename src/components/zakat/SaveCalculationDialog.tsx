@@ -28,9 +28,10 @@ import { useToast } from '@/hooks/use-toast';
 interface SaveCalculationDialogProps {
   formData: ZakatFormData;
   trigger?: React.ReactNode;
+  onSaved?: (calculationId: string) => void;
 }
 
-export function SaveCalculationDialog({ formData, trigger }: SaveCalculationDialogProps) {
+export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalculationDialogProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveCalculation } = useSavedCalculations();
@@ -75,6 +76,7 @@ export function SaveCalculationDialog({ formData, trigger }: SaveCalculationDial
     setIsSaving(false);
     
     if (result) {
+      onSaved?.(result.id);
       setOpen(false);
       setCustomName('');
     }

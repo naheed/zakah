@@ -99,6 +99,7 @@ export function ZakatWizard() {
   } = useZakatPersistence();
 
   const [calculationName, setCalculationName] = useState<string | undefined>();
+  const [savedCalculationId, setSavedCalculationId] = useState<string | undefined>();
   
   // Check for loaded calculation from saved calculations page
   useEffect(() => {
@@ -108,6 +109,7 @@ export function ZakatWizard() {
         const calc: SavedCalculation = JSON.parse(loadedCalc);
         setFormData(calc.form_data);
         setCalculationName(calc.name);
+        setSavedCalculationId(calc.id);
         // Go to results step
         const resultsIndex = allSteps.findIndex(s => s.id === 'results');
         if (resultsIndex >= 0) {
@@ -210,7 +212,16 @@ export function ZakatWizard() {
       case 'tax':
         return <TaxStep {...assetStepProps} />;
       case 'results':
-        return <ResultsStep data={formData} updateData={updateFormData} calculations={calculations} calculationName={calculationName} />;
+        return (
+          <ResultsStep 
+            data={formData} 
+            updateData={updateFormData} 
+            calculations={calculations} 
+            calculationName={calculationName}
+            savedCalculationId={savedCalculationId}
+            onCalculationSaved={setSavedCalculationId}
+          />
+        );
       default:
         return null;
     }
@@ -258,7 +269,11 @@ export function ZakatWizard() {
             />
 
             {/* Share Button */}
-            <ShareDrawer formData={formData} zakatDue={calculations.zakatDue}>
+            <ShareDrawer 
+              formData={formData} 
+              zakatDue={calculations.zakatDue}
+              calculationId={savedCalculationId}
+            >
               <Button variant="ghost" size="icon" className="shrink-0">
                 <Share2 className="h-5 w-5" />
                 <span className="sr-only">Share with spouse</span>
