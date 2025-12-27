@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef } from "react";
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { UploadedDocument, fieldToStepMapping } from "@/lib/documentTypes";
 
@@ -35,10 +35,9 @@ export function useDocumentExtraction(
   const stepFields = getFieldsForStep(stepId);
   
   // Use ref to avoid stale closures - always have access to latest data
+  // Update ref synchronously on each render (safe pattern, no useEffect needed)
   const dataRef = useRef(data);
-  useEffect(() => {
-    dataRef.current = data;
-  }, [data]);
+  dataRef.current = data;
 
   const handleDataExtracted = useCallback((extractedData: Partial<ZakatFormData>) => {
     const updates: Partial<ZakatFormData> = {};
