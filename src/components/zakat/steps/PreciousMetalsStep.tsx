@@ -1,36 +1,44 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { preciousMetalsContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
+import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
-import { StepDocumentsDisplay } from "../DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-interface PreciousMetalsStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
+export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+  const isHousehold = data.isHousehold;
 
-export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onRemoveDocument }: PreciousMetalsStepProps) {
   return (
-    <QuestionLayout content={preciousMetalsContent}>
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="precious-metals" onRemoveDocument={onRemoveDocument} />
-      
+    <AssetStepWrapper
+      content={preciousMetalsContent}
+      stepId="precious-metals"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      showUpload={false}
+      householdReminder="Include gold and silver owned by yourself, spouse, and children."
+    >
       <CurrencyInput
         label="Gold Value"
         description="Melt value of gold items (not gemstones or craftsmanship)"
+        householdDescription="Combined gold value for all family members"
+        isHousehold={isHousehold}
         value={data.goldValue}
         onChange={(value) => updateData({ goldValue: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'goldValue')}
       />
       
       <CurrencyInput
         label="Silver Value"
         description="Melt value of silver items"
+        householdDescription="Combined silver value for all family members"
+        isHousehold={isHousehold}
         value={data.silverValue}
         onChange={(value) => updateData({ silverValue: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'silverValue')}
       />
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }

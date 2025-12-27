@@ -1,60 +1,30 @@
 import { ZakatFormData, formatCurrency, calculateRetirementAccessible } from "@/lib/zakatCalculations";
 import { retirementContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
-import { CurrencyInput, getDocumentContributionsForField } from "../CurrencyInput";
-import { DocumentUpload } from "../DocumentUpload";
-import { StepDocumentsDisplay } from "../DocumentsManager";
+import { AssetStepWrapper } from "../AssetStepWrapper";
+import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-interface RetirementStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
-
-export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: RetirementStepProps) {
+export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
   const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode);
   const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.calculationMode);
   const isHousehold = data.isHousehold;
 
-  const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
-    const updates: Partial<ZakatFormData> = {};
-    const fields = ['fourOhOneKVestedBalance', 'traditionalIRABalance', 'rothIRAContributions', 'rothIRAEarnings', 'hsaBalance'] as const;
-    
-    for (const field of fields) {
-      if (extractedData[field] && extractedData[field]! > 0) {
-        updates[field] = (data[field] || 0) + extractedData[field]!;
-      }
-    }
-    
-    if (Object.keys(updates).length > 0) {
-      updateData(updates);
-    }
-  };
-  
   return (
-    <QuestionLayout content={retirementContent}>
-      {isHousehold && (
-        <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p className="text-sm text-foreground">
-            <span className="font-medium">Household Mode:</span> Include retirement accounts for yourself, spouse, and children.
-          </p>
-        </div>
-      )}
-
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="retirement" onRemoveDocument={onRemoveDocument} />
-      
-      <DocumentUpload
-        onDataExtracted={handleDataExtracted}
-        onDocumentAdded={onDocumentAdded}
-        label="Upload Retirement Statement"
-        description="Auto-fill from your 401(k) or IRA statement"
-      />
-
+    <AssetStepWrapper
+      content={retirementContent}
+      stepId="retirement"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      uploadLabel="Upload Retirement Statement"
+      uploadDescription="Auto-fill from your 401(k) or IRA statement"
+      householdReminder="Include retirement accounts for yourself, spouse, and children."
+    >
       <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
         <div>
           <Label className="text-foreground">Are you over 59½?</Label>
@@ -72,7 +42,6 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           isHousehold={isHousehold}
           value={data.fourOhOneKVestedBalance} 
           onChange={(value) => updateData({ fourOhOneKVestedBalance: value })} 
-          fieldName="fourOhOneKVestedBalance"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'fourOhOneKVestedBalance')}
         />
         {data.fourOhOneKVestedBalance > 0 && data.calculationMode === 'optimized' && (
@@ -92,7 +61,6 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           isHousehold={isHousehold}
           value={data.traditionalIRABalance} 
           onChange={(value) => updateData({ traditionalIRABalance: value })} 
-          fieldName="traditionalIRABalance"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'traditionalIRABalance')}
         />
         {data.traditionalIRABalance > 0 && data.calculationMode === 'optimized' && (
@@ -112,7 +80,6 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           isHousehold={isHousehold}
           value={data.rothIRAContributions} 
           onChange={(value) => updateData({ rothIRAContributions: value })} 
-          fieldName="rothIRAContributions"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'rothIRAContributions')}
         />
         <CurrencyInput 
@@ -122,7 +89,6 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           isHousehold={isHousehold}
           value={data.rothIRAEarnings} 
           onChange={(value) => updateData({ rothIRAEarnings: value })} 
-          fieldName="rothIRAEarnings"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'rothIRAEarnings')}
         />
       </div>
@@ -136,10 +102,9 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           isHousehold={isHousehold}
           value={data.hsaBalance} 
           onChange={(value) => updateData({ hsaBalance: value })} 
-          fieldName="hsaBalance"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'hsaBalance')}
         />
       </div>
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }

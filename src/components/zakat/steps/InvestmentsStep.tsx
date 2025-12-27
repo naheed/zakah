@@ -1,22 +1,13 @@
 import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
 import { investmentsContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
-import { CurrencyInput, getDocumentContributionsForField } from "../CurrencyInput";
-import { DocumentUpload } from "../DocumentUpload";
-import { StepDocumentsDisplay } from "../DocumentsManager";
+import { AssetStepWrapper } from "../AssetStepWrapper";
+import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface InvestmentsStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
-
-export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: InvestmentsStepProps) {
+export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
   const passiveZakatable = data.calculationMode === 'conservative' 
     ? data.passiveInvestmentsValue 
     : data.passiveInvestmentsValue * 0.30;
@@ -24,40 +15,19 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
   const isHousehold = data.isHousehold;
 
-  const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
-    const updates: Partial<ZakatFormData> = {};
-    const fields = ['activeInvestments', 'passiveInvestmentsValue', 'dividends'] as const;
-    
-    for (const field of fields) {
-      if (extractedData[field] && extractedData[field]! > 0) {
-        updates[field] = (data[field] || 0) + extractedData[field]!;
-      }
-    }
-    
-    if (Object.keys(updates).length > 0) {
-      updateData(updates);
-    }
-  };
-  
   return (
-    <QuestionLayout content={investmentsContent}>
-      {isHousehold && (
-        <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p className="text-sm text-foreground">
-            <span className="font-medium">Household Mode:</span> Include investment accounts for yourself, spouse, and children.
-          </p>
-        </div>
-      )}
-
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="investments" onRemoveDocument={onRemoveDocument} />
-      
-      <DocumentUpload
-        onDataExtracted={handleDataExtracted}
-        onDocumentAdded={onDocumentAdded}
-        label="Upload Brokerage Statement"
-        description="Auto-fill from your investment statement"
-      />
-      
+    <AssetStepWrapper
+      content={investmentsContent}
+      stepId="investments"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      uploadLabel="Upload Brokerage Statement"
+      uploadDescription="Auto-fill from your investment statement"
+      householdReminder="Include investment accounts for yourself, spouse, and children."
+    >
       <div className="space-y-2">
         <h3 className="font-medium text-foreground">Active Investments (Trading)</h3>
         <CurrencyInput
@@ -67,7 +37,6 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           isHousehold={isHousehold}
           value={data.activeInvestments}
           onChange={(value) => updateData({ activeInvestments: value })}
-          fieldName="activeInvestments"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'activeInvestments')}
         />
       </div>
@@ -81,7 +50,6 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           isHousehold={isHousehold}
           value={data.passiveInvestmentsValue}
           onChange={(value) => updateData({ passiveInvestmentsValue: value })}
-          fieldName="passiveInvestmentsValue"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'passiveInvestmentsValue')}
         />
         
@@ -107,7 +75,6 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           isHousehold={isHousehold}
           value={data.dividends}
           onChange={(value) => updateData({ dividends: value })}
-          fieldName="dividends"
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'dividends')}
         />
         
@@ -134,6 +101,6 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           </div>
         )}
       </div>
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }

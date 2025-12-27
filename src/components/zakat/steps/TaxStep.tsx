@@ -1,36 +1,44 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { taxContent } from "@/lib/zakatContent";
-import { QuestionLayout } from "../QuestionLayout";
+import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
-import { StepDocumentsDisplay } from "../DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
+import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-interface TaxStepProps {
-  data: ZakatFormData;
-  updateData: (updates: Partial<ZakatFormData>) => void;
-  uploadedDocuments: UploadedDocument[];
-  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
-  onRemoveDocument: (id: string) => void;
-}
+export function TaxStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+  const isHousehold = data.isHousehold;
 
-export function TaxStep({ data, updateData, uploadedDocuments, onRemoveDocument }: TaxStepProps) {
   return (
-    <QuestionLayout content={taxContent}>
-      <StepDocumentsDisplay documents={uploadedDocuments} stepId="tax" onRemoveDocument={onRemoveDocument} />
-      
+    <AssetStepWrapper
+      content={taxContent}
+      stepId="tax"
+      data={data}
+      updateData={updateData}
+      uploadedDocuments={uploadedDocuments}
+      onDocumentAdded={onDocumentAdded}
+      onRemoveDocument={onRemoveDocument}
+      showUpload={false}
+      householdReminder="Include taxes due for your entire household."
+    >
       <CurrencyInput
         label="Property Tax Due"
         description="Property taxes currently due"
+        householdDescription="Combined property taxes for your household"
+        isHousehold={isHousehold}
         value={data.propertyTax}
         onChange={(value) => updateData({ propertyTax: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'propertyTax')}
       />
       
       <CurrencyInput
         label="Late Tax Payments or Fines"
         description="Overdue taxes, penalties, or fines"
+        householdDescription="Combined late taxes for all family members"
+        isHousehold={isHousehold}
         value={data.lateTaxPayments}
         onChange={(value) => updateData({ lateTaxPayments: value })}
+        documentContributions={getDocumentContributionsForField(uploadedDocuments, 'lateTaxPayments')}
       />
-    </QuestionLayout>
+    </AssetStepWrapper>
   );
 }
