@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 
 interface ResultsStepProps {
   data: ZakatFormData;
+  updateData: (updates: Partial<ZakatFormData>) => void;
   calculations: {
     totalAssets: number;
     totalLiabilities: number;
@@ -31,7 +32,7 @@ interface ResultsStepProps {
   };
 }
 
-export function ResultsStep({ data, calculations }: ResultsStepProps) {
+export function ResultsStep({ data, updateData, calculations }: ResultsStepProps) {
   const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);
   const { currency } = data;
@@ -133,11 +134,29 @@ export function ResultsStep({ data, calculations }: ResultsStepProps) {
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="p-4 border-b border-border bg-accent flex items-center justify-between">
             <h3 className="font-semibold text-foreground">Asset Breakdown</h3>
-            <Button variant="ghost" size="sm" onClick={() => setShowSettings(!showSettings)}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                const newMode = data.calculationMode === 'conservative' ? 'optimized' : 'conservative';
+                updateData({ calculationMode: newMode });
+              }}
+            >
               <Settings2 className="w-4 h-4 mr-1" />
               {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
             </Button>
           </div>
+          
+          {showSettings && (
+            <div className="p-4 bg-muted/50 border-b border-border">
+              <p className="text-sm text-muted-foreground mb-2">
+                <strong>Conservative:</strong> Pay on full asset values (safer)
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Optimized:</strong> Apply 30% rule for passive investments, deduct taxes/penalties from retirement
+              </p>
+            </div>
+          )}
           
           {/* Donut Chart */}
           <div className="p-4">

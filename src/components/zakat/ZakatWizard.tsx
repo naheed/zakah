@@ -147,7 +147,7 @@ export function ZakatWizard() {
       case 'tax':
         return <TaxStep data={formData} updateData={updateFormData} />;
       case 'results':
-        return <ResultsStep data={formData} calculations={calculations} />;
+        return <ResultsStep data={formData} updateData={updateFormData} calculations={calculations} />;
       default:
         return null;
     }
