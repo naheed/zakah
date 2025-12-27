@@ -37,9 +37,6 @@ import { SavedCalculation } from "@/hooks/useSavedCalculations";
 type StepId = 
   | 'welcome'
   | 'currency'
-  | 'nisab'
-  | 'hawl'
-  | 'family'
   | 'categories'
   | 'liquid-assets'
   | 'precious-metals'
@@ -53,34 +50,44 @@ type StepId =
   | 'debt-owed-to-you'
   | 'liabilities'
   | 'tax'
-  | 'results';
+  | 'results'
+  | 'nisab'
+  | 'hawl'
+  | 'family';
 
 interface Step {
   id: StepId;
   title: string;
-  section: 'intro' | 'assets' | 'liabilities' | 'results';
+  section: 'intro' | 'assets' | 'liabilities' | 'results' | 'settings';
   condition?: (data: ZakatFormData) => boolean;
+  isSettings?: boolean;
 }
 
+// Reordered steps: Get to assets quickly, move nisab/hawl/family to end as settings
 const allSteps: Step[] = [
   { id: 'welcome', title: 'Welcome', section: 'intro' },
-  { id: 'nisab', title: 'Niṣāb', section: 'intro' },
-  { id: 'hawl', title: 'Ḥawl', section: 'intro' },
-  { id: 'family', title: 'Family', section: 'intro' },
-  { id: 'categories', title: 'Categories', section: 'intro' },
-  { id: 'liquid-assets', title: 'Liquid Assets', section: 'assets' },
-  { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => data.hasPreciousMetals },
-  { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => data.hasCrypto },
+  { id: 'categories', title: 'Asset Types', section: 'intro' },
+  // Core assets - get to the "aha moment" fast
+  { id: 'liquid-assets', title: 'Cash & Bank', section: 'assets' },
   { id: 'investments', title: 'Investments', section: 'assets' },
   { id: 'retirement', title: 'Retirement', section: 'assets' },
+  // Conditional assets
+  { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => data.hasPreciousMetals },
+  { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => data.hasCrypto },
   { id: 'trusts', title: 'Trusts', section: 'assets', condition: (data) => data.hasTrusts },
   { id: 'real-estate', title: 'Real Estate', section: 'assets', condition: (data) => data.hasRealEstate },
   { id: 'business', title: 'Business', section: 'assets', condition: (data) => data.hasBusiness },
-  { id: 'illiquid-assets', title: 'Illiquid Assets', section: 'assets', condition: (data) => data.hasIlliquidAssets },
-  { id: 'debt-owed-to-you', title: 'Debt Owed', section: 'assets', condition: (data) => data.hasDebtOwedToYou },
-  { id: 'liabilities', title: 'Expenses', section: 'liabilities' },
+  { id: 'illiquid-assets', title: 'Other Assets', section: 'assets', condition: (data) => data.hasIlliquidAssets },
+  { id: 'debt-owed-to-you', title: 'Receivables', section: 'assets', condition: (data) => data.hasDebtOwedToYou },
+  // Liabilities
+  { id: 'liabilities', title: 'Deductions', section: 'liabilities' },
   { id: 'tax', title: 'Taxes', section: 'liabilities', condition: (data) => data.hasTaxPayments },
-  { id: 'results', title: 'Results', section: 'results' },
+  // Results - the aha moment!
+  { id: 'results', title: 'Your Zakat', section: 'results' },
+  // Settings/adjustments - can be modified after seeing results
+  { id: 'nisab', title: 'Niṣāb Standard', section: 'settings', isSettings: true },
+  { id: 'hawl', title: 'Calendar', section: 'settings', isSettings: true },
+  { id: 'family', title: 'Household', section: 'settings', isSettings: true },
 ];
 
 export function ZakatWizard() {
@@ -105,6 +112,7 @@ export function ZakatWizard() {
 
   // Presence tracking for collaborative editing
   const { presentUsers, updatePresence } = usePresence(savedCalculationId);
+  
   // Check for loaded calculation from saved calculations page
   useEffect(() => {
     const loadedCalc = localStorage.getItem('zakat-load-calculation');
@@ -115,7 +123,8 @@ export function ZakatWizard() {
         setCalculationName(calc.name);
         setSavedCalculationId(calc.id);
         // Go to results step
-        const resultsIndex = allSteps.findIndex(s => s.id === 'results');
+        const activeSteps = getActiveSteps();
+        const resultsIndex = activeSteps.findIndex(s => s.id === 'results');
         if (resultsIndex >= 0) {
           setCurrentStepIndex(resultsIndex);
         }
@@ -132,6 +141,7 @@ export function ZakatWizard() {
   
   const activeSteps = getActiveSteps();
   const currentStep = activeSteps[currentStepIndex] || activeSteps[0];
+  
   
   const goToNext = () => {
     if (currentStepIndex < activeSteps.length - 1) {
@@ -176,6 +186,15 @@ export function ZakatWizard() {
       </div>
     );
   }
+
+  // Check if we're on welcome page
+  const isWelcomePage = currentStep.id === 'welcome';
+  // Check if we're on a settings page
+  const isSettingsPage = currentStep.isSettings;
+  // Get total non-settings steps for progress
+  const mainSteps = activeSteps.filter(s => !s.isSettings);
+  const mainStepIndex = mainSteps.findIndex(s => s.id === currentStep.id);
+  const progressStepIndex = mainStepIndex >= 0 ? mainStepIndex : mainSteps.length - 1;
   
   const renderStep = () => {
     // Common props for asset steps
@@ -248,65 +267,67 @@ export function ZakatWizard() {
         onStartFresh={startFresh}
       />
 
-      {/* Header with Progress */}
-      <div className="sticky top-0 z-10 bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 mb-2">
-            {/* Step Navigator Button */}
-            <StepNavigatorDrawer
-              steps={activeSteps}
-              currentStepIndex={currentStepIndex}
-              onStepSelect={goToStep}
-            >
-              <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Navigate steps</span>
-              </Button>
-            </StepNavigatorDrawer>
+      {/* Header with Progress - hidden on welcome page */}
+      {!isWelcomePage && (
+        <div className="sticky top-0 z-10 bg-card border-b border-border">
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="flex items-center gap-2 mb-2">
+              {/* Step Navigator Button */}
+              <StepNavigatorDrawer
+                steps={activeSteps}
+                currentStepIndex={currentStepIndex}
+                onStepSelect={goToStep}
+              >
+                <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Navigate steps</span>
+                </Button>
+              </StepNavigatorDrawer>
 
-            {/* Progress Bar - clickable to open drawer */}
-            <div className="flex-1">
-              <ProgressBar 
-                currentStep={currentStepIndex} 
-                totalSteps={activeSteps.length}
-                section={currentStep.section}
+              {/* Progress Bar */}
+              <div className="flex-1">
+                <ProgressBar 
+                  currentStep={progressStepIndex} 
+                  totalSteps={mainSteps.length}
+                  section={isSettingsPage ? 'settings' : currentStep.section}
+                />
+              </div>
+
+              {/* Documents Manager */}
+              <DocumentsManager 
+                documents={uploadedDocuments} 
+                onRemoveDocument={removeDocument} 
               />
+
+              {/* Share Button */}
+              <ShareDrawer 
+                formData={formData} 
+                zakatDue={calculations.zakatDue}
+                calculationId={savedCalculationId}
+              >
+                <Button variant="ghost" size="icon" className="shrink-0">
+                  <Share2 className="h-5 w-5" />
+                  <span className="sr-only">Share with spouse</span>
+                </Button>
+              </ShareDrawer>
+
+              {/* Presence Indicator - shows other users editing */}
+              {presentUsers.length > 0 && (
+                <PresenceIndicator users={presentUsers} />
+              )}
+
+              {/* User Menu */}
+              <UserMenu />
             </div>
-
-            {/* Documents Manager */}
-            <DocumentsManager 
-              documents={uploadedDocuments} 
-              onRemoveDocument={removeDocument} 
-            />
-
-            {/* Share Button */}
-            <ShareDrawer 
-              formData={formData} 
-              zakatDue={calculations.zakatDue}
-              calculationId={savedCalculationId}
-            >
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <Share2 className="h-5 w-5" />
-                <span className="sr-only">Share with spouse</span>
-              </Button>
-            </ShareDrawer>
-
-            {/* Presence Indicator - shows other users editing */}
-            {presentUsers.length > 0 && (
-              <PresenceIndicator users={presentUsers} />
-            )}
-
-            {/* User Menu */}
-            <UserMenu />
           </div>
         </div>
-      </div>
+      )}
       
-      <main className="max-w-4xl mx-auto px-4 py-8 pb-32">
+      <main className={`max-w-4xl mx-auto px-4 ${isWelcomePage ? 'py-4' : 'py-8 pb-32'}`}>
         {renderStep()}
       </main>
       
-      {currentStep.id !== 'welcome' && (
+      {!isWelcomePage && (
         <StepNavigation
           onPrevious={goToPrevious}
           onNext={goToNext}

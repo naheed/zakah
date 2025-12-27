@@ -117,8 +117,8 @@ Custodial accounts (UTMA/UGMA), trusts in children's names, and any wealth owned
 };
 
 export const categoriesContent: StepContent = {
-  questionNumber: 4,
-  title: "Which of these apply to you?",
+  questionNumber: 1,
+  title: "What assets do you have?",
   subtitle: "Select all that apply to personalize your calculation.",
   learnMore: {
     title: "Personalizing Your Calculation",
@@ -156,7 +156,7 @@ export const emailContent: StepContent = {
 // =============================================================================
 
 export const liquidAssetsContent: StepContent = {
-  questionNumber: 6,
+  questionNumber: 2,
   title: "What are your liquid assets?",
   subtitle: "Cash and money you can access immediately.",
   learnMore: {

@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 interface Step {
   id: string;
   title: string;
-  section: 'intro' | 'assets' | 'liabilities' | 'results';
+  section: 'intro' | 'assets' | 'liabilities' | 'results' | 'settings';
+  isSettings?: boolean;
 }
 
 interface StepNavigatorDrawerProps {
@@ -25,8 +26,9 @@ interface StepNavigatorDrawerProps {
 const sectionLabels = {
   intro: 'Getting Started',
   assets: 'Zakatable Assets',
-  liabilities: 'Expenses & Liabilities',
+  liabilities: 'Deductions',
   results: 'Your Zakat',
+  settings: 'Settings',
 };
 
 const sectionColors = {
@@ -34,6 +36,7 @@ const sectionColors = {
   assets: 'bg-chart-1',
   liabilities: 'bg-chart-2',
   results: 'bg-chart-5',
+  settings: 'bg-muted-foreground',
 };
 
 export function StepNavigatorDrawer({
@@ -68,7 +71,7 @@ export function StepNavigatorDrawer({
           <DrawerTitle>Jump to step</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-8 overflow-y-auto">
-          {(['intro', 'assets', 'liabilities', 'results'] as const).map((section) => {
+          {(['intro', 'assets', 'liabilities', 'results', 'settings'] as const).map((section) => {
             const sectionSteps = groupedSteps[section];
             if (!sectionSteps?.length) return null;
 
