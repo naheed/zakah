@@ -1,6 +1,6 @@
 import { FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { UploadedDocument } from "@/lib/documentTypes";
+import { UploadedDocument, getDocumentsForStep } from "@/lib/documentTypes";
 import { UploadedDocumentCard } from "./UploadedDocumentCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,9 +66,7 @@ export function StepDocumentsDisplay({
 }: StepDocumentsDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   
-  // Import here to avoid circular deps
-  const { getDocumentsForStep } = require("@/lib/documentTypes");
-  const relevantDocs = getDocumentsForStep(documents, stepId) as UploadedDocument[];
+  const relevantDocs = getDocumentsForStep(documents, stepId);
 
   if (relevantDocs.length === 0) return null;
 

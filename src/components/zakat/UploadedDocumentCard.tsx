@@ -1,6 +1,6 @@
-import { CheckCircle, FileText, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
+import { UploadedDocument, fieldDisplayNames, fieldToStepMapping } from "@/lib/documentTypes";
 import { Button } from "@/components/ui/button";
 
 interface UploadedDocumentCardProps {
@@ -22,8 +22,7 @@ export function UploadedDocumentCard({
   const displayData = Object.entries(document.extractedData).filter(([key, value]) => {
     if (typeof value !== "number" || value === 0) return false;
     if (showOnlyStepFields) {
-      const { fieldToStepMapping } = require("@/lib/documentTypes");
-      return fieldToStepMapping[key] === showOnlyStepFields;
+      return fieldToStepMapping[key as keyof typeof fieldToStepMapping] === showOnlyStepFields;
     }
     return true;
   });
