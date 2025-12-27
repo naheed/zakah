@@ -2,15 +2,22 @@ import { ZakatFormData } from "@/lib/zakatCalculations";
 import { liabilitiesContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "../QuestionLayout";
 import { CurrencyInput } from "../CurrencyInput";
+import { StepDocumentsDisplay } from "../DocumentsManager";
+import { UploadedDocument } from "@/lib/documentTypes";
 
 interface LiabilitiesStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  uploadedDocuments: UploadedDocument[];
+  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
+  onRemoveDocument: (id: string) => void;
 }
 
-export function LiabilitiesStep({ data, updateData }: LiabilitiesStepProps) {
+export function LiabilitiesStep({ data, updateData, uploadedDocuments, onRemoveDocument }: LiabilitiesStepProps) {
   return (
     <QuestionLayout content={liabilitiesContent}>
+      <StepDocumentsDisplay documents={uploadedDocuments} stepId="liabilities" onRemoveDocument={onRemoveDocument} />
+      
       <CurrencyInput
         label="Monthly Living Expenses"
         description="Rent, utilities, groceries, transport"

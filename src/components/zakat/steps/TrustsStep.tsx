@@ -2,17 +2,24 @@ import { ZakatFormData } from "@/lib/zakatCalculations";
 import { trustsContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "../QuestionLayout";
 import { CurrencyInput } from "../CurrencyInput";
+import { StepDocumentsDisplay } from "../DocumentsManager";
+import { UploadedDocument } from "@/lib/documentTypes";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 interface TrustsStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  uploadedDocuments: UploadedDocument[];
+  onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
+  onRemoveDocument: (id: string) => void;
 }
 
-export function TrustsStep({ data, updateData }: TrustsStepProps) {
+export function TrustsStep({ data, updateData, uploadedDocuments, onRemoveDocument }: TrustsStepProps) {
   return (
     <QuestionLayout content={trustsContent}>
+      <StepDocumentsDisplay documents={uploadedDocuments} stepId="trusts" onRemoveDocument={onRemoveDocument} />
+      
       <CurrencyInput
         label="Revocable Trust Value"
         description="You retain control—fully Zakatable"
