@@ -1,7 +1,6 @@
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { WelcomeStep } from "./steps/WelcomeStep";
-import { CurrencyStep } from "./steps/CurrencyStep";
 import { NisabStep } from "./steps/NisabStep";
 import { HawlStep } from "./steps/HawlStep";
 import { FamilyStep } from "./steps/FamilyStep";
@@ -59,7 +58,6 @@ interface Step {
 
 const allSteps: Step[] = [
   { id: 'welcome', title: 'Welcome', section: 'intro' },
-  { id: 'currency', title: 'Currency', section: 'intro' },
   { id: 'nisab', title: 'Niṣāb', section: 'intro' },
   { id: 'hawl', title: 'Ḥawl', section: 'intro' },
   { id: 'family', title: 'Family', section: 'intro' },
@@ -136,8 +134,6 @@ export function ZakatWizard() {
     switch (currentStep.id) {
       case 'welcome':
         return <WelcomeStep onNext={goToNext} />;
-      case 'currency':
-        return <CurrencyStep data={formData} updateData={updateFormData} />;
       case 'nisab':
         return <NisabStep data={formData} updateData={updateFormData} />;
       case 'hawl':
