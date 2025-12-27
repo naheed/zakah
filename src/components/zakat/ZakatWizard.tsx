@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ZakatFormData, defaultFormData, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from "@/lib/zakatCalculations";
+import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
+import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { CurrencyStep } from "./steps/CurrencyStep";
 import { NisabStep } from "./steps/NisabStep";
@@ -22,6 +22,11 @@ import { TaxStep } from "./steps/TaxStep";
 import { ResultsStep } from "./steps/ResultsStep";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
+import { ContinueSessionDialog } from "./ContinueSessionDialog";
+import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
+import { ShareDrawer } from "./ShareDrawer";
+import { Menu, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type StepId = 
   | 'welcome'
@@ -76,19 +81,24 @@ const allSteps: Step[] = [
 ];
 
 export function ZakatWizard() {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [formData, setFormData] = useState<ZakatFormData>(defaultFormData);
+  const {
+    formData,
+    stepIndex: currentStepIndex,
+    setStepIndex: setCurrentStepIndex,
+    updateFormData,
+    hasExistingSession,
+    lastUpdated,
+    continueSession,
+    startFresh,
+    isLoaded,
+  } = useZakatPersistence();
   
   const getActiveSteps = () => {
     return allSteps.filter(step => !step.condition || step.condition(formData));
   };
   
   const activeSteps = getActiveSteps();
-  const currentStep = activeSteps[currentStepIndex];
-  
-  const updateFormData = (updates: Partial<ZakatFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
-  };
+  const currentStep = activeSteps[currentStepIndex] || activeSteps[0];
   
   const goToNext = () => {
     if (currentStepIndex < activeSteps.length - 1) {
@@ -103,8 +113,24 @@ export function ZakatWizard() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  const goToStep = (index: number) => {
+    if (index >= 0 && index < activeSteps.length) {
+      setCurrentStepIndex(index);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
   
   const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+
+  // Don't render until we've loaded persisted data
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
   
   const renderStep = () => {
     switch (currentStep.id) {
@@ -155,13 +181,47 @@ export function ZakatWizard() {
   
   return (
     <div className="min-h-screen bg-background">
+      {/* Continue Session Dialog */}
+      <ContinueSessionDialog
+        open={hasExistingSession}
+        lastUpdated={lastUpdated}
+        onContinue={continueSession}
+        onStartFresh={startFresh}
+      />
+
+      {/* Header with Progress */}
       <div className="sticky top-0 z-10 bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <ProgressBar 
-            currentStep={currentStepIndex} 
-            totalSteps={activeSteps.length}
-            section={currentStep.section}
-          />
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-2 mb-2">
+            {/* Step Navigator Button */}
+            <StepNavigatorDrawer
+              steps={activeSteps}
+              currentStepIndex={currentStepIndex}
+              onStepSelect={goToStep}
+            >
+              <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Navigate steps</span>
+              </Button>
+            </StepNavigatorDrawer>
+
+            {/* Progress Bar - clickable to open drawer */}
+            <div className="flex-1">
+              <ProgressBar 
+                currentStep={currentStepIndex} 
+                totalSteps={activeSteps.length}
+                section={currentStep.section}
+              />
+            </div>
+
+            {/* Share Button */}
+            <ShareDrawer formData={formData} zakatDue={calculations.zakatDue}>
+              <Button variant="ghost" size="icon" className="shrink-0 -mr-2">
+                <Share2 className="h-5 w-5" />
+                <span className="sr-only">Share with spouse</span>
+              </Button>
+            </ShareDrawer>
+          </div>
         </div>
       </div>
       
