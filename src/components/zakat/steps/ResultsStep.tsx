@@ -179,8 +179,8 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
             </div>
           )}
           
-          {/* Sankey Chart */}
-          <div className="p-4 flex justify-center">
+          {/* Sankey Chart with Fullscreen */}
+          <div className="p-4 flex justify-center relative">
             <ZakatSankeyChart 
               data={{
                 liquidAssets: assetBreakdown.liquidAssets,
@@ -195,30 +195,31 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
                 zakatRate,
               }}
               currency={currency}
-              width={480}
-              height={280}
+              width={500}
+              height={320}
+              showFullscreenButton={true}
             />
           </div>
           
-          {/* Legend */}
-          <div className="px-4 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {/* Legend with clear naming */}
+          <div className="px-4 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
             {assetBreakdown.liquidAssets > 0 && (
-              <LegendItem label="Cash & Liquid" value={formatCurrency(assetBreakdown.liquidAssets, currency)} color="hsl(var(--chart-1))" />
+              <LegendItem label="Cash & Savings" value={formatCurrency(assetBreakdown.liquidAssets, currency)} color="hsl(142, 76%, 36%)" />
             )}
             {assetBreakdown.investments > 0 && (
-              <LegendItem label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} color="hsl(var(--chart-2))" />
+              <LegendItem label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} color="hsl(221, 83%, 53%)" />
             )}
             {assetBreakdown.retirement > 0 && (
-              <LegendItem label="Retirement" value={formatCurrency(assetBreakdown.retirement, currency)} color="hsl(var(--chart-3))" />
+              <LegendItem label="Retirement" value={formatCurrency(assetBreakdown.retirement, currency)} color="hsl(262, 83%, 58%)" />
             )}
             {assetBreakdown.realEstate > 0 && (
-              <LegendItem label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} color="hsl(var(--chart-4))" />
+              <LegendItem label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} color="hsl(25, 95%, 53%)" />
             )}
             {assetBreakdown.business > 0 && (
-              <LegendItem label="Business" value={formatCurrency(assetBreakdown.business, currency)} color="hsl(var(--chart-5))" />
+              <LegendItem label="Business" value={formatCurrency(assetBreakdown.business, currency)} color="hsl(340, 82%, 52%)" />
             )}
             {assetBreakdown.otherAssets > 0 && (
-              <LegendItem label="Other" value={formatCurrency(assetBreakdown.otherAssets, currency)} color="hsl(var(--primary))" />
+              <LegendItem label="Other Assets" value={formatCurrency(assetBreakdown.otherAssets, currency)} color="hsl(var(--primary))" />
             )}
           </div>
         </div>
