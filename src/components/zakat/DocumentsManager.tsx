@@ -1,5 +1,6 @@
-import { FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { FileText, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { UploadedDocument, getDocumentsForStep } from "@/lib/documentTypes";
 import { UploadedDocumentCard } from "./UploadedDocumentCard";
 import { Button } from "@/components/ui/button";
@@ -28,16 +29,24 @@ export function DocumentsManager({
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <FileText className="w-4 h-4" />
-          <span>{documents.length} Document{documents.length !== 1 ? "s" : ""}</span>
+          <span>{documents.length}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Uploaded Documents</SheetTitle>
           <SheetDescription>
-            All financial documents you've uploaded. Data is extracted and applied to relevant sections.
+            Financial documents with extracted data.
           </SheetDescription>
         </SheetHeader>
+        <div className="mt-4">
+          <Link to="/documents">
+            <Button variant="outline" size="sm" className="w-full gap-2">
+              <ExternalLink className="w-4 h-4" />
+              View All Documents
+            </Button>
+          </Link>
+        </div>
         <div className="mt-6 space-y-4">
           {documents.map((doc) => (
             <UploadedDocumentCard
