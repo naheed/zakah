@@ -1,13 +1,19 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { ZakatWizard } from "@/components/zakat/ZakatWizard";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <Helmet>
+        <title>ZakatFlow - Islamic Zakat Calculator for Modern Finance</title>
+        <meta 
+          name="description" 
+          content="Calculate your Zakat with our comprehensive calculator based on authentic Islamic scholarship. Covers stocks, crypto, retirement accounts, and more." 
+        />
+        <meta name="keywords" content="zakat calculator, islamic finance, zakat, nisab, muslim finance, 401k zakat, crypto zakat" />
+      </Helmet>
+      <ZakatWizard />
+    </>
   );
 };
 
