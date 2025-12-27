@@ -4,6 +4,7 @@ import { CurrencyInput } from "../CurrencyInput";
 import { InfoCard } from "../InfoCard";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { DocumentUpload } from "../DocumentUpload";
 
 interface RetirementStepProps {
   data: ZakatFormData;
@@ -24,6 +25,21 @@ export function RetirementStep({ data, updateData }: RetirementStepProps) {
     data.estimatedTaxRate,
     data.calculationMode
   );
+
+  const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
+    const updates: Partial<ZakatFormData> = {};
+    const fields = ['rothIRAContributions', 'rothIRAEarnings', 'fourOhOneKVestedBalance', 'traditionalIRABalance', 'hsaBalance'] as const;
+    
+    for (const field of fields) {
+      if (extractedData[field] && extractedData[field]! > 0) {
+        updates[field] = (data[field] || 0) + extractedData[field]!;
+      }
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      updateData(updates);
+    }
+  };
   
   return (
     <div className="max-w-xl">
@@ -34,6 +50,12 @@ export function RetirementStep({ data, updateData }: RetirementStepProps) {
       />
       
       <div className="space-y-8">
+        <DocumentUpload
+          onDataExtracted={handleDataExtracted}
+          label="Upload Retirement Statement"
+          description="Upload a 401(k), IRA, or HSA statement to auto-fill values"
+        />
+        
         <InfoCard variant="info">
           <p>
             Retirement accounts present unique Zakat challenges due to access restrictions. 

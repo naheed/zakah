@@ -4,6 +4,7 @@ import { CurrencyInput } from "../CurrencyInput";
 import { InfoCard } from "../InfoCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DocumentUpload } from "../DocumentUpload";
 
 interface InvestmentsStepProps {
   data: ZakatFormData;
@@ -16,6 +17,21 @@ export function InvestmentsStep({ data, updateData }: InvestmentsStepProps) {
     : data.passiveInvestmentsValue * 0.30;
   
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
+
+  const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
+    const updates: Partial<ZakatFormData> = {};
+    const fields = ['activeInvestments', 'passiveInvestmentsValue', 'dividends'] as const;
+    
+    for (const field of fields) {
+      if (extractedData[field] && extractedData[field]! > 0) {
+        updates[field] = (data[field] || 0) + extractedData[field]!;
+      }
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      updateData(updates);
+    }
+  };
   
   return (
     <div className="max-w-xl">
@@ -26,6 +42,11 @@ export function InvestmentsStep({ data, updateData }: InvestmentsStepProps) {
       />
       
       <div className="space-y-8">
+        <DocumentUpload
+          onDataExtracted={handleDataExtracted}
+          label="Upload Brokerage Statement"
+          description="Upload a brokerage statement to auto-fill your investment values"
+        />
         <div className="space-y-4">
           <h3 className="font-semibold text-foreground">Active Investments (Trading)</h3>
           
