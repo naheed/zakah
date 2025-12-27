@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
+import { usePresence } from "@/hooks/usePresence";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { NisabStep } from "./steps/NisabStep";
 import { HawlStep } from "./steps/HawlStep";
@@ -27,6 +28,7 @@ import { ShareDrawer } from "./ShareDrawer";
 import { DocumentsManager } from "./DocumentsManager";
 import { UserMenu } from "./UserMenu";
 import { SaveCalculationDialog } from "./SaveCalculationDialog";
+import { PresenceIndicator } from "./PresenceIndicator";
 import { Menu, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
@@ -100,7 +102,9 @@ export function ZakatWizard() {
 
   const [calculationName, setCalculationName] = useState<string | undefined>();
   const [savedCalculationId, setSavedCalculationId] = useState<string | undefined>();
-  
+
+  // Presence tracking for collaborative editing
+  const { presentUsers, updatePresence } = usePresence(savedCalculationId);
   // Check for loaded calculation from saved calculations page
   useEffect(() => {
     const loadedCalc = localStorage.getItem('zakat-load-calculation');
@@ -149,6 +153,13 @@ export function ZakatWizard() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  // Update presence when step changes
+  useEffect(() => {
+    if (savedCalculationId && currentStep) {
+      updatePresence(currentStep.title);
+    }
+  }, [savedCalculationId, currentStep, updatePresence]);
 
   // Wrapper for adding documents that also updates form values
   const handleDocumentAdded = (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => {
@@ -279,6 +290,11 @@ export function ZakatWizard() {
                 <span className="sr-only">Share with spouse</span>
               </Button>
             </ShareDrawer>
+
+            {/* Presence Indicator - shows other users editing */}
+            {presentUsers.length > 0 && (
+              <PresenceIndicator users={presentUsers} />
+            )}
 
             {/* User Menu */}
             <UserMenu />

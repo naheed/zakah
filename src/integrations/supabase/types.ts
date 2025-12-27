@@ -88,6 +88,7 @@ export type Database = {
           name: string
           updated_at: string
           user_id: string
+          version: number
           year_type: string
           year_value: number
           zakat_due: number | null
@@ -100,6 +101,7 @@ export type Database = {
           name: string
           updated_at?: string
           user_id: string
+          version?: number
           year_type: string
           year_value: number
           zakat_due?: number | null
@@ -112,6 +114,7 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+          version?: number
           year_type?: string
           year_value?: number
           zakat_due?: number | null
@@ -124,6 +127,22 @@ export type Database = {
     }
     Functions: {
       is_share_recipient: { Args: { share_id: string }; Returns: boolean }
+      update_calculation_with_version: {
+        Args: {
+          p_expected_version: number
+          p_form_data: Json
+          p_id: string
+          p_is_above_nisab: boolean
+          p_name: string
+          p_user_id: string
+          p_zakat_due: number
+        }
+        Returns: {
+          current_data: Json
+          new_version: number
+          success: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

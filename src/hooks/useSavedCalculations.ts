@@ -14,6 +14,7 @@ export interface SavedCalculation {
   is_above_nisab: boolean;
   created_at: string;
   updated_at: string;
+  version: number;
 }
 
 export function useSavedCalculations() {
@@ -48,6 +49,7 @@ export function useSavedCalculations() {
         ...calc,
         year_type: calc.year_type as 'lunar' | 'gregorian',
         form_data: calc.form_data as unknown as ZakatFormData,
+        version: (calc as { version?: number }).version ?? 1,
       }));
       setCalculations(typedData);
     }
