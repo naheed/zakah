@@ -1,7 +1,7 @@
 import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
 import { investmentsContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "../QuestionLayout";
-import { CurrencyInput } from "../CurrencyInput";
+import { CurrencyInput, getDocumentContributionsForField } from "../CurrencyInput";
 import { DocumentUpload } from "../DocumentUpload";
 import { StepDocumentsDisplay } from "../DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
@@ -22,6 +22,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
     : data.passiveInvestmentsValue * 0.30;
   
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
+  const isHousehold = data.isHousehold;
 
   const handleDataExtracted = (extractedData: Partial<ZakatFormData>) => {
     const updates: Partial<ZakatFormData> = {};
@@ -40,6 +41,14 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
   
   return (
     <QuestionLayout content={investmentsContent}>
+      {isHousehold && (
+        <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+          <p className="text-sm text-foreground">
+            <span className="font-medium">Household Mode:</span> Include investment accounts for yourself, spouse, and children.
+          </p>
+        </div>
+      )}
+
       <StepDocumentsDisplay documents={uploadedDocuments} stepId="investments" onRemoveDocument={onRemoveDocument} />
       
       <DocumentUpload
@@ -54,8 +63,12 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
         <CurrencyInput
           label="Stocks held for trading"
           description="Short-term holdings (<365 days) for capital gain. Include brokerage cash."
+          householdDescription="Combined short-term holdings for all family members"
+          isHousehold={isHousehold}
           value={data.activeInvestments}
           onChange={(value) => updateData({ activeInvestments: value })}
+          fieldName="activeInvestments"
+          documentContributions={getDocumentContributionsForField(uploadedDocuments, 'activeInvestments')}
         />
       </div>
       
@@ -64,8 +77,12 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
         <CurrencyInput
           label="Stocks held long-term"
           description="Buy-and-hold investments (>365 days)"
+          householdDescription="Combined long-term investments for all family members"
+          isHousehold={isHousehold}
           value={data.passiveInvestmentsValue}
           onChange={(value) => updateData({ passiveInvestmentsValue: value })}
+          fieldName="passiveInvestmentsValue"
+          documentContributions={getDocumentContributionsForField(uploadedDocuments, 'passiveInvestmentsValue')}
         />
         
         {data.passiveInvestmentsValue > 0 && (
@@ -86,8 +103,12 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
         <CurrencyInput
           label="Dividends Received"
           description="Total dividends this year (don't double-count if in checking/savings)"
+          householdDescription="Combined dividends for all family members"
+          isHousehold={isHousehold}
           value={data.dividends}
           onChange={(value) => updateData({ dividends: value })}
+          fieldName="dividends"
+          documentContributions={getDocumentContributionsForField(uploadedDocuments, 'dividends')}
         />
         
         <div className="space-y-2">

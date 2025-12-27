@@ -19,6 +19,7 @@ export interface ZakatFormData {
   calendarType: CalendarType;
   nisabStandard: NisabStandard;
   calculationMode: CalculationMode;
+  isHousehold: boolean; // Whether calculating for household or just self
   
   // Personal Info
   email: string;
@@ -110,6 +111,7 @@ export const defaultFormData: ZakatFormData = {
   calendarType: 'lunar',
   nisabStandard: 'silver',
   calculationMode: 'optimized',
+  isHousehold: false,
   email: '',
   age: 30,
   estimatedTaxRate: 0.25,
