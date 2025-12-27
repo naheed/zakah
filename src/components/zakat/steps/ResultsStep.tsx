@@ -6,6 +6,7 @@ import { CheckCircle, AlertCircle, Download, Mail, RotateCcw, Settings2 } from "
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { generateZakatPDF } from "@/lib/generatePDF";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -30,11 +31,13 @@ interface ResultsStepProps {
       exemptAssets: number;
     };
   };
+  calculationName?: string;
 }
 
-export function ResultsStep({ data, updateData, calculations }: ResultsStepProps) {
+export function ResultsStep({ data, updateData, calculations, calculationName }: ResultsStepProps) {
   const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { currency } = data;
   const {
     totalAssets,
@@ -53,16 +56,29 @@ export function ResultsStep({ data, updateData, calculations }: ResultsStepProps
   
   const handleEmailReceipt = () => {
     toast({
-      title: "Receipt Sent",
-      description: `A copy of your Zakat calculation has been sent to ${data.email || 'your email'}.`,
+      title: "Coming Soon",
+      description: "Email functionality will be available soon. Please download the PDF for now.",
     });
   };
   
   const handleDownload = () => {
-    toast({
-      title: "Download Started",
-      description: "Your Zakat calculation PDF is being generated.",
-    });
+    setIsGeneratingPDF(true);
+    try {
+      generateZakatPDF(data, calculations, calculationName);
+      toast({
+        title: "PDF Downloaded",
+        description: "Your Zakat calculation report has been downloaded.",
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Download Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
   
   const handleReset = () => {
@@ -239,9 +255,10 @@ export function ResultsStep({ data, updateData, calculations }: ResultsStepProps
             variant="outline" 
             className="flex-1 gap-2"
             onClick={handleDownload}
+            disabled={isGeneratingPDF}
           >
             <Download className="w-4 h-4" />
-            Download PDF
+            {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
           <Button 
             variant="outline" 
