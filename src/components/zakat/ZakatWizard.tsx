@@ -24,8 +24,10 @@ import { StepNavigation } from "./StepNavigation";
 import { ContinueSessionDialog } from "./ContinueSessionDialog";
 import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
 import { ShareDrawer } from "./ShareDrawer";
+import { DocumentsManager } from "./DocumentsManager";
 import { Menu, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UploadedDocument } from "@/lib/documentTypes";
 
 type StepId = 
   | 'welcome'
@@ -84,6 +86,9 @@ export function ZakatWizard() {
     stepIndex: currentStepIndex,
     setStepIndex: setCurrentStepIndex,
     updateFormData,
+    uploadedDocuments,
+    addDocument,
+    removeDocument,
     hasExistingSession,
     lastUpdated,
     continueSession,
@@ -118,6 +123,11 @@ export function ZakatWizard() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  // Wrapper for adding documents that also updates form values
+  const handleDocumentAdded = (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => {
+    addDocument(doc);
+  };
   
   const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
@@ -131,6 +141,15 @@ export function ZakatWizard() {
   }
   
   const renderStep = () => {
+    // Common props for asset steps
+    const assetStepProps = {
+      data: formData,
+      updateData: updateFormData,
+      uploadedDocuments,
+      onDocumentAdded: handleDocumentAdded,
+      onRemoveDocument: removeDocument,
+    };
+
     switch (currentStep.id) {
       case 'welcome':
         return <WelcomeStep onNext={goToNext} />;
@@ -145,29 +164,29 @@ export function ZakatWizard() {
       case 'email':
         return <EmailStep data={formData} updateData={updateFormData} />;
       case 'liquid-assets':
-        return <LiquidAssetsStep data={formData} updateData={updateFormData} />;
+        return <LiquidAssetsStep {...assetStepProps} />;
       case 'precious-metals':
-        return <PreciousMetalsStep data={formData} updateData={updateFormData} />;
+        return <PreciousMetalsStep {...assetStepProps} />;
       case 'crypto':
-        return <CryptoStep data={formData} updateData={updateFormData} />;
+        return <CryptoStep {...assetStepProps} />;
       case 'investments':
-        return <InvestmentsStep data={formData} updateData={updateFormData} />;
+        return <InvestmentsStep {...assetStepProps} />;
       case 'retirement':
-        return <RetirementStep data={formData} updateData={updateFormData} />;
+        return <RetirementStep {...assetStepProps} />;
       case 'trusts':
-        return <TrustsStep data={formData} updateData={updateFormData} />;
+        return <TrustsStep {...assetStepProps} />;
       case 'real-estate':
-        return <RealEstateStep data={formData} updateData={updateFormData} />;
+        return <RealEstateStep {...assetStepProps} />;
       case 'business':
-        return <BusinessStep data={formData} updateData={updateFormData} />;
+        return <BusinessStep {...assetStepProps} />;
       case 'illiquid-assets':
-        return <IlliquidAssetsStep data={formData} updateData={updateFormData} />;
+        return <IlliquidAssetsStep {...assetStepProps} />;
       case 'debt-owed-to-you':
-        return <DebtOwedToYouStep data={formData} updateData={updateFormData} />;
+        return <DebtOwedToYouStep {...assetStepProps} />;
       case 'liabilities':
-        return <LiabilitiesStep data={formData} updateData={updateFormData} />;
+        return <LiabilitiesStep {...assetStepProps} />;
       case 'tax':
-        return <TaxStep data={formData} updateData={updateFormData} />;
+        return <TaxStep {...assetStepProps} />;
       case 'results':
         return <ResultsStep data={formData} updateData={updateFormData} calculations={calculations} />;
       default:
@@ -209,6 +228,12 @@ export function ZakatWizard() {
                 section={currentStep.section}
               />
             </div>
+
+            {/* Documents Manager */}
+            <DocumentsManager 
+              documents={uploadedDocuments} 
+              onRemoveDocument={removeDocument} 
+            />
 
             {/* Share Button */}
             <ShareDrawer formData={formData} zakatDue={calculations.zakatDue}>

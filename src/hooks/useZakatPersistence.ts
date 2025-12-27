@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ZakatFormData, defaultFormData } from '@/lib/zakatCalculations';
+import { UploadedDocument, generateDocumentId } from '@/lib/documentTypes';
 
 const STORAGE_KEY = 'zakat-calculator-data';
-const STEP_KEY = 'zakat-calculator-step';
 
 interface PersistedData {
   formData: ZakatFormData;
   stepIndex: number;
   lastUpdated: string;
+  uploadedDocuments: UploadedDocument[];
 }
 
 export function useZakatPersistence() {
   const [formData, setFormData] = useState<ZakatFormData>(defaultFormData);
   const [stepIndex, setStepIndex] = useState(0);
+  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [hasExistingSession, setHasExistingSession] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -30,6 +32,7 @@ export function useZakatPersistence() {
         }
         setFormData(parsed.formData);
         setStepIndex(parsed.stepIndex);
+        setUploadedDocuments(parsed.uploadedDocuments || []);
       }
     } catch (e) {
       console.error('Failed to load saved data:', e);
@@ -45,6 +48,7 @@ export function useZakatPersistence() {
       formData,
       stepIndex,
       lastUpdated: new Date().toISOString(),
+      uploadedDocuments,
     };
     
     try {
@@ -52,10 +56,24 @@ export function useZakatPersistence() {
     } catch (e) {
       console.error('Failed to save data:', e);
     }
-  }, [formData, stepIndex, isLoaded]);
+  }, [formData, stepIndex, uploadedDocuments, isLoaded]);
 
   const updateFormData = useCallback((updates: Partial<ZakatFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const addDocument = useCallback((doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => {
+    const newDoc: UploadedDocument = {
+      ...doc,
+      id: generateDocumentId(),
+      uploadedAt: new Date().toISOString(),
+    };
+    setUploadedDocuments(prev => [...prev, newDoc]);
+    return newDoc;
+  }, []);
+
+  const removeDocument = useCallback((docId: string) => {
+    setUploadedDocuments(prev => prev.filter(d => d.id !== docId));
   }, []);
 
   const continueSession = useCallback(() => {
@@ -66,6 +84,7 @@ export function useZakatPersistence() {
   const startFresh = useCallback(() => {
     setFormData(defaultFormData);
     setStepIndex(0);
+    setUploadedDocuments([]);
     setHasExistingSession(false);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
@@ -73,6 +92,7 @@ export function useZakatPersistence() {
   const resetCalculator = useCallback(() => {
     setFormData(defaultFormData);
     setStepIndex(0);
+    setUploadedDocuments([]);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
@@ -81,6 +101,9 @@ export function useZakatPersistence() {
     stepIndex,
     setStepIndex,
     updateFormData,
+    uploadedDocuments,
+    addDocument,
+    removeDocument,
     hasExistingSession,
     lastUpdated,
     continueSession,
