@@ -4,12 +4,13 @@ import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useState, useRef } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { ZakatSankeyChart, SankeyChartData } from "../ZakatSankeyChart";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -150,10 +151,10 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
         </div>
         )}
         
-        {/* Asset Breakdown Chart */}
+        {/* Sankey Flow Chart */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="p-4 border-b border-border bg-accent flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Asset Breakdown</h3>
+            <h3 className="font-semibold text-foreground">Asset Flow to Zakat</h3>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -178,32 +179,46 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
             </div>
           )}
           
-          {/* Donut Chart */}
-          <div className="p-4">
-            <AssetDonutChart breakdown={assetBreakdown} currency={currency} />
+          {/* Sankey Chart */}
+          <div className="p-4 flex justify-center">
+            <ZakatSankeyChart 
+              data={{
+                liquidAssets: assetBreakdown.liquidAssets,
+                investments: assetBreakdown.investments,
+                retirement: assetBreakdown.retirement,
+                realEstate: assetBreakdown.realEstate,
+                business: assetBreakdown.business,
+                otherAssets: assetBreakdown.otherAssets,
+                totalLiabilities,
+                zakatDue,
+                netZakatableWealth,
+                zakatRate,
+              }}
+              currency={currency}
+              width={480}
+              height={280}
+            />
           </div>
           
-          <div className="divide-y divide-border border-t border-border">
+          {/* Legend */}
+          <div className="px-4 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
             {assetBreakdown.liquidAssets > 0 && (
-              <BreakdownRow label="Liquid Assets" value={formatCurrency(assetBreakdown.liquidAssets, currency)} color="hsl(var(--chart-1))" />
+              <LegendItem label="Cash & Liquid" value={formatCurrency(assetBreakdown.liquidAssets, currency)} color="hsl(var(--chart-1))" />
             )}
             {assetBreakdown.investments > 0 && (
-              <BreakdownRow label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} color="hsl(var(--chart-2))" />
+              <LegendItem label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} color="hsl(var(--chart-2))" />
             )}
             {assetBreakdown.retirement > 0 && (
-              <BreakdownRow label="Retirement Accounts" value={formatCurrency(assetBreakdown.retirement, currency)} color="hsl(var(--chart-3))" />
+              <LegendItem label="Retirement" value={formatCurrency(assetBreakdown.retirement, currency)} color="hsl(var(--chart-3))" />
             )}
             {assetBreakdown.realEstate > 0 && (
-              <BreakdownRow label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} color="hsl(var(--chart-4))" />
+              <LegendItem label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} color="hsl(var(--chart-4))" />
             )}
             {assetBreakdown.business > 0 && (
-              <BreakdownRow label="Business Assets" value={formatCurrency(assetBreakdown.business, currency)} color="hsl(var(--chart-5))" />
+              <LegendItem label="Business" value={formatCurrency(assetBreakdown.business, currency)} color="hsl(var(--chart-5))" />
             )}
             {assetBreakdown.otherAssets > 0 && (
-              <BreakdownRow label="Other Assets" value={formatCurrency(assetBreakdown.otherAssets, currency)} color="hsl(var(--primary))" />
-            )}
-            {assetBreakdown.exemptAssets > 0 && (
-              <BreakdownRow label="Exempt Assets" value={formatCurrency(assetBreakdown.exemptAssets, currency)} variant="muted" />
+              <LegendItem label="Other" value={formatCurrency(assetBreakdown.otherAssets, currency)} color="hsl(var(--primary))" />
             )}
           </div>
         </div>
@@ -346,6 +361,16 @@ function BreakdownRow({
       <span className={`font-mono ${bold ? 'font-bold text-lg' : ''} ${valueColors[variant]}`}>
         {value}
       </span>
+    </div>
+  );
+}
+
+function LegendItem({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+      <span className="text-muted-foreground truncate">{label}</span>
+      <span className="font-medium text-foreground ml-auto">{value}</span>
     </div>
   );
 }
