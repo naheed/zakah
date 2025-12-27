@@ -169,6 +169,7 @@ export const fieldDisplayNames: Record<string, string> = {
   silverValue: "Silver",
   revocableTrustValue: "Revocable Trust",
   irrevocableTrustValue: "Irrevocable Trust",
+  clatValue: "CLAT",
   realEstateForSale: "Real Estate",
   rentalPropertyIncome: "Rental Income",
   businessCashAndReceivables: "Business Cash",
@@ -177,6 +178,15 @@ export const fieldDisplayNames: Record<string, string> = {
   livestockValue: "Livestock",
   goodDebtOwedToYou: "Good Debt",
   badDebtRecovered: "Recovered Debt",
+  // Liabilities
+  monthlyLivingExpenses: "Living Expenses",
+  monthlyMortgage: "Mortgage Payment",
+  insuranceExpenses: "Insurance",
+  creditCardBalance: "Credit Card Balance",
+  unpaidBills: "Unpaid Bills",
+  studentLoansDue: "Student Loans Due",
+  propertyTax: "Property Tax",
+  lateTaxPayments: "Late Tax Payments",
 };
 
 // Generate a unique ID for documents

@@ -17,7 +17,9 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
       uploadedDocuments={uploadedDocuments}
       onDocumentAdded={onDocumentAdded}
       onRemoveDocument={onRemoveDocument}
-      showUpload={false}
+      showUpload={true}
+      uploadLabel="Upload Financial Statement"
+      uploadDescription="Credit card, mortgage, or loan statements"
       householdReminder="Include expenses and liabilities for your entire household."
     >
       <CurrencyInput
