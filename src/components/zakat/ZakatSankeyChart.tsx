@@ -572,7 +572,7 @@ const LegendCard = ({
   );
 };
 
-// Mini version for landing page mock
+// Mini version for landing page mock - clean and simple
 export function ZakatSankeyMock() {
   const mockData: SankeyChartData = {
     liquidAssets: 24500,
@@ -588,13 +588,13 @@ export function ZakatSankeyMock() {
   };
   
   return (
-    <div className="w-full">
+    <div className="w-full flex justify-center">
       <ZakatSankeyChart 
         data={mockData} 
         currency="USD" 
-        width={340} 
-        height={220}
-        showLabels={true}
+        width={320} 
+        height={200}
+        showLabels={false}
         showFullscreenButton={false}
       />
     </div>

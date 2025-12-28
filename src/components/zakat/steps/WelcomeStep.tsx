@@ -10,32 +10,32 @@ interface WelcomeStepProps {
 
 function MockReportPreview() {
   return (
-    <div className="relative w-full max-w-sm mx-auto">
+    <div className="relative w-full max-w-md mx-auto">
       {/* Glassmorphic card effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl blur-xl" />
       
-      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 shadow-lg">
+      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-lg">
         {/* Header */}
-        <div className="text-center mb-3">
+        <div className="text-center mb-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Your Zakat Due</p>
-          <p className="text-3xl font-bold text-primary">$2,847</p>
-          <p className="text-xs text-muted-foreground mt-1">2.5% of zakatable wealth</p>
+          <p className="text-4xl font-bold text-primary">$3,346</p>
+          <p className="text-sm text-muted-foreground mt-1">2.5% of zakatable wealth</p>
         </div>
 
-        {/* Sankey Chart */}
-        <div className="my-2 -mx-2">
+        {/* Sankey Chart - centered */}
+        <div className="flex justify-center items-center py-4">
           <ZakatSankeyMock />
         </div>
 
         {/* Summary row */}
-        <div className="pt-3 border-t border-border flex justify-between text-sm">
-          <span className="text-muted-foreground">Net Zakatable</span>
+        <div className="pt-4 border-t border-border flex justify-between text-sm">
+          <span className="text-muted-foreground">Net Zakatable Wealth</span>
           <span className="font-semibold text-foreground">$133,850</span>
         </div>
 
         {/* Overlay hint */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent rounded-2xl flex items-end justify-center pb-4 pointer-events-none">
-          <p className="text-xs text-muted-foreground">See your personalized report →</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent rounded-2xl flex items-end justify-center pb-6 pointer-events-none">
+          <p className="text-sm text-muted-foreground">See your personalized report →</p>
         </div>
       </div>
     </div>
