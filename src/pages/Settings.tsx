@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, FileText, Trash2, UserX, AlertTriangle } from "lucide-react";
+import { ArrowLeft, FileText, Trash2, UserX, ChevronDown, User, Users, Check } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { 
-  ZakatFormData, 
   calculateNisab, 
   formatCurrency, 
   SILVER_PRICE_PER_OUNCE, 
@@ -13,12 +12,17 @@ import {
   NisabStandard,
   CalendarType,
 } from "@/lib/zakatCalculations";
-import { UploadedDocumentCard } from "@/components/zakat/UploadedDocumentCard";
-import { User, Users, CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LearnMore } from "@/components/zakat/LearnMore";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,35 +34,36 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [calculationOpen, setCalculationOpen] = useState(true);
+  const [documentsOpen, setDocumentsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  
   const { 
     formData, 
     updateFormData, 
     uploadedDocuments, 
-    removeDocument 
   } = useZakatPersistence();
 
   const handleDeleteAllData = async () => {
     if (!user) return;
     setIsDeleting(true);
     try {
-      // Delete all shares first (due to foreign key)
       await supabase
         .from('zakat_calculation_shares')
         .delete()
         .eq('owner_id', user.id);
 
-      // Delete all calculations
       await supabase
         .from('zakat_calculations')
         .delete()
         .eq('user_id', user.id);
 
-      // Clear local encryption keys
       localStorage.removeItem('zakat_private_key');
       
       toast.success('All your data has been deleted');
@@ -75,28 +80,23 @@ export default function Settings() {
     if (!user) return;
     setIsDeleting(true);
     try {
-      // Delete all shares first
       await supabase
         .from('zakat_calculation_shares')
         .delete()
         .eq('owner_id', user.id);
 
-      // Delete all calculations
       await supabase
         .from('zakat_calculations')
         .delete()
         .eq('user_id', user.id);
 
-      // Delete profile
       await supabase
         .from('profiles')
         .delete()
         .eq('user_id', user.id);
 
-      // Clear local data
       localStorage.removeItem('zakat_private_key');
 
-      // Sign out and redirect
       await supabase.auth.signOut();
       toast.success('Your account and all data have been deleted');
       navigate('/');
@@ -137,273 +137,245 @@ export default function Settings() {
           </div>
         </div>
 
-        <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
-          {/* Nisab Standard Section */}
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Niṣāb Standard</h2>
-              <p className="text-sm text-muted-foreground">
-                The minimum threshold of wealth that makes Zakat obligatory
-              </p>
-            </div>
-            
-            <RadioGroup
-              value={formData.nisabStandard}
-              onValueChange={(value) => updateFormData({ nisabStandard: value as NisabStandard })}
-              className="space-y-3"
-            >
-              <label 
-                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
-                  formData.nisabStandard === 'silver' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <RadioGroupItem value="silver" id="silver" className="h-5 w-5" />
-                <div className="flex-1">
-                  <span className="font-medium text-foreground">Silver Standard</span>
-                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Recommended</span>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    595 grams of silver ≈ {formatCurrency(silverNisab, formData.currency)}
-                  </p>
-                </div>
-              </label>
-              
-              <label 
-                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
-                  formData.nisabStandard === 'gold' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <RadioGroupItem value="gold" id="gold" className="h-5 w-5" />
-                <div className="flex-1">
-                  <span className="font-medium text-foreground">Gold Standard</span>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    85 grams of gold ≈ {formatCurrency(goldNisab, formData.currency)}
-                  </p>
-                </div>
-              </label>
-            </RadioGroup>
-            
-            {/* Current Nisab Display */}
-            <div className="text-center p-6 bg-card border border-border rounded-xl">
-              <p className="text-sm text-muted-foreground mb-1">Your Niṣāb Threshold</p>
-              <p className="text-3xl font-bold text-primary">
-                {formatCurrency(currentNisab, formData.currency)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Based on current {formData.nisabStandard} prices
-              </p>
-            </div>
-          </section>
+        <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+          {/* Current Settings Summary */}
+          <div className="flex items-center gap-2 flex-wrap p-3 bg-card rounded-lg border border-border">
+            <span className="text-xs text-muted-foreground mr-1">Current:</span>
+            <Badge variant="secondary" className="text-xs">
+              {formData.nisabStandard === 'silver' ? '🥈 Silver' : '🥇 Gold'}
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              {formData.calendarType === 'lunar' ? '🌙 Lunar' : '☀️ Solar'}
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              {formData.isHousehold ? '👨‍👩‍👧 Household' : '👤 Individual'}
+            </Badge>
+            <span className="ml-auto text-xs text-muted-foreground">
+              Niṣāb: {formatCurrency(currentNisab, formData.currency)}
+            </span>
+          </div>
 
-          {/* Divider */}
-          <hr className="border-border" />
-
-          {/* Calendar Type Section */}
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Calendar Type</h2>
-              <p className="text-sm text-muted-foreground">
-                Choose which calendar year to use for your Zakat calculation
-              </p>
-            </div>
-            
-            <RadioGroup
-              value={formData.calendarType}
-              onValueChange={(value) => updateFormData({ calendarType: value as CalendarType })}
-              className="space-y-3"
-            >
-              <label 
-                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
-                  formData.calendarType === 'lunar' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <RadioGroupItem value="lunar" id="lunar" className="h-5 w-5" />
-                <div className="flex-1">
-                  <span className="font-medium text-foreground">Lunar Year (Islamic)</span>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    354 days • 2.5% Zakat rate
-                  </p>
-                </div>
-              </label>
-              
-              <label 
-                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
-                  formData.calendarType === 'solar' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <RadioGroupItem value="solar" id="solar" className="h-5 w-5" />
-                <div className="flex-1">
-                  <span className="font-medium text-foreground">Solar Year (Gregorian)</span>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    365 days • 2.577% Zakat rate (adjusted)
-                  </p>
-                </div>
-              </label>
-            </RadioGroup>
-            
-            {/* Selected Rate Display */}
-            <div className="text-center p-6 bg-card border border-border rounded-xl">
-              <p className="text-sm text-muted-foreground mb-1">Your Zakat Rate</p>
-              <p className="text-3xl font-bold text-primary">
-                {formData.calendarType === 'lunar' ? '2.5%' : '2.577%'}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {formData.calendarType === 'lunar' ? 'Traditional Islamic calendar' : 'Adjusted for longer year'}
-              </p>
-            </div>
-          </section>
-
-          {/* Divider */}
-          <hr className="border-border" />
-
-          {/* Household Mode Section */}
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Household Mode</h2>
-              <p className="text-sm text-muted-foreground">
-                Are you calculating Zakat for yourself alone or your entire household?
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => updateFormData({ isHousehold: false })}
-                className={`w-full flex items-center gap-4 p-4 min-h-[64px] rounded-lg border-2 transition-all text-left ${
-                  !formData.isHousehold 
-                    ? "border-primary bg-primary/5" 
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                  !formData.isHousehold ? "bg-primary/10" : "bg-accent"
-                }`}>
-                  <User className={`w-5 h-5 ${!formData.isHousehold ? "text-primary" : "text-muted-foreground"}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground">Just myself</p>
-                  <p className="text-sm text-muted-foreground">Calculate Zakat on my assets only</p>
-                </div>
-                {!formData.isHousehold && (
-                  <CheckCircle className="w-5 h-5 text-primary shrink-0" />
-                )}
+          {/* Calculation Settings Group */}
+          <Collapsible open={calculationOpen} onOpenChange={setCalculationOpen}>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                <span className="font-medium text-foreground">Calculation Settings</span>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", calculationOpen && "rotate-180")} />
               </button>
-              
-              <button
-                type="button"
-                onClick={() => updateFormData({ isHousehold: true })}
-                className={`w-full flex items-center gap-4 p-4 min-h-[64px] rounded-lg border-2 transition-all text-left ${
-                  formData.isHousehold 
-                    ? "border-primary bg-primary/5" 
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                  formData.isHousehold ? "bg-primary/10" : "bg-accent"
-                }`}>
-                  <Users className={`w-5 h-5 ${formData.isHousehold ? "text-primary" : "text-muted-foreground"}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 p-4 bg-card rounded-lg border border-border space-y-5">
+                {/* Nisab Standard */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-foreground">Niṣāb Standard</h3>
+                  <RadioGroup
+                    value={formData.nisabStandard}
+                    onValueChange={(value) => updateFormData({ nisabStandard: value as NisabStandard })}
+                    className="space-y-2"
+                  >
+                    <label className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                      formData.nisabStandard === 'silver' 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50"
+                    )}>
+                      <RadioGroupItem value="silver" className="h-4 w-4" />
+                      <div className="flex-1 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground">Silver</span>
+                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">Recommended</span>
+                        </div>
+                        {formData.nisabStandard === 'silver' && (
+                          <span className="text-xs text-primary flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            {formatCurrency(silverNisab, formData.currency)}
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                    
+                    <label className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                      formData.nisabStandard === 'gold' 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50"
+                    )}>
+                      <RadioGroupItem value="gold" className="h-4 w-4" />
+                      <div className="flex-1 flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">Gold</span>
+                        {formData.nisabStandard === 'gold' && (
+                          <span className="text-xs text-primary flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            {formatCurrency(goldNisab, formData.currency)}
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                  </RadioGroup>
+                  
+                  <LearnMore title="Why Silver vs Gold?">
+                    <p>The <strong>silver standard</strong> (595g) results in a lower threshold, meaning more people qualify to pay Zakat. This is the more cautious opinion, recommended by most scholars including Sheikh Joe Bradford.</p>
+                    <p className="mt-2">The <strong>gold standard</strong> (85g) results in a higher threshold. Some scholars permit this, especially in regions where gold is the primary measure of wealth.</p>
+                  </LearnMore>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground">My household</p>
-                  <p className="text-sm text-muted-foreground">Include spouse and/or children's assets</p>
+
+                {/* Calendar Type */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-foreground">Calendar Type</h3>
+                  <RadioGroup
+                    value={formData.calendarType}
+                    onValueChange={(value) => updateFormData({ calendarType: value as CalendarType })}
+                    className="space-y-2"
+                  >
+                    <label className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                      formData.calendarType === 'lunar' 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50"
+                    )}>
+                      <RadioGroupItem value="lunar" className="h-4 w-4" />
+                      <div className="flex-1 flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">Lunar (Islamic)</span>
+                        {formData.calendarType === 'lunar' && (
+                          <span className="text-xs text-primary flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            2.5% rate
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                    
+                    <label className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                      formData.calendarType === 'solar' 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50"
+                    )}>
+                      <RadioGroupItem value="solar" className="h-4 w-4" />
+                      <div className="flex-1 flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">Solar (Gregorian)</span>
+                        {formData.calendarType === 'solar' && (
+                          <span className="text-xs text-primary flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            2.577% rate
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                  </RadioGroup>
+                  
+                  <LearnMore title="Lunar vs Solar calendar">
+                    <p>The <strong>lunar year</strong> (354 days) is the traditional Islamic calendar used for Zakat. The standard 2.5% rate applies.</p>
+                    <p className="mt-2">If you track your finances by <strong>solar year</strong> (365 days), the rate is adjusted to 2.577% to account for the extra 11 days.</p>
+                  </LearnMore>
                 </div>
-                {formData.isHousehold && (
-                  <CheckCircle className="w-5 h-5 text-primary shrink-0" />
-                )}
+
+                {/* Household Mode */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-foreground">Who are you calculating for?</h3>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateFormData({ isHousehold: false })}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all",
+                        !formData.isHousehold 
+                          ? "border-primary bg-primary/5" 
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <User className={cn("w-4 h-4", !formData.isHousehold ? "text-primary" : "text-muted-foreground")} />
+                      <span className={cn("text-sm font-medium", !formData.isHousehold ? "text-primary" : "text-foreground")}>Just me</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => updateFormData({ isHousehold: true })}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all",
+                        formData.isHousehold 
+                          ? "border-primary bg-primary/5" 
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <Users className={cn("w-4 h-4", formData.isHousehold ? "text-primary" : "text-muted-foreground")} />
+                      <span className={cn("text-sm font-medium", formData.isHousehold ? "text-primary" : "text-foreground")}>Household</span>
+                    </button>
+                  </div>
+                  
+                  {formData.isHousehold && (
+                    <p className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
+                      Include combined assets of spouse and children in your calculation.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Documents Group */}
+          <Collapsible open={documentsOpen} onOpenChange={setDocumentsOpen}>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-foreground">Documents</span>
+                  {uploadedDocuments.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">{uploadedDocuments.length}</Badge>
+                  )}
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", documentsOpen && "rotate-180")} />
               </button>
-            </div>
-
-            {formData.isHousehold && (
-              <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                <p className="text-sm text-foreground font-medium mb-1">Household Mode Active</p>
-                <p className="text-sm text-muted-foreground">
-                  In asset questions, include the combined assets of your spouse and children.
-                </p>
-              </div>
-            )}
-          </section>
-
-          {/* Divider */}
-          <hr className="border-border" />
-
-          {/* Documents Section */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Uploaded Documents</h2>
-                <p className="text-sm text-muted-foreground">
-                  Financial documents with extracted data
-                </p>
-              </div>
-              {uploadedDocuments.length > 0 && (
-                <Link to="/documents">
-                  <Button variant="outline" size="sm" className="gap-2">
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 p-4 bg-card rounded-lg border border-border">
+                {uploadedDocuments.length > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-foreground">{uploadedDocuments.length} document{uploadedDocuments.length !== 1 ? 's' : ''} uploaded</span>
+                    </div>
+                    <Link to="/documents">
+                      <Button variant="ghost" size="sm" className="text-xs">
+                        View All →
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-muted-foreground">
                     <FileText className="w-4 h-4" />
-                    View All
-                  </Button>
-                </Link>
-              )}
-            </div>
-            
-            {uploadedDocuments.length > 0 ? (
-              <div className="space-y-3">
-                {uploadedDocuments.map((doc) => (
-                  <UploadedDocumentCard
-                    key={doc.id}
-                    document={doc}
-                    onRemove={removeDocument}
-                  />
-                ))}
+                    <span className="text-sm">No documents uploaded. Upload during calculation to auto-fill values.</span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center p-8 bg-accent/50 rounded-xl border border-border">
-                <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  No documents uploaded yet. You can upload financial statements during the calculation process to auto-fill asset values.
-                </p>
-              </div>
-            )}
-          </section>
+            </CollapsibleContent>
+          </Collapsible>
 
-          {/* Danger Zone - Only for signed-in users */}
+          {/* Account Group - Only for signed-in users */}
           {user && (
-            <>
-              <hr className="border-border" />
-              
-              <section className="space-y-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-destructive flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5" />
-                    Danger Zone
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Irreversible actions that affect your data
-                  </p>
-                </div>
-                
-                <div className="space-y-3 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+            <Collapsible open={accountOpen} onOpenChange={setAccountOpen}>
+              <CollapsibleTrigger asChild>
+                <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                  <span className="font-medium text-foreground">Account</span>
+                  <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", accountOpen && "rotate-180")} />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-2 p-4 bg-card rounded-lg border border-destructive/30 space-y-3">
+                  <p className="text-xs text-muted-foreground">These actions are irreversible.</p>
+                  
                   {/* Delete All Data */}
-                  <div className="flex items-center justify-between gap-4 p-4 bg-background rounded-lg border border-border">
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground flex items-center gap-2">
-                        <Trash2 className="w-4 h-4" />
-                        Delete All Data
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Remove all saved calculations and shares. Your account will remain active.
-                      </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Trash2 className="w-4 h-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Delete all data</p>
+                        <p className="text-xs text-muted-foreground">Calculations & shares</p>
+                      </div>
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={isDeleting}>
-                          Delete Data
+                        <Button variant="outline" size="sm" className="text-xs border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={isDeleting}>
+                          Delete
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -429,20 +401,18 @@ export default function Settings() {
                   </div>
 
                   {/* Delete Account */}
-                  <div className="flex items-center justify-between gap-4 p-4 bg-background rounded-lg border border-border">
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground flex items-center gap-2">
-                        <UserX className="w-4 h-4" />
-                        Delete Account
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Permanently delete your account and all associated data.
-                      </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <UserX className="w-4 h-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Delete account</p>
+                        <p className="text-xs text-muted-foreground">Account & all data</p>
+                      </div>
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={isDeleting}>
-                          Delete Account
+                        <Button variant="destructive" size="sm" className="text-xs" disabled={isDeleting}>
+                          Delete
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -467,8 +437,8 @@ export default function Settings() {
                     </AlertDialog>
                   </div>
                 </div>
-              </section>
-            </>
+              </CollapsibleContent>
+            </Collapsible>
           )}
         </main>
       </div>
