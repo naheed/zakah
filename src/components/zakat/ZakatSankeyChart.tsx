@@ -166,55 +166,66 @@ export function ZakatSankeyChart({
     // Build links
     const links: FlowLink[] = [];
     let sourceYOffset = 0;
-    let zakatYOffset = 0;
-    
+
+    // Track where each asset's left-flow enters the center bar (top edge),
+    // so the right-flow can start from the same top edge (not centered).
+    const centerFlowTopByAsset: Record<string, number> = {};
+
     // Links from assets to center (Net Zakatable)
-    leftNodes.forEach(node => {
+    leftNodes.forEach((node) => {
       const linkHeight = (node.value / totalAssets) * chartHeight;
+      const targetY = 30 + sourceYOffset + linkHeight / 2;
+
+      // Match the rendered thickness for left-side links (see render linkWidth calc)
+      const leftLinkWidth = Math.max(4, (node.value / totalAssets) * (height - 80));
+      centerFlowTopByAsset[node.name] = targetY - leftLinkWidth / 2;
+
       links.push({
         source: node,
         target: centerNode,
         value: node.value,
         sourceY: node.y + node.height / 2,
-        targetY: 30 + sourceYOffset + linkHeight / 2,
+        targetY,
         color: node.color,
         originalAssetName: node.name,
       });
       sourceYOffset += linkHeight;
     });
-    
-    // Links from center to zakat - COLORED by each asset's contribution
-    // Align right-side flows to the TOP of each asset's segment on the center bar
+
+    // Links from center to zakat - colored by each asset's contribution
     if (zakatNode) {
       let centerYOffset = 0;
       let zakatYOffset = 0;
       const totalZakatHeight = zakatNode.height;
-      
-      leftNodes.forEach(node => {
+
+      leftNodes.forEach((node) => {
         const zakatContribution = assetZakatContributions[node.name] || 0;
         if (zakatContribution > 0) {
           const proportionOfZakat = zakatContribution / data.zakatDue;
-          const linkHeightOnZakat = proportionOfZakat * totalZakatHeight;
-          
-          // How much of the center bar does this asset occupy?
+
+          // Match the rendered thickness for right-side links (see render linkWidth calc)
+          const rightLinkWidth = Math.max(3, proportionOfZakat * totalZakatHeight);
+
+          // Fallback keeps ordering consistent if needed
           const assetProportion = node.value / totalAssets;
           const assetPortionHeight = assetProportion * chartHeight;
-          
-          // Start the right-flow from the TOP of this asset's section (not the center)
-          const centerBarYForAsset = 30 + centerYOffset;
-          
+
+          // Align top edge of right-flow to top edge of the left-flow at the center bar
+          const sourceTop = centerFlowTopByAsset[node.name] ?? (30 + centerYOffset);
+          const centerBarYForAsset = sourceTop + rightLinkWidth / 2;
+
           links.push({
             source: centerNode,
             target: zakatNode,
             value: zakatContribution,
             sourceY: centerBarYForAsset,
-            targetY: zakatNode.y + zakatYOffset + linkHeightOnZakat / 2,
+            targetY: zakatNode.y + zakatYOffset + rightLinkWidth / 2,
             color: node.color,
             originalAssetName: node.name,
           });
-          
+
           centerYOffset += assetPortionHeight;
-          zakatYOffset += linkHeightOnZakat;
+          zakatYOffset += rightLinkWidth;
         }
       });
     }
