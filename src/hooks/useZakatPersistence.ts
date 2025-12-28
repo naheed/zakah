@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ZakatFormData, defaultFormData } from '@/lib/zakatCalculations';
-import { UploadedDocument, generateDocumentId } from '@/lib/documentTypes';
+import { UploadedDocument, generateDocumentId, sanitizeDocumentForStorage } from '@/lib/documentTypes';
+import { encryptSession, decryptSession, isSessionEncrypted, deobfuscateLegacy } from '@/lib/sessionEncryption';
 
 const STORAGE_KEY = 'zakat-calculator-data';
 
@@ -11,21 +12,6 @@ interface PersistedData {
   uploadedDocuments: UploadedDocument[];
 }
 
-// Simple obfuscation for localStorage (not true encryption, but adds a layer)
-// True encryption would require a key, which defeats the purpose for local-only data
-function obfuscate(data: string): string {
-  return btoa(encodeURIComponent(data));
-}
-
-function deobfuscate(data: string): string {
-  try {
-    return decodeURIComponent(atob(data));
-  } catch {
-    // Fallback for non-obfuscated legacy data
-    return data;
-  }
-}
-
 export function useZakatPersistence() {
   const [formData, setFormData] = useState<ZakatFormData>(defaultFormData);
   const [stepIndex, setStepIndex] = useState(0);
@@ -34,54 +20,77 @@ export function useZakatPersistence() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount (async due to encryption)
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        // Try to deobfuscate, fall back to raw parse for legacy data
-        let parsed: PersistedData;
-        try {
-          const deobfuscated = deobfuscate(stored);
-          parsed = JSON.parse(deobfuscated);
-        } catch {
-          // Legacy unobfuscated data
-          parsed = JSON.parse(stored);
+    async function loadData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          setIsLoaded(true);
+          return;
         }
-        
-        // Check if there's meaningful progress (beyond step 0)
-        if (parsed.stepIndex > 0) {
-          setHasExistingSession(true);
-          setLastUpdated(new Date(parsed.lastUpdated));
+
+        let parsed: PersistedData | null = null;
+
+        // Try to decrypt with session encryption (v2)
+        if (isSessionEncrypted(stored)) {
+          parsed = await decryptSession<PersistedData>(stored);
         }
-        setFormData(parsed.formData);
-        setStepIndex(parsed.stepIndex);
-        setUploadedDocuments(parsed.uploadedDocuments || []);
+
+        // If decryption failed or data is legacy format, try legacy decode
+        if (!parsed) {
+          parsed = deobfuscateLegacy<PersistedData>(stored);
+        }
+
+        if (parsed) {
+          // Check if there's meaningful progress (beyond step 0)
+          if (parsed.stepIndex > 0) {
+            setHasExistingSession(true);
+            setLastUpdated(new Date(parsed.lastUpdated));
+          }
+          setFormData(parsed.formData);
+          setStepIndex(parsed.stepIndex);
+          setUploadedDocuments(parsed.uploadedDocuments || []);
+        } else {
+          // Data couldn't be decrypted (likely session key was cleared)
+          // Start fresh - this is a privacy feature
+          console.log('Session data could not be decrypted, starting fresh');
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (e) {
+        console.error('Failed to load saved data:', e);
+        localStorage.removeItem(STORAGE_KEY);
       }
-    } catch (e) {
-      console.error('Failed to load saved data:', e);
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
+
+    loadData();
   }, []);
 
-  // Save to localStorage whenever data changes (obfuscated)
+  // Save to localStorage whenever data changes (encrypted)
   useEffect(() => {
     if (!isLoaded) return;
-    
-    const data: PersistedData = {
-      formData,
-      stepIndex,
-      lastUpdated: new Date().toISOString(),
-      uploadedDocuments,
-    };
-    
-    try {
-      const serialized = JSON.stringify(data);
-      const obfuscated = obfuscate(serialized);
-      localStorage.setItem(STORAGE_KEY, obfuscated);
-    } catch (e) {
-      console.error('Failed to save data:', e);
+
+    async function saveData() {
+      // Sanitize documents before storing (remove sensitive metadata)
+      const sanitizedDocuments = uploadedDocuments.map(sanitizeDocumentForStorage);
+
+      const data: PersistedData = {
+        formData,
+        stepIndex,
+        lastUpdated: new Date().toISOString(),
+        uploadedDocuments: sanitizedDocuments,
+      };
+
+      try {
+        const encrypted = await encryptSession(data);
+        localStorage.setItem(STORAGE_KEY, encrypted);
+      } catch (e) {
+        console.error('Failed to save data:', e);
+      }
     }
+
+    saveData();
   }, [formData, stepIndex, uploadedDocuments, isLoaded]);
 
   const updateFormData = useCallback((updates: Partial<ZakatFormData>) => {

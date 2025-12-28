@@ -256,7 +256,8 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Don't worry — your calculation is saved locally and will be available when you return.
+              Your session data is encrypted in your browser. Closing the browser clears the encryption key.
+              Sign in to save permanently with end-to-end encryption.
             </p>
           </div>
         )}

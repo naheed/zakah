@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Lock, Eye, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Shield, Lock, Eye, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PrivacyPolicy() {
@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           </Link>
 
           <h1 className="text-3xl font-bold text-foreground mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground mb-8">Last updated: December 27, 2025</p>
+          <p className="text-muted-foreground mb-8">Last updated: December 28, 2025</p>
 
           <div className="prose prose-sm dark:prose-invert max-w-none space-y-8">
             
@@ -34,15 +34,19 @@ export default function PrivacyPolicy() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>Your financial data is encrypted with keys stored only in your browser</span>
+                  <span>Session data is encrypted with AES-256-GCM using a key stored only in your browser session</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Eye className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>We cannot read your encrypted calculations - only you can</span>
+                  <span>Saved calculations use end-to-end encryption with keys stored in your browser — we cannot read them</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>Closing your browser clears the session encryption key, making session data unreadable</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>Documents uploaded for AI extraction are processed temporarily and not stored</span>
+                  <span>Uploaded documents are processed by AI and immediately discarded — only extracted values are kept</span>
                 </li>
               </ul>
             </div>
@@ -71,23 +75,50 @@ export default function PrivacyPolicy() {
 
               <h3 className="text-lg font-medium text-foreground mt-4">2.2 Financial Data You Enter</h3>
               <p className="text-muted-foreground">
-                When you save a calculation, you provide financial information including asset values, 
-                liabilities, and other data needed to calculate Zakat. <strong>This data is encrypted 
-                before being stored.</strong>
+                When you use the calculator, you provide financial information including asset values, 
+                liabilities, and other data needed to calculate Zakat. This data is encrypted 
+                before being stored (see Section 5 for details).
               </p>
 
               <h3 className="text-lg font-medium text-foreground mt-4">2.3 Uploaded Documents</h3>
               <p className="text-muted-foreground">
                 When you upload financial documents (bank statements, brokerage statements, etc.) for 
-                automatic data extraction, the document content is temporarily processed by our AI service. 
-                The raw documents are <strong>not stored</strong> after processing.
+                automatic data extraction:
               </p>
+              <ul className="list-disc list-inside text-muted-foreground ml-4 mt-2">
+                <li><strong>Original files are not stored</strong> — they are processed in memory and immediately discarded</li>
+                <li><strong>Extracted numeric values only</strong> are retained (e.g., account balances)</li>
+                <li><strong>Document metadata is session-only</strong> — filenames, institution names, and AI-generated summaries 
+                    are shown during your session but are <em>not</em> persisted to storage</li>
+              </ul>
 
               <h3 className="text-lg font-medium text-foreground mt-4">2.4 Usage Data</h3>
               <p className="text-muted-foreground">
                 We may collect anonymized usage analytics to improve the Service, including pages visited 
                 and feature usage patterns.
               </p>
+
+              <h3 className="text-lg font-medium text-foreground mt-4">2.5 Browser Session Storage</h3>
+              <p className="text-muted-foreground">
+                While you use the calculator, your current session data (form values and extracted document values) 
+                is stored in your browser's localStorage. This data is:
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground ml-4 mt-2">
+                <li><strong>Encrypted with AES-256-GCM</strong> using a session-specific key</li>
+                <li><strong>The encryption key is stored in sessionStorage</strong> — it is automatically 
+                    cleared when you close your browser</li>
+                <li><strong>Once the key is cleared, the encrypted data becomes unreadable</strong> — 
+                    effectively deleted upon browser close</li>
+                <li>For permanent storage, you must sign in and save your calculation (which uses 
+                    separate end-to-end encryption with persistent keys)</li>
+              </ul>
+              <div className="bg-muted/50 rounded-lg p-4 border border-border mt-3">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Note:</strong> On shared or public computers, closing the browser ensures your 
+                  session data cannot be recovered. For maximum privacy, you can also clear your browser 
+                  data manually.
+                </p>
+              </div>
             </section>
 
             <section>
@@ -111,23 +142,41 @@ export default function PrivacyPolicy() {
                 </p>
                 <ul className="list-disc list-inside text-muted-foreground ml-4 mt-3">
                   <li>Raw document content is transmitted to Google's AI service</li>
-                  <li>Extracted numeric values are encrypted before storage</li>
-                  <li>Original documents are not retained after processing</li>
+                  <li>Original documents are <strong>not stored</strong> after processing (typically completes in seconds)</li>
+                  <li>Only extracted numeric values are encrypted and stored</li>
+                  <li>Document metadata (filename, institution name, summary) is shown during your session 
+                      but cleared when you close your browser</li>
                   <li>Google's AI service may process data according to their privacy policy</li>
                 </ul>
               </div>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">5. End-to-End Encryption</h2>
+              <h2 className="text-xl font-semibold text-foreground">5. Encryption & Data Protection</h2>
               <p className="text-muted-foreground">
-                We use strong encryption to protect your financial data:
+                We use multiple layers of encryption to protect your financial data:
+              </p>
+              
+              <h3 className="text-lg font-medium text-foreground mt-4">5.1 Session Data Encryption</h3>
+              <p className="text-muted-foreground">
+                While you use the calculator (before signing in or saving):
               </p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
                 <li><strong>Encryption Standard:</strong> AES-256-GCM symmetric encryption</li>
-                <li><strong>Key Storage:</strong> Encryption keys are generated and stored locally in your browser's IndexedDB</li>
+                <li><strong>Key Storage:</strong> Encryption key stored in browser sessionStorage</li>
+                <li><strong>Automatic Clearing:</strong> Key is deleted when browser closes, making data unreadable</li>
+                <li><strong>Session-Specific:</strong> Each browser session gets a unique encryption key</li>
+              </ul>
+
+              <h3 className="text-lg font-medium text-foreground mt-4">5.2 Saved Calculation Encryption (End-to-End)</h3>
+              <p className="text-muted-foreground">
+                When you sign in and save a calculation:
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground ml-4">
+                <li><strong>Encryption Standard:</strong> AES-256-GCM symmetric encryption</li>
+                <li><strong>Key Storage:</strong> Encryption keys generated and stored locally in your browser's IndexedDB</li>
                 <li><strong>Device-Specific:</strong> Keys are unique to each browser/device and are not synced</li>
-                <li><strong>Zero-Knowledge:</strong> We cannot decrypt your saved calculations - only you can</li>
+                <li><strong>Zero-Knowledge:</strong> We cannot decrypt your saved calculations — only you can</li>
               </ul>
 
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mt-4">
@@ -139,6 +188,17 @@ export default function PrivacyPolicy() {
                   If you clear your browser data or use a different device, your encryption keys will be lost. 
                   We cannot recover your encrypted data without your keys. Consider backing up your calculations 
                   by downloading the PDF report.
+                </p>
+              </div>
+
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
+                <p className="text-sm text-foreground font-medium flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-primary" />
+                  Recommendation
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  For permanent, encrypted storage of your calculations, sign in and save your work. 
+                  Session data is secure but temporary — it becomes unreadable when you close your browser.
                 </p>
               </div>
             </section>
@@ -221,9 +281,12 @@ export default function PrivacyPolicy() {
               <h2 className="text-xl font-semibold text-foreground">8. Data Retention</h2>
               <p className="text-muted-foreground">We retain your data for the following periods:</p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
+                <li><strong>Session Data:</strong> Encrypted in browser localStorage; effectively deleted when you close 
+                    your browser (encryption key is cleared from sessionStorage)</li>
                 <li><strong>Account Information:</strong> Retained while your account is active and for up to 30 days after deletion request</li>
-                <li><strong>Saved Calculations:</strong> Retained until you delete them or delete your account</li>
+                <li><strong>Saved Calculations:</strong> End-to-end encrypted and retained until you delete them or delete your account</li>
                 <li><strong>Uploaded Documents:</strong> Processed in memory only; not retained after extraction (typically seconds)</li>
+                <li><strong>Document Metadata:</strong> Shown during session only; not persisted to storage</li>
                 <li><strong>Usage Analytics:</strong> Aggregated data retained for up to 24 months</li>
               </ul>
               <p className="text-muted-foreground mt-3">
@@ -237,7 +300,8 @@ export default function PrivacyPolicy() {
                 We implement appropriate technical and organizational measures to protect your data, including:
               </p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
-                <li>End-to-end encryption for stored financial data</li>
+                <li>Session-specific encryption for browser-stored data</li>
+                <li>End-to-end encryption for saved calculations</li>
                 <li>Secure HTTPS connections</li>
                 <li>Row-level security policies in our database</li>
                 <li>Regular security reviews</li>
