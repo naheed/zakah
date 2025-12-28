@@ -66,7 +66,7 @@ function TrustBadges() {
       </div>
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
         <Lock className="w-4 h-4 text-primary" />
-        <span>Data stays local</span>
+        <span>Encrypted & only visible to you</span>
       </div>
     </div>
   );
@@ -262,7 +262,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
             
             {/* Main Headline - Benefit-focused */}
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-tight leading-tight">
-              Know Your Zakat<br />in 2 Minutes
+              Know Your Zakat<br />in 5 Minutes
             </h1>
             
             {/* Subhead - Address complexity */}
