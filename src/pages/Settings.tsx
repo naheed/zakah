@@ -119,7 +119,7 @@ export default function Settings() {
   return (
     <>
       <Helmet>
-        <title>Settings | Zakat Calculator</title>
+        <title>Settings | Zakah Flow</title>
         <meta name="description" content="Configure your Zakat calculation settings including Nisab standard, calendar type, and household mode." />
       </Helmet>
       

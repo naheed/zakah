@@ -7,8 +7,8 @@ export default function Terms() {
   return (
     <>
       <Helmet>
-        <title>Terms of Service | Zakat Calculator</title>
-        <meta name="description" content="Terms of Service for the Zakat Calculator application." />
+        <title>Terms of Service | Zakah Flow</title>
+        <meta name="description" content="Terms of Service for the Zakah Flow application." />
       </Helmet>
       
       <div className="min-h-screen bg-background">

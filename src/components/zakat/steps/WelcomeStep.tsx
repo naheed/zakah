@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, Lock, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ZakatSankeyMock } from "../ZakatSankeyChart";
-
+import zakahFlowLogo from "@/assets/zakahflow-logo.png";
 interface WelcomeStepProps {
   onNext: () => void;
 }
@@ -74,7 +74,13 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
 
         {/* Right Side - CTA */}
         <div className="order-1 md:order-2 flex flex-col">
-          {/* Headline */}
+          {/* Logo and Headline */}
+          <div className="flex items-center gap-3 mb-4">
+            <img src={zakahFlowLogo} alt="Zakah Flow" className="h-12 w-auto" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent">
+              Zakah Flow
+            </span>
+          </div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 tracking-tight">
             Calculate Your Zakat
           </h1>

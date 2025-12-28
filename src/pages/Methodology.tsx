@@ -10,10 +10,10 @@ const Methodology = () => {
   return (
     <>
       <Helmet>
-        <title>Zakat Methodology & References - ZakatFlow</title>
+        <title>Zakat Methodology & References - Zakah Flow</title>
         <meta 
           name="description" 
-          content="Comprehensive scholarly methodology and Islamic jurisprudence behind ZakatFlow's Zakat calculations. Based on AMJA guidance, Joe Bradford's works, and Islamic Finance Guru." 
+          content="Comprehensive scholarly methodology and Islamic jurisprudence behind Zakah Flow's Zakat calculations. Based on AMJA guidance, Joe Bradford's works, and Islamic Finance Guru." 
         />
       </Helmet>
       
