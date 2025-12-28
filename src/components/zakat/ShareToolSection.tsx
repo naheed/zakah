@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useReferral } from '@/hooks/useReferral';
+import { useReferral, getInviteUrl } from '@/hooks/useReferral';
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -21,13 +21,16 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
     isGenerating,
     generateReferralCode, 
     fetchStats,
-    getInviteUrl 
   } = useReferral();
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string>('');
+  const initRef = useRef(false);
 
-  // Generate referral code and fetch stats on mount
+  // Generate referral code and fetch stats on mount (once)
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    
     const init = async () => {
       const code = await generateReferralCode();
       if (code) {
@@ -36,14 +39,15 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
       fetchStats();
     };
     init();
-  }, [generateReferralCode, fetchStats, getInviteUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Update invite URL when referral code changes
   useEffect(() => {
     if (referralCode) {
       setInviteUrl(getInviteUrl(referralCode));
     }
-  }, [referralCode, getInviteUrl]);
+  }, [referralCode]);
 
   const handleCopy = async () => {
     if (!inviteUrl) return;

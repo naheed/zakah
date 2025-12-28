@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -28,6 +28,11 @@ async function hashSessionId(sessionId: string): Promise<string> {
   return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+// Pure function - no dependencies, stable reference
+export function getInviteUrl(code: string): string {
+  return `https://zakat.vora.dev/invite/${code}`;
+}
+
 export interface ReferralStats {
   referralCode: string | null;
   totalReferrals: number;
@@ -42,7 +47,11 @@ export function useReferral() {
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Refs to prevent concurrent operations and track state
   const hasGeneratedRef = useRef(false);
+  const isFetchingStatsRef = useRef(false);
+  const isGeneratingRef = useRef(false);
 
   // Get the referral code this user came from (if any)
   const getReferredBy = useCallback((): string | null => {
@@ -56,9 +65,13 @@ export function useReferral() {
 
   // Generate or fetch the user's own referral code for sharing
   const generateReferralCode = useCallback(async (): Promise<string | null> => {
+    // Return existing code if available
     if (referralCode) return referralCode;
-    if (isGenerating || hasGeneratedRef.current) return null;
     
+    // Prevent concurrent generation
+    if (isGeneratingRef.current || hasGeneratedRef.current) return null;
+    
+    isGeneratingRef.current = true;
     setIsGenerating(true);
     hasGeneratedRef.current = true;
     
@@ -91,15 +104,19 @@ export function useReferral() {
       hasGeneratedRef.current = false;
       return null;
     } finally {
+      isGeneratingRef.current = false;
       setIsGenerating(false);
     }
-  }, [referralCode, isGenerating, user?.id]);
+  }, [referralCode, user?.id]);
 
   // Fetch referral stats
-  const fetchStats = useCallback(async () => {
-    if (isLoading) return;
+  const fetchStats = useCallback(async (code?: string) => {
+    // Prevent concurrent fetches
+    if (isFetchingStatsRef.current) return;
     
+    isFetchingStatsRef.current = true;
     setIsLoading(true);
+    
     try {
       const sessionId = getOrCreateSessionId();
       const sessionHash = await hashSessionId(sessionId);
@@ -107,7 +124,7 @@ export function useReferral() {
       const { data, error } = await supabase.functions.invoke('get-referral-stats', {
         body: {
           sessionHash,
-          referralCode: referralCode || undefined,
+          referralCode: code || referralCode || undefined,
         },
       });
 
@@ -133,14 +150,10 @@ export function useReferral() {
     } catch (error) {
       console.error('Error in fetchStats:', error);
     } finally {
+      isFetchingStatsRef.current = false;
       setIsLoading(false);
     }
-  }, [isLoading, referralCode]);
-
-  // Get the invite URL for sharing - always use production domain
-  const getInviteUrl = useCallback((code: string): string => {
-    return `https://zakat.vora.dev/invite/${code}`;
-  }, []);
+  }, [referralCode]);
 
   return {
     referralCode,
