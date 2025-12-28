@@ -7,8 +7,8 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | Zakat Calculator</title>
-        <meta name="description" content="Privacy Policy for the Zakat Calculator - Learn how we protect your financial data with end-to-end encryption." />
+        <title>Privacy Policy | Zakah Flow</title>
+        <meta name="description" content="Privacy Policy for Zakah Flow - Learn how we protect your financial data with end-to-end encryption." />
       </Helmet>
       
       <div className="min-h-screen bg-background">
