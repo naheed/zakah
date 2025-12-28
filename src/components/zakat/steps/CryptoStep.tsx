@@ -4,6 +4,7 @@ import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
+import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 
 export function CryptoStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
@@ -23,8 +24,13 @@ export function CryptoStep({ data, updateData, uploadedDocuments, onDocumentAdde
       householdReminder="Include crypto holdings for yourself, spouse, and children."
     >
       <CurrencyInput 
-        label="Bitcoin, Ethereum & Major Crypto" 
-        description="Treated as currency—100% Zakatable" 
+        label={
+          <span className="flex items-center gap-2">
+            Bitcoin, Ethereum & Major Crypto
+            <WhyTooltip {...fiqhExplanations.cryptoCurrency} />
+          </span>
+        }
+        description="Treated as currency—100% Zakatable"
         householdDescription="Combined major crypto holdings for all family members"
         isHousehold={isHousehold}
         value={data.cryptoCurrency} 
@@ -32,8 +38,13 @@ export function CryptoStep({ data, updateData, uploadedDocuments, onDocumentAdde
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'cryptoCurrency')}
       />
       <CurrencyInput 
-        label="Altcoins, Tokens & NFTs (Trading)" 
-        description="Held for trading/flipping—100% Zakatable" 
+        label={
+          <span className="flex items-center gap-2">
+            Altcoins, Tokens & NFTs (Trading)
+            <WhyTooltip {...fiqhExplanations.cryptoTrading} />
+          </span>
+        }
+        description="Held for trading/flipping—100% Zakatable"
         householdDescription="Combined altcoins/NFTs for all family members"
         isHousehold={isHousehold}
         value={data.cryptoTrading} 
@@ -42,10 +53,13 @@ export function CryptoStep({ data, updateData, uploadedDocuments, onDocumentAdde
       />
       
       <div className="space-y-3 pt-4 border-t border-border">
-        <h3 className="font-medium text-foreground">Staking & DeFi</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">Staking & DeFi</h3>
+          <WhyTooltip {...fiqhExplanations.stakedAssets} />
+        </div>
         <CurrencyInput 
           label="Staked Assets (Principal)" 
-          description="Your staked principal—fully Zakatable" 
+          description="Your staked principal—fully Zakatable"
           householdDescription="Combined staked assets for all family members"
           isHousehold={isHousehold}
           value={data.stakedAssets} 
@@ -62,8 +76,13 @@ export function CryptoStep({ data, updateData, uploadedDocuments, onDocumentAdde
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'stakedRewardsVested')}
         />
         <CurrencyInput 
-          label="Liquidity Pool Value" 
-          description="Current redeemable value of LP positions" 
+          label={
+            <span className="flex items-center gap-2">
+              Liquidity Pool Value
+              <WhyTooltip {...fiqhExplanations.defiLiquidity} />
+            </span>
+          }
+          description="Current redeemable value of LP positions"
           householdDescription="Combined LP positions for all family members"
           isHousehold={isHousehold}
           value={data.liquidityPoolValue} 

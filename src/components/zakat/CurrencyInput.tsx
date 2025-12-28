@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { parseMathExpression } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ interface DocumentContribution {
 }
 
 interface CurrencyInputProps {
-  label: string;
+  label: ReactNode;
   value: number;
   onChange: (value: number) => void;
   description?: string;
@@ -111,7 +111,7 @@ export function CurrencyInput({
       >
         {/* Floating Label */}
         <motion.label
-          htmlFor={label}
+          htmlFor={typeof label === 'string' ? label : undefined}
           className={cn(
             "absolute left-10 pointer-events-none transition-colors",
             shouldFloat 
@@ -142,7 +142,7 @@ export function CurrencyInput({
         {/* Input */}
         <Input
           ref={inputRef}
-          id={label}
+          id={typeof label === 'string' ? label : undefined}
           type="text"
           value={inputValue}
           onChange={handleChange}
