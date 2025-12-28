@@ -35,7 +35,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
       <div className="min-h-[85vh] flex flex-col">
         {/* Header for logged-in users */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50">
-          <span className="text-lg font-bold bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent">
+          <span className="text-lg font-semibold font-serif bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent">
             Zakat Flow
           </span>
           <div className="flex items-center gap-2">
@@ -106,12 +106,12 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
 
             {/* Right Side - CTA */}
             <div className="order-1 md:order-2 flex flex-col">
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 tracking-tight">
-                Start a New Calculation
-              </h1>
-              <p className="text-muted-foreground mb-6">
-                Begin a fresh Zakat calculation for this year.
-              </p>
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-2 tracking-tight">
+              Start a New Calculation
+            </h1>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Begin a fresh Zakat calculation for this year.
+            </p>
               
               <Button onClick={onNext} size="lg" className="w-full sm:w-auto gap-2 text-base h-12 mb-3">
                 New Calculation
@@ -169,18 +169,18 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
         <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Side - CTA (Primary focus) */}
           <div className="order-1 flex flex-col">
-            {/* Brand Name */}
-            <span className="text-2xl font-bold bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent mb-4">
+           {/* Brand Name */}
+            <span className="text-2xl font-semibold font-serif bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent mb-4">
               Zakat Flow
             </span>
             
             {/* Main Headline - Benefit-focused */}
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-tight leading-tight">
+            <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-3 tracking-tight leading-tight">
               Know Your Zakat<br />in 5 Minutes
             </h1>
             
             {/* Subhead with inline asset types */}
-            <p className="text-lg text-muted-foreground mb-6">
+            <p className="text-lg font-light text-muted-foreground mb-6 leading-relaxed">
               Handles {assetTypes.join(" • ")}—we simplify the complexity.
             </p>
             

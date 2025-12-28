@@ -13,12 +13,12 @@ export function StepHeader({ questionNumber, emoji, title, subtitle }: StepHeade
           Question {questionNumber}
         </span>
       )}
-      <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+      <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
         {emoji && <span className="mr-2">{emoji}</span>}
         {title}
       </h1>
       {subtitle && (
-        <p className="text-lg text-muted-foreground">{subtitle}</p>
+        <p className="text-base text-muted-foreground leading-relaxed">{subtitle}</p>
       )}
     </div>
   );
