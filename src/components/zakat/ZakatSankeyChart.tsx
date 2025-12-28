@@ -1,5 +1,5 @@
 import { formatCurrency } from "@/lib/zakatCalculations";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Maximize2 } from "lucide-react";
@@ -65,6 +65,8 @@ interface FlowLink {
   value: number;
   sourceY: number;
   targetY: number;
+  color: string;
+  originalAssetName?: string;
 }
 
 interface TooltipData {
@@ -73,9 +75,8 @@ interface TooltipData {
   description: string;
   x: number;
   y: number;
-  isLink?: boolean;
-  sourceName?: string;
-  targetName?: string;
+  showBelow?: boolean;
+  zakatContribution?: number;
 }
 
 export function ZakatSankeyChart({ 
@@ -88,14 +89,15 @@ export function ZakatSankeyChart({
 }: ZakatSankeyChartProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   
-  // Calculate layout
-  const { nodes, links, leftNodes, rightNode, zakatNode } = useMemo(() => {
+  // Calculate layout with proper zakat contribution flows
+  const { nodes, links, leftNodes, centerNode, zakatNode, assetZakatContributions } = useMemo(() => {
     const leftNodes: FlowNode[] = [];
     const nodeWidth = 14;
     const padding = showLabels ? 140 : 40;
     const chartWidth = width - padding * 2;
-    const chartHeight = height - 40;
+    const chartHeight = height - 60; // More bottom margin for labels
     
     // Build left side nodes (assets)
     const assetData = [
@@ -108,14 +110,21 @@ export function ZakatSankeyChart({
     ].filter(a => a.value > 0);
     
     const totalAssets = assetData.reduce((sum, a) => sum + a.value, 0);
-    if (totalAssets === 0) return { nodes: [], links: [], leftNodes: [], rightNode: null, zakatNode: null };
+    if (totalAssets === 0) return { nodes: [], links: [], leftNodes: [], centerNode: null, zakatNode: null, assetZakatContributions: {} };
+    
+    // Calculate each asset's proportional contribution to zakat
+    const assetZakatContributions: Record<string, number> = {};
+    assetData.forEach(asset => {
+      // Each asset contributes proportionally to the zakat
+      assetZakatContributions[asset.name] = (asset.value / totalAssets) * data.zakatDue;
+    });
     
     // Calculate heights proportionally
     const minHeight = 20;
     const nodePadding = 8;
     const availableHeight = chartHeight - (assetData.length - 1) * nodePadding;
     
-    let currentY = 20;
+    let currentY = 30;
     assetData.forEach(asset => {
       const proportionalHeight = (asset.value / totalAssets) * availableHeight;
       const nodeHeight = Math.max(minHeight, proportionalHeight);
@@ -132,60 +141,86 @@ export function ZakatSankeyChart({
       currentY += nodeHeight + nodePadding;
     });
     
-    // Center node (Net Zakatable Wealth)
-    const centerX = padding + chartWidth / 2 - nodeWidth / 2;
-    const rightNode: FlowNode = {
+    // Center node (Net Zakatable Wealth) - positioned at 45% width
+    const centerX = padding + chartWidth * 0.45 - nodeWidth / 2;
+    const centerNode: FlowNode = {
       name: "Net Zakatable Wealth",
       value: data.netZakatableWealth,
       color: ASSET_COLORS["Net Zakatable Wealth"],
       x: centerX,
-      y: 20,
+      y: 30,
       height: chartHeight,
     };
     
-    // Zakat Due node (right side)
+    // Zakat Due node (right side) - taller to receive all colored flows
+    const zakatHeight = Math.max(60, chartHeight * 0.4);
     const zakatNode: FlowNode | null = data.zakatDue > 0 ? {
       name: "Zakat Due",
       value: data.zakatDue,
       color: ASSET_COLORS["Zakat Due"],
       x: width - padding - nodeWidth,
-      y: 20,
-      height: Math.max(40, chartHeight * 0.3),
+      y: 30 + (chartHeight - zakatHeight) / 2,
+      height: zakatHeight,
     } : null;
     
     // Build links
     const links: FlowLink[] = [];
     let sourceYOffset = 0;
+    let zakatYOffset = 0;
     
+    // Links from assets to center (Net Zakatable)
     leftNodes.forEach(node => {
       const linkHeight = (node.value / totalAssets) * chartHeight;
       links.push({
         source: node,
-        target: rightNode,
+        target: centerNode,
         value: node.value,
         sourceY: node.y + node.height / 2,
-        targetY: 20 + sourceYOffset + linkHeight / 2,
+        targetY: 30 + sourceYOffset + linkHeight / 2,
+        color: node.color,
+        originalAssetName: node.name,
       });
       sourceYOffset += linkHeight;
     });
     
-    // Link from center to zakat
+    // Links from center to zakat - COLORED by each asset's contribution
     if (zakatNode) {
-      links.push({
-        source: rightNode,
-        target: zakatNode,
-        value: data.zakatDue,
-        sourceY: rightNode.y + rightNode.height / 2,
-        targetY: zakatNode.y + zakatNode.height / 2,
+      let centerYOffset = 0;
+      const totalZakatHeight = zakatNode.height;
+      
+      leftNodes.forEach(node => {
+        const zakatContribution = assetZakatContributions[node.name] || 0;
+        if (zakatContribution > 0) {
+          const proportionOfZakat = zakatContribution / data.zakatDue;
+          const linkHeight = proportionOfZakat * totalZakatHeight;
+          
+          // Calculate where this asset's portion is in the center bar
+          const assetProportion = node.value / totalAssets;
+          const centerBarYForAsset = 30 + (centerYOffset + assetProportion * chartHeight / 2);
+          
+          links.push({
+            source: centerNode,
+            target: zakatNode,
+            value: zakatContribution,
+            sourceY: centerBarYForAsset,
+            targetY: zakatNode.y + zakatYOffset + linkHeight / 2,
+            color: node.color,
+            originalAssetName: node.name,
+          });
+          
+          centerYOffset += assetProportion * chartHeight;
+          zakatYOffset += linkHeight;
+        }
       });
     }
     
     return { 
-      nodes: [...leftNodes, rightNode, ...(zakatNode ? [zakatNode] : [])], 
+      nodes: [...leftNodes, centerNode, ...(zakatNode ? [zakatNode] : [])], 
       links, 
       leftNodes, 
-      rightNode, 
-      zakatNode 
+      centerNode, 
+      zakatNode,
+      assetZakatContributions,
     };
   }, [data, width, height, showLabels]);
   
@@ -220,32 +255,47 @@ export function ZakatSankeyChart({
   
   const handleNodeHover = (node: FlowNode, e: React.MouseEvent) => {
     const rect = (e.target as SVGElement).getBoundingClientRect();
-    const svgRect = (e.currentTarget.closest('svg') as SVGElement)?.getBoundingClientRect();
+    const svgRect = svgRef.current?.getBoundingClientRect();
     if (!svgRect) return;
+    
+    // Check if tooltip would be cut off at top
+    const showBelow = rect.top - svgRect.top < 80;
+    
+    // Get zakat contribution for this asset
+    const zakatContribution = assetZakatContributions[node.name];
     
     setTooltip({
       name: node.name,
       value: node.value,
       description: ASSET_DESCRIPTIONS[node.name] || "",
       x: rect.left - svgRect.left + rect.width / 2,
-      y: rect.top - svgRect.top,
+      y: showBelow ? rect.bottom - svgRect.top : rect.top - svgRect.top,
+      showBelow,
+      zakatContribution,
     });
   };
   
   const handleLinkHover = (link: FlowLink, e: React.MouseEvent) => {
     const rect = (e.target as SVGElement).getBoundingClientRect();
-    const svgRect = (e.currentTarget.closest('svg') as SVGElement)?.getBoundingClientRect();
+    const svgRect = svgRef.current?.getBoundingClientRect();
     if (!svgRect) return;
     
+    const showBelow = rect.top - svgRect.top < 80;
+    
+    const isZakatLink = link.target.name === "Zakat Due";
+    const description = isZakatLink 
+      ? `Zakat contribution from ${link.originalAssetName}`
+      : `Flow from ${link.source.name}`;
+    
     setTooltip({
-      name: `${link.source.name} → ${link.target.name}`,
+      name: isZakatLink 
+        ? `${link.originalAssetName} → Zakat`
+        : `${link.source.name} → ${link.target.name}`,
       value: link.value,
-      description: `Flow from ${link.source.name}`,
+      description,
       x: rect.left - svgRect.left + rect.width / 2,
-      y: rect.top - svgRect.top,
-      isLink: true,
-      sourceName: link.source.name,
-      targetName: link.target.name,
+      y: showBelow ? rect.bottom - svgRect.top : rect.top - svgRect.top,
+      showBelow,
     });
   };
   
@@ -253,17 +303,21 @@ export function ZakatSankeyChart({
 
   const chartElement = (
     <div className="relative">
-      <svg width={width} height={height} className="overflow-visible">
+      <svg ref={svgRef} width={width} height={height} className="overflow-visible">
         {/* Links */}
         {links.map((link, i) => {
-          const linkWidth = Math.max(4, (link.value / totalAssets) * (height - 60));
+          const isZakatLink = link.target.name === "Zakat Due";
+          const linkWidth = isZakatLink 
+            ? Math.max(3, (link.value / data.zakatDue) * (zakatNode?.height || 60))
+            : Math.max(4, (link.value / totalAssets) * (height - 80));
+          
           return (
             <path
               key={`link-${i}`}
               d={generatePath(link, linkWidth)}
-              fill={link.source.color}
-              fillOpacity={0.3}
-              className="cursor-pointer transition-all duration-200 hover:fill-opacity-50"
+              fill={link.color}
+              fillOpacity={isZakatLink ? 0.5 : 0.3}
+              className="cursor-pointer transition-all duration-200 hover:fill-opacity-70"
               onMouseEnter={(e) => handleLinkHover(link, e)}
               onMouseLeave={() => setTooltip(null)}
             />
@@ -348,14 +402,16 @@ export function ZakatSankeyChart({
         })}
       </svg>
       
-      {/* Tooltip */}
+      {/* Tooltip - positioned below or above based on space */}
       {tooltip && (
         <div 
-          className="absolute bg-popover border border-border rounded-lg px-4 py-3 shadow-lg z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full"
+          className={`absolute bg-popover border border-border rounded-lg px-4 py-3 shadow-lg z-50 pointer-events-none transform -translate-x-1/2 ${
+            tooltip.showBelow ? 'translate-y-2' : '-translate-y-full'
+          }`}
           style={{ 
             left: tooltip.x, 
-            top: tooltip.y - 8,
-            minWidth: '160px',
+            top: tooltip.showBelow ? tooltip.y : tooltip.y - 8,
+            minWidth: '180px',
           }}
         >
           <p className="text-sm font-semibold text-foreground">{tooltip.name}</p>
@@ -365,6 +421,11 @@ export function ZakatSankeyChart({
           <p className="text-base font-bold text-foreground">
             {formatCurrency(tooltip.value, currency)}
           </p>
+          {tooltip.zakatContribution !== undefined && tooltip.zakatContribution > 0 && (
+            <p className="text-xs text-primary mt-1">
+              → Zakat: {formatCurrency(tooltip.zakatContribution, currency)}
+            </p>
+          )}
         </div>
       )}
     </div>
