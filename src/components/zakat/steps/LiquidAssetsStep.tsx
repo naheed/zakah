@@ -10,7 +10,8 @@ export function LiquidAssetsStep({
   updateData, 
   uploadedDocuments, 
   onDocumentAdded,
-  onRemoveDocument 
+  onRemoveDocument,
+  questionNumber,
 }: AssetStepProps) {
   const isHousehold = data.isHousehold;
 
@@ -18,6 +19,7 @@ export function LiquidAssetsStep({
     <AssetStepWrapper
       content={liquidAssetsContent}
       stepId="liquid-assets"
+      questionNumber={questionNumber}
       data={data}
       updateData={updateData}
       uploadedDocuments={uploadedDocuments}

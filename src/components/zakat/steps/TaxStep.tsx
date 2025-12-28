@@ -5,13 +5,14 @@ import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-export function TaxStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+export function TaxStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
 
   return (
     <AssetStepWrapper
       content={taxContent}
       stepId="tax"
+      questionNumber={questionNumber}
       data={data}
       updateData={updateData}
       uploadedDocuments={uploadedDocuments}

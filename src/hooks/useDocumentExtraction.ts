@@ -89,4 +89,5 @@ export interface AssetStepProps {
   uploadedDocuments: UploadedDocument[];
   onDocumentAdded: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
   onRemoveDocument: (id: string) => void;
+  questionNumber?: number;
 }

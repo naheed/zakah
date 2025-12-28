@@ -5,13 +5,14 @@ import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-export function IlliquidAssetsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+export function IlliquidAssetsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
 
   return (
     <AssetStepWrapper
       content={illiquidAssetsContent}
       stepId="illiquid-assets"
+      questionNumber={questionNumber}
       data={data}
       updateData={updateData}
       uploadedDocuments={uploadedDocuments}

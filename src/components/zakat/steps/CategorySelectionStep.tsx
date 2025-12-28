@@ -9,6 +9,7 @@ import { Banknote, TrendingUp, Landmark, CheckCircle2 } from "lucide-react";
 interface CategorySelectionStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  questionNumber?: number;
 }
 
 const defaultCategories = [
@@ -80,11 +81,11 @@ const optionalCategories = [
   },
 ];
 
-export function CategorySelectionStep({ data, updateData }: CategorySelectionStepProps) {
+export function CategorySelectionStep({ data, updateData, questionNumber }: CategorySelectionStepProps) {
   const selectedCount = optionalCategories.filter(cat => data[cat.id]).length;
 
   return (
-    <QuestionLayout content={categoriesContent}>
+    <QuestionLayout content={categoriesContent} questionNumber={questionNumber}>
       {/* Always Included Section */}
       <div>
         <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">

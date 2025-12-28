@@ -10,6 +10,8 @@ import { useDocumentExtraction } from "@/hooks/useDocumentExtraction";
 interface AssetStepWrapperProps {
   content: StepContent;
   stepId: string;
+  /** Dynamic question number from wizard */
+  questionNumber?: number;
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
   uploadedDocuments: UploadedDocument[];
@@ -25,6 +27,7 @@ interface AssetStepWrapperProps {
 export function AssetStepWrapper({
   content,
   stepId,
+  questionNumber,
   data,
   updateData,
   uploadedDocuments,
@@ -40,7 +43,7 @@ export function AssetStepWrapper({
   const isHousehold = data.isHousehold;
 
   return (
-    <QuestionLayout content={content}>
+    <QuestionLayout content={content} questionNumber={questionNumber}>
       {/* Household mode reminder */}
       {isHousehold && householdReminder && (
         <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">

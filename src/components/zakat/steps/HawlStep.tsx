@@ -7,11 +7,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 interface HawlStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  questionNumber?: number;
 }
 
-export function HawlStep({ data, updateData }: HawlStepProps) {
+export function HawlStep({ data, updateData, questionNumber }: HawlStepProps) {
   return (
-    <QuestionLayout content={hawlContent}>
+    <QuestionLayout content={hawlContent} questionNumber={questionNumber}>
       <RadioGroup
         value={data.calendarType}
         onValueChange={(value) => updateData({ calendarType: value as CalendarType })}
