@@ -7,6 +7,8 @@ const ALLOWED_ORIGINS = [
   'https://www.zakahflow.com',
   'https://zakatflow.com',
   'https://www.zakatflow.com',
+  'https://zakat.vora.dev',
+  'https://www.zakat.vora.dev',
 ];
 
 function isOriginAllowed(origin: string | null): boolean {
