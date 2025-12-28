@@ -184,32 +184,37 @@ export function ZakatSankeyChart({
     });
     
     // Links from center to zakat - COLORED by each asset's contribution
+    // Align right-side flows to the TOP of each asset's segment on the center bar
     if (zakatNode) {
       let centerYOffset = 0;
+      let zakatYOffset = 0;
       const totalZakatHeight = zakatNode.height;
       
       leftNodes.forEach(node => {
         const zakatContribution = assetZakatContributions[node.name] || 0;
         if (zakatContribution > 0) {
           const proportionOfZakat = zakatContribution / data.zakatDue;
-          const linkHeight = proportionOfZakat * totalZakatHeight;
+          const linkHeightOnZakat = proportionOfZakat * totalZakatHeight;
           
-          // Calculate where this asset's portion is in the center bar
+          // How much of the center bar does this asset occupy?
           const assetProportion = node.value / totalAssets;
-          const centerBarYForAsset = 30 + (centerYOffset + assetProportion * chartHeight / 2);
+          const assetPortionHeight = assetProportion * chartHeight;
+          
+          // Start the right-flow from the TOP of this asset's section (matching where left-flow enters)
+          const centerBarYForAsset = 30 + centerYOffset + assetPortionHeight / 2;
           
           links.push({
             source: centerNode,
             target: zakatNode,
             value: zakatContribution,
             sourceY: centerBarYForAsset,
-            targetY: zakatNode.y + zakatYOffset + linkHeight / 2,
+            targetY: zakatNode.y + zakatYOffset + linkHeightOnZakat / 2,
             color: node.color,
             originalAssetName: node.name,
           });
           
-          centerYOffset += assetProportion * chartHeight;
-          zakatYOffset += linkHeight;
+          centerYOffset += assetPortionHeight;
+          zakatYOffset += linkHeightOnZakat;
         }
       });
     }
