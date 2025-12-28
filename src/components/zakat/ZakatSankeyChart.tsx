@@ -200,8 +200,8 @@ export function ZakatSankeyChart({
           const assetProportion = node.value / totalAssets;
           const assetPortionHeight = assetProportion * chartHeight;
           
-          // Start the right-flow from the TOP of this asset's section (matching where left-flow enters)
-          const centerBarYForAsset = 30 + centerYOffset + assetPortionHeight / 2;
+          // Start the right-flow from the TOP of this asset's section (not the center)
+          const centerBarYForAsset = 30 + centerYOffset;
           
           links.push({
             source: centerNode,
