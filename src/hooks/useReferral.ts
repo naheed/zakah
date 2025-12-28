@@ -31,8 +31,9 @@ async function hashSessionId(sessionId: string): Promise<string> {
 export interface ReferralStats {
   referralCode: string | null;
   totalReferrals: number;
-  totalZakatCalculated: number;
-  totalAssetsCalculated: number;
+  totalZakatCalculated: number | null; // null when below privacy threshold
+  totalAssetsCalculated: number | null; // null when below privacy threshold
+  thresholdMet: boolean; // true when >= 5 referrals (privacy threshold)
 }
 
 export function useReferral() {
@@ -119,8 +120,9 @@ export function useReferral() {
         setStats({
           referralCode: data.referralCode,
           totalReferrals: data.totalReferrals || 0,
-          totalZakatCalculated: data.totalZakatCalculated || 0,
-          totalAssetsCalculated: data.totalAssetsCalculated || 0,
+          totalZakatCalculated: data.totalZakatCalculated ?? null,
+          totalAssetsCalculated: data.totalAssetsCalculated ?? null,
+          thresholdMet: data.thresholdMet ?? false,
         });
 
         // If we got a referral code from stats, store it
