@@ -650,19 +650,40 @@ function AnimatedSankeyChart({
   const leftPadding = isMobile ? 4 : 6;
   const rightPadding = isMobile ? 4 : 6;
   
-  // Calculate total assets for proportional sizing - now including 401(k)
-  const retirement401kValue = selectedMode === "conservative" 
-    ? DEMO_DATA.retirement401k 
-    : DEMO_DATA.retirement401kZakatable;
-    
+  // Assets with both raw value (for bar height) and zakatable value (for flow thickness)
+  // In optimized mode, 401(k) zakatable = 65% of vested value
   const assets = [
-    { name: "Cash", value: DEMO_DATA.cashValue, color: ASSET_COLORS.cash },
-    { name: "Investments", value: DEMO_DATA.investmentsExtracted, color: ASSET_COLORS.investments },
-    { name: "401(k)", value: retirement401kValue, color: ASSET_COLORS.retirement },
-    { name: "Other", value: DEMO_DATA.otherAssets, color: ASSET_COLORS.other },
+    { 
+      name: "Cash", 
+      rawValue: DEMO_DATA.cashValue, 
+      zakatableValue: DEMO_DATA.cashValue, // 100% zakatable
+      color: ASSET_COLORS.cash 
+    },
+    { 
+      name: "Investments", 
+      rawValue: DEMO_DATA.investmentsExtracted, 
+      zakatableValue: DEMO_DATA.investmentsExtracted, // 100% zakatable
+      color: ASSET_COLORS.investments 
+    },
+    { 
+      name: "401(k)", 
+      rawValue: DEMO_DATA.retirement401k, // Always show full vested value for bar
+      zakatableValue: selectedMode === "conservative" 
+        ? DEMO_DATA.retirement401k // 100% in conservative
+        : DEMO_DATA.retirement401kZakatable, // 65% in optimized
+      color: ASSET_COLORS.retirement 
+    },
+    { 
+      name: "Other", 
+      rawValue: DEMO_DATA.otherAssets, 
+      zakatableValue: DEMO_DATA.otherAssets, // 100% zakatable
+      color: ASSET_COLORS.other 
+    },
   ];
   
-  const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
+  // Total raw value for bar sizing, total zakatable for flow sizing
+  const totalRawValue = assets.reduce((sum, a) => sum + a.rawValue, 0);
+  const totalZakatableValue = assets.reduce((sum, a) => sum + a.zakatableValue, 0);
   const currentZakat = selectedMode === "conservative" 
     ? DEMO_DATA.conservativeZakat 
     : DEMO_DATA.optimizedZakat;
@@ -672,16 +693,23 @@ function AnimatedSankeyChart({
   const bottomMargin = 16; // Space for label
   const availableHeight = height - topMargin - bottomMargin;
   
-  // Left side: Asset nodes - proportional heights stacked from top
+  // Left side: Asset nodes - proportional heights based on RAW value (full bar)
   const assetSpacing = 3;
   const totalSpacing = assetSpacing * (assets.length - 1);
   const leftNodeAreaHeight = availableHeight;
   
   let leftY = topMargin;
   const assetNodes = assets.map((asset) => {
-    const proportion = asset.value / totalAssets;
-    const nodeHeight = Math.max(10, proportion * (leftNodeAreaHeight - totalSpacing));
-    const node = { ...asset, y: leftY, height: nodeHeight, proportion };
+    const rawProportion = asset.rawValue / totalRawValue;
+    const zakatableProportion = asset.zakatableValue / totalZakatableValue;
+    const nodeHeight = Math.max(10, rawProportion * (leftNodeAreaHeight - totalSpacing));
+    const node = { 
+      ...asset, 
+      y: leftY, 
+      height: nodeHeight, 
+      rawProportion,
+      zakatableProportion,
+    };
     leftY += nodeHeight + assetSpacing;
     return node;
   });
@@ -691,33 +719,46 @@ function AnimatedSankeyChart({
   const centerY = topMargin;
   const centerHeight = availableHeight;
   
-  // Calculate flow positions on center node - stacked from top (proportional)
+  // Calculate flow positions on center node
+  // Flow thickness is based on ZAKATABLE proportion (not raw)
+  // 401(k) flow should be smaller than its bar in optimized mode
   let centerFlowY = centerY;
   const flowPositions = assetNodes.map((asset) => {
-    const flowThickness = asset.proportion * centerHeight;
+    // Flow thickness based on zakatable proportion of center height
+    const proportionalHeight = asset.zakatableProportion * centerHeight;
+    // Cap flow at asset bar height (can't be larger than source bar)
+    const flowThickness = Math.min(proportionalHeight, asset.height);
+    
     const position = {
       asset,
       sourceY: asset.y + asset.height / 2,
-      targetY: centerFlowY + flowThickness / 2,
+      targetY: centerFlowY + proportionalHeight / 2,
       thickness: flowThickness,
       topY: centerFlowY, // Top edge of this flow on center node
+      proportionalHeight, // Full proportional height on center
     };
-    centerFlowY += flowThickness;
+    centerFlowY += proportionalHeight;
     return position;
   });
   
-  // Zakat node - height proportional to zakat rate (2.5%), positioned to receive all flows
+  // Zakat node - height proportional to zakat rate (2.5%)
   const zakatX = width - rightPadding - nodeWidth;
-  const zakatProportion = currentZakat / totalAssets;
+  const zakatProportion = currentZakat / totalZakatableValue;
   const zakatHeight = Math.max(30, zakatProportion * centerHeight * 4); // Scale up for visibility
-  const zakatY = centerY + (centerHeight - zakatHeight) / 2; // Center vertically
+  const zakatY = centerY; // Top-aligned
   
-  // Calculate each asset's contribution to Zakat (proportional to their share of total)
+  // Calculate each asset's contribution to Zakat (proportional to zakatable share)
+  // Right flows start from TOP edge of where left flow enters center (top-aligned)
   let zakatFlowY = zakatY;
   const zakatFlowPositions = flowPositions.map((flow) => {
-    const zakatContribution = flow.asset.proportion * zakatHeight;
+    const zakatContribution = flow.asset.zakatableProportion * zakatHeight;
+    
+    // Right flow starts from TOP of where left flow enters center node
+    const rightFlowSourceY = flow.topY + zakatContribution / 2;
+    
     const position = {
       ...flow,
+      rightSourceY: rightFlowSourceY,
       zakatTargetY: zakatFlowY + zakatContribution / 2,
       zakatThickness: zakatContribution,
       zakatTopY: zakatFlowY,
@@ -824,12 +865,13 @@ function AnimatedSankeyChart({
         />
         
         {/* Multi-colored Zakat flows - each asset's color continues to Zakat node */}
+        {/* Right flows start from TOP edge of where left flow enters (top-aligned) */}
         {zakatFlowPositions.map((flow, i) => (
           <motion.path
             key={`zakat-flow-${flow.asset.name}`}
             d={generatePath(
               centerX + nodeWidth,
-              flow.targetY, // Start from where left flow enters center
+              flow.rightSourceY, // Start from TOP edge alignment (not center)
               zakatX,
               flow.zakatTargetY, // End at stacked position on Zakat node
               flow.zakatThickness
