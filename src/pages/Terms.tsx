@@ -21,7 +21,7 @@ export default function Terms() {
           </Link>
 
           <h1 className="text-3xl font-bold text-foreground mb-2">Terms of Service</h1>
-          <p className="text-muted-foreground mb-8">Last updated: December 28, 2024</p>
+          <p className="text-muted-foreground mb-8">Last updated: December 27, 2025</p>
 
           <div className="prose prose-sm dark:prose-invert max-w-none space-y-8">
 
@@ -172,7 +172,18 @@ export default function Terms() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">12. Governing Law</h2>
+              <h2 className="text-xl font-semibold text-foreground">12. Dispute Resolution</h2>
+              <p className="text-muted-foreground">
+                Any disputes arising from these Terms or your use of the Service shall be resolved through 
+                good faith negotiation. If negotiation fails, disputes shall be resolved through binding 
+                arbitration in accordance with the rules of the American Arbitration Association, conducted 
+                in California. You agree to waive any right to participate in a class action lawsuit or 
+                class-wide arbitration.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-foreground">13. Governing Law</h2>
               <p className="text-muted-foreground">
                 These Terms shall be governed by and construed in accordance with the laws of the 
                 State of California, United States, without regard to its conflict of law provisions.
@@ -180,7 +191,25 @@ export default function Terms() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">13. Changes to Terms</h2>
+              <h2 className="text-xl font-semibold text-foreground">14. Force Majeure</h2>
+              <p className="text-muted-foreground">
+                We shall not be liable for any failure or delay in performing our obligations where such 
+                failure or delay results from circumstances beyond our reasonable control, including but 
+                not limited to natural disasters, acts of government, internet or infrastructure failures, 
+                or third-party service outages.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-foreground">15. Assignment</h2>
+              <p className="text-muted-foreground">
+                You may not assign or transfer these Terms or your rights hereunder without our prior 
+                written consent. We may assign these Terms without restriction.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-foreground">16. Changes to Terms</h2>
               <p className="text-muted-foreground">
                 We reserve the right to modify these Terms at any time. We will notify you of material 
                 changes by posting the new Terms on this page and updating the "Last updated" date. 
@@ -189,7 +218,7 @@ export default function Terms() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">14. Severability</h2>
+              <h2 className="text-xl font-semibold text-foreground">17. Severability</h2>
               <p className="text-muted-foreground">
                 If any provision of these Terms is found to be unenforceable, the remaining provisions 
                 will continue in full force and effect.
@@ -197,7 +226,15 @@ export default function Terms() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">15. Contact</h2>
+              <h2 className="text-xl font-semibold text-foreground">18. Entire Agreement</h2>
+              <p className="text-muted-foreground">
+                These Terms, together with our Privacy Policy, constitute the entire agreement between 
+                you and us regarding the Service and supersede all prior agreements and understandings.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-foreground">19. Contact</h2>
               <p className="text-muted-foreground">
                 For questions about these Terms, please contact:
               </p>

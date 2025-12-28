@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           </Link>
 
           <h1 className="text-3xl font-bold text-foreground mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground mb-8">Last updated: December 28, 2024</p>
+          <p className="text-muted-foreground mb-8">Last updated: December 27, 2025</p>
 
           <div className="prose prose-sm dark:prose-invert max-w-none space-y-8">
             
@@ -162,36 +162,73 @@ export default function PrivacyPolicy() {
                 <li><strong>Google OAuth:</strong> Authentication provider</li>
               </ul>
 
-              <h3 className="text-lg font-medium text-foreground mt-4">6.3 No Sale of Data</h3>
+              <h3 className="text-lg font-medium text-foreground mt-4">6.3 No Sale or Sharing of Data</h3>
               <p className="text-muted-foreground">
-                We do not sell, rent, or trade your personal information to third parties.
+                We do not sell, rent, share, or trade your personal information to third parties for 
+                monetary or other valuable consideration. We do not engage in cross-context behavioral 
+                advertising. Therefore, we do not offer an opt-out mechanism for such practices.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">7. California Privacy Rights (CCPA)</h2>
+              <h2 className="text-xl font-semibold text-foreground">7. California Privacy Rights (CCPA/CPRA)</h2>
               <p className="text-muted-foreground">
-                If you are a California resident, you have the following rights:
+                If you are a California resident, you have the following rights under the California Consumer 
+                Privacy Act (CCPA) as amended by the California Privacy Rights Act (CPRA):
               </p>
+              
+              <h3 className="text-lg font-medium text-foreground mt-4">7.1 Your Rights</h3>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
-                <li><strong>Right to Know:</strong> Request information about the personal data we collect</li>
-                <li><strong>Right to Delete:</strong> Request deletion of your personal data</li>
-                <li><strong>Right to Opt-Out:</strong> We do not sell personal information</li>
-                <li><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising your rights</li>
+                <li><strong>Right to Know:</strong> Request information about the categories and specific pieces of personal data we collect, use, and disclose</li>
+                <li><strong>Right to Delete:</strong> Request deletion of your personal data, subject to certain exceptions</li>
+                <li><strong>Right to Correct:</strong> Request correction of inaccurate personal data we maintain about you</li>
+                <li><strong>Right to Opt-Out of Sale/Sharing:</strong> We do not sell or share personal information, so this right does not apply</li>
+                <li><strong>Right to Limit Use of Sensitive Personal Information:</strong> Your financial data is encrypted and used only to provide the Service</li>
+                <li><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising any of these rights</li>
               </ul>
-              <p className="text-muted-foreground mt-3">
-                To exercise these rights, contact us at <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a>.
+
+              <h3 className="text-lg font-medium text-foreground mt-4">7.2 Sensitive Personal Information</h3>
+              <p className="text-muted-foreground">
+                We collect financial information which may be considered sensitive personal information under CPRA. 
+                This information is used solely to calculate your Zakat obligation and is encrypted before storage. 
+                We do not use sensitive personal information for purposes other than providing the Service.
+              </p>
+
+              <h3 className="text-lg font-medium text-foreground mt-4">7.3 How to Exercise Your Rights</h3>
+              <p className="text-muted-foreground">
+                To exercise your California privacy rights, contact us at{" "}
+                <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a>. 
+                We will respond to verifiable requests within 45 days. If we need more time (up to 90 days total), 
+                we will notify you.
+              </p>
+
+              <h3 className="text-lg font-medium text-foreground mt-4">7.4 Verification Process</h3>
+              <p className="text-muted-foreground">
+                To protect your privacy, we will verify your identity before responding to requests. We may ask 
+                you to confirm information associated with your account (such as your email address). For deletion 
+                requests, we may require additional confirmation.
+              </p>
+
+              <h3 className="text-lg font-medium text-foreground mt-4">7.5 Authorized Agents</h3>
+              <p className="text-muted-foreground">
+                You may designate an authorized agent to make requests on your behalf. The agent must provide 
+                proof of authorization (such as a power of attorney or signed permission), and we may still 
+                verify your identity directly.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold text-foreground">8. Data Retention</h2>
+              <p className="text-muted-foreground">We retain your data for the following periods:</p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
-                <li>Saved calculations are retained until you delete them</li>
-                <li>Account data is retained while your account is active</li>
-                <li>Uploaded documents are processed in memory and not retained</li>
-                <li>You may delete your account and all associated data at any time</li>
+                <li><strong>Account Information:</strong> Retained while your account is active and for up to 30 days after deletion request</li>
+                <li><strong>Saved Calculations:</strong> Retained until you delete them or delete your account</li>
+                <li><strong>Uploaded Documents:</strong> Processed in memory only; not retained after extraction (typically seconds)</li>
+                <li><strong>Usage Analytics:</strong> Aggregated data retained for up to 24 months</li>
               </ul>
+              <p className="text-muted-foreground mt-3">
+                You may delete your account and request deletion of all associated data at any time by contacting us.
+              </p>
             </section>
 
             <section>
