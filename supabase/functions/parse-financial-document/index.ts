@@ -58,7 +58,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Processing ${documentType} document (${mimeType})`);
+    console.log(`Processing ${documentType} document (${mimeType}), base64 length: ${documentBase64.length}`);
 
     const documentGuidance = getDocumentTypeGuidance(documentType);
 
@@ -115,108 +115,112 @@ RULES:
       });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const requestBody = {
+      contents: [{ parts }],
+      tools: [
+        {
+          functionDeclarations: [
+            {
+              name: "extract_financial_data",
+              description: "Extract structured financial data from document",
+              parameters: {
+                type: "object",
+                properties: {
+                  // Liquid Assets
+                  checkingAccounts: { type: "number", description: "Checking account balance" },
+                  savingsAccounts: { type: "number", description: "Savings account balance" },
+                  cashOnHand: { type: "number", description: "Physical cash" },
+                  digitalWallets: { type: "number", description: "Digital wallet balances" },
+                  foreignCurrency: { type: "number", description: "Foreign currency in USD" },
+                  interestEarned: { type: "number", description: "Interest income" },
+                  
+                  // Investments
+                  activeInvestments: { type: "number", description: "Short-term trading value" },
+                  passiveInvestmentsValue: { type: "number", description: "Long-term investments value" },
+                  dividends: { type: "number", description: "Dividend income" },
+                  
+                  // Retirement
+                  rothIRAContributions: { type: "number", description: "Roth IRA contributions" },
+                  rothIRAEarnings: { type: "number", description: "Roth IRA earnings" },
+                  fourOhOneKVestedBalance: { type: "number", description: "401k vested balance" },
+                  fourOhOneKUnvestedMatch: { type: "number", description: "401k unvested match" },
+                  traditionalIRABalance: { type: "number", description: "Traditional IRA balance" },
+                  hsaBalance: { type: "number", description: "HSA balance" },
+                  iraWithdrawals: { type: "number", description: "IRA withdrawals" },
+                  esaWithdrawals: { type: "number", description: "ESA withdrawals" },
+                  fiveTwentyNineWithdrawals: { type: "number", description: "529 withdrawals" },
+                  
+                  // Crypto
+                  cryptoCurrency: { type: "number", description: "Major crypto value" },
+                  cryptoTrading: { type: "number", description: "Altcoins value" },
+                  stakedAssets: { type: "number", description: "Staked crypto" },
+                  stakedRewardsVested: { type: "number", description: "Staking rewards" },
+                  liquidityPoolValue: { type: "number", description: "Liquidity pools" },
+                  
+                  // Precious Metals
+                  goldValue: { type: "number", description: "Gold value" },
+                  silverValue: { type: "number", description: "Silver value" },
+                  
+                  // Real Estate
+                  realEstateForSale: { type: "number", description: "Property for sale" },
+                  rentalPropertyIncome: { type: "number", description: "Rental income" },
+                  
+                  // Business
+                  businessCashAndReceivables: { type: "number", description: "Business cash" },
+                  businessInventory: { type: "number", description: "Inventory value" },
+                  
+                  // Trusts
+                  revocableTrustValue: { type: "number", description: "Revocable trust" },
+                  irrevocableTrustValue: { type: "number", description: "Irrevocable trust" },
+                  clatValue: { type: "number", description: "CLAT value" },
+                  
+                  // Other Assets
+                  illiquidAssetsValue: { type: "number", description: "Illiquid assets" },
+                  livestockValue: { type: "number", description: "Livestock" },
+                  
+                  // Debts Owed To You
+                  goodDebtOwedToYou: { type: "number", description: "Collectible debt owed to you" },
+                  badDebtRecovered: { type: "number", description: "Recovered bad debt" },
+                  
+                  // Liabilities
+                  monthlyLivingExpenses: { type: "number", description: "Monthly essentials estimate" },
+                  insuranceExpenses: { type: "number", description: "Monthly insurance costs" },
+                  monthlyMortgage: { type: "number", description: "Monthly mortgage" },
+                  creditCardBalance: { type: "number", description: "Credit card balance" },
+                  unpaidBills: { type: "number", description: "Unpaid bills" },
+                  studentLoansDue: { type: "number", description: "Student loans due" },
+                  propertyTax: { type: "number", description: "Property tax due" },
+                  lateTaxPayments: { type: "number", description: "Late tax payments" },
+                  
+                  // Metadata
+                  summary: { type: "string", description: "Summary of extracted data" },
+                  documentDate: { type: "string", description: "Statement date" },
+                  institutionName: { type: "string", description: "Institution name" },
+                  notes: { type: "string", description: "Important notes" }
+                },
+                required: ["summary"]
+              }
+            }
+          ]
+        }
+      ],
+      toolConfig: {
+        functionCallingConfig: {
+          mode: "ANY"
+        }
+      }
+    };
+    
+    console.log("Request body size:", JSON.stringify(requestBody).length);
 
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        tools: [
-          {
-            functionDeclarations: [
-              {
-                name: "extract_financial_data",
-                description: "Extract structured financial data from document",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    // Liquid Assets
-                    checkingAccounts: { type: "number", description: "Checking account balance" },
-                    savingsAccounts: { type: "number", description: "Savings account balance" },
-                    cashOnHand: { type: "number", description: "Physical cash" },
-                    digitalWallets: { type: "number", description: "Digital wallet balances" },
-                    foreignCurrency: { type: "number", description: "Foreign currency in USD" },
-                    interestEarned: { type: "number", description: "Interest income" },
-                    
-                    // Investments
-                    activeInvestments: { type: "number", description: "Short-term trading value" },
-                    passiveInvestmentsValue: { type: "number", description: "Long-term investments value" },
-                    dividends: { type: "number", description: "Dividend income" },
-                    
-                    // Retirement
-                    rothIRAContributions: { type: "number", description: "Roth IRA contributions" },
-                    rothIRAEarnings: { type: "number", description: "Roth IRA earnings" },
-                    fourOhOneKVestedBalance: { type: "number", description: "401k vested balance" },
-                    fourOhOneKUnvestedMatch: { type: "number", description: "401k unvested match" },
-                    traditionalIRABalance: { type: "number", description: "Traditional IRA balance" },
-                    hsaBalance: { type: "number", description: "HSA balance" },
-                    iraWithdrawals: { type: "number", description: "IRA withdrawals" },
-                    esaWithdrawals: { type: "number", description: "ESA withdrawals" },
-                    fiveTwentyNineWithdrawals: { type: "number", description: "529 withdrawals" },
-                    
-                    // Crypto
-                    cryptoCurrency: { type: "number", description: "Major crypto value" },
-                    cryptoTrading: { type: "number", description: "Altcoins value" },
-                    stakedAssets: { type: "number", description: "Staked crypto" },
-                    stakedRewardsVested: { type: "number", description: "Staking rewards" },
-                    liquidityPoolValue: { type: "number", description: "Liquidity pools" },
-                    
-                    // Precious Metals
-                    goldValue: { type: "number", description: "Gold value" },
-                    silverValue: { type: "number", description: "Silver value" },
-                    
-                    // Real Estate
-                    realEstateForSale: { type: "number", description: "Property for sale" },
-                    rentalPropertyIncome: { type: "number", description: "Rental income" },
-                    
-                    // Business
-                    businessCashAndReceivables: { type: "number", description: "Business cash" },
-                    businessInventory: { type: "number", description: "Inventory value" },
-                    
-                    // Trusts
-                    revocableTrustValue: { type: "number", description: "Revocable trust" },
-                    irrevocableTrustValue: { type: "number", description: "Irrevocable trust" },
-                    clatValue: { type: "number", description: "CLAT value" },
-                    
-                    // Other Assets
-                    illiquidAssetsValue: { type: "number", description: "Illiquid assets" },
-                    livestockValue: { type: "number", description: "Livestock" },
-                    
-                    // Debts Owed To You
-                    goodDebtOwedToYou: { type: "number", description: "Collectible debt owed to you" },
-                    badDebtRecovered: { type: "number", description: "Recovered bad debt" },
-                    
-                    // Liabilities
-                    monthlyLivingExpenses: { type: "number", description: "Monthly essentials estimate" },
-                    insuranceExpenses: { type: "number", description: "Monthly insurance costs" },
-                    monthlyMortgage: { type: "number", description: "Monthly mortgage" },
-                    creditCardBalance: { type: "number", description: "Credit card balance" },
-                    unpaidBills: { type: "number", description: "Unpaid bills" },
-                    studentLoansDue: { type: "number", description: "Student loans due" },
-                    propertyTax: { type: "number", description: "Property tax due" },
-                    lateTaxPayments: { type: "number", description: "Late tax payments" },
-                    
-                    // Metadata
-                    summary: { type: "string", description: "Summary of extracted data" },
-                    documentDate: { type: "string", description: "Statement date" },
-                    institutionName: { type: "string", description: "Institution name" },
-                    notes: { type: "string", description: "Important notes" }
-                  },
-                  required: ["summary"]
-                }
-              }
-            ]
-          }
-        ],
-        toolConfig: {
-          functionCallingConfig: {
-            mode: "ANY"
-          }
-        }
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
