@@ -153,7 +153,7 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
         </div>
         )}
         
-        {/* Sankey Flow Chart */}
+        {/* Sankey Flow Chart - Full width, centered */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="p-4 border-b border-border bg-accent flex items-center justify-between">
             <h3 className="font-semibold text-foreground">Asset Flow to Zakat</h3>
@@ -181,8 +181,8 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
             </div>
           )}
           
-          {/* Sankey Chart with Fullscreen */}
-          <div className="p-4 flex justify-center relative">
+          {/* Sankey Chart - Responsive and centered */}
+          <div className="p-6 flex justify-center items-center">
             <ZakatSankeyChart 
               data={{
                 liquidAssets: assetBreakdown.liquidAssets,
@@ -197,32 +197,10 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
                 zakatRate,
               }}
               currency={currency}
-              width={500}
-              height={320}
+              width={580}
+              height={380}
               showFullscreenButton={true}
             />
-          </div>
-          
-          {/* Legend with clear naming */}
-          <div className="px-4 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {assetBreakdown.liquidAssets > 0 && (
-              <LegendItem label="Cash & Savings" value={formatCurrency(assetBreakdown.liquidAssets, currency)} color="hsl(142, 76%, 36%)" />
-            )}
-            {assetBreakdown.investments > 0 && (
-              <LegendItem label="Investments" value={formatCurrency(assetBreakdown.investments, currency)} color="hsl(221, 83%, 53%)" />
-            )}
-            {assetBreakdown.retirement > 0 && (
-              <LegendItem label="Retirement" value={formatCurrency(assetBreakdown.retirement, currency)} color="hsl(262, 83%, 58%)" />
-            )}
-            {assetBreakdown.realEstate > 0 && (
-              <LegendItem label="Real Estate" value={formatCurrency(assetBreakdown.realEstate, currency)} color="hsl(25, 95%, 53%)" />
-            )}
-            {assetBreakdown.business > 0 && (
-              <LegendItem label="Business" value={formatCurrency(assetBreakdown.business, currency)} color="hsl(340, 82%, 52%)" />
-            )}
-            {assetBreakdown.otherAssets > 0 && (
-              <LegendItem label="Other Assets" value={formatCurrency(assetBreakdown.otherAssets, currency)} color="hsl(var(--primary))" />
-            )}
           </div>
         </div>
         
@@ -388,15 +366,7 @@ function BreakdownRow({
   );
 }
 
-function LegendItem({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div className="flex items-center gap-2 text-sm">
-      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-      <span className="text-muted-foreground truncate">{label}</span>
-      <span className="font-medium text-foreground ml-auto">{value}</span>
-    </div>
-  );
-}
+// LegendItem removed - no longer used since chart shows all info
 
 interface ChartData {
   name: string;
