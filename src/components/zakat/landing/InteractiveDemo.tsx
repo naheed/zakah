@@ -629,7 +629,7 @@ export function InteractiveDemo() {
   );
 }
 
-// Simplified animated Sankey chart for the demo - Single Zakat output with 401(k)
+// Proper Sankey chart with top-edge alignment and multi-colored Zakat flows
 function AnimatedSankeyChart({ 
   showZakatValue, 
   isAnimating,
@@ -663,30 +663,70 @@ function AnimatedSankeyChart({
   ];
   
   const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
+  const currentZakat = selectedMode === "conservative" 
+    ? DEMO_DATA.conservativeZakat 
+    : DEMO_DATA.optimizedZakat;
   
-  // Calculate asset node heights and positions proportionally
-  const assetSpacing = 4;
-  const availableHeight = height - 16;
-  let currentY = 8;
+  // Available height for the chart content
+  const topMargin = 8;
+  const bottomMargin = 16; // Space for label
+  const availableHeight = height - topMargin - bottomMargin;
   
+  // Left side: Asset nodes - proportional heights stacked from top
+  const assetSpacing = 3;
+  const totalSpacing = assetSpacing * (assets.length - 1);
+  const leftNodeAreaHeight = availableHeight;
+  
+  let leftY = topMargin;
   const assetNodes = assets.map((asset) => {
-    const nodeHeight = Math.max(12, (asset.value / totalAssets) * (availableHeight - assetSpacing * 3));
-    const node = { ...asset, y: currentY, height: nodeHeight };
-    currentY += nodeHeight + assetSpacing;
+    const proportion = asset.value / totalAssets;
+    const nodeHeight = Math.max(10, proportion * (leftNodeAreaHeight - totalSpacing));
+    const node = { ...asset, y: leftY, height: nodeHeight, proportion };
+    leftY += nodeHeight + assetSpacing;
     return node;
   });
   
-  // Center node (Net Zakatable)
+  // Center node (Net Zakatable) - spans the full height of incoming flows
   const centerX = width * 0.48;
-  const centerY = 12;
-  const centerHeight = height - 28;
+  const centerY = topMargin;
+  const centerHeight = availableHeight;
   
-  // Single Zakat node (right side)
+  // Calculate flow positions on center node - stacked from top (proportional)
+  let centerFlowY = centerY;
+  const flowPositions = assetNodes.map((asset) => {
+    const flowThickness = asset.proportion * centerHeight;
+    const position = {
+      asset,
+      sourceY: asset.y + asset.height / 2,
+      targetY: centerFlowY + flowThickness / 2,
+      thickness: flowThickness,
+      topY: centerFlowY, // Top edge of this flow on center node
+    };
+    centerFlowY += flowThickness;
+    return position;
+  });
+  
+  // Zakat node - height proportional to zakat rate (2.5%), positioned to receive all flows
   const zakatX = width - rightPadding - nodeWidth;
-  const zakatY = height / 2 - 18;
-  const zakatHeight = 36;
+  const zakatProportion = currentZakat / totalAssets;
+  const zakatHeight = Math.max(30, zakatProportion * centerHeight * 4); // Scale up for visibility
+  const zakatY = centerY + (centerHeight - zakatHeight) / 2; // Center vertically
   
-  // Generate curved path
+  // Calculate each asset's contribution to Zakat (proportional to their share of total)
+  let zakatFlowY = zakatY;
+  const zakatFlowPositions = flowPositions.map((flow) => {
+    const zakatContribution = flow.asset.proportion * zakatHeight;
+    const position = {
+      ...flow,
+      zakatTargetY: zakatFlowY + zakatContribution / 2,
+      zakatThickness: zakatContribution,
+      zakatTopY: zakatFlowY,
+    };
+    zakatFlowY += zakatContribution;
+    return position;
+  });
+  
+  // Generate curved path for Sankey flows
   const generatePath = (
     startX: number, 
     startY: number, 
@@ -718,60 +758,58 @@ function AnimatedSankeyChart({
           </filter>
         </defs>
         
-        {/* Asset nodes (left) with staggered animation */}
-        {assetNodes.map((asset, i) => {
-          const flowThickness = Math.max(5, (asset.value / totalAssets) * 36);
-          const endY = centerY + (i + 0.5) * (centerHeight / assetNodes.length);
-          
-          return (
-            <g key={asset.name}>
-              <motion.rect
-                x={leftPadding}
-                y={asset.y}
-                width={nodeWidth}
-                height={asset.height}
-                rx={2}
-                fill={asset.color}
-                initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
-                animate={{ scaleY: 1, opacity: 1 }}
-                transition={{ 
-                  duration: 0.4, 
-                  delay: i * 0.08,
-                  ease: M3_EASING.emphasizedDecelerate 
-                }}
-                style={{ transformOrigin: `${leftPadding + nodeWidth/2}px ${asset.y + asset.height/2}px` }}
-              />
-              {/* Flow to center with path drawing effect */}
-              <motion.path
-                d={generatePath(
-                  leftPadding + nodeWidth,
-                  asset.y + asset.height / 2,
-                  centerX,
-                  endY,
-                  flowThickness
-                )}
-                fill={asset.color}
-                fillOpacity={0.25}
-                initial={isAnimating ? { opacity: 0 } : false}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
-              />
-              {/* Asset label */}
-              <motion.text
-                x={leftPadding + nodeWidth + 4}
-                y={asset.y + asset.height / 2 + 3}
-                className="fill-muted-foreground text-[6px]"
-                initial={isAnimating ? { opacity: 0 } : false}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 + i * 0.08 }}
-              >
-                {asset.name}
-              </motion.text>
-            </g>
-          );
-        })}
+        {/* Asset nodes (left) and flows to center - staggered animation */}
+        {flowPositions.map((flow, i) => (
+          <g key={flow.asset.name}>
+            {/* Asset node rect */}
+            <motion.rect
+              x={leftPadding}
+              y={flow.asset.y}
+              width={nodeWidth}
+              height={flow.asset.height}
+              rx={2}
+              fill={flow.asset.color}
+              initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
+              animate={{ scaleY: 1, opacity: 1 }}
+              transition={{ 
+                duration: 0.4, 
+                delay: i * 0.08,
+                ease: M3_EASING.emphasizedDecelerate 
+              }}
+              style={{ transformOrigin: `${leftPadding + nodeWidth/2}px ${flow.asset.y + flow.asset.height/2}px` }}
+            />
+            
+            {/* Flow from asset to center - maintaining asset color, stacked on center */}
+            <motion.path
+              d={generatePath(
+                leftPadding + nodeWidth,
+                flow.sourceY,
+                centerX,
+                flow.targetY,
+                flow.thickness
+              )}
+              fill={flow.asset.color}
+              fillOpacity={0.45}
+              initial={isAnimating ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
+            />
+            
+            {/* Asset label */}
+            <motion.text
+              x={leftPadding + nodeWidth + 4}
+              y={flow.asset.y + flow.asset.height / 2 + 3}
+              className="fill-muted-foreground text-[6px]"
+              initial={isAnimating ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 + i * 0.08 }}
+            >
+              {flow.asset.name}
+            </motion.text>
+          </g>
+        ))}
         
-        {/* Center node (Net Zakatable) */}
+        {/* Center node (Net Zakatable) - spans full height */}
         <motion.rect
           x={centerX}
           y={centerY}
@@ -785,23 +823,26 @@ function AnimatedSankeyChart({
           style={{ transformOrigin: `${centerX + nodeWidth/2}px ${centerY + centerHeight/2}px` }}
         />
         
-        {/* Single Zakat output flow */}
-        <motion.path
-          d={generatePath(
-            centerX + nodeWidth,
-            centerY + centerHeight / 2,
-            zakatX,
-            height / 2,
-            20
-          )}
-          fill={ASSET_COLORS.zakat}
-          fillOpacity={0.35}
-          initial={isAnimating ? { opacity: 0 } : false}
-          animate={{ opacity: showZakatValue ? 1 : 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        />
+        {/* Multi-colored Zakat flows - each asset's color continues to Zakat node */}
+        {zakatFlowPositions.map((flow, i) => (
+          <motion.path
+            key={`zakat-flow-${flow.asset.name}`}
+            d={generatePath(
+              centerX + nodeWidth,
+              flow.targetY, // Start from where left flow enters center
+              zakatX,
+              flow.zakatTargetY, // End at stacked position on Zakat node
+              flow.zakatThickness
+            )}
+            fill={flow.asset.color}
+            fillOpacity={0.55}
+            initial={isAnimating ? { opacity: 0 } : false}
+            animate={{ opacity: showZakatValue ? 1 : 0 }}
+            transition={{ duration: 0.5, delay: 0.5 + i * 0.06 }}
+          />
+        ))}
         
-        {/* Single Zakat node with celebration animation */}
+        {/* Zakat node with celebration animation - proportional height */}
         <motion.rect
           x={zakatX}
           y={zakatY}
@@ -822,7 +863,7 @@ function AnimatedSankeyChart({
             ease: M3_EASING.emphasizedDecelerate,
             scale: isCelebrating ? { duration: 1, repeat: Infinity, repeatType: "reverse" } : undefined
           }}
-          style={{ transformOrigin: `${zakatX + nodeWidth/2}px ${height/2}px` }}
+          style={{ transformOrigin: `${zakatX + nodeWidth/2}px ${zakatY + zakatHeight/2}px` }}
         />
         
         {/* Zakat label with mode indicator */}
@@ -834,7 +875,7 @@ function AnimatedSankeyChart({
           >
             <text
               x={zakatX - 4}
-              y={height / 2 - 4}
+              y={zakatY + zakatHeight / 2 - 4}
               textAnchor="end"
               className="fill-foreground text-[7px] font-medium capitalize"
             >
@@ -842,7 +883,7 @@ function AnimatedSankeyChart({
             </text>
             <text
               x={zakatX - 4}
-              y={height / 2 + 5}
+              y={zakatY + zakatHeight / 2 + 5}
               textAnchor="end"
               className="fill-muted-foreground text-[6px]"
             >
