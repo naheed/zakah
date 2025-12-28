@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.get-usage-metrics]
 verify_jwt = false
+
+[functions.generate-referral-code]
+verify_jwt = false
+
+[functions.get-referral-stats]
+verify_jwt = false
