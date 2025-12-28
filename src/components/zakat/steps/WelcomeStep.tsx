@@ -224,31 +224,21 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
           <div className="order-2 md:order-1">
             <MockReportPreview />
             
-            {/* Usage Metrics - Social Proof */}
-            {(metricsLoading || (metrics && metrics.allTime.calculations > 0)) && (
+            {/* Usage Metrics - Social Proof (only show when 5+ unique sessions for privacy) */}
+            {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
               <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm">
-                {metricsLoading ? (
-                  <>
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-5 w-32" />
-                  </>
-                ) : metrics && (
-                  <>
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Calculator className="w-4 h-4 text-primary" />
-                      <span className="font-medium text-foreground">{formatCount(metrics.allTime.calculations)}</span> calculations
-                    </span>
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <DollarSign className="w-4 h-4 text-primary" />
-                      <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}</span> evaluated
-                    </span>
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Heart className="w-4 h-4 text-primary" />
-                      <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span> Zakat calculated
-                    </span>
-                  </>
-                )}
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calculator className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-foreground">{formatCount(metrics.allTime.calculations)}</span> calculations
+                </span>
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}</span> evaluated
+                </span>
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Heart className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span> Zakat calculated
+                </span>
               </div>
             )}
           </div>
