@@ -254,6 +254,7 @@ export function ZakatWizard() {
             calculationName={calculationName}
             savedCalculationId={savedCalculationId}
             onCalculationSaved={setSavedCalculationId}
+            onEditCalculation={() => setCurrentStepIndex(1)}
           />
         );
       default:

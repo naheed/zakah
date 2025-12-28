@@ -2,20 +2,32 @@ import { ZakatFormData, formatCurrency, formatPercent, CalculationMode } from "@
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn, Settings, Share2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn, Share2, ChevronDown, ChevronUp, Edit, Mail, MessageCircle, Twitter, Facebook, Copy, Check, Heart, Sparkles, Users, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
 import { ShareDrawer } from "../ShareDrawer";
-import { ShareToolSection } from "../ShareToolSection";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { ZakatSankeyChart, SankeyChartData } from "../ZakatSankeyChart";
+import { ZakatSankeyChart } from "../ZakatSankeyChart";
 import { useTrackCalculation } from "@/hooks/useTrackCalculation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReferral } from "@/hooks/useReferral";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -43,15 +55,26 @@ interface ResultsStepProps {
   calculationName?: string;
   savedCalculationId?: string;
   onCalculationSaved?: (id: string) => void;
+  onEditCalculation?: () => void;
 }
 
-export function ResultsStep({ data, updateData, calculations, calculationName, savedCalculationId, onCalculationSaved }: ResultsStepProps) {
+export function ResultsStep({ 
+  data, 
+  updateData, 
+  calculations, 
+  calculationName, 
+  savedCalculationId, 
+  onCalculationSaved,
+  onEditCalculation 
+}: ResultsStepProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showSettings, setShowSettings] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [breakdownOpen, setBreakdownOpen] = useState(!isMobile);
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   const { trackCalculation } = useTrackCalculation();
   const { currency } = data;
   const {
@@ -101,6 +124,12 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
   const handleReset = () => {
     window.location.reload();
   };
+
+  const handleEdit = () => {
+    if (onEditCalculation) {
+      onEditCalculation();
+    }
+  };
   
   return (
     <div className="max-w-2xl mx-auto">
@@ -110,7 +139,7 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
       />
       
       <div className="space-y-6">
-        {/* Main Result Card */}
+        {/* 1. Main Result Card - The Aha! Moment */}
         <div className={`rounded-2xl p-8 text-center ${
           isAboveNisab 
             ? 'bg-primary text-primary-foreground' 
@@ -140,8 +169,40 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
             </>
           )}
         </div>
+
+        {/* 2. Edit Strip - Quick Actions */}
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            className="flex-1 h-11 gap-2"
+            onClick={handleEdit}
+          >
+            <Edit className="w-4 h-4" />
+            Review & Edit
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" className="flex-1 h-11 gap-2">
+                <RotateCcw className="w-4 h-4" />
+                Start New
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Start New Calculation?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will clear all your current data and start fresh. Make sure you've saved or downloaded your results if needed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleReset}>Start Fresh</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
         
-        {/* Purification Alert */}
+        {/* 3. Purification Alert (if applicable) */}
         {totalPurification > 0 && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
             <h3 className="font-semibold text-destructive mb-2">⚠️ Purification Required</h3>
@@ -160,120 +221,26 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
                 </p>
               )}
             </div>
-        </div>
-        )}
-        
-        {/* Sankey Flow Chart - Full width, centered */}
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-border bg-accent flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Asset Flow to Zakat</h3>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => {
-                const newMode = data.calculationMode === 'conservative' ? 'optimized' : 'conservative';
-                updateData({ calculationMode: newMode });
-              }}
-            >
-              <Settings2 className="w-4 h-4 mr-1" />
-              {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
-            </Button>
           </div>
-          
-          {showSettings && (
-            <div className="p-4 bg-muted/50 border-b border-border">
-              <p className="text-sm text-muted-foreground mb-2">
-                <strong>Conservative:</strong> Pay on full asset values (safer)
-              </p>
-              <p className="text-sm text-muted-foreground">
-                <strong>Optimized:</strong> Apply 30% rule for passive investments, deduct taxes/penalties from retirement
-              </p>
-            </div>
-          )}
-          
-          {/* Sankey Chart - Responsive and centered */}
-          <div className={`${isMobile ? 'p-3' : 'p-6'} flex justify-center items-center overflow-x-auto`}>
-            <ZakatSankeyChart 
-              data={{
-                liquidAssets: assetBreakdown.liquidAssets,
-                investments: assetBreakdown.investments,
-                retirement: assetBreakdown.retirement,
-                realEstate: assetBreakdown.realEstate,
-                business: assetBreakdown.business,
-                otherAssets: assetBreakdown.otherAssets,
-                totalLiabilities,
-                zakatDue,
-                netZakatableWealth,
-                zakatRate,
-              }}
-              currency={currency}
-              width={isMobile ? 340 : 580}
-              height={isMobile ? 280 : 380}
-              showLabels={!isMobile}
-              showFullscreenButton={true}
-            />
-          </div>
-        </div>
-        
-        {/* Calculation Summary */}
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-border bg-accent">
-            <h3 className="font-semibold text-foreground">Calculation Summary</h3>
-          </div>
-          
-          <div className="divide-y divide-border">
-            <BreakdownRow label="Total Zakatable Assets" value={formatCurrency(totalAssets, currency)} />
-            <BreakdownRow label="Total Deductions" value={`-${formatCurrency(totalLiabilities, currency)}`} variant="negative" />
-            <BreakdownRow label="Net Zakatable Wealth" value={formatCurrency(netZakatableWealth, currency)} bold />
-            <BreakdownRow label={`Niṣāb (${data.nisabStandard})`} value={formatCurrency(nisab, currency)} />
-            <BreakdownRow label={`Zakat Rate (${data.calendarType})`} value={formatPercent(zakatRate)} />
-            <BreakdownRow label="Zakat Due" value={formatCurrency(zakatDue, currency)} variant="positive" bold />
-          </div>
-        </div>
-        
-        {isAboveNisab && (
-          <InfoCard variant="success" title="Congratulations!">
-            <p>
-              Allah has blessed you with wealth above the niṣāb. By paying your Zakat, 
-              you purify your wealth and fulfill one of the five pillars of Islam. 
-              May Allah accept your Zakat and bless you with more.
-            </p>
-          </InfoCard>
-        )}
-        
-        {!isAboveNisab && (
-          <InfoCard variant="tip" title="Consider Voluntary Charity">
-            <p>
-              While Zakat is not obligatory for you this year, you can still earn 
-              rewards through voluntary charity (Sadaqah). Every good deed counts!
-            </p>
-          </InfoCard>
         )}
 
-        {/* Save Your Work Prompt - for non-authenticated users */}
+        {/* 4. Save Section - For non-authenticated users */}
         {!user && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center space-y-4">
             <div>
               <h3 className="font-semibold text-lg text-foreground mb-2">Save Your Calculation</h3>
               <p className="text-muted-foreground text-sm">
-                Create a free account to save this calculation and access it anytime. 
-                You can also track your Zakat history across multiple years.
+                Create a free account to save this calculation and track your Zakat history.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleSignIn} className="gap-2">
-                <LogIn className="w-4 h-4" />
-                Sign In / Create Account
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Your session data is encrypted in your browser. Closing the browser clears the encryption key.
-              Sign in to save permanently with end-to-end encryption.
-            </p>
+            <Button onClick={handleSignIn} className="gap-2">
+              <LogIn className="w-4 h-4" />
+              Sign In / Create Account
+            </Button>
           </div>
         )}
-        
-        {/* Actions - Stack on mobile for better touch targets */}
+
+        {/* 5. Primary Actions */}
         <div className="flex flex-col gap-3">
           <Button 
             variant="outline" 
@@ -284,8 +251,8 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
             <Download className="w-4 h-4" />
             {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
-          <div className="flex flex-col sm:flex-row gap-3">
-            {user && (
+          {user && (
+            <div className="flex flex-col sm:flex-row gap-3">
               <SaveCalculationDialog 
                 formData={data}
                 onSaved={onCalculationSaved}
@@ -296,48 +263,322 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
                   </Button>
                 }
               />
-            )}
-            <ShareDrawer 
-              formData={data} 
-              zakatDue={zakatDue}
-              calculationId={savedCalculationId}
+            </div>
+          )}
+        </div>
+        
+        {/* 6. Collapsible Calculation Breakdown */}
+        <Collapsible open={breakdownOpen} onOpenChange={setBreakdownOpen}>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <CollapsibleTrigger className="w-full p-4 border-b border-border bg-accent flex items-center justify-between hover:bg-accent/80 transition-colors">
+              <h3 className="font-semibold text-foreground">View Calculation Breakdown</h3>
+              {breakdownOpen ? (
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              )}
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              {/* Sankey Chart */}
+              <div className="border-b border-border">
+                <div className="p-3 flex items-center justify-between bg-muted/30">
+                  <span className="text-sm text-muted-foreground">Asset Flow to Zakat</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      const newMode = data.calculationMode === 'conservative' ? 'optimized' : 'conservative';
+                      updateData({ calculationMode: newMode });
+                    }}
+                  >
+                    <Settings2 className="w-4 h-4 mr-1" />
+                    {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
+                  </Button>
+                </div>
+                
+                {showSettings && (
+                  <div className="p-4 bg-muted/50 border-b border-border">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      <strong>Conservative:</strong> Pay on full asset values (safer)
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Optimized:</strong> Apply 30% rule for passive investments, deduct taxes/penalties from retirement
+                    </p>
+                  </div>
+                )}
+                
+                <div className={`${isMobile ? 'p-3' : 'p-6'} flex justify-center items-center overflow-x-auto`}>
+                  <ZakatSankeyChart 
+                    data={{
+                      liquidAssets: assetBreakdown.liquidAssets,
+                      investments: assetBreakdown.investments,
+                      retirement: assetBreakdown.retirement,
+                      realEstate: assetBreakdown.realEstate,
+                      business: assetBreakdown.business,
+                      otherAssets: assetBreakdown.otherAssets,
+                      totalLiabilities,
+                      zakatDue,
+                      netZakatableWealth,
+                      zakatRate,
+                    }}
+                    currency={currency}
+                    width={isMobile ? 340 : 580}
+                    height={isMobile ? 280 : 380}
+                    showLabels={!isMobile}
+                    showFullscreenButton={true}
+                  />
+                </div>
+              </div>
+              
+              {/* Summary Table */}
+              <div className="divide-y divide-border">
+                <BreakdownRow label="Total Zakatable Assets" value={formatCurrency(totalAssets, currency)} />
+                <BreakdownRow label="Total Deductions" value={`-${formatCurrency(totalLiabilities, currency)}`} variant="negative" />
+                <BreakdownRow label="Net Zakatable Wealth" value={formatCurrency(netZakatableWealth, currency)} bold />
+                <BreakdownRow label={`Niṣāb (${data.nisabStandard})`} value={formatCurrency(nisab, currency)} />
+                <BreakdownRow label={`Zakat Rate (${data.calendarType})`} value={formatPercent(zakatRate)} />
+                <BreakdownRow label="Zakat Due" value={formatCurrency(zakatDue, currency)} variant="positive" bold />
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+        
+        {/* 7. Celebration & Share Section - Combined */}
+        <CelebrationShareSection 
+          isAboveNisab={isAboveNisab} 
+          currency={currency}
+          formData={data}
+          zakatDue={zakatDue}
+          savedCalculationId={savedCalculationId}
+        />
+
+        {/* 8. Collapsible Disclaimer */}
+        <Collapsible open={disclaimerOpen} onOpenChange={setDisclaimerOpen}>
+          <div className="border border-border rounded-xl overflow-hidden bg-muted/30">
+            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm font-medium">What this calculator doesn't cover</span>
+              </div>
+              {disclaimerOpen ? (
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              )}
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="p-4 pt-0 text-sm text-muted-foreground space-y-2">
+                <p>This calculator does not cover:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Farming assets harvested for sale</li>
+                  <li>Ḥarām earnings (bonds, interest income, etc.)</li>
+                </ul>
+                <p className="pt-2">
+                  If you have these, please consult a specialist in Islamic Finance.
+                </p>
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      </div>
+    </div>
+  );
+}
+
+// Combined Celebration & Share Section Component
+function CelebrationShareSection({ 
+  isAboveNisab, 
+  currency,
+  formData,
+  zakatDue,
+  savedCalculationId
+}: { 
+  isAboveNisab: boolean; 
+  currency: string;
+  formData: ZakatFormData;
+  zakatDue: number;
+  savedCalculationId?: string;
+}) {
+  const { toast } = useToast();
+  const { 
+    referralCode, 
+    stats, 
+    isLoading, 
+    isGenerating,
+    generateReferralCode, 
+    fetchStats,
+    getInviteUrl 
+  } = useReferral();
+  const [copied, setCopied] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState<string>('');
+
+  useEffect(() => {
+    const init = async () => {
+      const code = await generateReferralCode();
+      if (code) {
+        setInviteUrl(getInviteUrl(code));
+      }
+      fetchStats();
+    };
+    init();
+  }, [generateReferralCode, fetchStats, getInviteUrl]);
+
+  useEffect(() => {
+    if (referralCode) {
+      setInviteUrl(getInviteUrl(referralCode));
+    }
+  }, [referralCode, getInviteUrl]);
+
+  const handleCopy = async () => {
+    if (!inviteUrl) return;
+    
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      toast({
+        title: 'Link Copied',
+        description: 'Share this link with friends and family.',
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: 'Copy Failed',
+        description: 'Please copy the link manually.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const shareMessage = encodeURIComponent(
+    `I just calculated my Zakat using this amazing tool. It follows authentic Islamic methodology and makes the process so easy. Try it out: ${inviteUrl}`
+  );
+
+  const shareLinks = {
+    email: `mailto:?subject=${encodeURIComponent('Calculate Your Zakat')}&body=${shareMessage}`,
+    whatsapp: `https://wa.me/?text=${shareMessage}`,
+    twitter: `https://twitter.com/intent/tweet?text=${shareMessage}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl)}&quote=${shareMessage}`,
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 rounded-xl overflow-hidden">
+      {/* Celebration Message */}
+      <div className="p-6 text-center border-b border-primary/10">
+        <Heart className="w-8 h-8 mx-auto mb-3 text-primary" />
+        {isAboveNisab ? (
+          <>
+            <h3 className="font-semibold text-lg text-foreground mb-2">Congratulations!</h3>
+            <p className="text-sm text-muted-foreground">
+              Allah has blessed you with wealth above the niṣāb. By paying your Zakat, 
+              you purify your wealth and fulfill one of the five pillars of Islam.
+            </p>
+          </>
+        ) : (
+          <>
+            <h3 className="font-semibold text-lg text-foreground mb-2">Consider Voluntary Charity</h3>
+            <p className="text-sm text-muted-foreground">
+              While Zakat is not obligatory this year, you can still earn 
+              rewards through voluntary charity (Sadaqah).
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* Share Section */}
+      <div className="p-6 space-y-4">
+        {/* Hadith Quote */}
+        <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 border border-border/50">
+          <p className="text-sm italic text-muted-foreground leading-relaxed text-center">
+            "Whoever guides someone to goodness will have a reward like one who did it."
+          </p>
+          <p className="text-xs text-muted-foreground mt-2 font-medium text-center">
+            — Prophet Muhammad ﷺ (Ṣaḥīḥ Muslim 1893)
+          </p>
+        </div>
+
+        <p className="text-sm text-muted-foreground text-center">
+          Share this tool with friends & family
+        </p>
+
+        {/* Share Buttons */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <a href={shareLinks.email} target="_blank" rel="noopener noreferrer">
+              <Mail className="w-4 h-4" />
+              Email
+            </a>
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </a>
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer">
+              <Twitter className="w-4 h-4" />
+              Twitter
+            </a>
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer">
+              <Facebook className="w-4 h-4" />
+              Facebook
+            </a>
+          </Button>
+        </div>
+
+        {/* Personal Invite Link */}
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground text-center">Your personal invite link:</p>
+          <div className="flex gap-2">
+            <Input
+              readOnly
+              value={inviteUrl || 'Loading...'}
+              className="font-mono text-xs bg-muted/50"
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleCopy}
+              disabled={!inviteUrl || isGenerating}
             >
-              <Button variant="outline" className="flex-1 h-12 gap-2">
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
-            </ShareDrawer>
+              {copied ? (
+                <Check className="w-4 h-4 text-primary" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </Button>
           </div>
         </div>
 
-        {/* Adjust Settings & Start Over */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link to="/settings" className="flex-1">
-            <Button variant="ghost" className="w-full h-11 gap-2">
-              <Settings className="w-4 h-4" />
-              Adjust Settings
-            </Button>
-          </Link>
-          <Button 
-            variant="ghost" 
-            className="flex-1 h-11 gap-2"
-            onClick={handleReset}
-          >
-            <RotateCcw className="w-4 h-4" />
-            Start Over
-          </Button>
-        </div>
-        
-        <InfoCard variant="warning" title="Important Note">
-          <p>
-            This calculator does not cover: (1) Farming assets harvested for sale, 
-            (2) Ḥarām earnings (bonds, interest income, etc.). If you have these, 
-            please consult a specialist in Islamic Finance.
-          </p>
-        </InfoCard>
+        {/* Referral Stats */}
+        {stats && stats.totalReferrals > 0 && (
+          <div className="bg-primary/10 rounded-lg p-3 text-center">
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="font-medium">{stats.totalReferrals}</span>
+              <span className="text-muted-foreground">
+                {stats.totalReferrals === 1 ? 'calculation' : 'calculations'} through your shares
+              </span>
+            </div>
+          </div>
+        )}
 
-        {/* Share Tool Section */}
-        <ShareToolSection currency={currency} />
+        {/* Share with Spouse - Secondary */}
+        <div className="pt-2 border-t border-border/50">
+          <ShareDrawer 
+            formData={formData} 
+            zakatDue={zakatDue}
+            calculationId={savedCalculationId}
+          >
+            <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground">
+              <Share2 className="w-4 h-4" />
+              Share calculation with spouse
+            </Button>
+          </ShareDrawer>
+        </div>
       </div>
     </div>
   );
@@ -379,75 +620,6 @@ function BreakdownRow({
       <span className={`font-mono ${bold ? 'font-bold text-lg' : ''} ${valueColors[variant]}`}>
         {value}
       </span>
-    </div>
-  );
-}
-
-// LegendItem removed - no longer used since chart shows all info
-
-interface ChartData {
-  name: string;
-  value: number;
-  color: string;
-}
-
-function AssetDonutChart({ 
-  breakdown, 
-  currency 
-}: { 
-  breakdown: ResultsStepProps['calculations']['assetBreakdown'];
-  currency: string;
-}) {
-  const chartData: ChartData[] = [
-    { name: 'Liquid Assets', value: breakdown.liquidAssets, color: 'hsl(var(--chart-1))' },
-    { name: 'Investments', value: breakdown.investments, color: 'hsl(var(--chart-2))' },
-    { name: 'Retirement', value: breakdown.retirement, color: 'hsl(var(--chart-3))' },
-    { name: 'Real Estate', value: breakdown.realEstate, color: 'hsl(var(--chart-4))' },
-    { name: 'Business', value: breakdown.business, color: 'hsl(var(--chart-5))' },
-    { name: 'Other', value: breakdown.otherAssets, color: 'hsl(var(--primary))' },
-  ].filter(item => item.value > 0);
-
-  if (chartData.length === 0) {
-    return (
-      <div className="h-48 flex items-center justify-center text-muted-foreground">
-        No assets to display
-      </div>
-    );
-  }
-
-  const total = chartData.reduce((sum, item) => sum + item.value, 0);
-
-  return (
-    <div className="h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={90}
-            paddingAngle={2}
-            dataKey="value"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip 
-            formatter={(value: number) => formatCurrency(value, currency)}
-            contentStyle={{
-              backgroundColor: 'hsl(var(--card))',
-              borderColor: 'hsl(var(--border))',
-              borderRadius: '8px',
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="text-center -mt-4">
-        <p className="text-sm text-muted-foreground">Total Zakatable</p>
-        <p className="text-xl font-bold text-foreground">{formatCurrency(total, currency)}</p>
-      </div>
     </div>
   );
 }
