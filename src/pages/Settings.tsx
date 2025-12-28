@@ -138,23 +138,6 @@ export default function Settings() {
         </div>
 
         <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
-          {/* Current Settings Summary */}
-          <div className="flex items-center gap-2 flex-wrap p-3 bg-card rounded-lg border border-border">
-            <span className="text-xs text-muted-foreground mr-1">Current:</span>
-            <Badge variant="secondary" className="text-xs">
-              {formData.nisabStandard === 'silver' ? '🥈 Silver' : '🥇 Gold'}
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {formData.calendarType === 'lunar' ? '🌙 Lunar' : '☀️ Solar'}
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {formData.isHousehold ? '👨‍👩‍👧 Household' : '👤 Individual'}
-            </Badge>
-            <span className="ml-auto text-xs text-muted-foreground">
-              Niṣāb: {formatCurrency(currentNisab, formData.currency)}
-            </span>
-          </div>
-
           {/* Calculation Settings Group */}
           <Collapsible open={calculationOpen} onOpenChange={setCalculationOpen}>
             <CollapsibleTrigger asChild>
