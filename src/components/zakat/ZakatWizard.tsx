@@ -191,19 +191,16 @@ export function ZakatWizard() {
   const isWelcomePage = currentStep.id === 'welcome';
   // Check if we're on a settings page
   const isSettingsPage = currentStep.isSettings;
-  // Get total non-settings steps for progress
-  const mainSteps = activeSteps.filter(s => !s.isSettings);
-  const mainStepIndex = mainSteps.findIndex(s => s.id === currentStep.id);
-  const progressStepIndex = mainStepIndex >= 0 ? mainStepIndex : mainSteps.length - 1;
-  
-  // Calculate question number (1-indexed, excluding welcome)
-  // This matches the progress bar's step numbering
+
+  // Progress and question numbering should exclude the welcome step (but include results)
+  const progressSteps = activeSteps.filter(s => !s.isSettings && s.id !== 'welcome');
+  const progressStepIndexRaw = progressSteps.findIndex(s => s.id === currentStep.id);
+  const progressStepIndex = progressStepIndexRaw >= 0 ? progressStepIndexRaw : progressSteps.length - 1;
+
+  // Calculate question number (1-indexed, excluding welcome + settings)
   const getQuestionNumber = () => {
-    // Welcome is not a question, so question numbers start from step index 1
-    // The progress bar shows "currentStep + 1 of totalSteps" where currentStep is 0-indexed
-    // So progressStepIndex + 1 should match the question number
     if (currentStep.id === 'welcome' || currentStep.isSettings) {
-      return undefined; // No question number for welcome or settings
+      return undefined;
     }
     return progressStepIndex + 1;
   };
@@ -303,7 +300,7 @@ export function ZakatWizard() {
               <div className="flex-1">
                 <ProgressBar 
                   currentStep={progressStepIndex} 
-                  totalSteps={mainSteps.length}
+                  totalSteps={progressSteps.length}
                   section={isSettingsPage ? 'settings' : currentStep.section}
                 />
               </div>
