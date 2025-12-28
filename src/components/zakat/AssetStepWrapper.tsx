@@ -6,6 +6,7 @@ import { DocumentUpload } from "./DocumentUpload";
 import { StepDocumentsDisplay } from "./DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { useDocumentExtraction } from "@/hooks/useDocumentExtraction";
+import { ProTip } from "./ProTip";
 
 interface AssetStepWrapperProps {
   content: StepContent;
@@ -44,6 +45,11 @@ export function AssetStepWrapper({
 
   return (
     <QuestionLayout content={content} questionNumber={questionNumber}>
+      {/* Pro tip for math in inputs */}
+      <ProTip tipKey="math-inputs">
+        <strong>Pro tip:</strong> You can do math in any field below, e.g. type "1000 + 500" and it will calculate automatically.
+      </ProTip>
+
       {/* Household mode reminder */}
       {isHousehold && householdReminder && (
         <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
