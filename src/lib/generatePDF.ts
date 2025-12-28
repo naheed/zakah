@@ -22,23 +22,23 @@ interface ZakatCalculations {
   };
 }
 
-// PDF palette (RGB)
+// Premium warm palette (RGB)
 const COLORS = {
-  pageBg: [241, 245, 249] as [number, number, number],
-  white: [255, 255, 255] as [number, number, number],
-  border: [226, 232, 240] as [number, number, number],
-
-  dark: [15, 23, 42] as [number, number, number],
-  darkMuted: [30, 41, 59] as [number, number, number],
-
-  primary: [16, 185, 129] as [number, number, number], // emerald-ish
-
-  text: [15, 23, 42] as [number, number, number],
-  textMuted: [100, 116, 139] as [number, number, number],
-
+  pageBg: [249, 246, 243] as [number, number, number], // Warm cream
+  cardBg: [255, 255, 255] as [number, number, number],
+  headerBg: [28, 26, 24] as [number, number, number], // Warm dark
+  
+  primary: [16, 185, 129] as [number, number, number], // Emerald
+  gold: [218, 165, 32] as [number, number, number], // Gold accent
+  
+  text: [28, 26, 24] as [number, number, number],
+  textMuted: [128, 118, 102] as [number, number, number],
+  textLight: [180, 170, 155] as [number, number, number],
+  
+  border: [226, 220, 210] as [number, number, number],
   danger: [220, 38, 38] as [number, number, number],
-
-  // Asset colors (roughly aligned with the web chart)
+  
+  // Asset colors
   cash: [34, 197, 94] as [number, number, number],
   investments: [59, 130, 246] as [number, number, number],
   retirement: [139, 92, 246] as [number, number, number],
@@ -53,11 +53,11 @@ const ASSET_CONFIG: {
   color: [number, number, number];
 }[] = [
   { key: "liquidAssets", name: "Cash & Savings", color: COLORS.cash },
-  { key: "investments", name: "Investment Portfolio", color: COLORS.investments },
-  { key: "retirement", name: "Retirement Accounts", color: COLORS.retirement },
+  { key: "investments", name: "Investments", color: COLORS.investments },
+  { key: "retirement", name: "Retirement", color: COLORS.retirement },
   { key: "realEstate", name: "Real Estate", color: COLORS.realEstate },
   { key: "business", name: "Business", color: COLORS.business },
-  { key: "otherAssets", name: "Other Assets", color: COLORS.other },
+  { key: "otherAssets", name: "Other", color: COLORS.other },
 ];
 
 function drawRoundedRect(
@@ -80,32 +80,153 @@ function drawRoundedRect(
 }
 
 function formatAllocationPercent(value: number, total: number) {
-  if (!total || total <= 0) return "0.0%";
-  return `${((value / total) * 100).toFixed(1)}%`;
+  if (!total || total <= 0) return "0%";
+  return `${((value / total) * 100).toFixed(0)}%`;
 }
 
-function drawSectionTitle(doc: jsPDF, x: number, y: number, n: string, title: string) {
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...COLORS.textMuted);
-  doc.text(n, x, y);
+interface PDFOptions {
+  sankeyImageDataUrl?: string;
+}
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
+export async function generateZakatPDF(
+  data: ZakatFormData, 
+  calculations: ZakatCalculations, 
+  calculationName?: string,
+  options?: PDFOptions
+): Promise<void> {
+  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const currency = data.currency;
+  const date = new Date();
+  const dateStr = date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit" });
+
+  // Page background - warm cream
+  doc.setFillColor(...COLORS.pageBg);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+  // Main card container
+  const cardM = 10;
+  const cardX = cardM;
+  const cardY = cardM;
+  const cardW = pageWidth - cardM * 2;
+  const cardH = pageHeight - cardM * 2;
+  drawRoundedRect(doc, cardX, cardY, cardW, cardH, 4, COLORS.cardBg, COLORS.border);
+
+  const pad = 12;
+  let y = cardY + pad;
+
+  // === BISMILLAH SECTION (Top) ===
+  const bismillahArabic = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+  const bismillahEnglish = "In the name of Allah, the Most Gracious, the Most Merciful";
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(14);
   doc.setTextColor(...COLORS.text);
-  doc.text(title, x + 10, y);
+  doc.text(bismillahArabic, pageWidth / 2, y, { align: "center" });
+  
+  y += 6;
+  doc.setFontSize(8);
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text(bismillahEnglish, pageWidth / 2, y, { align: "center" });
+  
+  // Gold accent line under Bismillah
+  y += 6;
+  const lineW = 40;
+  doc.setDrawColor(...COLORS.gold);
+  doc.setLineWidth(0.5);
+  doc.line(pageWidth / 2 - lineW / 2, y, pageWidth / 2 + lineW / 2, y);
+  
+  y += 12;
 
-  return y + 6;
-}
+  // === HEADER SECTION ===
+  const headerH = 50;
+  doc.setFillColor(...COLORS.headerBg);
+  doc.roundedRect(cardX + pad, y, cardW - pad * 2, headerH, 3, 3, "F");
+  
+  // Primary accent bar
+  doc.setFillColor(...COLORS.primary);
+  doc.rect(cardX + pad, y, cardW - pad * 2, 2, "F");
+  
+  // Header content
+  const headerY = y;
+  
+  // Left side: Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("ZAKAT REPORT", cardX + pad + 10, headerY + 18);
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(200, 195, 190);
+  const calLabel = data.calendarType === "lunar" ? "Lunar (Hijri)" : "Solar (Gregorian)";
+  doc.text(`${calLabel} • ${formatPercent(calculations.zakatRate)} Rate`, cardX + pad + 10, headerY + 26);
+  
+  // Right side: Date
+  doc.setFontSize(7);
+  doc.setTextColor(180, 175, 170);
+  doc.text("Generated", cardX + cardW - pad - 10, headerY + 15, { align: "right" });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(255, 255, 255);
+  doc.text(dateStr, cardX + cardW - pad - 10, headerY + 22, { align: "right" });
 
-function drawAssetAllocation(
-  doc: jsPDF,
-  x: number,
-  y: number,
-  w: number,
-  calculations: ZakatCalculations,
-  currency: string
-): number {
+  // === HERO AMOUNT SECTION (within header) ===
+  if (calculations.isAboveNisab) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(200, 195, 190);
+    doc.text("Your Zakat Due", cardX + pad + 10, headerY + 38);
+    
+    // Large amount - using serif-like styling
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.setTextColor(255, 255, 255);
+    doc.text(formatCurrency(calculations.zakatDue, currency), cardX + pad + 10, headerY + 48);
+  } else {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(200, 195, 190);
+    doc.text("Below Niṣāb Threshold", cardX + pad + 10, headerY + 38);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text("No Zakat Due This Year", cardX + pad + 10, headerY + 48);
+  }
+
+  y = headerY + headerH + 10;
+
+  // === SANKEY CHART SECTION ===
+  if (options?.sankeyImageDataUrl) {
+    const sankeyW = cardW - pad * 2;
+    const sankeyH = 65;
+    
+    // Section label
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...COLORS.textMuted);
+    doc.text("ASSET FLOW TO ZAKAT", cardX + pad, y);
+    y += 5;
+    
+    // Add the captured Sankey image
+    try {
+      doc.addImage(options.sankeyImageDataUrl, "PNG", cardX + pad, y, sankeyW, sankeyH);
+    } catch {
+      // Fallback: draw a placeholder box
+      drawRoundedRect(doc, cardX + pad, y, sankeyW, sankeyH, 3, COLORS.pageBg, COLORS.border);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...COLORS.textMuted);
+      doc.text("Sankey Chart", cardX + pad + sankeyW / 2, y + sankeyH / 2, { align: "center" });
+    }
+    
+    y += sankeyH + 10;
+  }
+
+  // === ASSET BREAKDOWN (Compact Table) ===
   const items = ASSET_CONFIG
     .map((a) => ({
       ...a,
@@ -114,275 +235,164 @@ function drawAssetAllocation(
     .filter((a) => a.value > 0)
     .sort((a, b) => b.value - a.value);
 
-  if (items.length === 0) {
-    doc.setFont("helvetica", "normal");
+  if (items.length > 0) {
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...COLORS.textMuted);
-    doc.text("No zakatable assets to display.", x, y + 4);
-    return y + 10;
+    doc.text("ASSET BREAKDOWN", cardX + pad, y);
+    y += 6;
+
+    const total = calculations.totalAssets || items.reduce((s, i) => s + i.value, 0);
+    const tableW = cardW - pad * 2;
+    const rowH = 8;
+    
+    // Table background
+    const tableH = items.length * rowH + 2;
+    drawRoundedRect(doc, cardX + pad, y, tableW, tableH, 2, COLORS.cardBg, COLORS.border);
+    
+    let tableY = y + 6;
+    items.forEach((item) => {
+      // Color dot
+      doc.setFillColor(...item.color);
+      doc.circle(cardX + pad + 6, tableY - 1, 1.5, "F");
+      
+      // Asset name
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...COLORS.text);
+      doc.text(item.name, cardX + pad + 12, tableY);
+      
+      // Percentage
+      doc.setTextColor(...COLORS.textMuted);
+      doc.text(formatAllocationPercent(item.value, total), cardX + pad + tableW * 0.6, tableY);
+      
+      // Value
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.text);
+      doc.text(formatCurrency(item.value, currency), cardX + pad + tableW - 6, tableY, { align: "right" });
+      
+      tableY += rowH;
+    });
+    
+    y += tableH + 8;
   }
 
-  const total = calculations.totalAssets || items.reduce((s, i) => s + i.value, 0);
-
-  const rowH = 18;
-  const gap = 6;
-
-  items.forEach((item) => {
-    drawRoundedRect(doc, x, y, w, rowH, 4, COLORS.white, COLORS.border);
-
-    // Color dot
-    doc.setFillColor(...item.color);
-    doc.circle(x + 7, y + 8, 2, "F");
-
-    // Label
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(...COLORS.text);
-    doc.text(item.name, x + 12, y + 8);
-
-    // Value (top-right)
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(...COLORS.text);
-    doc.text(formatCurrency(item.value, currency), x + w - 6, y + 8, { align: "right" });
-
-    // Percent (right, above bar)
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...COLORS.textMuted);
-    doc.text(formatAllocationPercent(item.value, total), x + w - 6, y + 12, { align: "right" });
-
-    // Progress bar (below text; avoid overlapping percent)
-    const barX = x + 12;
-    const barY = y + 14;
-    const barW = w - 24;
-    const barH = 3;
-
-    const trackR = Math.min(1.5, barH / 2);
-    doc.setFillColor(...COLORS.border);
-    doc.roundedRect(barX, barY, barW, barH, trackR, trackR, "F");
-
-    const fillWRaw = (item.value / total) * barW;
-    const fillW = Math.min(barW, Math.max(0.8, fillWRaw));
-    const fillR = Math.min(trackR, fillW / 2);
-
-    doc.setFillColor(...item.color);
-    doc.roundedRect(barX, barY, fillW, barH, fillR, fillR, "F");
-
-    y += rowH + gap;
-  });
-
-  return y - gap; // remove last gap
-}
-
-function drawKeyValueRow(
-  doc: jsPDF,
-  x: number,
-  y: number,
-  w: number,
-  label: string,
-  value: string,
-  opts?: { valueColor?: [number, number, number]; bold?: boolean }
-) {
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...COLORS.textMuted);
-  doc.text(label, x, y);
-
-  doc.setFont("helvetica", opts?.bold ? "bold" : "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...(opts?.valueColor ?? COLORS.text));
-  doc.text(value, x + w, y, { align: "right" });
-}
-
-export function generateZakatPDF(data: ZakatFormData, calculations: ZakatCalculations, calculationName?: string): void {
-  // Use mm + explicit A4 so the output is predictable and always one page.
-  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  const currency = data.currency;
-
-  const date = new Date();
-  const dateStr = date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
-  const yearStr = String(date.getFullYear());
-
-  // Page background
-  doc.setFillColor(...COLORS.pageBg);
-  doc.rect(0, 0, pageWidth, pageHeight, "F");
-
-  // Outer container (marketable “sheet” look)
-  const outerM = 8;
-  const cardX = outerM;
-  const cardY = outerM;
-  const cardW = pageWidth - outerM * 2;
-  const cardH = pageHeight - outerM * 2;
-  drawRoundedRect(doc, cardX, cardY, cardW, cardH, 6, COLORS.white, COLORS.border);
-
-  const pad = 10;
-
-  // Hero header
-  const headerH = 70;
-  doc.setFillColor(...COLORS.dark);
-  doc.rect(cardX, cardY, cardW, headerH, "F");
-  doc.setFillColor(...COLORS.primary);
-  doc.rect(cardX, cardY, cardW, 3, "F");
-
-  // Header text
-  doc.setTextColor(...COLORS.white);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("ZAKAT REPORT", cardX + pad, cardY + 18);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(226, 232, 240);
-  doc.text(`Verified Calculation • ${yearStr}`, cardX + pad, cardY + 26);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(203, 213, 225);
-  doc.text("Generated Date", cardX + cardW - pad, cardY + 18, { align: "right" });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...COLORS.white);
-  doc.text(dateStr, cardX + cardW - pad, cardY + 26, { align: "right" });
-
-  // Obligation card (smaller, not half the page)
-  const obligationX = cardX + pad;
-  const obligationY = cardY + 34;
-  const obligationW = cardW - pad * 2;
-  const obligationH = 32;
-  drawRoundedRect(doc, obligationX, obligationY, obligationW, obligationH, 5, COLORS.white);
-
-  doc.setTextColor(...COLORS.textMuted);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-
-  if (calculations.isAboveNisab) {
-    doc.text("Total Obligation Due", obligationX + 8, obligationY + 10);
-
-    doc.setTextColor(...COLORS.text);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text(formatCurrency(calculations.zakatDue, currency), obligationX + 8, obligationY + 22);
-
-    doc.setTextColor(...COLORS.textMuted);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    const calLabel = data.calendarType === "lunar" ? "Lunar (Hijri)" : "Solar (Gregorian)";
-    doc.text(`Rate applied: ${formatPercent(calculations.zakatRate)} • Calendar: ${calLabel}`, obligationX + 8, obligationY + 29);
-  } else {
-    doc.text("Below Niṣāb Threshold", obligationX + 8, obligationY + 10);
-
-    doc.setTextColor(...COLORS.text);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("No Zakat Due", obligationX + 8, obligationY + 21);
-
-    doc.setTextColor(...COLORS.textMuted);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text(`Nisab: ${formatCurrency(calculations.nisab, currency)}`, obligationX + 8, obligationY + 29);
-  }
-
-  let y = cardY + headerH + 16;
-
-  // 01 Asset Allocation
-  y = drawSectionTitle(doc, cardX + pad, y, "01", "Asset Allocation");
-  y = drawAssetAllocation(doc, cardX + pad, y, cardW - pad * 2, calculations, currency) + 10;
-
-  // 02 Final Ledger + Configuration (two-column)
-  const colGap = 8;
+  // === TWO COLUMN SECTION: Ledger + Configuration ===
+  const colGap = 6;
   const colW = (cardW - pad * 2 - colGap) / 2;
   const leftX = cardX + pad;
   const rightX = leftX + colW + colGap;
 
-  const sectionY = y;
-  y = drawSectionTitle(doc, leftX, y, "02", "Final Ledger");
-
-  const ledgerBoxY = y;
-  const ledgerBoxH = 36;
-  drawRoundedRect(doc, leftX, ledgerBoxY, colW, ledgerBoxH, 5, COLORS.white, COLORS.border);
-
-  const ledgerPadX = leftX + 8;
-  const ledgerPadW = colW - 16;
-  let ledgerY = ledgerBoxY + 10;
-
-  drawKeyValueRow(doc, ledgerPadX, ledgerY, ledgerPadW, "Total Assets", formatCurrency(calculations.totalAssets, currency));
-  ledgerY += 9;
-  drawKeyValueRow(
-    doc,
-    ledgerPadX,
-    ledgerY,
-    ledgerPadW,
-    "Liabilities (Deducted)",
-    `-${formatCurrency(calculations.totalLiabilities, currency)}`,
-    { valueColor: COLORS.danger }
-  );
-  ledgerY += 9;
-  drawKeyValueRow(doc, ledgerPadX, ledgerY, ledgerPadW, "Net Zakatable Wealth", formatCurrency(calculations.netZakatableWealth, currency), {
-    bold: true,
-  });
-
+  // Final Ledger
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text("FINAL LEDGER", leftX, y);
+  
   // Configuration
-  // Keep header aligned with ledger top for a clean grid.
-  y = drawSectionTitle(doc, rightX, sectionY + 6, "", "Configuration");
-
-  const configBoxY = ledgerBoxY;
-  const configBoxH = ledgerBoxH;
-  drawRoundedRect(doc, rightX, configBoxY, colW, configBoxH, 5, COLORS.white, COLORS.border);
-
-  const cfgPadX = rightX + 8;
-  const cfgPadW = colW - 16;
-  let cfgY = configBoxY + 10;
-
+  doc.text("CONFIGURATION", rightX, y);
+  
+  y += 5;
+  const boxH = 28;
+  
+  // Ledger box
+  drawRoundedRect(doc, leftX, y, colW, boxH, 2, COLORS.cardBg, COLORS.border);
+  
+  const ledgerPad = 6;
+  let ledgerY = y + 8;
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text("Total Assets", leftX + ledgerPad, ledgerY);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  doc.text(formatCurrency(calculations.totalAssets, currency), leftX + colW - ledgerPad, ledgerY, { align: "right" });
+  
+  ledgerY += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text("Liabilities", leftX + ledgerPad, ledgerY);
+  doc.setTextColor(...COLORS.danger);
+  doc.text(`-${formatCurrency(calculations.totalLiabilities, currency)}`, leftX + colW - ledgerPad, ledgerY, { align: "right" });
+  
+  ledgerY += 7;
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  doc.text("Net Zakatable", leftX + ledgerPad, ledgerY);
+  doc.text(formatCurrency(calculations.netZakatableWealth, currency), leftX + colW - ledgerPad, ledgerY, { align: "right" });
+  
+  // Configuration box
+  drawRoundedRect(doc, rightX, y, colW, boxH, 2, COLORS.cardBg, COLORS.border);
+  
+  let cfgY = y + 8;
   const nisabLabel = data.nisabStandard === "silver" ? "Nisab (Silver)" : "Nisab (Gold)";
-  const calendarLabel = data.calendarType === "lunar" ? "Lunar (Hijri)" : "Solar (Gregorian)";
+  const calendarLabel = data.calendarType === "lunar" ? "Lunar (Hijri)" : "Solar";
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text(nisabLabel, rightX + ledgerPad, cfgY);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  doc.text(formatCurrency(calculations.nisab, currency), rightX + colW - ledgerPad, cfgY, { align: "right" });
+  
+  cfgY += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text("Calendar", rightX + ledgerPad, cfgY);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  doc.text(calendarLabel, rightX + colW - ledgerPad, cfgY, { align: "right" });
+  
+  cfgY += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text("Rate Applied", rightX + ledgerPad, cfgY);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  doc.text(formatPercent(calculations.zakatRate), rightX + colW - ledgerPad, cfgY, { align: "right" });
+  
+  y += boxH + 8;
 
-  drawKeyValueRow(doc, cfgPadX, cfgY, cfgPadW, nisabLabel, formatCurrency(calculations.nisab, currency));
-  cfgY += 9;
-  drawKeyValueRow(doc, cfgPadX, cfgY, cfgPadW, "Calendar Type", calendarLabel);
-  cfgY += 9;
-  drawKeyValueRow(doc, cfgPadX, cfgY, cfgPadW, "Rate Applied", formatPercent(calculations.zakatRate));
-
-  y = ledgerBoxY + ledgerBoxH + 14;
-
-  // Optional: Purification (compact, only if needed)
+  // === PURIFICATION ALERT (if applicable) ===
   const totalPurification = calculations.interestToPurify + calculations.dividendsToPurify;
   if (totalPurification > 0) {
-    const alertH = 18;
-    const alertY = Math.min(y, cardY + cardH - 32 - alertH);
-    drawRoundedRect(doc, cardX + pad, alertY, cardW - pad * 2, alertH, 5, COLORS.white, COLORS.border);
-
+    const alertH = 16;
+    drawRoundedRect(doc, cardX + pad, y, cardW - pad * 2, alertH, 2, [255, 248, 240] as [number, number, number], COLORS.border);
+    
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(...COLORS.danger);
-    doc.text("Purification Required", cardX + pad + 8, alertY + 8);
-
-    doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
+    doc.setTextColor(...COLORS.danger);
+    doc.text("✦ Purification Required", cardX + pad + 6, y + 6);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
     doc.setTextColor(...COLORS.textMuted);
-
     const parts: string[] = [];
     if (calculations.interestToPurify > 0) parts.push(`Interest: ${formatCurrency(calculations.interestToPurify, currency)}`);
-    if (calculations.dividendsToPurify > 0) parts.push(`Non‑Halal Dividends: ${formatCurrency(calculations.dividendsToPurify, currency)}`);
-
-    doc.text(parts.join(" • "), cardX + pad + 8, alertY + 14);
+    if (calculations.dividendsToPurify > 0) parts.push(`Non-Halal Dividends: ${formatCurrency(calculations.dividendsToPurify, currency)}`);
+    doc.text(parts.join("  •  "), cardX + pad + 6, y + 12);
+    
+    y += alertH + 6;
   }
 
-  // Footer (source + date)
-  const footerY = cardY + cardH - 10;
+  // === FOOTER ===
+  const footerY = cardY + cardH - 12;
+  
+  // Divider line
   doc.setDrawColor(...COLORS.border);
   doc.setLineWidth(0.3);
-  doc.line(cardX + pad, footerY - 6, cardX + cardW - pad, footerY - 6);
-
+  doc.line(cardX + pad, footerY - 4, cardX + cardW - pad, footerY - 4);
+  
+  // Footer text
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.setTextColor(...COLORS.textMuted);
-  doc.text(`Computed by zakah.vora.dev • Generated ${dateStr}`, cardX + cardW / 2, footerY, { align: "center" });
+  doc.setTextColor(...COLORS.textLight);
+  doc.text("Computed by ZakahFlow • zakah.vora.dev", cardX + pad, footerY);
+  doc.text(`Generated ${dateStr}`, cardX + cardW - pad, footerY, { align: "right" });
 
-  // Save
+  // Save PDF
   const fileName = calculationName
     ? `zakat-report-${calculationName.replace(/\s+/g, "-").toLowerCase()}.pdf`
     : `zakat-report-${new Date().toISOString().split("T")[0]}.pdf`;
