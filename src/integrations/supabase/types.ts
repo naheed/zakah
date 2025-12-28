@@ -44,6 +44,78 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_aggregates: {
+        Row: {
+          created_at: string
+          referral_code: string
+          referrer_session_hash: string
+          referrer_user_id: string | null
+          total_assets_calculated: number
+          total_referrals: number
+          total_zakat_calculated: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          referral_code: string
+          referrer_session_hash: string
+          referrer_user_id?: string | null
+          total_assets_calculated?: number
+          total_referrals?: number
+          total_zakat_calculated?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          referral_code?: string
+          referrer_session_hash?: string
+          referrer_user_id?: string | null
+          total_assets_calculated?: number
+          total_referrals?: number
+          total_zakat_calculated?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_session_hash: string | null
+          referred_user_id: string | null
+          referrer_session_hash: string
+          referrer_user_id: string | null
+          total_assets: number | null
+          zakat_due: number | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_session_hash?: string | null
+          referred_user_id?: string | null
+          referrer_session_hash: string
+          referrer_user_id?: string | null
+          total_assets?: number | null
+          zakat_due?: number | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_session_hash?: string | null
+          referred_user_id?: string | null
+          referrer_session_hash?: string
+          referrer_user_id?: string | null
+          total_assets?: number | null
+          zakat_due?: number | null
+        }
+        Relationships: []
+      }
       zakat_anonymous_events: {
         Row: {
           created_at: string
@@ -196,6 +268,16 @@ export type Database = {
     }
     Functions: {
       get_authenticated_email: { Args: never; Returns: string }
+      increment_referral_aggregate: {
+        Args: {
+          p_assets: number
+          p_referral_code: string
+          p_referrer_session_hash: string
+          p_referrer_user_id: string
+          p_zakat: number
+        }
+        Returns: undefined
+      }
       increment_usage_aggregate: {
         Args: {
           p_assets: number

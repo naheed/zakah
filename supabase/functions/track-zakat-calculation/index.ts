@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionHash, totalAssets, zakatDue } = await req.json();
+    const { sessionHash, totalAssets, zakatDue, referredBy } = await req.json();
 
     // Validate input
     if (!sessionHash || typeof sessionHash !== "string" || sessionHash.length !== 64) {
@@ -126,6 +126,54 @@ serve(async (req) => {
               calculation_count: 1,
             });
           }
+        }
+      }
+
+      // Handle referral tracking if referredBy code is provided
+      if (referredBy && typeof referredBy === "string" && referredBy.length > 0) {
+        console.log("Processing referral from code:", referredBy);
+        
+        // Get the referral aggregate to find the referrer
+        const { data: referralAggregate } = await supabase
+          .from("referral_aggregates")
+          .select("referrer_session_hash, referrer_user_id")
+          .eq("referral_code", referredBy)
+          .maybeSingle();
+
+        if (referralAggregate) {
+          // Insert the referral record
+          const { error: referralInsertError } = await supabase
+            .from("referrals")
+            .insert({
+              referrer_session_hash: referralAggregate.referrer_session_hash,
+              referrer_user_id: referralAggregate.referrer_user_id,
+              referral_code: referredBy,
+              referred_session_hash: sessionHash,
+              total_assets: roundedAssets,
+              zakat_due: roundedZakat,
+              converted_at: new Date().toISOString(),
+            });
+
+          if (referralInsertError) {
+            console.error("Error inserting referral:", referralInsertError);
+          } else {
+            // Update the referral aggregate
+            const { error: aggregateError } = await supabase.rpc("increment_referral_aggregate", {
+              p_referral_code: referredBy,
+              p_referrer_session_hash: referralAggregate.referrer_session_hash,
+              p_referrer_user_id: referralAggregate.referrer_user_id,
+              p_assets: roundedAssets,
+              p_zakat: roundedZakat,
+            });
+
+            if (aggregateError) {
+              console.error("Error updating referral aggregate:", aggregateError);
+            } else {
+              console.log("Referral tracked successfully");
+            }
+          }
+        } else {
+          console.log("Referral code not found:", referredBy);
         }
       }
     }

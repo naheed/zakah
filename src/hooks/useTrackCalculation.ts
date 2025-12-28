@@ -26,6 +26,8 @@ async function hashSessionId(sessionId: string): Promise<string> {
   return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+const REFERRAL_CODE_KEY = 'zakat_referred_by';
+
 interface TrackCalculationParams {
   totalAssets: number;
   zakatDue: number;
@@ -50,6 +52,9 @@ export function useTrackCalculation() {
     try {
       const sessionId = getOrCreateSessionId();
       const sessionHash = await hashSessionId(sessionId);
+      
+      // Check if user came from a referral link
+      const referredBy = sessionStorage.getItem(REFERRAL_CODE_KEY);
 
       // Fire and forget - don't wait for response
       supabase.functions.invoke('track-zakat-calculation', {
@@ -57,6 +62,7 @@ export function useTrackCalculation() {
           sessionHash,
           totalAssets,
           zakatDue,
+          referredBy: referredBy || undefined,
         },
       }).then(({ error }) => {
         if (error) {

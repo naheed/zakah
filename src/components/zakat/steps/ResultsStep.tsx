@@ -10,6 +10,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
 import { ShareDrawer } from "../ShareDrawer";
+import { ShareToolSection } from "../ShareToolSection";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ZakatSankeyChart, SankeyChartData } from "../ZakatSankeyChart";
@@ -329,6 +330,9 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
             please consult a specialist in Islamic Finance.
           </p>
         </InfoCard>
+
+        {/* Share Tool Section */}
+        <ShareToolSection currency={currency} />
       </div>
     </div>
   );
