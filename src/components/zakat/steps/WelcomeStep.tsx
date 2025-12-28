@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BookOpen, Lock, Shield, Calculator, DollarSign, Heart, Settings as SettingsIcon, FolderOpen, Trash2, Landmark, Bitcoin, Building2, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { ZakatSankeyMock } from "../ZakatSankeyChart";
 import { useUsageMetrics, formatLargeNumber, formatCount } from "@/hooks/useUsageMetrics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReferralWidget } from "../ReferralWidget";
@@ -13,7 +12,7 @@ import { SavedCalculation } from "@/hooks/useSavedCalculations";
 import { HowItWorks } from "../landing/HowItWorks";
 import { AssetTypeGrid } from "../landing/AssetTypeGrid";
 import { MethodologyTeaser } from "../landing/MethodologyTeaser";
-
+import { InteractiveDemo } from "../landing/InteractiveDemo";
 interface WelcomeStepProps {
   onNext: () => void;
   onLoadCalculation?: (calculation: SavedCalculation) => void;
@@ -26,35 +25,6 @@ const assetBadges = [
   { icon: Building2, label: "Real Estate" },
   { icon: Briefcase, label: "RSUs & ESPP" },
 ];
-
-function MockReportPreview() {
-  return (
-    <div className="relative w-full max-w-md mx-auto">
-      {/* Glassmorphic card effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl blur-xl" />
-      
-      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 sm:p-6 shadow-lg">
-        {/* Header */}
-        <div className="text-center mb-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Your Zakat Due</p>
-          <p className="text-3xl sm:text-4xl font-bold text-primary">$3,346</p>
-          <p className="text-sm text-muted-foreground mt-1">2.5% of zakatable wealth</p>
-        </div>
-
-        {/* Sankey Chart - centered with animation */}
-        <div className="flex justify-center items-center py-4">
-          <ZakatSankeyMock />
-        </div>
-
-        {/* Summary row */}
-        <div className="pt-4 border-t border-border flex justify-between text-sm">
-          <span className="text-muted-foreground">Net Zakatable Wealth</span>
-          <span className="font-semibold text-foreground">$133,850</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // Trust badges for the hero section
 function TrustBadges() {
@@ -220,9 +190,9 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
       {/* Hero Section */}
       <section className="flex-1 flex items-center justify-center px-4 py-12 md:py-16">
         <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Left Side - Mock Report Preview */}
+          {/* Left Side - Interactive Demo */}
           <div className="order-2 md:order-1">
-            <MockReportPreview />
+            <InteractiveDemo />
             
             {/* Usage Metrics - Social Proof (only show when 5+ unique sessions for privacy) */}
             {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
