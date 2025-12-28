@@ -19,6 +19,7 @@ export function useZakatPersistence() {
   const [hasExistingSession, setHasExistingSession] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [sessionDismissed, setSessionDismissed] = useState(false);
 
   // Load from localStorage on mount (async due to encryption)
   useEffect(() => {
@@ -113,6 +114,7 @@ export function useZakatPersistence() {
 
   const continueSession = useCallback(() => {
     setHasExistingSession(false);
+    setSessionDismissed(true);
     // stepIndex is already loaded
   }, []);
 
@@ -121,6 +123,7 @@ export function useZakatPersistence() {
     setStepIndex(0);
     setUploadedDocuments([]);
     setHasExistingSession(false);
+    setSessionDismissed(true);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
@@ -131,6 +134,9 @@ export function useZakatPersistence() {
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
+  // Only show dialog on initial load, not when navigating within active session
+  const showSessionDialog = hasExistingSession && !sessionDismissed;
+
   return {
     formData,
     setFormData,
@@ -140,7 +146,7 @@ export function useZakatPersistence() {
     uploadedDocuments,
     addDocument,
     removeDocument,
-    hasExistingSession,
+    hasExistingSession: showSessionDialog,
     lastUpdated,
     continueSession,
     startFresh,
