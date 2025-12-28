@@ -11,6 +11,7 @@ const Methodology = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [tocOpen, setTocOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     nisab: true,
     hawl: false,
@@ -83,24 +84,55 @@ const Methodology = () => {
             </div>
           </header>
 
-          {/* Table of Contents - Sticky on mobile */}
-          <nav className={`mb-12 p-4 sm:p-6 rounded-lg bg-muted/30 border border-border ${isMobile ? 'sticky top-0 z-20 bg-background/95 backdrop-blur-sm' : ''}`}>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Table of Contents</h2>
-            <ul className={`space-y-2 text-sm ${isMobile ? 'columns-1' : 'columns-2'}`}>
-              <li><a href="#nisab" className="text-primary hover:underline block py-1">1. The Niṣāb Threshold</a></li>
-              <li><a href="#hawl" className="text-primary hover:underline block py-1">2. The Ḥawl (Zakat Year)</a></li>
-              <li><a href="#liquid" className="text-primary hover:underline block py-1">3. Liquid Assets & Cash</a></li>
-              <li><a href="#stocks" className="text-primary hover:underline block py-1">4. Stocks & Investments</a></li>
-              <li><a href="#retirement" className="text-primary hover:underline block py-1">5. Retirement Accounts</a></li>
-              <li><a href="#crypto" className="text-primary hover:underline block py-1">6. Cryptocurrency</a></li>
-              <li><a href="#metals" className="text-primary hover:underline block py-1">7. Gold, Silver & Jewelry</a></li>
-              <li><a href="#realestate" className="text-primary hover:underline block py-1">8. Real Estate</a></li>
-              <li><a href="#business" className="text-primary hover:underline block py-1">9. Business Assets</a></li>
-              <li><a href="#debts" className="text-primary hover:underline block py-1">10. Debts & Liabilities</a></li>
-              <li><a href="#trusts" className="text-primary hover:underline block py-1">11. Trusts</a></li>
-              <li><a href="#references" className="text-primary hover:underline block py-1">12. References</a></li>
-            </ul>
-          </nav>
+          {/* Table of Contents - Collapsible on mobile, always visible on desktop */}
+          {isMobile ? (
+            <nav className="mb-8 sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border -mx-4 px-4">
+              <Collapsible open={tocOpen} onOpenChange={setTocOpen}>
+                <CollapsibleTrigger className="w-full py-3 flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">Table of Contents</span>
+                  {tocOpen ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-3">
+                  <ul className="space-y-1 text-sm">
+                    <li><a href="#nisab" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">1. The Niṣāb Threshold</a></li>
+                    <li><a href="#hawl" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">2. The Ḥawl (Zakat Year)</a></li>
+                    <li><a href="#liquid" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">3. Liquid Assets & Cash</a></li>
+                    <li><a href="#stocks" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">4. Stocks & Investments</a></li>
+                    <li><a href="#retirement" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">5. Retirement Accounts</a></li>
+                    <li><a href="#crypto" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">6. Cryptocurrency</a></li>
+                    <li><a href="#metals" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">7. Gold, Silver & Jewelry</a></li>
+                    <li><a href="#realestate" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">8. Real Estate</a></li>
+                    <li><a href="#business" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">9. Business Assets</a></li>
+                    <li><a href="#debts" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">10. Debts & Liabilities</a></li>
+                    <li><a href="#trusts" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">11. Trusts</a></li>
+                    <li><a href="#references" onClick={() => setTocOpen(false)} className="text-primary hover:underline block py-1.5">12. References</a></li>
+                  </ul>
+                </CollapsibleContent>
+              </Collapsible>
+            </nav>
+          ) : (
+            <nav className="mb-12 p-6 rounded-lg bg-muted/30 border border-border">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Table of Contents</h2>
+              <ul className="space-y-2 text-sm columns-2">
+                <li><a href="#nisab" className="text-primary hover:underline block py-1">1. The Niṣāb Threshold</a></li>
+                <li><a href="#hawl" className="text-primary hover:underline block py-1">2. The Ḥawl (Zakat Year)</a></li>
+                <li><a href="#liquid" className="text-primary hover:underline block py-1">3. Liquid Assets & Cash</a></li>
+                <li><a href="#stocks" className="text-primary hover:underline block py-1">4. Stocks & Investments</a></li>
+                <li><a href="#retirement" className="text-primary hover:underline block py-1">5. Retirement Accounts</a></li>
+                <li><a href="#crypto" className="text-primary hover:underline block py-1">6. Cryptocurrency</a></li>
+                <li><a href="#metals" className="text-primary hover:underline block py-1">7. Gold, Silver & Jewelry</a></li>
+                <li><a href="#realestate" className="text-primary hover:underline block py-1">8. Real Estate</a></li>
+                <li><a href="#business" className="text-primary hover:underline block py-1">9. Business Assets</a></li>
+                <li><a href="#debts" className="text-primary hover:underline block py-1">10. Debts & Liabilities</a></li>
+                <li><a href="#trusts" className="text-primary hover:underline block py-1">11. Trusts</a></li>
+                <li><a href="#references" className="text-primary hover:underline block py-1">12. References</a></li>
+              </ul>
+            </nav>
+          )}
 
           {/* Sections */}
           <div className="space-y-16">
