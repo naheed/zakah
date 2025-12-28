@@ -1,11 +1,46 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, Scale, Calendar, Coins, Building, TrendingUp, Shield, Landmark, Wallet, HandCoins, FileText, AlertCircle, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, Scale, Calendar, Coins, Building, TrendingUp, Shield, Landmark, Wallet, HandCoins, FileText, AlertCircle, Users, ChevronUp, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Separator } from "@/components/ui/separator";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Methodology = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    nisab: true,
+    hawl: false,
+    liquid: false,
+    stocks: false,
+    retirement: false,
+    crypto: false,
+    metals: false,
+    realestate: false,
+    business: false,
+    debts: false,
+    trusts: false,
+    references: false,
+  });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleSection = (id: string) => {
+    setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <>
@@ -48,22 +83,22 @@ const Methodology = () => {
             </div>
           </header>
 
-          {/* Table of Contents */}
-          <nav className="mb-12 p-6 rounded-lg bg-muted/30 border border-border">
+          {/* Table of Contents - Sticky on mobile */}
+          <nav className={`mb-12 p-4 sm:p-6 rounded-lg bg-muted/30 border border-border ${isMobile ? 'sticky top-0 z-20 bg-background/95 backdrop-blur-sm' : ''}`}>
             <h2 className="text-lg font-semibold text-foreground mb-4">Table of Contents</h2>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#nisab" className="text-primary hover:underline">1. The Niṣāb Threshold</a></li>
-              <li><a href="#hawl" className="text-primary hover:underline">2. The Ḥawl (Zakat Year)</a></li>
-              <li><a href="#liquid" className="text-primary hover:underline">3. Liquid Assets & Cash</a></li>
-              <li><a href="#stocks" className="text-primary hover:underline">4. Stocks & Investments</a></li>
-              <li><a href="#retirement" className="text-primary hover:underline">5. Retirement Accounts (401k, IRA, Roth)</a></li>
-              <li><a href="#crypto" className="text-primary hover:underline">6. Cryptocurrency & Digital Assets</a></li>
-              <li><a href="#metals" className="text-primary hover:underline">7. Gold, Silver & Jewelry</a></li>
-              <li><a href="#realestate" className="text-primary hover:underline">8. Real Estate</a></li>
-              <li><a href="#business" className="text-primary hover:underline">9. Business Assets</a></li>
-              <li><a href="#debts" className="text-primary hover:underline">10. Debts & Liabilities</a></li>
-              <li><a href="#trusts" className="text-primary hover:underline">11. Trusts</a></li>
-              <li><a href="#references" className="text-primary hover:underline">12. References & Further Reading</a></li>
+            <ul className={`space-y-2 text-sm ${isMobile ? 'columns-1' : 'columns-2'}`}>
+              <li><a href="#nisab" className="text-primary hover:underline block py-1">1. The Niṣāb Threshold</a></li>
+              <li><a href="#hawl" className="text-primary hover:underline block py-1">2. The Ḥawl (Zakat Year)</a></li>
+              <li><a href="#liquid" className="text-primary hover:underline block py-1">3. Liquid Assets & Cash</a></li>
+              <li><a href="#stocks" className="text-primary hover:underline block py-1">4. Stocks & Investments</a></li>
+              <li><a href="#retirement" className="text-primary hover:underline block py-1">5. Retirement Accounts</a></li>
+              <li><a href="#crypto" className="text-primary hover:underline block py-1">6. Cryptocurrency</a></li>
+              <li><a href="#metals" className="text-primary hover:underline block py-1">7. Gold, Silver & Jewelry</a></li>
+              <li><a href="#realestate" className="text-primary hover:underline block py-1">8. Real Estate</a></li>
+              <li><a href="#business" className="text-primary hover:underline block py-1">9. Business Assets</a></li>
+              <li><a href="#debts" className="text-primary hover:underline block py-1">10. Debts & Liabilities</a></li>
+              <li><a href="#trusts" className="text-primary hover:underline block py-1">11. Trusts</a></li>
+              <li><a href="#references" className="text-primary hover:underline block py-1">12. References</a></li>
             </ul>
           </nav>
 
@@ -969,6 +1004,19 @@ const Methodology = () => {
             </p>
           </footer>
         </div>
+        
+        {/* Back to Top Button - Mobile */}
+        {showBackToTop && (
+          <Button
+            variant="secondary"
+            size="icon"
+            className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+            onClick={scrollToTop}
+          >
+            <ChevronUp className="h-5 w-5" />
+            <span className="sr-only">Back to top</span>
+          </Button>
+        )}
       </div>
     </>
   );

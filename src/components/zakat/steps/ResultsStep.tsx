@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ZakatSankeyChart, SankeyChartData } from "../ZakatSankeyChart";
 import { useTrackCalculation } from "@/hooks/useTrackCalculation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -48,6 +49,7 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [showSettings, setShowSettings] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { trackCalculation } = useTrackCalculation();
@@ -190,7 +192,7 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
           )}
           
           {/* Sankey Chart - Responsive and centered */}
-          <div className="p-6 flex justify-center items-center">
+          <div className={`${isMobile ? 'p-3' : 'p-6'} flex justify-center items-center overflow-x-auto`}>
             <ZakatSankeyChart 
               data={{
                 liquidAssets: assetBreakdown.liquidAssets,
@@ -205,8 +207,9 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
                 zakatRate,
               }}
               currency={currency}
-              width={580}
-              height={380}
+              width={isMobile ? 340 : 580}
+              height={isMobile ? 280 : 380}
+              showLabels={!isMobile}
               showFullscreenButton={true}
             />
           </div>
@@ -270,52 +273,54 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
           </div>
         )}
         
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        {/* Actions - Stack on mobile for better touch targets */}
+        <div className="flex flex-col gap-3">
           <Button 
             variant="outline" 
-            className="flex-1 gap-2"
+            className="w-full h-12 gap-2"
             onClick={handleDownload}
             disabled={isGeneratingPDF}
           >
             <Download className="w-4 h-4" />
             {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
-          {user && (
-            <SaveCalculationDialog 
-              formData={data}
-              onSaved={onCalculationSaved}
-              trigger={
-                <Button variant="outline" className="flex-1 gap-2">
-                  <Save className="w-4 h-4" />
-                  {savedCalculationId ? 'Save As New' : 'Save'}
-                </Button>
-              }
-            />
-          )}
-          <ShareDrawer 
-            formData={data} 
-            zakatDue={zakatDue}
-            calculationId={savedCalculationId}
-          >
-            <Button variant="outline" className="flex-1 gap-2">
-              <Share2 className="w-4 h-4" />
-              Share
-            </Button>
-          </ShareDrawer>
+          <div className="flex flex-col sm:flex-row gap-3">
+            {user && (
+              <SaveCalculationDialog 
+                formData={data}
+                onSaved={onCalculationSaved}
+                trigger={
+                  <Button variant="outline" className="flex-1 h-12 gap-2">
+                    <Save className="w-4 h-4" />
+                    {savedCalculationId ? 'Save As New' : 'Save'}
+                  </Button>
+                }
+              />
+            )}
+            <ShareDrawer 
+              formData={data} 
+              zakatDue={zakatDue}
+              calculationId={savedCalculationId}
+            >
+              <Button variant="outline" className="flex-1 h-12 gap-2">
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+            </ShareDrawer>
+          </div>
         </div>
 
         {/* Adjust Settings & Start Over */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Link to="/settings" className="flex-1">
-            <Button variant="ghost" className="w-full gap-2">
+            <Button variant="ghost" className="w-full h-11 gap-2">
               <Settings className="w-4 h-4" />
               Adjust Settings
             </Button>
           </Link>
           <Button 
             variant="ghost" 
-            className="flex-1 gap-2"
+            className="flex-1 h-11 gap-2"
             onClick={handleReset}
           >
             <RotateCcw className="w-4 h-4" />

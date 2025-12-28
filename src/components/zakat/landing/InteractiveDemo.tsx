@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { FileText, Check, Loader2, Play } from "lucide-react";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Animation phases
 type AnimationPhase = 
@@ -76,6 +77,7 @@ export function InteractiveDemo() {
   const [showWatchOverlay, setShowWatchOverlay] = useState(true);
   const [animationKey, setAnimationKey] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   // Typed values
   const typedCash = useTypingAnimation("$24,500", phase === "typing-cash", 100);
@@ -271,6 +273,7 @@ export function InteractiveDemo() {
               <AnimatedSankeyChart 
                 showZakatSplit={showZakatSplit || phase === "complete"}
                 isAnimating={isAnimating}
+                isMobile={isMobile}
               />
             ) : (
               <div className="flex justify-center py-3">
@@ -316,16 +319,19 @@ export function InteractiveDemo() {
 // Simplified animated Sankey chart for the demo
 function AnimatedSankeyChart({ 
   showZakatSplit, 
-  isAnimating 
+  isAnimating,
+  isMobile = false
 }: { 
   showZakatSplit: boolean;
   isAnimating: boolean;
+  isMobile?: boolean;
 }) {
-  const width = 300;
-  const height = 130;
-  const nodeWidth = 8;
-  const leftPadding = 6;
-  const rightPadding = 6;
+  // Responsive width based on device
+  const width = isMobile ? 260 : 300;
+  const height = isMobile ? 115 : 130;
+  const nodeWidth = isMobile ? 6 : 8;
+  const leftPadding = isMobile ? 4 : 6;
+  const rightPadding = isMobile ? 4 : 6;
   
   // Calculate total assets for proportional sizing
   const assets = [

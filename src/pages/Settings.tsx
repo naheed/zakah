@@ -153,13 +153,13 @@ export default function Settings() {
               className="space-y-3"
             >
               <label 
-                className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
                   formData.nisabStandard === 'silver' 
                     ? 'border-primary bg-primary/5' 
                     : 'border-border hover:border-primary/50'
                 }`}
               >
-                <RadioGroupItem value="silver" id="silver" />
+                <RadioGroupItem value="silver" id="silver" className="h-5 w-5" />
                 <div className="flex-1">
                   <span className="font-medium text-foreground">Silver Standard</span>
                   <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Recommended</span>
@@ -170,13 +170,13 @@ export default function Settings() {
               </label>
               
               <label 
-                className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
                   formData.nisabStandard === 'gold' 
                     ? 'border-primary bg-primary/5' 
                     : 'border-border hover:border-primary/50'
                 }`}
               >
-                <RadioGroupItem value="gold" id="gold" />
+                <RadioGroupItem value="gold" id="gold" className="h-5 w-5" />
                 <div className="flex-1">
                   <span className="font-medium text-foreground">Gold Standard</span>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -216,13 +216,13 @@ export default function Settings() {
               className="space-y-3"
             >
               <label 
-                className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
                   formData.calendarType === 'lunar' 
                     ? 'border-primary bg-primary/5' 
                     : 'border-border hover:border-primary/50'
                 }`}
               >
-                <RadioGroupItem value="lunar" id="lunar" />
+                <RadioGroupItem value="lunar" id="lunar" className="h-5 w-5" />
                 <div className="flex-1">
                   <span className="font-medium text-foreground">Lunar Year (Islamic)</span>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -232,13 +232,13 @@ export default function Settings() {
               </label>
               
               <label 
-                className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`flex items-center space-x-3 p-4 min-h-[56px] rounded-lg border-2 cursor-pointer transition-all ${
                   formData.calendarType === 'solar' 
                     ? 'border-primary bg-primary/5' 
                     : 'border-border hover:border-primary/50'
                 }`}
               >
-                <RadioGroupItem value="solar" id="solar" />
+                <RadioGroupItem value="solar" id="solar" className="h-5 w-5" />
                 <div className="flex-1">
                   <span className="font-medium text-foreground">Solar Year (Gregorian)</span>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -276,18 +276,18 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => updateFormData({ isHousehold: false })}
-                className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+                className={`w-full flex items-center gap-4 p-4 min-h-[64px] rounded-lg border-2 transition-all text-left ${
                   !formData.isHousehold 
                     ? "border-primary bg-primary/5" 
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                   !formData.isHousehold ? "bg-primary/10" : "bg-accent"
                 }`}>
                   <User className={`w-5 h-5 ${!formData.isHousehold ? "text-primary" : "text-muted-foreground"}`} />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground">Just myself</p>
                   <p className="text-sm text-muted-foreground">Calculate Zakat on my assets only</p>
                 </div>
@@ -299,18 +299,18 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => updateFormData({ isHousehold: true })}
-                className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+                className={`w-full flex items-center gap-4 p-4 min-h-[64px] rounded-lg border-2 transition-all text-left ${
                   formData.isHousehold 
                     ? "border-primary bg-primary/5" 
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                   formData.isHousehold ? "bg-primary/10" : "bg-accent"
                 }`}>
                   <Users className={`w-5 h-5 ${formData.isHousehold ? "text-primary" : "text-muted-foreground"}`} />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground">My household</p>
                   <p className="text-sm text-muted-foreground">Include spouse and/or children's assets</p>
                 </div>
