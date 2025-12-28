@@ -59,6 +59,9 @@ export default {
   			}
   		},
   		borderRadius: {
+  			'4xl': 'var(--radius-xl)',
+  			'3xl': 'var(--radius-lg)',
+  			'2xl': 'var(--radius)',
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
@@ -127,7 +130,14 @@ export default {
   			md: 'var(--shadow-md)',
   			lg: 'var(--shadow-lg)',
   			xl: 'var(--shadow-xl)',
-  			'2xl': 'var(--shadow-2xl)'
+  			'2xl': 'var(--shadow-2xl)',
+  			float: 'var(--shadow-float)',
+  			elevated: 'var(--shadow-elevated)'
+  		},
+  		transitionDuration: {
+  			fast: 'var(--duration-fast)',
+  			normal: 'var(--duration-normal)',
+  			slow: 'var(--duration-slow)'
   		}
   	}
   },

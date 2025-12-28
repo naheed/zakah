@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { usePresence } from "@/hooks/usePresence";
@@ -28,6 +29,31 @@ import { Menu, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
+
+// Animation variants for step transitions
+const stepVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 80 : -80,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 80 : -80,
+    opacity: 0,
+  }),
+};
+
+const stepTransition = {
+  type: "spring" as const,
+  stiffness: 400,
+  damping: 35,
+};
+
+const SWIPE_THRESHOLD = 50;
+const SWIPE_VELOCITY_THRESHOLD = 500;
 
 type StepId = 
   | 'welcome'
@@ -96,6 +122,7 @@ export function ZakatWizard() {
 
   const [calculationName, setCalculationName] = useState<string | undefined>();
   const [savedCalculationId, setSavedCalculationId] = useState<string | undefined>();
+  const [direction, setDirection] = useState(1); // 1 for forward, -1 for backward
 
   // Presence tracking for collaborative editing
   const { presentUsers, updatePresence } = usePresence(savedCalculationId);
@@ -130,26 +157,49 @@ export function ZakatWizard() {
   const currentStep = activeSteps[currentStepIndex] || activeSteps[0];
   
   
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (currentStepIndex < activeSteps.length - 1) {
+      setDirection(1);
       setCurrentStepIndex(currentStepIndex + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [currentStepIndex, activeSteps.length, setCurrentStepIndex]);
   
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     if (currentStepIndex > 0) {
+      setDirection(-1);
       setCurrentStepIndex(currentStepIndex - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [currentStepIndex, setCurrentStepIndex]);
 
-  const goToStep = (index: number) => {
+  const goToStep = useCallback((index: number) => {
     if (index >= 0 && index < activeSteps.length) {
+      setDirection(index > currentStepIndex ? 1 : -1);
       setCurrentStepIndex(index);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [currentStepIndex, activeSteps.length, setCurrentStepIndex]);
+
+  // Swipe gesture handlers
+  const handleDragEnd = useCallback(
+    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const { offset, velocity } = info;
+
+      if (
+        offset.x < -SWIPE_THRESHOLD ||
+        velocity.x < -SWIPE_VELOCITY_THRESHOLD
+      ) {
+        goToNext();
+      } else if (
+        offset.x > SWIPE_THRESHOLD ||
+        velocity.x > SWIPE_VELOCITY_THRESHOLD
+      ) {
+        goToPrevious();
+      }
+    },
+    [goToNext, goToPrevious]
+  );
 
   // Update presence when step changes
   useEffect(() => {
@@ -320,7 +370,24 @@ export function ZakatWizard() {
       )}
       
       <main className={`max-w-4xl mx-auto px-4 ${isWelcomePage ? 'py-4' : 'py-8 pb-32'}`}>
-        {renderStep()}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentStep.id}
+            custom={direction}
+            variants={stepVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={stepTransition}
+            drag={!isWelcomePage ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            onDragEnd={handleDragEnd}
+            className="touch-pan-y"
+          >
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
       </main>
       
       {!isWelcomePage && (
