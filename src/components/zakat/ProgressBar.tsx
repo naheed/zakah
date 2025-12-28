@@ -82,7 +82,7 @@ export function ProgressBar({ currentStep, totalSteps, section }: ProgressBarPro
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 25 }}
             >
-              <Sparkles className="h-4 w-4 text-chart-5" />
+              <Sparkles className="h-4 w-4 text-tertiary" />
             </motion.span>
           )}
         </AnimatePresence>
@@ -127,7 +127,7 @@ export function ProgressBar({ currentStep, totalSteps, section }: ProgressBarPro
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 500, damping: 25 }}
               >
-                <Check className="h-2 w-2 text-chart-5" />
+                <Check className="h-2 w-2 text-success" />
               </motion.div>
             )}
           </AnimatePresence>

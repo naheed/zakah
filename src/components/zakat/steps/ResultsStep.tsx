@@ -160,8 +160,8 @@ export function ResultsStep({
           }}
           className={`rounded-2xl p-8 text-center ${
             isAboveNisab 
-              ? 'bg-primary text-primary-foreground' 
-              : 'bg-muted text-foreground'
+              ? 'bg-tertiary text-tertiary-foreground' 
+              : 'bg-surface-container-high text-foreground'
           }`}
         >
           {isAboveNisab ? (
@@ -284,9 +284,9 @@ export function ResultsStep({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ delay: 0.7 }}
-              className="bg-destructive/10 border border-destructive/30 rounded-xl p-4"
-            >
-              <h3 className="font-semibold text-destructive mb-2">⚠️ Purification Required</h3>
+            className="bg-tertiary/10 border border-tertiary/30 rounded-xl p-4"
+          >
+            <h3 className="font-semibold text-tertiary-foreground mb-2">✨ Purification Required</h3>
               <p className="text-sm text-muted-foreground mb-3">
                 The following amounts must be donated to charity (without reward expectation):
               </p>
@@ -723,7 +723,7 @@ function BreakdownRow({
   index?: number;
 }) {
   const valueColors = {
-    positive: 'text-chart-1',
+    positive: 'text-success',
     negative: 'text-destructive',
     neutral: 'text-foreground',
     muted: 'text-muted-foreground',
