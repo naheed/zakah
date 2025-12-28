@@ -4,7 +4,7 @@ import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn, Settings, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
@@ -13,6 +13,7 @@ import { ShareDrawer } from "../ShareDrawer";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ZakatSankeyChart, SankeyChartData } from "../ZakatSankeyChart";
+import { useTrackCalculation } from "@/hooks/useTrackCalculation";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -48,6 +49,7 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const { trackCalculation } = useTrackCalculation();
   const { currency } = data;
   const {
     totalAssets,
@@ -63,6 +65,11 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
   } = calculations;
   
   const totalPurification = interestToPurify + dividendsToPurify;
+
+  // Track anonymous usage metrics when results are shown
+  useEffect(() => {
+    trackCalculation({ totalAssets, zakatDue });
+  }, [totalAssets, zakatDue, trackCalculation]);
 
   const handleSignIn = () => {
     navigate('/auth');
