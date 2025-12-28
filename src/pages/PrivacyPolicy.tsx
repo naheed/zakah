@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start gap-2">
                   <Eye className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>Saved calculations use end-to-end encryption with keys stored in your browser — we cannot read them</span>
+                  <span>Saved calculations are fully encrypted — names, amounts, and all data are unreadable to us (true zero-knowledge)</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
@@ -168,15 +168,18 @@ export default function PrivacyPolicy() {
                 <li><strong>Session-Specific:</strong> Each browser session gets a unique encryption key</li>
               </ul>
 
-              <h3 className="text-lg font-medium text-foreground mt-4">5.2 Saved Calculation Encryption (End-to-End)</h3>
+              <h3 className="text-lg font-medium text-foreground mt-4">5.2 Saved Calculation Encryption (Zero-Knowledge)</h3>
               <p className="text-muted-foreground">
-                When you sign in and save a calculation:
+                When you sign in and save a calculation, <strong>all data is encrypted before leaving your browser</strong>:
               </p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
                 <li><strong>Encryption Standard:</strong> AES-256-GCM symmetric encryption</li>
+                <li><strong>What's Encrypted:</strong> Calculation name, all financial data, Zakat amount, and all metadata</li>
                 <li><strong>Key Storage:</strong> Encryption keys generated and stored locally in your browser's IndexedDB</li>
-                <li><strong>Device-Specific:</strong> Keys are unique to each browser/device and are not synced</li>
-                <li><strong>Zero-Knowledge:</strong> We cannot decrypt your saved calculations — only you can</li>
+                <li><strong>Device-Specific:</strong> Keys are unique to each browser/device and are never transmitted</li>
+                <li><strong>True Zero-Knowledge:</strong> Our servers store only encrypted blobs — we cannot see your 
+                    calculation names, financial details, or Zakat amounts</li>
+                <li><strong>Database Contents:</strong> Only encrypted data, timestamps, and your user ID are stored</li>
               </ul>
 
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mt-4">
