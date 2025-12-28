@@ -1,9 +1,8 @@
-import { Sankey, Tooltip, Rectangle, Layer } from "recharts";
 import { formatCurrency } from "@/lib/zakatCalculations";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 
 export interface SankeyChartData {
   liquidAssets: number;
@@ -20,27 +19,26 @@ export interface SankeyChartData {
 
 // Color coding by Zakat treatment with clear semantic meaning
 const ASSET_COLORS: Record<string, string> = {
-  "Cash & Savings": "hsl(142, 76%, 36%)", // Green - Full 2.5%
-  "Investment Portfolio": "hsl(221, 83%, 53%)", // Blue - May have 30% rule
-  "Retirement Accounts": "hsl(262, 83%, 58%)", // Purple - Tax/penalty deductions
-  "Real Estate": "hsl(25, 95%, 53%)", // Orange - Business assets
-  "Business Assets": "hsl(340, 82%, 52%)", // Pink - Business assets  
-  "Other Assets": "hsl(var(--primary))",
-  "Net Zakatable Wealth": "hsl(215, 20%, 65%)",
-  "Deductions": "hsl(var(--destructive))",
-  "Zakat Due (2.5%)": "hsl(142, 76%, 36%)", // Green for Zakat
+  "Cash & Savings": "#22c55e", // Green - Full 2.5%
+  "Investment Portfolio": "#3b82f6", // Blue - May have 30% rule
+  "Retirement Accounts": "#8b5cf6", // Purple - Tax/penalty deductions
+  "Real Estate": "#f97316", // Orange - Business assets
+  "Business Assets": "#ec4899", // Pink - Business assets  
+  "Other Assets": "#06b6d4", // Cyan
+  "Net Zakatable Wealth": "#64748b", // Slate
+  "Zakat Due": "#22c55e", // Green for Zakat
 };
 
-// Map internal names to display names
-const DISPLAY_NAMES: Record<string, string> = {
-  "Cash & Savings": "Cash & Savings",
-  "Investment Portfolio": "Investment Portfolio",
-  "Retirement Accounts": "Retirement Accounts",
-  "Real Estate": "Real Estate",
-  "Business Assets": "Business Assets",
-  "Other Assets": "Other Assets",
-  "Net Zakatable Wealth": "Net Zakatable Wealth",
-  "Zakat Due (2.5%)": "Zakat Due (2.5%)",
+// Asset descriptions for tooltips
+const ASSET_DESCRIPTIONS: Record<string, string> = {
+  "Cash & Savings": "Bank accounts, cash, gold, silver, crypto",
+  "Investment Portfolio": "Stocks, bonds, mutual funds, brokerage",
+  "Retirement Accounts": "401(k), IRA, pension (after tax/penalty)",
+  "Real Estate": "Investment properties for income",
+  "Business Assets": "Inventory, receivables, business cash",
+  "Other Assets": "Trusts, debts owed to you, other",
+  "Net Zakatable Wealth": "Total wealth eligible for Zakat",
+  "Zakat Due": "Your obligatory Zakat payment (2.5%)",
 };
 
 interface ZakatSankeyChartProps {
@@ -52,9 +50,32 @@ interface ZakatSankeyChartProps {
   showFullscreenButton?: boolean;
 }
 
-interface SankeyNodeData {
+interface FlowNode {
   name: string;
   value: number;
+  color: string;
+  x: number;
+  y: number;
+  height: number;
+}
+
+interface FlowLink {
+  source: FlowNode;
+  target: FlowNode;
+  value: number;
+  sourceY: number;
+  targetY: number;
+}
+
+interface TooltipData {
+  name: string;
+  value: number;
+  description: string;
+  x: number;
+  y: number;
+  isLink?: boolean;
+  sourceName?: string;
+  targetName?: string;
 }
 
 export function ZakatSankeyChart({ 
@@ -66,82 +87,109 @@ export function ZakatSankeyChart({
   showFullscreenButton = false,
 }: ZakatSankeyChartProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   
-  // Build nodes and links dynamically based on non-zero values
-  const nodes: SankeyNodeData[] = [];
-  const links: { source: number; target: number; value: number }[] = [];
-  
-  let nodeIndex = 0;
-  const nodeMap: Record<string, number> = {};
-  const nodeValues: Record<string, number> = {};
-  
-  // Add asset nodes (left side)
-  const addAssetNode = (name: string, value: number) => {
-    if (value > 0) {
-      nodes.push({ name, value });
-      nodeMap[name] = nodeIndex++;
-      nodeValues[name] = value;
-      return true;
-    }
-    return false;
-  };
-  
-  // Add asset categories with clearer names
-  addAssetNode("Cash & Savings", data.liquidAssets);
-  addAssetNode("Investment Portfolio", data.investments);
-  addAssetNode("Retirement Accounts", data.retirement);
-  addAssetNode("Real Estate", data.realEstate);
-  addAssetNode("Business Assets", data.business);
-  addAssetNode("Other Assets", data.otherAssets);
-  
-  // Calculate total assets flowing in
-  const totalAssetsFlow = data.liquidAssets + data.investments + data.retirement + 
-    data.realEstate + data.business + data.otherAssets;
-  
-  // Add center node (Net Zakatable Wealth)
-  nodes.push({ name: "Net Zakatable Wealth", value: data.netZakatableWealth });
-  const netZakatableIndex = nodeIndex++;
-  nodeMap["Net Zakatable Wealth"] = netZakatableIndex;
-  nodeValues["Net Zakatable Wealth"] = data.netZakatableWealth;
-  
-  // Add final node (Zakat Due)
-  if (data.zakatDue > 0) {
-    nodes.push({ name: "Zakat Due (2.5%)", value: data.zakatDue });
-    nodeMap["Zakat Due (2.5%)"] = nodeIndex++;
-    nodeValues["Zakat Due (2.5%)"] = data.zakatDue;
-  }
-  
-  // Create links from assets to net zakatable
-  if (data.liquidAssets > 0) {
-    links.push({ source: nodeMap["Cash & Savings"], target: netZakatableIndex, value: data.liquidAssets });
-  }
-  if (data.investments > 0) {
-    links.push({ source: nodeMap["Investment Portfolio"], target: netZakatableIndex, value: data.investments });
-  }
-  if (data.retirement > 0) {
-    links.push({ source: nodeMap["Retirement Accounts"], target: netZakatableIndex, value: data.retirement });
-  }
-  if (data.realEstate > 0) {
-    links.push({ source: nodeMap["Real Estate"], target: netZakatableIndex, value: data.realEstate });
-  }
-  if (data.business > 0) {
-    links.push({ source: nodeMap["Business Assets"], target: netZakatableIndex, value: data.business });
-  }
-  if (data.otherAssets > 0) {
-    links.push({ source: nodeMap["Other Assets"], target: netZakatableIndex, value: data.otherAssets });
-  }
-  
-  // Link from net zakatable to zakat due
-  if (data.zakatDue > 0 && nodeMap["Zakat Due (2.5%)"] !== undefined) {
-    links.push({ 
-      source: netZakatableIndex, 
-      target: nodeMap["Zakat Due (2.5%)"], 
-      value: data.zakatDue 
+  // Calculate layout
+  const { nodes, links, leftNodes, rightNode, zakatNode } = useMemo(() => {
+    const leftNodes: FlowNode[] = [];
+    const nodeWidth = 14;
+    const padding = showLabels ? 140 : 40;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - 40;
+    
+    // Build left side nodes (assets)
+    const assetData = [
+      { name: "Cash & Savings", value: data.liquidAssets },
+      { name: "Investment Portfolio", value: data.investments },
+      { name: "Retirement Accounts", value: data.retirement },
+      { name: "Real Estate", value: data.realEstate },
+      { name: "Business Assets", value: data.business },
+      { name: "Other Assets", value: data.otherAssets },
+    ].filter(a => a.value > 0);
+    
+    const totalAssets = assetData.reduce((sum, a) => sum + a.value, 0);
+    if (totalAssets === 0) return { nodes: [], links: [], leftNodes: [], rightNode: null, zakatNode: null };
+    
+    // Calculate heights proportionally
+    const minHeight = 20;
+    const nodePadding = 8;
+    const availableHeight = chartHeight - (assetData.length - 1) * nodePadding;
+    
+    let currentY = 20;
+    assetData.forEach(asset => {
+      const proportionalHeight = (asset.value / totalAssets) * availableHeight;
+      const nodeHeight = Math.max(minHeight, proportionalHeight);
+      
+      leftNodes.push({
+        name: asset.name,
+        value: asset.value,
+        color: ASSET_COLORS[asset.name] || "#64748b",
+        x: padding,
+        y: currentY,
+        height: nodeHeight,
+      });
+      
+      currentY += nodeHeight + nodePadding;
     });
-  }
+    
+    // Center node (Net Zakatable Wealth)
+    const centerX = padding + chartWidth / 2 - nodeWidth / 2;
+    const rightNode: FlowNode = {
+      name: "Net Zakatable Wealth",
+      value: data.netZakatableWealth,
+      color: ASSET_COLORS["Net Zakatable Wealth"],
+      x: centerX,
+      y: 20,
+      height: chartHeight,
+    };
+    
+    // Zakat Due node (right side)
+    const zakatNode: FlowNode | null = data.zakatDue > 0 ? {
+      name: "Zakat Due",
+      value: data.zakatDue,
+      color: ASSET_COLORS["Zakat Due"],
+      x: width - padding - nodeWidth,
+      y: 20,
+      height: Math.max(40, chartHeight * 0.3),
+    } : null;
+    
+    // Build links
+    const links: FlowLink[] = [];
+    let sourceYOffset = 0;
+    
+    leftNodes.forEach(node => {
+      const linkHeight = (node.value / totalAssets) * chartHeight;
+      links.push({
+        source: node,
+        target: rightNode,
+        value: node.value,
+        sourceY: node.y + node.height / 2,
+        targetY: 20 + sourceYOffset + linkHeight / 2,
+      });
+      sourceYOffset += linkHeight;
+    });
+    
+    // Link from center to zakat
+    if (zakatNode) {
+      links.push({
+        source: rightNode,
+        target: zakatNode,
+        value: data.zakatDue,
+        sourceY: rightNode.y + rightNode.height / 2,
+        targetY: zakatNode.y + zakatNode.height / 2,
+      });
+    }
+    
+    return { 
+      nodes: [...leftNodes, rightNode, ...(zakatNode ? [zakatNode] : [])], 
+      links, 
+      leftNodes, 
+      rightNode, 
+      zakatNode 
+    };
+  }, [data, width, height, showLabels]);
   
-  // Return empty state if no data
-  if (links.length === 0) {
+  if (nodes.length === 0) {
     return (
       <div className="h-48 flex items-center justify-center text-muted-foreground">
         No assets to display
@@ -149,178 +197,177 @@ export function ZakatSankeyChart({
     );
   }
   
-  const sankeyData = { nodes, links };
+  const nodeWidth = 14;
+  const padding = showLabels ? 140 : 40;
   
-  // Custom node renderer
-  const CustomNode = (props: any) => {
-    const { x, y, width: nodeWidth, height: nodeHeight, index, payload } = props;
-    const name = payload?.name || nodes[index]?.name || "";
-    const color = ASSET_COLORS[name] || "hsl(var(--muted))";
-    const nodeValue = nodeValues[name] || 0;
+  // Generate curved path for links
+  const generatePath = (link: FlowLink, linkWidth: number) => {
+    const sourceX = link.source.x + nodeWidth;
+    const sourceY = link.sourceY;
+    const targetX = link.target.x;
+    const targetY = link.targetY;
     
-    // Determine label position based on node position
-    const isLeftSide = x < width / 3;
-    const isRightSide = x > (width * 2) / 3;
-    const isCenter = !isLeftSide && !isRightSide;
+    const midX = (sourceX + targetX) / 2;
     
-    return (
-      <Layer>
-        <Rectangle
-          x={x}
-          y={y}
-          width={nodeWidth}
-          height={nodeHeight}
-          fill={color}
-          fillOpacity={0.9}
-          rx={4}
-          ry={4}
-        />
-        {showLabels && nodeHeight > 15 && (
-          <>
-            <text
-              x={isLeftSide ? x - 8 : isRightSide ? x + nodeWidth + 8 : x + nodeWidth / 2}
-              y={y + nodeHeight / 2 - 6}
-              textAnchor={isLeftSide ? "end" : isRightSide ? "start" : "middle"}
-              dominantBaseline="middle"
-              className="fill-foreground text-xs font-semibold"
-              style={{ fontSize: '11px' }}
-            >
-              {name}
-            </text>
-            <text
-              x={isLeftSide ? x - 8 : isRightSide ? x + nodeWidth + 8 : x + nodeWidth / 2}
-              y={y + nodeHeight / 2 + 8}
-              textAnchor={isLeftSide ? "end" : isRightSide ? "start" : "middle"}
-              dominantBaseline="middle"
-              className="fill-muted-foreground text-xs"
-              style={{ fontSize: '10px' }}
-            >
-              {formatCurrency(nodeValue, currency)}
-            </text>
-          </>
-        )}
-      </Layer>
-    );
-  };
-  
-  // Custom link renderer with gradient
-  const CustomLink = (props: any) => {
-    const { sourceX, sourceY, sourceControlX, targetX, targetY, targetControlX, linkWidth, index } = props;
-    const link = links[index];
-    if (!link) return null;
-    
-    const sourceName = nodes[link.source]?.name || "";
-    const targetName = nodes[link.target]?.name || "";
-    const sourceColor = ASSET_COLORS[sourceName] || "hsl(var(--muted))";
-    const targetColor = ASSET_COLORS[targetName] || "hsl(var(--muted))";
-    
-    const gradientId = `gradient-${index}`;
-    
-    const path = `
-      M${sourceX},${sourceY}
-      C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}
-      L${targetX},${targetY + linkWidth}
-      C${targetControlX},${targetY + linkWidth} ${sourceControlX},${sourceY + linkWidth} ${sourceX},${sourceY + linkWidth}
+    return `
+      M ${sourceX} ${sourceY - linkWidth / 2}
+      C ${midX} ${sourceY - linkWidth / 2}, ${midX} ${targetY - linkWidth / 2}, ${targetX} ${targetY - linkWidth / 2}
+      L ${targetX} ${targetY + linkWidth / 2}
+      C ${midX} ${targetY + linkWidth / 2}, ${midX} ${sourceY + linkWidth / 2}, ${sourceX} ${sourceY + linkWidth / 2}
       Z
     `;
-    
-    return (
-      <Layer>
-        <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={sourceColor} stopOpacity={0.5} />
-            <stop offset="100%" stopColor={targetColor} stopOpacity={0.3} />
-          </linearGradient>
-        </defs>
-        <path
-          d={path}
-          fill={`url(#${gradientId})`}
-          stroke="none"
-          className="transition-opacity hover:opacity-80"
-        />
-      </Layer>
-    );
   };
+  
+  const handleNodeHover = (node: FlowNode, e: React.MouseEvent) => {
+    const rect = (e.target as SVGElement).getBoundingClientRect();
+    const svgRect = (e.currentTarget.closest('svg') as SVGElement)?.getBoundingClientRect();
+    if (!svgRect) return;
+    
+    setTooltip({
+      name: node.name,
+      value: node.value,
+      description: ASSET_DESCRIPTIONS[node.name] || "",
+      x: rect.left - svgRect.left + rect.width / 2,
+      y: rect.top - svgRect.top,
+    });
+  };
+  
+  const handleLinkHover = (link: FlowLink, e: React.MouseEvent) => {
+    const rect = (e.target as SVGElement).getBoundingClientRect();
+    const svgRect = (e.currentTarget.closest('svg') as SVGElement)?.getBoundingClientRect();
+    if (!svgRect) return;
+    
+    setTooltip({
+      name: `${link.source.name} → ${link.target.name}`,
+      value: link.value,
+      description: `Flow from ${link.source.name}`,
+      x: rect.left - svgRect.left + rect.width / 2,
+      y: rect.top - svgRect.top,
+      isLink: true,
+      sourceName: link.source.name,
+      targetName: link.target.name,
+    });
+  };
+  
+  const totalAssets = leftNodes.reduce((sum, n) => sum + n.value, 0);
 
   const chartElement = (
-    <Sankey
-      width={width}
-      height={height}
-      data={sankeyData}
-      node={<CustomNode />}
-      link={<CustomLink />}
-      nodePadding={30}
-      nodeWidth={14}
-      linkCurvature={0.5}
-      margin={{ top: 20, right: showLabels ? 140 : 30, bottom: 20, left: showLabels ? 140 : 30 }}
-    >
-      <Tooltip
-        content={({ payload }) => {
-          if (!payload || payload.length === 0) return null;
-          const item = payload[0]?.payload;
-          if (!item) return null;
-          
-          // Check if it's a link (has source and target)
-          if (item.source !== undefined && item.target !== undefined) {
-            const sourceName = nodes[item.source]?.name || "Source";
-            const targetName = nodes[item.target]?.name || "Target";
-            const value = item.value;
-            
-            if (typeof value !== 'number' || isNaN(value)) return null;
-            
-            return (
-              <div className="bg-popover border border-border rounded-lg px-4 py-3 shadow-lg">
-                <p className="text-sm font-semibold text-foreground mb-1">
-                  {sourceName}
-                </p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  → {targetName}
-                </p>
-                <p className="text-base font-bold text-foreground">
-                  {formatCurrency(value, currency)}
-                </p>
-              </div>
-            );
-          }
-          
-          // Node tooltip
-          const nodeName = item.name || "Unknown";
-          const nodeValue = nodeValues[nodeName];
-          
-          if (typeof nodeValue !== 'number' || isNaN(nodeValue)) return null;
-          
-          // Get description based on node type
-          let description = "";
-          if (nodeName === "Cash & Savings") {
-            description = "Bank accounts, cash, gold, silver, crypto";
-          } else if (nodeName === "Investment Portfolio") {
-            description = "Stocks, bonds, mutual funds, brokerage accounts";
-          } else if (nodeName === "Retirement Accounts") {
-            description = "401(k), IRA, pension plans (after tax/penalty)";
-          } else if (nodeName === "Real Estate") {
-            description = "Investment properties held for income";
-          } else if (nodeName === "Business Assets") {
-            description = "Inventory, receivables, cash in business";
-          } else if (nodeName === "Net Zakatable Wealth") {
-            description = "Total wealth eligible for Zakat calculation";
-          } else if (nodeName === "Zakat Due (2.5%)") {
-            description = "Your obligatory Zakat payment";
-          }
+    <div className="relative">
+      <svg width={width} height={height} className="overflow-visible">
+        {/* Links */}
+        {links.map((link, i) => {
+          const linkWidth = Math.max(4, (link.value / totalAssets) * (height - 60));
+          return (
+            <path
+              key={`link-${i}`}
+              d={generatePath(link, linkWidth)}
+              fill={link.source.color}
+              fillOpacity={0.3}
+              className="cursor-pointer transition-all duration-200 hover:fill-opacity-50"
+              onMouseEnter={(e) => handleLinkHover(link, e)}
+              onMouseLeave={() => setTooltip(null)}
+            />
+          );
+        })}
+        
+        {/* Nodes */}
+        {nodes.map((node, i) => {
+          // Determine label position based on node position
+          const isLeftSide = node.x < width * 0.35;
+          const isRightSide = node.x > width * 0.65;
+          const isCenter = !isLeftSide && !isRightSide;
           
           return (
-            <div className="bg-popover border border-border rounded-lg px-4 py-3 shadow-lg max-w-xs">
-              <p className="text-sm font-semibold text-foreground">{nodeName}</p>
-              {description && (
-                <p className="text-xs text-muted-foreground mt-1 mb-2">{description}</p>
+            <g key={`node-${i}`}>
+              <rect
+                x={node.x}
+                y={node.y}
+                width={nodeWidth}
+                height={node.height}
+                fill={node.color}
+                rx={4}
+                className="cursor-pointer transition-all duration-200 hover:opacity-80"
+                onMouseEnter={(e) => handleNodeHover(node, e)}
+                onMouseLeave={() => setTooltip(null)}
+              />
+              {showLabels && (
+                <>
+                  {isCenter ? (
+                    <>
+                      {/* Center labels go below the node */}
+                      <text
+                        x={node.x + nodeWidth / 2}
+                        y={node.y + node.height + 16}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-foreground text-xs font-semibold pointer-events-none"
+                        style={{ fontSize: '10px' }}
+                      >
+                        {node.name}
+                      </text>
+                      <text
+                        x={node.x + nodeWidth / 2}
+                        y={node.y + node.height + 28}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-muted-foreground text-xs pointer-events-none"
+                        style={{ fontSize: '9px' }}
+                      >
+                        {formatCurrency(node.value, currency)}
+                      </text>
+                    </>
+                  ) : (
+                    <>
+                      {/* Side labels go to the side */}
+                      <text
+                        x={isLeftSide ? node.x - 8 : node.x + nodeWidth + 8}
+                        y={node.y + node.height / 2 - 6}
+                        textAnchor={isLeftSide ? "end" : "start"}
+                        dominantBaseline="middle"
+                        className="fill-foreground text-xs font-semibold pointer-events-none"
+                        style={{ fontSize: '11px' }}
+                      >
+                        {node.name}
+                      </text>
+                      <text
+                        x={isLeftSide ? node.x - 8 : node.x + nodeWidth + 8}
+                        y={node.y + node.height / 2 + 8}
+                        textAnchor={isLeftSide ? "end" : "start"}
+                        dominantBaseline="middle"
+                        className="fill-muted-foreground text-xs pointer-events-none"
+                        style={{ fontSize: '10px' }}
+                      >
+                        {formatCurrency(node.value, currency)}
+                      </text>
+                    </>
+                  )}
+                </>
               )}
-              <p className="text-base font-bold text-foreground">
-                {formatCurrency(nodeValue, currency)}
-              </p>
-            </div>
+            </g>
           );
-        }}
-      />
-    </Sankey>
+        })}
+      </svg>
+      
+      {/* Tooltip */}
+      {tooltip && (
+        <div 
+          className="absolute bg-popover border border-border rounded-lg px-4 py-3 shadow-lg z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full"
+          style={{ 
+            left: tooltip.x, 
+            top: tooltip.y - 8,
+            minWidth: '160px',
+          }}
+        >
+          <p className="text-sm font-semibold text-foreground">{tooltip.name}</p>
+          {tooltip.description && (
+            <p className="text-xs text-muted-foreground mt-1 mb-2">{tooltip.description}</p>
+          )}
+          <p className="text-base font-bold text-foreground">
+            {formatCurrency(tooltip.value, currency)}
+          </p>
+        </div>
+      )}
+    </div>
   );
   
   if (showFullscreenButton) {
@@ -439,7 +486,7 @@ export function ZakatSankeyChart({
   );
 }
 
-function LegendCard({ 
+const LegendCard = ({ 
   name, 
   value, 
   currency, 
@@ -451,7 +498,7 @@ function LegendCard({
   currency: string; 
   description: string;
   color: string;
-}) {
+}) => {
   return (
     <div className="bg-card border border-border rounded-lg p-4">
       <div className="flex items-center gap-2 mb-2">
@@ -462,7 +509,7 @@ function LegendCard({
       <p className="font-bold text-lg text-foreground">{formatCurrency(value, currency)}</p>
     </div>
   );
-}
+};
 
 // Mini version for landing page mock
 export function ZakatSankeyMock() {
