@@ -1,0 +1,145 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { sessionHash, totalAssets, zakatDue } = await req.json();
+
+    // Validate input
+    if (!sessionHash || typeof sessionHash !== "string" || sessionHash.length !== 64) {
+      console.error("Invalid session hash format");
+      return new Response(
+        JSON.stringify({ error: "Invalid session hash" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (typeof totalAssets !== "number" || totalAssets < 0) {
+      console.error("Invalid totalAssets:", totalAssets);
+      return new Response(
+        JSON.stringify({ error: "Invalid totalAssets" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (typeof zakatDue !== "number" || zakatDue < 0) {
+      console.error("Invalid zakatDue:", zakatDue);
+      return new Response(
+        JSON.stringify({ error: "Invalid zakatDue" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Round values for additional privacy
+    const roundedAssets = Math.round(totalAssets / 1000) * 1000;
+    const roundedZakat = Math.round(zakatDue / 100) * 100;
+
+    // Create Supabase client with service role for writes
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const today = new Date().toISOString().split("T")[0];
+    const currentMonth = today.substring(0, 7); // YYYY-MM
+    const currentYear = today.substring(0, 4); // YYYY
+
+    // Insert event (with deduplication via unique constraint)
+    const { error: insertError, data: insertData } = await supabase
+      .from("zakat_anonymous_events")
+      .upsert(
+        {
+          session_hash: sessionHash,
+          event_date: today,
+          total_assets: roundedAssets,
+          zakat_due: roundedZakat,
+        },
+        { onConflict: "session_hash,event_date", ignoreDuplicates: true }
+      )
+      .select();
+
+    if (insertError) {
+      console.error("Error inserting event:", insertError);
+      // Don't fail completely - aggregates can still be updated
+    }
+
+    // Check if this was a new insert (not a duplicate)
+    const isNewEvent = insertData && insertData.length > 0;
+    console.log("Event insert result:", { isNewEvent, insertData });
+
+    if (isNewEvent) {
+      // Update all aggregate periods atomically
+      const periods = [
+        { period_type: "monthly", period_value: currentMonth },
+        { period_type: "yearly", period_value: currentYear },
+        { period_type: "all_time", period_value: "all" },
+      ];
+
+      for (const period of periods) {
+        // Upsert with increment
+        const { error: upsertError } = await supabase.rpc("increment_usage_aggregate", {
+          p_period_type: period.period_type,
+          p_period_value: period.period_value,
+          p_assets: roundedAssets,
+          p_zakat: roundedZakat,
+        });
+
+        if (upsertError) {
+          console.error(`Error updating ${period.period_type} aggregate:`, upsertError);
+          
+          // Fallback: try direct upsert
+          const { data: existing } = await supabase
+            .from("zakat_usage_aggregates")
+            .select("*")
+            .eq("period_type", period.period_type)
+            .eq("period_value", period.period_value)
+            .single();
+
+          if (existing) {
+            await supabase
+              .from("zakat_usage_aggregates")
+              .update({
+                unique_sessions: existing.unique_sessions + 1,
+                total_assets: existing.total_assets + roundedAssets,
+                total_zakat: existing.total_zakat + roundedZakat,
+                calculation_count: existing.calculation_count + 1,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("period_type", period.period_type)
+              .eq("period_value", period.period_value);
+          } else {
+            await supabase.from("zakat_usage_aggregates").insert({
+              period_type: period.period_type,
+              period_value: period.period_value,
+              unique_sessions: 1,
+              total_assets: roundedAssets,
+              total_zakat: roundedZakat,
+              calculation_count: 1,
+            });
+          }
+        }
+      }
+    }
+
+    console.log("Successfully tracked calculation");
+    return new Response(
+      JSON.stringify({ success: true }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error tracking calculation:", error);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
