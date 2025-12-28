@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface ProgressBarProps {
   currentStep: number;
@@ -34,9 +35,11 @@ export function ProgressBar({ currentStep, totalSteps, section }: ProgressBarPro
         </span>
       </div>
       <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-        <div
-          className={cn("h-full transition-all duration-500 ease-out rounded-full", sectionColors[section])}
-          style={{ width: `${progress}%` }}
+        <motion.div
+          className={cn("h-full rounded-full", sectionColors[section])}
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       </div>
     </div>
