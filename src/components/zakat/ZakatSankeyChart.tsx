@@ -152,8 +152,8 @@ export function ZakatSankeyChart({
       height: chartHeight,
     };
     
-    // Zakat Due node (right side) - taller to receive all colored flows
-    const zakatHeight = Math.max(60, chartHeight * 0.4);
+    // Zakat Due node (right side) - smaller, proportional
+    const zakatHeight = Math.max(40, chartHeight * 0.25);
     const zakatNode: FlowNode | null = data.zakatDue > 0 ? {
       name: "Zakat Due",
       value: data.zakatDue,

@@ -75,6 +75,63 @@ function drawRoundedRect(
   }
 }
 
+// Helper to draw curved flow band (mimics SVG bezier curves)
+function drawCurvedFlow(
+  doc: jsPDF,
+  srcX: number,
+  srcY: number, 
+  srcH: number,
+  tgtX: number,
+  tgtY: number,
+  tgtH: number,
+  color: [number, number, number],
+  opacity: number = 0.4
+) {
+  doc.setFillColor(...color);
+  
+  const midX = (srcX + tgtX) / 2;
+  const steps = 20;
+  
+  // Build polygon points along the curved path
+  const topPoints: { x: number; y: number }[] = [];
+  const bottomPoints: { x: number; y: number }[] = [];
+  
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    // Cubic bezier: (1-t)^3*P0 + 3*(1-t)^2*t*P1 + 3*(1-t)*t^2*P2 + t^3*P3
+    const x = Math.pow(1-t, 3) * srcX + 3 * Math.pow(1-t, 2) * t * midX + 3 * (1-t) * Math.pow(t, 2) * midX + Math.pow(t, 3) * tgtX;
+    
+    // Top edge
+    const topSrc = srcY - srcH / 2;
+    const topTgt = tgtY - tgtH / 2;
+    const yTop = Math.pow(1-t, 3) * topSrc + 3 * Math.pow(1-t, 2) * t * topSrc + 3 * (1-t) * Math.pow(t, 2) * topTgt + Math.pow(t, 3) * topTgt;
+    
+    // Bottom edge
+    const botSrc = srcY + srcH / 2;
+    const botTgt = tgtY + tgtH / 2;
+    const yBot = Math.pow(1-t, 3) * botSrc + 3 * Math.pow(1-t, 2) * t * botSrc + 3 * (1-t) * Math.pow(t, 2) * botTgt + Math.pow(t, 3) * botTgt;
+    
+    topPoints.push({ x, y: yTop });
+    bottomPoints.push({ x, y: yBot });
+  }
+  
+  // Draw as series of small quads with transparency effect
+  doc.setGState(new (doc as any).GState({ opacity }));
+  
+  for (let i = 0; i < steps; i++) {
+    const t1 = topPoints[i];
+    const t2 = topPoints[i + 1];
+    const b1 = bottomPoints[i];
+    const b2 = bottomPoints[i + 1];
+    
+    // Draw quad as two triangles
+    doc.triangle(t1.x, t1.y, t2.x, t2.y, b1.x, b1.y, 'F');
+    doc.triangle(t2.x, t2.y, b2.x, b2.y, b1.x, b1.y, 'F');
+  }
+  
+  doc.setGState(new (doc as any).GState({ opacity: 1 }));
+}
+
 function drawSankeyChart(
   doc: jsPDF,
   breakdown: ZakatCalculations['assetBreakdown'],
@@ -96,16 +153,16 @@ function drawSankeyChart(
   
   const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
   
-  const chartHeight = 85;
-  const nodeWidth = 10;
+  const chartHeight = 80;
+  const nodeWidth = 8;
   
-  // Column positions - spread across the width
-  const leftColX = margin + 75;
+  // Column positions - spread across the width with more centering
+  const leftColX = margin + 70;
   const centerColX = pageWidth / 2 - nodeWidth / 2;
-  const rightColX = pageWidth - margin - 75;
+  const rightColX = pageWidth - margin - 70;
   
   // Calculate node positions for left side (assets)
-  const nodePadding = 3;
+  const nodePadding = 4;
   const availableHeight = chartHeight - (assets.length - 1) * nodePadding;
   
   interface NodePos { x: number; y: number; h: number; name: string; value: number; color: [number, number, number]; colorLight: [number, number, number] }
@@ -113,7 +170,7 @@ function drawSankeyChart(
   
   let currentY = startY;
   assets.forEach(asset => {
-    const nodeHeight = Math.max(10, (asset.value / totalAssets) * availableHeight);
+    const nodeHeight = Math.max(8, (asset.value / totalAssets) * availableHeight);
     assetNodes.push({
       x: leftColX,
       y: currentY,
@@ -133,39 +190,32 @@ function drawSankeyChart(
     h: chartHeight,
   };
   
-  // Zakat node (right side)
-  const zakatHeight = Math.max(25, chartHeight * 0.3);
+  // Zakat node (right side) - smaller, proportional
+  const zakatHeight = Math.max(20, chartHeight * 0.25);
   const zakatNode = {
     x: rightColX,
     y: startY + (chartHeight - zakatHeight) / 2,
     h: zakatHeight,
   };
   
-  // Draw flows from assets to center (using light colors for visibility)
+  // Draw curved flows from assets to center
   let centerYOffset = 0;
   assetNodes.forEach(node => {
     const flowHeight = (node.value / totalAssets) * chartHeight;
-    const targetYMid = startY + centerYOffset + flowHeight / 2;
-    
-    // Draw simplified flow band
-    doc.setFillColor(...node.colorLight);
     
     const srcX = leftColX + nodeWidth;
-    const srcY = node.y;
+    const srcY = node.y + node.h / 2;
     const srcH = node.h;
     const tgtX = centerColX;
-    const tgtY = startY + centerYOffset;
+    const tgtY = startY + centerYOffset + flowHeight / 2;
     const tgtH = flowHeight;
     
-    // Draw as quadrilateral
-    doc.triangle(srcX, srcY, srcX, srcY + srcH, tgtX, tgtY + tgtH / 2, 'F');
-    doc.triangle(srcX, srcY, tgtX, tgtY + tgtH / 2, tgtX, tgtY, 'F');
-    doc.triangle(srcX, srcY + srcH, tgtX, tgtY + tgtH, tgtX, tgtY + tgtH / 2, 'F');
+    drawCurvedFlow(doc, srcX, srcY, srcH, tgtX, tgtY, tgtH, node.color, 0.35);
     
     centerYOffset += flowHeight;
   });
   
-  // Draw flows from center to zakat (colored by asset contribution)
+  // Draw curved flows from center to zakat (colored by asset contribution)
   let zakatYOffset = 0;
   let centerFlowYOffset = 0;
   assetNodes.forEach(node => {
@@ -173,19 +223,14 @@ function drawSankeyChart(
     const zakatFlowHeight = (zakatContribution / zakatDue) * zakatNode.h;
     const centerFlowHeight = (node.value / totalAssets) * chartHeight;
     
-    doc.setFillColor(...node.colorLight);
-    
     const srcX = centerColX + nodeWidth;
-    const srcY = startY + centerFlowYOffset;
-    const srcH = centerFlowHeight;
+    const srcY = startY + centerFlowYOffset + centerFlowHeight / 2;
+    const srcH = Math.max(3, centerFlowHeight * 0.3);
     const tgtX = rightColX;
-    const tgtY = zakatNode.y + zakatYOffset;
+    const tgtY = zakatNode.y + zakatYOffset + zakatFlowHeight / 2;
     const tgtH = zakatFlowHeight;
     
-    // Draw flow
-    doc.triangle(srcX, srcY + srcH / 2 - 5, srcX, srcY + srcH / 2 + 5, tgtX, tgtY + tgtH / 2, 'F');
-    doc.triangle(srcX, srcY + srcH / 2 - 5, tgtX, tgtY, tgtX, tgtY + tgtH / 2, 'F');
-    doc.triangle(srcX, srcY + srcH / 2 + 5, tgtX, tgtY + tgtH, tgtX, tgtY + tgtH / 2, 'F');
+    drawCurvedFlow(doc, srcX, srcY, srcH, tgtX, tgtY, tgtH, node.color, 0.5);
     
     zakatYOffset += zakatFlowHeight;
     centerFlowYOffset += centerFlowHeight;
@@ -197,15 +242,15 @@ function drawSankeyChart(
     doc.roundedRect(node.x, node.y, nodeWidth, node.h, 2, 2, 'F');
     
     // Label to the left
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...COLORS.text);
-    doc.text(node.name, node.x - 5, node.y + node.h / 2 - 2, { align: 'right' });
+    doc.text(node.name, node.x - 4, node.y + node.h / 2 - 1, { align: 'right' });
     
-    doc.setFontSize(7);
+    doc.setFontSize(6);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...COLORS.textMuted);
-    doc.text(formatCurrency(node.value, currency), node.x - 5, node.y + node.h / 2 + 5, { align: 'right' });
+    doc.text(formatCurrency(node.value, currency), node.x - 4, node.y + node.h / 2 + 5, { align: 'right' });
   });
   
   // Draw center node
@@ -213,30 +258,30 @@ function drawSankeyChart(
   doc.roundedRect(centerNode.x, centerNode.y, nodeWidth, centerNode.h, 2, 2, 'F');
   
   // Center label below
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...COLORS.text);
-  doc.text('Net Zakatable', centerNode.x + nodeWidth / 2, centerNode.y + centerNode.h + 10, { align: 'center' });
-  doc.setFontSize(7);
+  doc.text('Net Zakatable', centerNode.x + nodeWidth / 2, centerNode.y + centerNode.h + 8, { align: 'center' });
+  doc.setFontSize(6);
   doc.setTextColor(...COLORS.textMuted);
-  doc.text(formatCurrency(netZakatableWealth, currency), centerNode.x + nodeWidth / 2, centerNode.y + centerNode.h + 17, { align: 'center' });
+  doc.text(formatCurrency(netZakatableWealth, currency), centerNode.x + nodeWidth / 2, centerNode.y + centerNode.h + 14, { align: 'center' });
   
-  // Draw zakat node
+  // Draw zakat node - smaller green box
   doc.setFillColor(...COLORS.primary);
   doc.roundedRect(zakatNode.x, zakatNode.y, nodeWidth, zakatNode.h, 2, 2, 'F');
   
   // Zakat label to the right
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...COLORS.text);
-  doc.text('Zakat Due', zakatNode.x + nodeWidth + 5, zakatNode.y + zakatNode.h / 2 - 2);
+  doc.text('Zakat Due', zakatNode.x + nodeWidth + 4, zakatNode.y + zakatNode.h / 2 - 1);
   
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...COLORS.primary);
-  doc.text(formatCurrency(zakatDue, currency), zakatNode.x + nodeWidth + 5, zakatNode.y + zakatNode.h / 2 + 7);
+  doc.text(formatCurrency(zakatDue, currency), zakatNode.x + nodeWidth + 4, zakatNode.y + zakatNode.h / 2 + 7);
   
-  return startY + chartHeight + 25;
+  return startY + chartHeight + 22;
 }
 
 export function generateZakatPDF(
@@ -276,46 +321,46 @@ export function generateZakatPDF(
   let yPos = 45;
   
   if (calculations.isAboveNisab) {
-    // Green result card
-    drawRoundedRect(doc, margin, yPos, pageWidth - margin * 2, 45, 6, COLORS.primary);
+    // Green result card - smaller height
+    drawRoundedRect(doc, margin, yPos, pageWidth - margin * 2, 38, 6, COLORS.primary);
     
     doc.setTextColor(...COLORS.white);
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Your Zakat Due', pageWidth / 2, yPos + 14, { align: 'center' });
+    doc.text('Your Zakat Due', pageWidth / 2, yPos + 11, { align: 'center' });
     
-    doc.setFontSize(28);
+    doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
-    doc.text(formatCurrency(calculations.zakatDue, currency), pageWidth / 2, yPos + 32, { align: 'center' });
+    doc.text(formatCurrency(calculations.zakatDue, currency), pageWidth / 2, yPos + 25, { align: 'center' });
     
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
     doc.text(
       `${formatPercent(calculations.zakatRate)} of ${formatCurrency(calculations.netZakatableWealth, currency)} net zakatable wealth`,
       pageWidth / 2, 
-      yPos + 42, 
+      yPos + 34, 
       { align: 'center' }
     );
   } else {
-    // Gray result card
-    drawRoundedRect(doc, margin, yPos, pageWidth - margin * 2, 45, 6, COLORS.background, COLORS.border);
+    // Gray result card - smaller height
+    drawRoundedRect(doc, margin, yPos, pageWidth - margin * 2, 38, 6, COLORS.background, COLORS.border);
     
     doc.setTextColor(...COLORS.textMuted);
-    doc.setFontSize(10);
-    doc.text('Below Nisab Threshold', pageWidth / 2, yPos + 14, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text('Below Nisab Threshold', pageWidth / 2, yPos + 11, { align: 'center' });
     
     doc.setTextColor(...COLORS.text);
-    doc.setFontSize(20);
+    doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('No Zakat Due This Year', pageWidth / 2, yPos + 30, { align: 'center' });
+    doc.text('No Zakat Due This Year', pageWidth / 2, yPos + 24, { align: 'center' });
     
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...COLORS.textMuted);
-    doc.text(`Your wealth is below ${formatCurrency(calculations.nisab, currency)}`, pageWidth / 2, yPos + 40, { align: 'center' });
+    doc.text(`Your wealth is below ${formatCurrency(calculations.nisab, currency)}`, pageWidth / 2, yPos + 33, { align: 'center' });
   }
   
-  yPos += 55;
+  yPos += 48;
   
   // === SANKEY CHART ===
   doc.setFontSize(12);
