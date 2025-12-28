@@ -9,37 +9,15 @@ import { ReferralWidget } from "../ReferralWidget";
 import { RecentCalculations } from "../RecentCalculations";
 import { UserMenu } from "../UserMenu";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
-import { HowItWorks } from "../landing/HowItWorks";
-import { MethodologyTeaser } from "../landing/MethodologyTeaser";
 import { InteractiveDemo } from "../landing/InteractiveDemo";
+
 interface WelcomeStepProps {
   onNext: () => void;
   onLoadCalculation?: (calculation: SavedCalculation) => void;
 }
 
-// Asset coverage badges for first-time users
-const assetBadges = [
-  { icon: Landmark, label: "401(k) & IRA" },
-  { icon: Bitcoin, label: "Crypto" },
-  { icon: Building2, label: "Real Estate" },
-  { icon: Briefcase, label: "RSUs & ESPP" },
-];
-
-// Trust badges for the hero section
-function TrustBadges() {
-  return (
-    <div className="flex flex-wrap items-center gap-3 mt-4">
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
-        <Shield className="w-4 h-4 text-primary" />
-        <span>Private & Secure</span>
-      </div>
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
-        <Lock className="w-4 h-4 text-primary" />
-        <span>Encrypted & only visible to you</span>
-      </div>
-    </div>
-  );
-}
+// Asset coverage inline text
+const assetTypes = ["401(k)s", "Crypto", "Real Estate", "RSUs"];
 
 export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
@@ -183,37 +161,14 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
     );
   }
 
-  // First-time user experience - full landing page
+  // First-time user experience - optimized landing page
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero Section */}
-      <section className="flex-1 flex items-center justify-center px-4 py-12 md:py-16">
+      <section className="flex-1 flex items-center justify-center px-4 py-8 md:py-12">
         <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Left Side - Interactive Demo */}
-          <div className="order-2 md:order-1">
-            <InteractiveDemo />
-            
-            {/* Usage Metrics - Social Proof (only show when 5+ unique sessions for privacy) */}
-            {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
-              <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm">
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Calculator className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-foreground">{formatCount(metrics.allTime.calculations)}</span> calculations
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <DollarSign className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}</span> evaluated
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Heart className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span> Zakat calculated
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Right Side - CTA */}
-          <div className="order-1 md:order-2 flex flex-col">
+          {/* Left Side - CTA (Primary focus) */}
+          <div className="order-1 flex flex-col">
             {/* Brand Name */}
             <span className="text-2xl font-bold bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent mb-4">
               Zakat Flow
@@ -224,49 +179,29 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               Know Your Zakat<br />in 5 Minutes
             </h1>
             
-            {/* Subhead - Address complexity */}
-            <p className="text-lg text-muted-foreground mb-4">
-              401(k)s, crypto, rental income—we handle the complexity.
+            {/* Subhead with inline asset types */}
+            <p className="text-lg text-muted-foreground mb-6">
+              Handles {assetTypes.join(" • ")}—we simplify the complexity.
             </p>
-
-            {/* Asset Coverage Badges */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {assetBadges.map((badge, index) => (
-                <Badge 
-                  key={index} 
-                  variant="secondary" 
-                  className="gap-1.5 px-3 py-1 text-xs font-medium"
-                >
-                  <badge.icon className="w-3.5 h-3.5" />
-                  {badge.label}
-                </Badge>
-              ))}
-            </div>
             
             {/* Primary CTA */}
-            <Button onClick={onNext} size="lg" className="w-full sm:w-auto gap-2 text-base h-12 mb-3">
+            <Button onClick={onNext} size="lg" className="w-full sm:w-auto gap-2 text-base h-12 mb-4">
               Start Calculating
               <ArrowRight className="w-4 h-4" />
             </Button>
 
-            {/* Trust Badges */}
-            <TrustBadges />
+            {/* Consolidated Trust Badge */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+              <Lock className="w-4 h-4 text-primary" />
+              <span>Encrypted & grounded in Islamic scholarship</span>
+            </div>
 
-            {/* Login Option */}
-            <div className="mt-6">
-              <div className="relative w-full sm:w-auto my-3">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">or continue with</span>
-                </div>
-              </div>
-              
+            {/* Sign-in Section - Simplified */}
+            <div className="flex items-center gap-3">
               <Button 
                 variant="outline" 
                 onClick={signInWithGoogle}
-                className="w-full sm:w-auto gap-2 h-10"
+                className="gap-2 h-10"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -274,30 +209,44 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Google
+                Sign in with Google
               </Button>
-              
-              <p className="text-xs text-muted-foreground mt-3">
-                Sign in to securely save your calculations
-              </p>
+              <span className="text-xs text-muted-foreground">to save calculations</span>
             </div>
+          </div>
+
+          {/* Right Side - Interactive Demo (Proof) */}
+          <div className="order-2">
+            <InteractiveDemo />
+            
+            {/* Usage Metrics - Social Proof (only show when 5+ unique sessions for privacy) */}
+            {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
+              <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calculator className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-foreground">{formatCount(metrics.allTime.calculations)}</span> calculations
+                </span>
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Heart className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span> Zakat calculated
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* How It Works + Methodology */}
-      <HowItWorks />
-      <MethodologyTeaser />
-
-      {/* Footer */}
-      <footer className="py-8 px-4 border-t border-border">
+      {/* Consolidated Footer */}
+      <footer className="py-6 px-4 border-t border-border">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+          {/* Methodology citation + links in one row */}
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground mb-3">
+            <span>Based on AMJA, AAOIFI & Sheikh Joe Bradford</span>
+            <span className="text-muted-foreground/50">•</span>
             <Link 
               to="/methodology" 
-              className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+              className="text-primary hover:underline"
             >
-              <BookOpen className="w-4 h-4" />
               Methodology
             </Link>
             <span className="text-muted-foreground/50">•</span>
@@ -305,19 +254,18 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               to="/privacy" 
               className="hover:text-foreground transition-colors"
             >
-              Privacy Policy
+              Privacy
             </Link>
             <span className="text-muted-foreground/50">•</span>
             <Link 
               to="/terms" 
               className="hover:text-foreground transition-colors"
             >
-              Terms of Service
+              Terms
             </Link>
           </div>
-          <div className="text-center text-xs text-muted-foreground space-y-1">
-            <p>Built by Naheed Vora • Provided as-is</p>
-            <p>Questions or feedback? <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a></p>
+          <div className="text-center text-xs text-muted-foreground">
+            <p>Built by Naheed Vora • <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a></p>
           </div>
         </div>
       </footer>
