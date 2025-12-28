@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FileText, Check, Loader2 } from "lucide-react";
+import { FileText, Check, Loader2, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/zakatCalculations";
+import { Button } from "@/components/ui/button";
 
 // Animation phases
 type AnimationPhase = 
@@ -72,6 +73,7 @@ function useTypingAnimation(
 export function InteractiveDemo() {
   const [phase, setPhase] = useState<AnimationPhase>("idle");
   const [isVisible, setIsVisible] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
   
@@ -129,13 +131,20 @@ export function InteractiveDemo() {
     timers.push(setTimeout(() => setPhase("complete"), 9500));
     
     return () => timers.forEach(clearTimeout);
-  }, [isVisible]);
+  }, [isVisible, animationKey]);
   
-  // Reset animation when scrolling away and back
-  const resetAnimation = useCallback(() => {
-    hasAnimated.current = false;
+  // Replay animation
+  const handleReplay = useCallback(() => {
     setPhase("idle");
     setIsVisible(false);
+    hasAnimated.current = false;
+    
+    // Trigger restart after a brief delay
+    setTimeout(() => {
+      setIsVisible(true);
+      hasAnimated.current = true;
+      setAnimationKey(prev => prev + 1);
+    }, 100);
   }, []);
   
   const showCashInput = phase !== "idle";
@@ -143,6 +152,7 @@ export function InteractiveDemo() {
   const showAggregation = ["aggregating", "sankey-reveal", "zakat-split", "complete"].includes(phase);
   const showSankey = ["sankey-reveal", "zakat-split", "complete"].includes(phase);
   const showZakatSplit = ["zakat-split", "complete"].includes(phase);
+  const showReplay = phase === "complete";
   
   return (
     <div 
@@ -189,7 +199,7 @@ export function InteractiveDemo() {
         </div>
         
         {/* Animation Stages Container */}
-        <div className="space-y-3 min-h-[220px]">
+        <div className="space-y-3 min-h-[200px]">
           {/* Stage 1: Manual Input */}
           <div 
             className={`transition-all duration-500 ${
@@ -288,14 +298,27 @@ export function InteractiveDemo() {
           </div>
         </div>
         
-        {/* Summary row */}
-        <div className={`pt-4 border-t border-border flex justify-between text-sm transition-opacity duration-500 ${
+        {/* Summary row with replay button */}
+        <div className={`pt-4 border-t border-border flex justify-between items-center text-sm transition-opacity duration-500 ${
           showSankey ? "opacity-100" : "opacity-50"
         }`}>
-          <span className="text-muted-foreground">Net Zakatable Wealth</span>
+          <div className="flex-1">
+            <span className="text-muted-foreground">Net Zakatable Wealth</span>
+          </div>
           <span className="font-semibold text-foreground">
             {showSankey ? formatCurrency(DEMO_DATA.netZakatable, "USD") : "—"}
           </span>
+          {showReplay && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleReplay}
+              className="ml-2 h-7 w-7 text-muted-foreground hover:text-foreground"
+              aria-label="Replay animation"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -310,27 +333,41 @@ function AnimatedSankeyChart({
   showZakatSplit: boolean;
   isAnimating: boolean;
 }) {
-  const width = 280;
-  const height = 140;
-  const nodeWidth = 12;
-  const padding = 20;
+  const width = 320;
+  const height = 160;
+  const nodeWidth = 10;
+  const leftPadding = 8;
+  const rightPadding = 8;
   
-  // Asset nodes (left side)
+  // Calculate total assets for proportional sizing
   const assets = [
-    { name: "Cash", value: DEMO_DATA.cashValue, color: ASSET_COLORS.cash, y: 10 },
-    { name: "Investments", value: DEMO_DATA.investmentsExtracted, color: ASSET_COLORS.investments, y: 40 },
-    { name: "Retirement", value: DEMO_DATA.retirementValue, color: ASSET_COLORS.retirement, y: 70 },
-    { name: "Other", value: DEMO_DATA.otherAssets, color: ASSET_COLORS.other, y: 100 },
+    { name: "Cash", value: DEMO_DATA.cashValue, color: ASSET_COLORS.cash },
+    { name: "Investments", value: DEMO_DATA.investmentsExtracted, color: ASSET_COLORS.investments },
+    { name: "Retirement", value: DEMO_DATA.retirementValue, color: ASSET_COLORS.retirement },
+    { name: "Other", value: DEMO_DATA.otherAssets, color: ASSET_COLORS.other },
   ];
   
+  const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
+  
+  // Calculate asset node heights and positions proportionally
+  const assetSpacing = 6;
+  const availableHeight = height - 20;
+  let currentY = 10;
+  
+  const assetNodes = assets.map((asset) => {
+    const nodeHeight = Math.max(16, (asset.value / totalAssets) * (availableHeight - assetSpacing * 3));
+    const node = { ...asset, y: currentY, height: nodeHeight };
+    currentY += nodeHeight + assetSpacing;
+    return node;
+  });
+  
   // Center node (Net Zakatable)
-  const centerX = width * 0.45;
-  const centerY = 10;
-  const centerHeight = 120;
+  const centerX = width * 0.48;
+  const centerY = 15;
+  const centerHeight = height - 35;
   
   // Zakat nodes (right side)
-  const zakatX = width - padding - nodeWidth;
-  const zakatY = 35;
+  const zakatX = width - rightPadding - nodeWidth;
   
   // Generate curved path
   const generatePath = (
@@ -350,10 +387,8 @@ function AnimatedSankeyChart({
     `;
   };
   
-  const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
-  
   return (
-    <div className="flex justify-center py-2">
+    <div className="flex justify-center py-1">
       <svg width={width} height={height} className="overflow-visible">
         <style>{`
           .sankey-path {
@@ -361,6 +396,9 @@ function AnimatedSankeyChart({
           }
           .sankey-node {
             animation: sankey-appear 0.4s ease-out forwards;
+          }
+          .sankey-label {
+            animation: sankey-fade 0.4s ease-out forwards;
           }
           @keyframes sankey-draw {
             0% { opacity: 0; }
@@ -370,39 +408,45 @@ function AnimatedSankeyChart({
             0% { opacity: 0; transform: scaleY(0); }
             100% { opacity: 1; transform: scaleY(1); }
           }
+          @keyframes sankey-fade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
         `}</style>
         
         {/* Asset nodes (left) */}
-        {assets.map((asset, i) => {
-          const nodeHeight = Math.max(20, (asset.value / totalAssets) * 100);
+        {assetNodes.map((asset, i) => {
+          const flowThickness = Math.max(6, (asset.value / totalAssets) * 40);
+          const endY = centerY + (i + 0.5) * (centerHeight / assetNodes.length);
+          
           return (
             <g key={asset.name}>
               <rect
-                x={padding}
+                x={leftPadding}
                 y={asset.y}
                 width={nodeWidth}
-                height={nodeHeight}
-                rx={3}
+                height={asset.height}
+                rx={2}
                 fill={asset.color}
                 className="sankey-node"
                 style={{ 
-                  animationDelay: `${i * 100}ms`,
-                  transformOrigin: `${padding + nodeWidth/2}px ${asset.y + nodeHeight/2}px`
+                  animationDelay: `${i * 80}ms`,
+                  transformOrigin: `${leftPadding + nodeWidth/2}px ${asset.y + asset.height/2}px`
                 }}
               />
               {/* Flow to center */}
               <path
                 d={generatePath(
-                  padding + nodeWidth,
-                  asset.y + nodeHeight / 2,
+                  leftPadding + nodeWidth,
+                  asset.y + asset.height / 2,
                   centerX,
-                  centerY + (i + 0.5) * (centerHeight / assets.length),
-                  Math.max(8, (asset.value / totalAssets) * 50)
+                  endY,
+                  flowThickness
                 )}
                 fill={asset.color}
-                fillOpacity={0.3}
+                fillOpacity={0.25}
                 className="sankey-path"
-                style={{ animationDelay: `${300 + i * 100}ms` }}
+                style={{ animationDelay: `${250 + i * 80}ms` }}
               />
             </g>
           );
@@ -414,10 +458,10 @@ function AnimatedSankeyChart({
           y={centerY}
           width={nodeWidth}
           height={centerHeight}
-          rx={3}
+          rx={2}
           fill={ASSET_COLORS.net}
           className="sankey-node"
-          style={{ animationDelay: "400ms" }}
+          style={{ animationDelay: "350ms", transformOrigin: `${centerX + nodeWidth/2}px ${centerY + centerHeight/2}px` }}
         />
         
         {/* Flow to Zakat */}
@@ -428,67 +472,89 @@ function AnimatedSankeyChart({
             <path
               d={generatePath(
                 centerX + nodeWidth,
-                centerY + centerHeight * 0.3,
+                centerY + centerHeight * 0.35,
                 zakatX,
-                zakatY,
-                20
+                45,
+                16
               )}
               fill={ASSET_COLORS.zakat}
-              fillOpacity={0.4}
+              fillOpacity={0.35}
               className="sankey-path"
-              style={{ animationDelay: "600ms" }}
+              style={{ animationDelay: "500ms" }}
             />
             <rect
               x={zakatX}
-              y={zakatY - 5}
+              y={30}
               width={nodeWidth}
               height={30}
-              rx={3}
+              rx={2}
               fill={ASSET_COLORS.zakat}
               className="sankey-node"
-              style={{ animationDelay: "700ms" }}
+              style={{ animationDelay: "600ms", transformOrigin: `${zakatX + nodeWidth/2}px 45px` }}
             />
             
             {/* Optimized flow (smaller) */}
             <path
               d={generatePath(
                 centerX + nodeWidth,
-                centerY + centerHeight * 0.7,
+                centerY + centerHeight * 0.65,
                 zakatX,
-                zakatY + 55,
-                14
+                100,
+                12
               )}
               fill={ASSET_COLORS.zakat}
-              fillOpacity={0.25}
+              fillOpacity={0.2}
               className="sankey-path"
-              style={{ animationDelay: "800ms" }}
+              style={{ animationDelay: "700ms" }}
             />
             <rect
               x={zakatX}
-              y={zakatY + 45}
+              y={88}
               width={nodeWidth}
-              height={22}
-              rx={3}
+              height={24}
+              rx={2}
               fill={ASSET_COLORS.zakat}
               opacity={0.6}
               className="sankey-node"
-              style={{ animationDelay: "900ms" }}
+              style={{ animationDelay: "800ms", transformOrigin: `${zakatX + nodeWidth/2}px 100px` }}
             />
             
-            {/* Labels */}
+            {/* Right-side labels */}
             <text
-              x={zakatX + nodeWidth + 6}
-              y={zakatY + 8}
-              className="fill-foreground text-[9px] font-medium"
+              x={zakatX - 4}
+              y={42}
+              textAnchor="end"
+              className="fill-foreground text-[9px] font-medium sankey-label"
+              style={{ animationDelay: "650ms" }}
             >
               Conservative
             </text>
             <text
-              x={zakatX + nodeWidth + 6}
-              y={zakatY + 60}
-              className="fill-muted-foreground text-[9px]"
+              x={zakatX - 4}
+              y={53}
+              textAnchor="end"
+              className="fill-muted-foreground text-[8px] sankey-label"
+              style={{ animationDelay: "650ms" }}
+            >
+              $3,346
+            </text>
+            <text
+              x={zakatX - 4}
+              y={97}
+              textAnchor="end"
+              className="fill-muted-foreground text-[9px] sankey-label"
+              style={{ animationDelay: "850ms" }}
             >
               Optimized
+            </text>
+            <text
+              x={zakatX - 4}
+              y={108}
+              textAnchor="end"
+              className="fill-muted-foreground text-[8px] sankey-label"
+              style={{ animationDelay: "850ms" }}
+            >
+              $2,391
             </text>
           </>
         ) : (
@@ -499,33 +565,34 @@ function AnimatedSankeyChart({
                 centerX + nodeWidth,
                 centerY + centerHeight / 2,
                 zakatX,
-                zakatY + 20,
-                25
+                height / 2,
+                20
               )}
               fill={ASSET_COLORS.zakat}
-              fillOpacity={0.4}
+              fillOpacity={0.35}
               className="sankey-path"
-              style={{ animationDelay: "600ms" }}
+              style={{ animationDelay: "500ms" }}
             />
             <rect
               x={zakatX}
-              y={zakatY}
+              y={height / 2 - 18}
               width={nodeWidth}
-              height={40}
-              rx={3}
+              height={36}
+              rx={2}
               fill={ASSET_COLORS.zakat}
               className="sankey-node"
-              style={{ animationDelay: "700ms" }}
+              style={{ animationDelay: "600ms", transformOrigin: `${zakatX + nodeWidth/2}px ${height/2}px` }}
             />
           </>
         )}
         
-        {/* Node labels */}
+        {/* Center node label */}
         <text
           x={centerX + nodeWidth / 2}
-          y={centerY + centerHeight + 12}
+          y={height - 4}
           textAnchor="middle"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-muted-foreground text-[8px] sankey-label"
+          style={{ animationDelay: "400ms" }}
         >
           Net Zakatable
         </text>
