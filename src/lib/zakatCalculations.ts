@@ -458,16 +458,17 @@ export function formatPercent(rate: number): string {
   return `${(rate * 100).toFixed(3)}%`;
 }
 
+import { Parser } from 'expr-eval';
+
+const mathParser = new Parser();
+
 export function parseMathExpression(expression: string): number {
   if (!expression || expression.trim() === '') return 0;
   
-  // Remove any characters that aren't numbers, operators, decimal points, or spaces
-  const sanitized = expression.replace(/[^0-9+\-*/.() ]/g, '');
-  
   try {
-    // Use Function constructor for safe evaluation of basic math
-    const result = new Function(`return ${sanitized}`)();
-    return isNaN(result) ? 0 : result;
+    // Use expr-eval for safe math expression parsing (no code execution risk)
+    const result = mathParser.evaluate(expression);
+    return typeof result === 'number' && !isNaN(result) ? result : 0;
   } catch {
     return 0;
   }
