@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { parseMathExpression } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
 import { FileText, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Collapsible,
   CollapsibleContent,
@@ -48,6 +48,10 @@ export function CurrencyInput({
   const [isFocused, setIsFocused] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const lastExternalValue = useRef(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Determine if label should float (focused or has value)
+  const shouldFloat = isFocused || inputValue.length > 0;
   
   // Sync inputValue when external value changes (from document upload)
   useEffect(() => {
@@ -76,6 +80,10 @@ export function CurrencyInput({
     }
   };
 
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
+  };
+
   const displayDescription = isHousehold && householdDescription 
     ? householdDescription 
     : description;
@@ -85,30 +93,78 @@ export function CurrencyInput({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <Label htmlFor={label} className="text-base font-medium">
-        {label}
-      </Label>
       {displayDescription && (
         <p className="text-sm text-muted-foreground">{displayDescription}</p>
       )}
-      <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+      
+      {/* M3 Filled Text Field Container */}
+      <motion.div 
+        onClick={handleContainerClick}
+        className={cn(
+          "relative bg-muted/50 rounded-t-lg cursor-text transition-colors",
+          "border-b-2",
+          isFocused ? "border-primary bg-muted/70" : "border-muted-foreground/30 hover:bg-muted/60"
+        )}
+        initial={false}
+        animate={isFocused ? { scale: 1.005 } : { scale: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        {/* Floating Label */}
+        <motion.label
+          htmlFor={label}
+          className={cn(
+            "absolute left-10 pointer-events-none transition-colors",
+            shouldFloat 
+              ? "text-xs font-medium" 
+              : "text-base",
+            isFocused 
+              ? "text-primary" 
+              : "text-muted-foreground"
+          )}
+          initial={false}
+          animate={{
+            top: shouldFloat ? 8 : 20,
+            fontSize: shouldFloat ? "0.75rem" : "1rem",
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          {label}
+        </motion.label>
+        
+        {/* Currency Symbol */}
+        <span className={cn(
+          "absolute left-3 top-1/2 -translate-y-1/2 transition-colors",
+          isFocused ? "text-primary" : "text-muted-foreground"
+        )}>
           {currency}
         </span>
+        
+        {/* Input */}
         <Input
+          ref={inputRef}
           id={label}
           type="text"
           value={inputValue}
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
-          placeholder={placeholder}
+          placeholder={shouldFloat ? placeholder : ""}
           className={cn(
-            "pl-7 h-12 text-lg",
-            isFocused && "ring-2 ring-primary"
+            "pl-10 pt-6 pb-2 h-14 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0",
           )}
         />
-      </div>
+        
+        {/* Active Indicator Line Animation */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary origin-center"
+          initial={false}
+          animate={{ 
+            scaleX: isFocused ? 1 : 0,
+            opacity: isFocused ? 1 : 0 
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        />
+      </motion.div>
       
       {hasContributions ? (
         <Collapsible open={showBreakdown} onOpenChange={setShowBreakdown}>

@@ -1,9 +1,11 @@
-import { useState, useRef } from "react";
-import { Upload, FileText, Image, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { Upload, FileText, Image, Loader2, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface DocumentUploadProps {
   onDataExtracted: (data: Partial<ZakatFormData>) => void;
@@ -34,13 +36,40 @@ export function DocumentUpload({
 }: DocumentUploadProps) {
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [lastResult, setLastResult] = useState<ExtractedResult | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
 
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      processFile(files[0]);
+    }
+  }, []);
+
+  const processFile = async (file: File) => {
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       toast({
@@ -64,6 +93,7 @@ export function DocumentUpload({
 
     setStatus("uploading");
     setLastResult(null);
+    setShowCelebration(false);
 
     try {
       // Convert file to base64
@@ -93,6 +123,12 @@ export function DocumentUpload({
 
       setStatus("success");
       setLastResult(data);
+      setShowCelebration(true);
+
+      // Haptic feedback on mobile
+      if (navigator.vibrate) {
+        navigator.vibrate([10, 50, 10]);
+      }
 
       // Extract numeric fields from the response
       const extractedFields: Partial<ZakatFormData> = {};
@@ -131,6 +167,9 @@ export function DocumentUpload({
         description: `Data extracted from ${data.institutionName || file.name}`,
       });
 
+      // Reset celebration after animation
+      setTimeout(() => setShowCelebration(false), 2000);
+
     } catch (error) {
       console.error("Document upload error:", error);
       setStatus("error");
@@ -154,6 +193,12 @@ export function DocumentUpload({
     }
   };
 
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
+
   const handleClick = () => {
     fileInputRef.current?.click();
   };
@@ -162,13 +207,21 @@ export function DocumentUpload({
     switch (status) {
       case "uploading":
       case "processing":
-        return <Loader2 className="w-4 h-4 animate-spin" />;
+        return <Loader2 className="w-5 h-5 animate-spin" />;
       case "success":
-        return <CheckCircle className="w-4 h-4 text-chart-1" />;
+        return (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          >
+            <CheckCircle className="w-5 h-5 text-chart-1" />
+          </motion.div>
+        );
       case "error":
-        return <AlertCircle className="w-4 h-4 text-destructive" />;
+        return <AlertCircle className="w-5 h-5 text-destructive" />;
       default:
-        return <Upload className="w-4 h-4" />;
+        return <Upload className="w-5 h-5" />;
     }
   };
 
@@ -197,27 +250,88 @@ export function DocumentUpload({
         className="hidden"
       />
       
-      <div 
+      <motion.div 
         onClick={handleClick}
-        className={`
-          border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
-          ${status === "idle" || status === "success" ? "border-border hover:border-primary hover:bg-primary/5" : ""}
-          ${status === "uploading" || status === "processing" ? "border-primary bg-primary/5 pointer-events-none" : ""}
-          ${status === "error" ? "border-destructive bg-destructive/5" : ""}
-        `}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={cn(
+          "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors relative overflow-hidden",
+          status === "idle" || status === "success" 
+            ? "border-border hover:border-primary hover:bg-primary/5" 
+            : "",
+          status === "uploading" || status === "processing" 
+            ? "border-primary bg-primary/5 pointer-events-none" 
+            : "",
+          status === "error" 
+            ? "border-destructive bg-destructive/5" 
+            : "",
+          isDragging 
+            ? "border-primary bg-primary/10 border-solid" 
+            : ""
+        )}
+        initial={false}
+        animate={{
+          scale: isDragging ? 1.02 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <div className="flex flex-col items-center gap-2">
-          <div className={`
-            w-12 h-12 rounded-full flex items-center justify-center
-            ${status === "idle" || status === "success" ? "bg-muted" : ""}
-            ${status === "uploading" || status === "processing" ? "bg-primary/20" : ""}
-            ${status === "error" ? "bg-destructive/20" : ""}
-          `}>
+        {/* Success Celebration Overlay */}
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none"
+            >
+              {/* Glow effect */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1.5, opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 bg-chart-1/20 rounded-xl"
+              />
+              {/* Sparkle particles */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.2, 1] }}
+                  transition={{ duration: 0.5, times: [0, 0.6, 1] }}
+                >
+                  <Sparkles className="w-8 h-8 text-chart-1" />
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex flex-col items-center gap-2 relative z-10">
+          <motion.div 
+            className={cn(
+              "w-12 h-12 rounded-full flex items-center justify-center transition-colors",
+              status === "idle" || status === "success" ? "bg-muted" : "",
+              status === "uploading" || status === "processing" ? "bg-primary/20" : "",
+              status === "error" ? "bg-destructive/20" : "",
+              isDragging ? "bg-primary/20" : ""
+            )}
+            animate={{
+              scale: isDragging ? 1.1 : 1,
+              y: isDragging ? -4 : 0,
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
             {getStatusIcon()}
-          </div>
+          </motion.div>
           
           <div>
-            <p className="font-medium text-foreground">{getStatusText()}</p>
+            <motion.p 
+              className="font-medium text-foreground"
+              animate={{ y: isDragging ? -2 : 0 }}
+            >
+              {isDragging ? "Drop to upload" : getStatusText()}
+            </motion.p>
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           </div>
           
@@ -235,28 +349,47 @@ export function DocumentUpload({
             document names and summaries are cleared when you close your browser.
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Show last upload result briefly */}
-      {lastResult && lastResult.success && status === "success" && (
-        <div className="bg-chart-1/10 border border-chart-1/30 rounded-lg p-3">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-chart-1 shrink-0" />
-            <p className="text-sm text-foreground">
-              <span className="font-medium">{lastResult.institutionName}</span> added successfully
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Show last upload result with animation */}
+      <AnimatePresence mode="wait">
+        {lastResult && lastResult.success && status === "success" && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="bg-chart-1/10 border border-chart-1/30 rounded-lg p-3"
+          >
+            <div className="flex items-center gap-2">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+              >
+                <CheckCircle className="w-4 h-4 text-chart-1 shrink-0" />
+              </motion.div>
+              <p className="text-sm text-foreground">
+                <span className="font-medium">{lastResult.institutionName}</span> added successfully
+              </p>
+            </div>
+          </motion.div>
+        )}
 
-      {lastResult && !lastResult.success && lastResult.error && (
-        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-sm text-destructive">{lastResult.error}</p>
-          </div>
-        </div>
-      )}
+        {lastResult && !lastResult.success && lastResult.error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-destructive/10 border border-destructive/30 rounded-lg p-3"
+          >
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+              <p className="text-sm text-destructive">{lastResult.error}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
