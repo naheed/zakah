@@ -41,7 +41,7 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Zakah Flow</CardTitle>
+          <CardTitle className="text-2xl">Zakat Flow</CardTitle>
           <CardDescription>
             Sign in securely to save and access your Zakat calculations
           </CardDescription>
