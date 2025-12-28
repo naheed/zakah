@@ -588,7 +588,7 @@ const LegendCard = ({
   );
 };
 
-// Mini version for landing page mock - clean and simple
+// Mini version for landing page mock - with entrance animation
 export function ZakatSankeyMock() {
   const mockData: SankeyChartData = {
     liquidAssets: 24500,
@@ -604,15 +604,28 @@ export function ZakatSankeyMock() {
   };
   
   return (
-    <div className="w-full flex justify-center">
-      <ZakatSankeyChart 
-        data={mockData} 
-        currency="USD" 
-        width={320} 
-        height={200}
-        showLabels={false}
-        showFullscreenButton={false}
-      />
+    <div className="w-full flex justify-center animate-fade-in">
+      <div className="[&_path]:animate-[sankey-flow_1.2s_ease-out_forwards] [&_path]:opacity-0 [&_rect]:animate-[sankey-node_0.6s_ease-out_forwards] [&_rect]:opacity-0">
+        <style>{`
+          @keyframes sankey-flow {
+            0% { opacity: 0; stroke-dashoffset: 100; }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; stroke-dashoffset: 0; }
+          }
+          @keyframes sankey-node {
+            0% { opacity: 0; transform: scaleY(0); }
+            100% { opacity: 1; transform: scaleY(1); }
+          }
+        `}</style>
+        <ZakatSankeyChart 
+          data={mockData} 
+          currency="USD" 
+          width={320} 
+          height={200}
+          showLabels={false}
+          showFullscreenButton={false}
+        />
+      </div>
     </div>
   );
 }
