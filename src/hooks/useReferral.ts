@@ -137,10 +137,9 @@ export function useReferral() {
     }
   }, [isLoading, referralCode]);
 
-  // Get the invite URL for sharing
+  // Get the invite URL for sharing - always use production domain
   const getInviteUrl = useCallback((code: string): string => {
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/invite/${code}`;
+    return `https://zakat.vora.dev/invite/${code}`;
   }, []);
 
   return {
