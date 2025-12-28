@@ -115,7 +115,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
               </Button>
               
               <p className="text-xs text-muted-foreground mt-3">
-                Sign in to save calculations across devices
+                Sign in to securely retrieve your previous calculations
               </p>
             </>
           )}
@@ -126,15 +126,31 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             </p>
           )}
 
-          {/* Methodology Link */}
+          {/* Footer Links */}
           <div className="mt-6 pt-4 border-t border-border">
-            <Link 
-              to="/methodology" 
-              className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <BookOpen className="w-3 h-3" />
-              Methodology & references
-            </Link>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <Link 
+                to="/methodology" 
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <BookOpen className="w-3 h-3" />
+                Methodology
+              </Link>
+              <span className="text-muted-foreground/50">•</span>
+              <Link 
+                to="/privacy" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <span className="text-muted-foreground/50">•</span>
+              <Link 
+                to="/terms" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Terms of Service
+              </Link>
+            </div>
             <p className="text-xs text-muted-foreground mt-2">
               Built by Naheed Vora • Provided as-is
             </p>
