@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 interface WhyTooltipProps {
   title?: string;
@@ -41,10 +42,11 @@ export function WhyTooltip({ title, explanation, className }: WhyTooltipProps) {
         "inline-flex items-center justify-center w-5 h-5 rounded-full",
         "bg-primary/10 hover:bg-primary/20 transition-colors",
         "text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        "touch-manipulation",
+        "touch-manipulation pointer-events-auto",
         className
       )}
       aria-label={title || "Why?"}
+      onClick={(e) => e.stopPropagation()}
     >
       <Question weight="bold" className="w-3 h-3" />
     </button>
@@ -62,14 +64,16 @@ export function WhyTooltip({ title, explanation, className }: WhyTooltipProps) {
     );
   }
 
-  // Use Tooltip on desktop
+  // Use Tooltip on desktop with Portal for proper layering
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent side="top" className="p-3">
-          {content}
-        </TooltipContent>
+        <TooltipPrimitive.Portal>
+          <TooltipContent side="top" className="p-3 pointer-events-auto">
+            {content}
+          </TooltipContent>
+        </TooltipPrimitive.Portal>
       </Tooltip>
     </TooltipProvider>
   );
