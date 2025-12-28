@@ -192,6 +192,19 @@ export function ZakatWizard() {
 
   const questionNumber = getQuestionNumber();
   
+  // Handle loading a saved calculation from WelcomeStep
+  const handleLoadCalculation = (calc: SavedCalculation) => {
+    setFormData(calc.form_data);
+    setCalculationName(calc.name);
+    setSavedCalculationId(calc.id);
+    // Go to results step
+    const activeStepsNow = allSteps.filter(step => !step.condition || step.condition(calc.form_data));
+    const resultsIndex = activeStepsNow.findIndex(s => s.id === 'results');
+    if (resultsIndex >= 0) {
+      setCurrentStepIndex(resultsIndex);
+    }
+  };
+
   const renderStep = () => {
     // Common props for asset steps
     const assetStepProps = {
@@ -205,7 +218,7 @@ export function ZakatWizard() {
 
     switch (currentStep.id) {
       case 'welcome':
-        return <WelcomeStep onNext={goToNext} />;
+        return <WelcomeStep onNext={goToNext} onLoadCalculation={handleLoadCalculation} />;
       case 'categories':
         return <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'liquid-assets':
@@ -256,6 +269,7 @@ export function ZakatWizard() {
         lastUpdated={lastUpdated}
         onContinue={continueSession}
         onStartFresh={startFresh}
+        onLoadServerCalculation={handleLoadCalculation}
       />
 
       {/* Header with Progress - hidden on welcome page */}
