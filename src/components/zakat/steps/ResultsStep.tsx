@@ -17,6 +17,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useReferral } from "@/hooks/useReferral";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { motion, AnimatePresence } from "framer-motion";
+import { Confetti, useConfetti } from "@/components/ui/confetti";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,6 +95,9 @@ export function ResultsStep({
   
   const totalPurification = interestToPurify + dividendsToPurify;
 
+  // Trigger confetti on mount if above nisab
+  const showConfetti = useConfetti(isAboveNisab);
+
   // Track anonymous usage metrics when results are shown
   useEffect(() => {
     trackCalculation({ totalAssets, zakatDue });
@@ -133,45 +139,113 @@ export function ResultsStep({
   
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Confetti celebration for above nisab */}
+      <Confetti isActive={showConfetti} />
+
       <StepHeader
         title="Your Zakat Calculation"
         subtitle="Based on Sheikh Joe Bradford's methodology"
       />
       
       <div className="space-y-6">
-        {/* 1. Main Result Card - The Aha! Moment */}
-        <div className={`rounded-2xl p-8 text-center ${
-          isAboveNisab 
-            ? 'bg-primary text-primary-foreground' 
-            : 'bg-muted text-foreground'
-        }`}>
+        {/* 1. Main Result Card - The Aha! Moment with Spring Animation */}
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 200, 
+            damping: 20,
+            delay: 0.1 
+          }}
+          className={`rounded-2xl p-8 text-center ${
+            isAboveNisab 
+              ? 'bg-primary text-primary-foreground' 
+              : 'bg-muted text-foreground'
+          }`}
+        >
           {isAboveNisab ? (
             <>
-              <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-90" />
-              <p className="text-lg opacity-90 mb-2">Your Zakat Due</p>
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 200, 
+                  damping: 15,
+                  delay: 0.3 
+                }}
+              >
+                <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-90" />
+              </motion.div>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-lg opacity-90 mb-2"
+              >
+                Your Zakat Due
+              </motion.p>
               <p className="text-5xl font-bold mb-4">
-                {formatCurrency(zakatDue, currency)}
+                <NumberTicker 
+                  value={zakatDue} 
+                  delay={0.5}
+                  formatFn={(v) => formatCurrency(v, currency)}
+                />
               </p>
-              <p className="text-sm opacity-80">
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="text-sm opacity-80"
+              >
                 {formatPercent(zakatRate)} of your net Zakatable wealth ({data.calendarType} year)
-              </p>
+              </motion.p>
             </>
           ) : (
             <>
-              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg mb-2">Below Niṣāb Threshold</p>
-              <p className="text-2xl font-semibold mb-4">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+              >
+                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              </motion.div>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-lg mb-2"
+              >
+                Below Niṣāb Threshold
+              </motion.p>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-2xl font-semibold mb-4"
+              >
                 No Zakat Due This Year
-              </p>
-              <p className="text-sm text-muted-foreground">
+              </motion.p>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground"
+              >
                 Your wealth is below {formatCurrency(nisab, currency)}
-              </p>
+              </motion.p>
             </>
           )}
-        </div>
+        </motion.div>
 
-        {/* 2. Edit Strip - Quick Actions */}
-        <div className="flex gap-3">
+        {/* 2. Edit Strip - Quick Actions with stagger */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="flex gap-3"
+        >
           <Button 
             variant="outline" 
             className="flex-1 h-11 gap-2"
@@ -200,33 +274,46 @@ export function ResultsStep({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
+        </motion.div>
         
         {/* 3. Purification Alert (if applicable) */}
-        {totalPurification > 0 && (
-          <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
-            <h3 className="font-semibold text-destructive mb-2">⚠️ Purification Required</h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              The following amounts must be donated to charity (without reward expectation):
-            </p>
-            <div className="space-y-1">
-              {interestToPurify > 0 && (
-                <p className="text-sm">
-                  Interest (Riba): <strong>{formatCurrency(interestToPurify, currency)}</strong>
-                </p>
-              )}
-              {dividendsToPurify > 0 && (
-                <p className="text-sm">
-                  Non-Halal Dividends: <strong>{formatCurrency(dividendsToPurify, currency)}</strong>
-                </p>
-              )}
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {totalPurification > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ delay: 0.7 }}
+              className="bg-destructive/10 border border-destructive/30 rounded-xl p-4"
+            >
+              <h3 className="font-semibold text-destructive mb-2">⚠️ Purification Required</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                The following amounts must be donated to charity (without reward expectation):
+              </p>
+              <div className="space-y-1">
+                {interestToPurify > 0 && (
+                  <p className="text-sm">
+                    Interest (Riba): <strong>{formatCurrency(interestToPurify, currency)}</strong>
+                  </p>
+                )}
+                {dividendsToPurify > 0 && (
+                  <p className="text-sm">
+                    Non-Halal Dividends: <strong>{formatCurrency(dividendsToPurify, currency)}</strong>
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* 4. Save Section - For non-authenticated users */}
         {!user && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center space-y-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center space-y-4"
+          >
             <div>
               <h3 className="font-semibold text-lg text-foreground mb-2">Save Your Calculation</h3>
               <p className="text-muted-foreground text-sm">
@@ -237,11 +324,16 @@ export function ResultsStep({
               <LogIn className="w-4 h-4" />
               Sign In / Create Account
             </Button>
-          </div>
+          </motion.div>
         )}
 
         {/* 5. Primary Actions */}
-        <div className="flex flex-col gap-3">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          className="flex flex-col gap-3"
+        >
           <Button 
             variant="outline" 
             className="w-full h-12 gap-2"
@@ -265,122 +357,140 @@ export function ResultsStep({
               />
             </div>
           )}
-        </div>
+        </motion.div>
         
         {/* 6. Collapsible Calculation Breakdown */}
-        <Collapsible open={breakdownOpen} onOpenChange={setBreakdownOpen}>
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <CollapsibleTrigger className="w-full p-4 border-b border-border bg-accent flex items-center justify-between hover:bg-accent/80 transition-colors">
-              <h3 className="font-semibold text-foreground">View Calculation Breakdown</h3>
-              {breakdownOpen ? (
-                <ChevronUp className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              )}
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              {/* Sankey Chart */}
-              <div className="border-b border-border">
-                <div className="p-3 flex items-center justify-between bg-muted/30">
-                  <span className="text-sm text-muted-foreground">Asset Flow to Zakat</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => {
-                      const newMode = data.calculationMode === 'conservative' ? 'optimized' : 'conservative';
-                      updateData({ calculationMode: newMode });
-                    }}
-                  >
-                    <Settings2 className="w-4 h-4 mr-1" />
-                    {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
-                  </Button>
-                </div>
-                
-                {showSettings && (
-                  <div className="p-4 bg-muted/50 border-b border-border">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>Conservative:</strong> Pay on full asset values (safer)
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Optimized:</strong> Apply 30% rule for passive investments, deduct taxes/penalties from retirement
-                    </p>
-                  </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0 }}
+        >
+          <Collapsible open={breakdownOpen} onOpenChange={setBreakdownOpen}>
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <CollapsibleTrigger className="w-full p-4 border-b border-border bg-accent flex items-center justify-between hover:bg-accent/80 transition-colors">
+                <h3 className="font-semibold text-foreground">View Calculation Breakdown</h3>
+                {breakdownOpen ? (
+                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 )}
-                
-                <div className={`${isMobile ? 'p-3' : 'p-6'} flex justify-center items-center overflow-x-auto`}>
-                  <ZakatSankeyChart 
-                    data={{
-                      liquidAssets: assetBreakdown.liquidAssets,
-                      investments: assetBreakdown.investments,
-                      retirement: assetBreakdown.retirement,
-                      realEstate: assetBreakdown.realEstate,
-                      business: assetBreakdown.business,
-                      otherAssets: assetBreakdown.otherAssets,
-                      totalLiabilities,
-                      zakatDue,
-                      netZakatableWealth,
-                      zakatRate,
-                    }}
-                    currency={currency}
-                    width={isMobile ? 340 : 580}
-                    height={isMobile ? 280 : 380}
-                    showLabels={!isMobile}
-                    showFullscreenButton={true}
-                  />
-                </div>
-              </div>
+              </CollapsibleTrigger>
               
-              {/* Summary Table */}
-              <div className="divide-y divide-border">
-                <BreakdownRow label="Total Zakatable Assets" value={formatCurrency(totalAssets, currency)} />
-                <BreakdownRow label="Total Deductions" value={`-${formatCurrency(totalLiabilities, currency)}`} variant="negative" />
-                <BreakdownRow label="Net Zakatable Wealth" value={formatCurrency(netZakatableWealth, currency)} bold />
-                <BreakdownRow label={`Niṣāb (${data.nisabStandard})`} value={formatCurrency(nisab, currency)} />
-                <BreakdownRow label={`Zakat Rate (${data.calendarType})`} value={formatPercent(zakatRate)} />
-                <BreakdownRow label="Zakat Due" value={formatCurrency(zakatDue, currency)} variant="positive" bold />
-              </div>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
+              <CollapsibleContent>
+                {/* Sankey Chart */}
+                <div className="border-b border-border">
+                  <div className="p-3 flex items-center justify-between bg-muted/30">
+                    <span className="text-sm text-muted-foreground">Asset Flow to Zakat</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        const newMode = data.calculationMode === 'conservative' ? 'optimized' : 'conservative';
+                        updateData({ calculationMode: newMode });
+                      }}
+                    >
+                      <Settings2 className="w-4 h-4 mr-1" />
+                      {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
+                    </Button>
+                  </div>
+                  
+                  {showSettings && (
+                    <div className="p-4 bg-muted/50 border-b border-border">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        <strong>Conservative:</strong> Pay on full asset values (safer)
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Optimized:</strong> Apply 30% rule for passive investments, deduct taxes/penalties from retirement
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className={`${isMobile ? 'p-3' : 'p-6'} flex justify-center items-center overflow-x-auto`}>
+                    <ZakatSankeyChart 
+                      data={{
+                        liquidAssets: assetBreakdown.liquidAssets,
+                        investments: assetBreakdown.investments,
+                        retirement: assetBreakdown.retirement,
+                        realEstate: assetBreakdown.realEstate,
+                        business: assetBreakdown.business,
+                        otherAssets: assetBreakdown.otherAssets,
+                        totalLiabilities,
+                        zakatDue,
+                        netZakatableWealth,
+                        zakatRate,
+                      }}
+                      currency={currency}
+                      width={isMobile ? 340 : 580}
+                      height={isMobile ? 280 : 380}
+                      showLabels={!isMobile}
+                      showFullscreenButton={true}
+                    />
+                  </div>
+                </div>
+                
+                {/* Summary Table with staggered rows */}
+                <div className="divide-y divide-border">
+                  <BreakdownRow label="Total Zakatable Assets" value={formatCurrency(totalAssets, currency)} index={0} />
+                  <BreakdownRow label="Total Deductions" value={`-${formatCurrency(totalLiabilities, currency)}`} variant="negative" index={1} />
+                  <BreakdownRow label="Net Zakatable Wealth" value={formatCurrency(netZakatableWealth, currency)} bold index={2} />
+                  <BreakdownRow label={`Niṣāb (${data.nisabStandard})`} value={formatCurrency(nisab, currency)} index={3} />
+                  <BreakdownRow label={`Zakat Rate (${data.calendarType})`} value={formatPercent(zakatRate)} index={4} />
+                  <BreakdownRow label="Zakat Due" value={formatCurrency(zakatDue, currency)} variant="positive" bold index={5} />
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        </motion.div>
         
         {/* 7. Celebration & Share Section - Combined */}
-        <CelebrationShareSection 
-          isAboveNisab={isAboveNisab} 
-          currency={currency}
-          formData={data}
-          zakatDue={zakatDue}
-          savedCalculationId={savedCalculationId}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1 }}
+        >
+          <CelebrationShareSection 
+            isAboveNisab={isAboveNisab} 
+            currency={currency}
+            formData={data}
+            zakatDue={zakatDue}
+            savedCalculationId={savedCalculationId}
+          />
+        </motion.div>
 
         {/* 8. Collapsible Disclaimer */}
-        <Collapsible open={disclaimerOpen} onOpenChange={setDisclaimerOpen}>
-          <div className="border border-border rounded-xl overflow-hidden bg-muted/30">
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="text-sm font-medium">What this calculator doesn't cover</span>
-              </div>
-              {disclaimerOpen ? (
-                <ChevronUp className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="p-4 pt-0 text-sm text-muted-foreground space-y-2">
-                <p>This calculator does not cover:</p>
-                <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>Farming assets harvested for sale</li>
-                  <li>Ḥarām earnings (bonds, interest income, etc.)</li>
-                </ul>
-                <p className="pt-2">
-                  If you have these, please consult a specialist in Islamic Finance.
-                </p>
-              </div>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2 }}
+        >
+          <Collapsible open={disclaimerOpen} onOpenChange={setDisclaimerOpen}>
+            <div className="border border-border rounded-xl overflow-hidden bg-muted/30">
+              <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-sm font-medium">What this calculator doesn't cover</span>
+                </div>
+                {disclaimerOpen ? (
+                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-4 pt-0 text-sm text-muted-foreground space-y-2">
+                  <p>This calculator does not cover:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Farming assets harvested for sale</li>
+                    <li>Ḥarām earnings (bonds, interest income, etc.)</li>
+                  </ul>
+                  <p className="pt-2">
+                    If you have these, please consult a specialist in Islamic Finance.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        </motion.div>
       </div>
     </div>
   );
@@ -465,7 +575,13 @@ function CelebrationShareSection({
     <div className="bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 rounded-xl overflow-hidden">
       {/* Celebration Message */}
       <div className="p-6 text-center border-b border-primary/10">
-        <Heart className="w-8 h-8 mx-auto mb-3 text-primary" />
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        >
+          <Heart className="w-8 h-8 mx-auto mb-3 text-primary" />
+        </motion.div>
         {isAboveNisab ? (
           <>
             <h3 className="font-semibold text-lg text-foreground mb-2">Congratulations!</h3>
@@ -554,17 +670,24 @@ function CelebrationShareSection({
         </div>
 
         {/* Referral Stats */}
-        {stats && stats.totalReferrals > 0 && (
-          <div className="bg-primary/10 rounded-lg p-3 text-center">
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="font-medium">{stats.totalReferrals}</span>
-              <span className="text-muted-foreground">
-                {stats.totalReferrals === 1 ? 'calculation' : 'calculations'} through your shares
-              </span>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {stats && stats.totalReferrals > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-primary/10 rounded-lg p-3 text-center"
+            >
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="font-medium">{stats.totalReferrals}</span>
+                <span className="text-muted-foreground">
+                  {stats.totalReferrals === 1 ? 'calculation' : 'calculations'} through your shares
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Share with Spouse - Secondary */}
         <div className="pt-2 border-t border-border/50">
@@ -590,12 +713,14 @@ function BreakdownRow({
   variant = 'neutral',
   bold = false,
   color,
+  index = 0,
 }: { 
   label: string; 
   value: string; 
   variant?: 'positive' | 'negative' | 'neutral' | 'muted';
   bold?: boolean;
   color?: string;
+  index?: number;
 }) {
   const valueColors = {
     positive: 'text-chart-1',
@@ -605,7 +730,12 @@ function BreakdownRow({
   };
   
   return (
-    <div className="flex items-center justify-between p-4">
+    <motion.div 
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="flex items-center justify-between p-4"
+    >
       <div className="flex items-center gap-2">
         {color && (
           <span 
@@ -620,6 +750,6 @@ function BreakdownRow({
       <span className={`font-mono ${bold ? 'font-bold text-lg' : ''} ${valueColors[variant]}`}>
         {value}
       </span>
-    </div>
+    </motion.div>
   );
 }
