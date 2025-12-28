@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useEncryptionKeys } from './useEncryptionKeys';
+import { ZakatFormData } from '@/lib/zakatCalculations';
 
 export interface CalculationShare {
   id: string;
@@ -10,10 +12,13 @@ export interface CalculationShare {
   shared_with_user_id: string | null;
   created_at: string;
   accepted_at: string | null;
+  encrypted_form_data: string | null;
+  encrypted_symmetric_key: string | null;
 }
 
 export function useCalculationShares(calculationId?: string) {
   const { user } = useAuth();
+  const { isReady, encrypt, encryptForSharing } = useEncryptionKeys();
   const [shares, setShares] = useState<CalculationShare[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +36,7 @@ export function useCalculationShares(calculationId?: string) {
         .eq('calculation_id', calculationId);
       
       if (fetchError) throw fetchError;
-      setShares(data || []);
+      setShares((data || []) as CalculationShare[]);
     } catch (err: any) {
       console.error('Error fetching shares:', err);
       setError(err.message);
@@ -44,7 +49,7 @@ export function useCalculationShares(calculationId?: string) {
     fetchShares();
   }, [calculationId, user]);
 
-  const createShare = async (calculationId: string, email: string) => {
+  const createShare = async (calculationId: string, email: string, formData?: ZakatFormData) => {
     if (!user) throw new Error('Must be logged in to share');
     
     const normalizedEmail = email.toLowerCase().trim();
@@ -53,6 +58,13 @@ export function useCalculationShares(calculationId?: string) {
     if (normalizedEmail === user.email?.toLowerCase()) {
       throw new Error('Cannot share with yourself');
     }
+
+    // Try to get recipient's public key to encrypt data for them
+    let encryptedData: string | null = null;
+    let encryptedKey: string | null = null;
+
+    // Note: We'll encrypt data when recipient logs in and we have their public key
+    // For now, just create the share - encryption happens on recipient's first access
     
     const { data, error } = await supabase
       .from('zakat_calculation_shares')
@@ -60,6 +72,8 @@ export function useCalculationShares(calculationId?: string) {
         calculation_id: calculationId,
         owner_id: user.id,
         shared_with_email: normalizedEmail,
+        encrypted_form_data: encryptedData,
+        encrypted_symmetric_key: encryptedKey,
       })
       .select()
       .single();
@@ -87,18 +101,48 @@ export function useCalculationShares(calculationId?: string) {
     await fetchShares();
   };
 
+  // Update encrypted data for existing share when recipient's public key becomes available
+  const updateShareEncryption = useCallback(async (
+    shareId: string, 
+    formData: ZakatFormData,
+    recipientPublicKey: string
+  ) => {
+    if (!isReady) return false;
+
+    const encrypted = await encryptForSharing(formData, recipientPublicKey);
+    if (!encrypted) return false;
+
+    const { error } = await supabase
+      .from('zakat_calculation_shares')
+      .update({
+        encrypted_form_data: encrypted.encryptedData,
+        encrypted_symmetric_key: encrypted.encryptedKey,
+      })
+      .eq('id', shareId);
+
+    if (error) {
+      console.error('Error updating share encryption:', error);
+      return false;
+    }
+
+    await fetchShares();
+    return true;
+  }, [isReady, encryptForSharing]);
+
   return {
     shares,
     loading,
     error,
     createShare,
     removeShare,
+    updateShareEncryption,
     refetch: fetchShares,
   };
 }
 
 export function useSharedCalculations() {
   const { user } = useAuth();
+  const { isReady, decryptShared } = useEncryptionKeys();
   const [calculations, setCalculations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -119,7 +163,9 @@ export function useSharedCalculations() {
             calculation_id,
             owner_id,
             created_at,
-            accepted_at
+            accepted_at,
+            encrypted_form_data,
+            encrypted_symmetric_key
           `)
           .or(`shared_with_user_id.eq.${user.id},shared_with_email.eq.${user.email}`);
         
@@ -140,12 +186,37 @@ export function useSharedCalculations() {
         
         if (calcsError) throw calcsError;
         
-        // Combine with share info
-        const combined = (calcs || []).map(calc => ({
-          ...calc,
-          shareInfo: shares.find(s => s.calculation_id === calc.id),
-          isShared: true,
-        }));
+        // Combine with share info and decrypt if possible
+        const combined = await Promise.all(
+          (calcs || []).map(async (calc) => {
+            const shareInfo = shares.find(s => s.calculation_id === calc.id);
+            let decryptedFormData = null;
+
+            // Try to decrypt the shared data
+            if (
+              isReady &&
+              shareInfo?.encrypted_form_data &&
+              shareInfo?.encrypted_symmetric_key
+            ) {
+              try {
+                decryptedFormData = await decryptShared(
+                  shareInfo.encrypted_form_data,
+                  shareInfo.encrypted_symmetric_key
+                );
+              } catch (err) {
+                console.error('Failed to decrypt shared calculation:', err);
+              }
+            }
+
+            return {
+              ...calc,
+              form_data: decryptedFormData || calc.form_data,
+              shareInfo,
+              isShared: true,
+              isDecrypted: !!decryptedFormData,
+            };
+          })
+        );
         
         setCalculations(combined);
       } catch (err) {
@@ -156,7 +227,7 @@ export function useSharedCalculations() {
     };
 
     fetchSharedCalculations();
-  }, [user]);
+  }, [user, isReady, decryptShared]);
 
   return { calculations, loading };
 }

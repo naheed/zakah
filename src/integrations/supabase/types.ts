@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          public_key: string | null
           updated_at: string
           user_id: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          public_key?: string | null
           updated_at?: string
           user_id: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          public_key?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -46,6 +49,8 @@ export type Database = {
           accepted_at: string | null
           calculation_id: string
           created_at: string
+          encrypted_form_data: string | null
+          encrypted_symmetric_key: string | null
           id: string
           owner_id: string
           shared_with_email: string
@@ -55,6 +60,8 @@ export type Database = {
           accepted_at?: string | null
           calculation_id: string
           created_at?: string
+          encrypted_form_data?: string | null
+          encrypted_symmetric_key?: string | null
           id?: string
           owner_id: string
           shared_with_email: string
@@ -64,6 +71,8 @@ export type Database = {
           accepted_at?: string | null
           calculation_id?: string
           created_at?: string
+          encrypted_form_data?: string | null
+          encrypted_symmetric_key?: string | null
           id?: string
           owner_id?: string
           shared_with_email?: string
@@ -82,6 +91,7 @@ export type Database = {
       zakat_calculations: {
         Row: {
           created_at: string
+          encryption_version: number | null
           form_data: Json
           id: string
           is_above_nisab: boolean | null
@@ -95,6 +105,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          encryption_version?: number | null
           form_data: Json
           id?: string
           is_above_nisab?: boolean | null
@@ -108,6 +119,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          encryption_version?: number | null
           form_data?: Json
           id?: string
           is_above_nisab?: boolean | null
