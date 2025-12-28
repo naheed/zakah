@@ -95,7 +95,8 @@ LIABILITY FIELDS:
 - propertyTax: Property tax due
 
 RULES:
-- Put ALL numeric fields into extractedData (object map of fieldName -> number)
+- Put ALL numeric fields into extractedData as an array of objects: { field: string, amount: number }
+- Use field names exactly as listed above (e.g., checkingAccounts, creditCardBalance)
 - Return numeric values only (no currency symbols)
 - Omit fields with no data found (do not return 0)
 - For credit cards: analyze transactions to estimate monthlyLivingExpenses and insuranceExpenses
@@ -126,14 +127,21 @@ RULES:
             {
               name: "extract_financial_data",
               description: "Extract structured financial data from document",
-              parameters: {
+parameters: {
                 type: "object",
                 properties: {
                   extractedData: {
-                    type: "object",
+                    type: "array",
                     description:
-                      "Map of Zakat field names to numeric values extracted from the document. Only include keys from the field list in the prompt.",
-                    additionalProperties: { type: "number" },
+                      "List of extracted numeric fields as {field, amount}. Use only field names listed in the prompt.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        field: { type: "string", description: "Zakat field name" },
+                        amount: { type: "number", description: "Numeric value" },
+                      },
+                      required: ["field", "amount"],
+                    },
                   },
                   summary: { type: "string", description: "Summary of extracted data" },
                   documentDate: { type: "string", description: "Statement date" },
@@ -182,8 +190,8 @@ RULES:
       }
       
       return new Response(
-        JSON.stringify({ error: "Failed to process document" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Failed to process document", details: errorText }),
+        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -207,20 +215,35 @@ RULES:
     }
 
     const args = functionCallPart.functionCall.args || {};
-    const extractedData = (args.extractedData && typeof args.extractedData === "object")
-      ? args.extractedData
-      : {};
 
-    console.log("Extracted data:", JSON.stringify({ extractedData, summary: args.summary }));
+    const extractedData: Record<string, number> = {};
+    const raw = (args as any).extractedData;
+
+    if (Array.isArray(raw)) {
+      for (const item of raw) {
+        const field = item?.field;
+        const amount = item?.amount;
+        if (typeof field === "string" && typeof amount === "number" && Number.isFinite(amount)) {
+          extractedData[field] = amount;
+        }
+      }
+    } else if (raw && typeof raw === "object") {
+      // Backwards compatibility if model returns an object map
+      for (const [k, v] of Object.entries(raw)) {
+        if (typeof v === "number" && Number.isFinite(v)) extractedData[k] = v;
+      }
+    }
+
+    console.log("Extracted data:", JSON.stringify({ extractedData, summary: (args as any).summary }));
 
     return new Response(
       JSON.stringify({
         success: true,
         extractedData,
-        summary: args.summary || "Data extracted successfully",
-        documentDate: args.documentDate,
-        institutionName: args.institutionName,
-        notes: args.notes,
+        summary: (args as any).summary || "Data extracted successfully",
+        documentDate: (args as any).documentDate,
+        institutionName: (args as any).institutionName,
+        notes: (args as any).notes,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
