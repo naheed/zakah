@@ -19,7 +19,15 @@ export interface SavedCalculation {
   encryption_version?: number;
 }
 
-const ENCRYPTION_VERSION = 1;
+// Encrypted payload structure for zero-knowledge storage
+interface EncryptedPayload {
+  formData: ZakatFormData;
+  name: string;
+  zakatDue: number;
+  isAboveNisab: boolean;
+}
+
+const ENCRYPTION_VERSION = 2; // Bumped to indicate full metadata encryption
 
 export function useSavedCalculations() {
   const { user } = useAuth();
@@ -61,31 +69,51 @@ export function useSavedCalculations() {
     const decryptedData = await Promise.all(
       (data || []).map(async (calc) => {
         let formData: ZakatFormData;
+        let name: string;
+        let zakatDue: number;
+        let isAboveNisab: boolean;
         
-        // Check if data is encrypted (encryption_version > 0)
-        if (calc.encryption_version && calc.encryption_version > 0) {
+        // Check encryption version to determine decryption strategy
+        if (calc.encryption_version && calc.encryption_version >= 2) {
+          // V2: Full zero-knowledge encryption - all metadata in encrypted blob
           try {
-            // form_data is stored as encrypted string
-            const decrypted = await decrypt(calc.form_data as unknown as string);
-            formData = decrypted as ZakatFormData;
+            const decrypted = await decrypt(calc.form_data as unknown as string) as EncryptedPayload;
+            formData = decrypted.formData;
+            name = decrypted.name;
+            zakatDue = decrypted.zakatDue;
+            isAboveNisab = decrypted.isAboveNisab;
           } catch (err) {
             console.error('Failed to decrypt calculation:', calc.id, err);
-            // Return null to filter out failed decryptions
+            return null;
+          }
+        } else if (calc.encryption_version === 1) {
+          // V1: Only form_data encrypted, metadata in plaintext
+          try {
+            const decrypted = await decrypt(calc.form_data as unknown as string);
+            formData = decrypted as ZakatFormData;
+            name = calc.name;
+            zakatDue = calc.zakat_due ?? 0;
+            isAboveNisab = calc.is_above_nisab ?? false;
+          } catch (err) {
+            console.error('Failed to decrypt calculation:', calc.id, err);
             return null;
           }
         } else {
-          // Legacy unencrypted data
+          // V0: Legacy unencrypted data
           formData = calc.form_data as unknown as ZakatFormData;
+          name = calc.name;
+          zakatDue = calc.zakat_due ?? 0;
+          isAboveNisab = calc.is_above_nisab ?? false;
         }
 
         return {
           id: calc.id,
-          name: calc.name,
+          name,
           year_type: calc.year_type as 'lunar' | 'gregorian',
           year_value: calc.year_value,
           form_data: formData,
-          zakat_due: calc.zakat_due ?? 0,
-          is_above_nisab: calc.is_above_nisab ?? false,
+          zakat_due: zakatDue,
+          is_above_nisab: isAboveNisab,
           created_at: calc.created_at,
           updated_at: calc.updated_at,
           version: calc.version ?? 1,
@@ -129,9 +157,17 @@ export function useSavedCalculations() {
 
     const result = calculateZakat(formData);
 
-    // Encrypt form data before saving
-    const encryptedFormData = await encrypt(formData);
-    if (!encryptedFormData) {
+    // Create zero-knowledge payload with ALL sensitive data
+    const payload: EncryptedPayload = {
+      formData,
+      name,
+      zakatDue: result.zakatDue,
+      isAboveNisab: result.isAboveNisab,
+    };
+
+    // Encrypt the entire payload
+    const encryptedPayload = await encrypt(payload);
+    if (!encryptedPayload) {
       toast({
         title: 'Encryption failed',
         description: 'Could not encrypt your data.',
@@ -140,16 +176,17 @@ export function useSavedCalculations() {
       return null;
     }
 
+    // Store with placeholder values in plaintext columns (zero-knowledge)
     const { data, error } = await supabase
       .from('zakat_calculations')
       .insert({
         user_id: user.id,
-        name,
+        name: '🔒', // Placeholder - real name is encrypted
         year_type: yearType,
         year_value: yearValue,
-        form_data: encryptedFormData as any,
-        zakat_due: result.zakatDue,
-        is_above_nisab: result.isAboveNisab,
+        form_data: encryptedPayload as any,
+        zakat_due: 0, // Placeholder - real value is encrypted
+        is_above_nisab: false, // Placeholder - real value is encrypted
         encryption_version: ENCRYPTION_VERSION,
       })
       .select()
@@ -166,8 +203,8 @@ export function useSavedCalculations() {
     }
 
     toast({
-      title: 'Saved',
-      description: `Calculation "${name}" has been saved securely.`,
+      title: 'Saved securely',
+      description: `Your calculation has been encrypted and saved.`,
     });
 
     await fetchCalculations();
@@ -176,7 +213,8 @@ export function useSavedCalculations() {
 
   const updateCalculation = async (
     id: string,
-    formData: ZakatFormData
+    formData: ZakatFormData,
+    name?: string
   ) => {
     if (!user) return null;
 
@@ -189,11 +227,23 @@ export function useSavedCalculations() {
       return null;
     }
 
+    // Get existing calculation to preserve name if not provided
+    const existing = calculations.find(c => c.id === id);
+    const calcName = name || existing?.name || 'Calculation';
+
     const result = calculateZakat(formData);
 
-    // Encrypt form data before updating
-    const encryptedFormData = await encrypt(formData);
-    if (!encryptedFormData) {
+    // Create zero-knowledge payload
+    const payload: EncryptedPayload = {
+      formData,
+      name: calcName,
+      zakatDue: result.zakatDue,
+      isAboveNisab: result.isAboveNisab,
+    };
+
+    // Encrypt the entire payload
+    const encryptedPayload = await encrypt(payload);
+    if (!encryptedPayload) {
       toast({
         title: 'Encryption failed',
         description: 'Could not encrypt your data.',
@@ -205,9 +255,10 @@ export function useSavedCalculations() {
     const { error } = await supabase
       .from('zakat_calculations')
       .update({
-        form_data: encryptedFormData as any,
-        zakat_due: result.zakatDue,
-        is_above_nisab: result.isAboveNisab,
+        form_data: encryptedPayload as any,
+        name: '🔒', // Placeholder
+        zakat_due: 0, // Placeholder
+        is_above_nisab: false, // Placeholder
         encryption_version: ENCRYPTION_VERSION,
       })
       .eq('id', id)
