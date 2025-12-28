@@ -22,8 +22,9 @@ export function MethodologyTeaser() {
                 Grounded in Scholarship
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                Our calculations follow Dr. Wahbah al-Zuhayli's methodology from <em>al-Fiqh al-Islāmī</em>, 
-                with careful treatment of modern assets like retirement accounts and cryptocurrency.
+                Our methodology synthesizes guidance from leading Islamic finance authorities: Sheikh Joe Bradford's 
+                "Simple Zakat Guide", AMJA (Assembly of Muslim Jurists of America) fatwas, Zakat.fyi resources, 
+                Islamic Finance Guru, and AAOIFI Shariah Standard 35.
               </p>
               <Link to="/methodology">
                 <Button variant="outline" size="sm" className="gap-2">
