@@ -124,7 +124,7 @@ function drawAssetAllocation(
 
   const total = calculations.totalAssets || items.reduce((s, i) => s + i.value, 0);
 
-  const rowH = 16;
+  const rowH = 18;
   const gap = 6;
 
   items.forEach((item) => {
@@ -132,38 +132,42 @@ function drawAssetAllocation(
 
     // Color dot
     doc.setFillColor(...item.color);
-    doc.circle(x + 7, y + 7, 2, "F");
+    doc.circle(x + 7, y + 8, 2, "F");
 
     // Label
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...COLORS.text);
-    doc.text(item.name, x + 12, y + 7);
+    doc.text(item.name, x + 12, y + 8);
 
-    // Value
+    // Value (top-right)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...COLORS.text);
-    doc.text(formatCurrency(item.value, currency), x + w - 6, y + 7, { align: "right" });
+    doc.text(formatCurrency(item.value, currency), x + w - 6, y + 8, { align: "right" });
 
-    // Percent (muted)
+    // Percent (right, above bar)
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.textMuted);
     doc.text(formatAllocationPercent(item.value, total), x + w - 6, y + 12, { align: "right" });
 
-    // Bar
+    // Progress bar (below text; avoid overlapping percent)
     const barX = x + 12;
-    const barY = y + 11;
+    const barY = y + 14;
     const barW = w - 24;
-    const barH = 2.5;
+    const barH = 3;
 
+    const trackR = Math.min(1.5, barH / 2);
     doc.setFillColor(...COLORS.border);
-    doc.roundedRect(barX, barY, barW, barH, 1.2, 1.2, "F");
+    doc.roundedRect(barX, barY, barW, barH, trackR, trackR, "F");
 
-    const fillW = Math.max(2, Math.min(barW, (item.value / total) * barW));
+    const fillWRaw = (item.value / total) * barW;
+    const fillW = Math.min(barW, Math.max(0.8, fillWRaw));
+    const fillR = Math.min(trackR, fillW / 2);
+
     doc.setFillColor(...item.color);
-    doc.roundedRect(barX, barY, fillW, barH, 1.2, 1.2, "F");
+    doc.roundedRect(barX, barY, fillW, barH, fillR, fillR, "F");
 
     y += rowH + gap;
   });
