@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Info, AlertCircle, CheckCircle, Lightbulb } from "lucide-react";
 
-type InfoCardVariant = 'info' | 'warning' | 'success' | 'tip';
+type InfoCardVariant = 'info' | 'warning' | 'success' | 'tip' | 'celebration';
 
 interface InfoCardProps {
   title?: string;
@@ -22,14 +22,19 @@ const variantStyles = {
     iconColor: 'text-destructive',
   },
   success: {
-    container: 'bg-chart-1/10 border-chart-1/20',
+    container: 'bg-success/10 border-success/20',
     icon: CheckCircle,
-    iconColor: 'text-chart-1',
+    iconColor: 'text-success',
   },
   tip: {
     container: 'bg-accent border-border',
     icon: Lightbulb,
-    iconColor: 'text-chart-4',
+    iconColor: 'text-tertiary',
+  },
+  celebration: {
+    container: 'bg-tertiary/10 border-tertiary/20',
+    icon: CheckCircle,
+    iconColor: 'text-tertiary',
   },
 };
 

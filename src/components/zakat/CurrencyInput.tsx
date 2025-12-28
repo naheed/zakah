@@ -101,9 +101,9 @@ export function CurrencyInput({
       <motion.div 
         onClick={handleContainerClick}
         className={cn(
-          "relative bg-muted/50 rounded-t-lg cursor-text transition-colors",
+          "relative bg-surface-container-high rounded-t-lg cursor-text transition-colors",
           "border-b-2",
-          isFocused ? "border-primary bg-muted/70" : "border-muted-foreground/30 hover:bg-muted/60"
+          isFocused ? "border-primary bg-surface-container-highest" : "border-muted-foreground/30 hover:bg-surface-container-highest"
         )}
         initial={false}
         animate={isFocused ? { scale: 1.005 } : { scale: 1 }}

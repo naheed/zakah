@@ -215,7 +215,7 @@ export function DocumentUpload({
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
           >
-            <CheckCircle className="w-5 h-5 text-chart-1" />
+            <CheckCircle className="w-5 h-5 text-success" />
           </motion.div>
         );
       case "error":
@@ -291,7 +291,7 @@ export function DocumentUpload({
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1.5, opacity: 0 }}
                 transition={{ duration: 0.8 }}
-                className="absolute inset-0 bg-chart-1/20 rounded-xl"
+                className="absolute inset-0 bg-tertiary/20 rounded-xl"
               />
               {/* Sparkle particles */}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -300,7 +300,7 @@ export function DocumentUpload({
                   animate={{ scale: [0, 1.2, 1] }}
                   transition={{ duration: 0.5, times: [0, 0.6, 1] }}
                 >
-                  <Sparkles className="w-8 h-8 text-chart-1" />
+                  <Sparkles className="w-8 h-8 text-tertiary" />
                 </motion.div>
               </div>
             </motion.div>
@@ -359,7 +359,7 @@ export function DocumentUpload({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="bg-chart-1/10 border border-chart-1/30 rounded-lg p-3"
+            className="bg-success/10 border border-success/30 rounded-lg p-3"
           >
             <div className="flex items-center gap-2">
               <motion.div
@@ -367,7 +367,7 @@ export function DocumentUpload({
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
               >
-                <CheckCircle className="w-4 h-4 text-chart-1 shrink-0" />
+                <CheckCircle className="w-4 h-4 text-success shrink-0" />
               </motion.div>
               <p className="text-sm text-foreground">
                 <span className="font-medium">{lastResult.institutionName}</span> added successfully

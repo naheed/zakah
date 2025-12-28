@@ -35,7 +35,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
       <div className="min-h-[85vh] flex flex-col">
         {/* Header for logged-in users */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50">
-          <span className="text-lg font-semibold font-serif bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent">
+          <span className="text-lg font-semibold font-serif text-transparent bg-clip-text" style={{ backgroundImage: 'var(--gradient-brand)' }}>
             Zakat Flow
           </span>
           <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
           {/* Left Side - CTA (Primary focus) */}
           <div className="order-1 flex flex-col">
            {/* Brand Name */}
-            <span className="text-2xl font-semibold font-serif bg-gradient-to-r from-[#1e4d7a] to-[#4ade80] bg-clip-text text-transparent mb-4">
+            <span className="text-2xl font-semibold font-serif text-transparent bg-clip-text mb-4" style={{ backgroundImage: 'var(--gradient-brand)' }}>
               Zakat Flow
             </span>
             

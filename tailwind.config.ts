@@ -47,6 +47,21 @@ export default {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
+  			tertiary: {
+  				DEFAULT: 'hsl(var(--tertiary))',
+  				foreground: 'hsl(var(--tertiary-foreground))'
+  			},
+  			success: {
+  				DEFAULT: 'hsl(var(--success))',
+  				foreground: 'hsl(var(--success-foreground))'
+  			},
+  			surface: {
+  				'container-lowest': 'hsl(var(--surface-container-lowest))',
+  				'container-low': 'hsl(var(--surface-container-low))',
+  				container: 'hsl(var(--surface-container))',
+  				'container-high': 'hsl(var(--surface-container-high))',
+  				'container-highest': 'hsl(var(--surface-container-highest))'
+  			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
