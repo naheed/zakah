@@ -29,7 +29,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
       uploadDescription="Auto-fill from your investment statement"
       householdReminder="Include investment accounts for yourself, spouse, and children."
     >
-      <div className="space-y-2">
+      <div className="space-y-3">
         <h3 className="font-medium text-foreground">Active Investments (Trading)</h3>
         <CurrencyInput
           label="Stocks held for trading"
@@ -40,6 +40,16 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           onChange={(value) => updateData({ activeInvestments: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'activeInvestments')}
         />
+        
+        {/* RSU/Stock Options Clarification */}
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm text-foreground font-medium mb-1">Have RSUs or Stock Options?</p>
+          <p className="text-xs text-muted-foreground">
+            <strong>Unvested RSUs/options:</strong> Not zakatable — you don't own them yet.<br />
+            <strong>Vested RSUs:</strong> Include the current market value above.<br />
+            <strong>Exercised options:</strong> Include shares owned in your totals.
+          </p>
+        </div>
       </div>
       
       <div className="space-y-3">

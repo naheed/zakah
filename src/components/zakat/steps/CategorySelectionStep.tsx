@@ -112,10 +112,10 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
             {defaultCategories.map((category) => (
               <div
                 key={category.label}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container border border-border/50 text-sm text-muted-foreground"
+                className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg bg-surface-container border border-border/50 text-sm text-muted-foreground touch-manipulation"
               >
-                <Check weight="bold" className="w-3.5 h-3.5 text-primary" />
-                <category.icon weight="duotone" className="w-3.5 h-3.5" />
+                <Check weight="bold" className="w-4 h-4 text-primary" />
+                <category.icon weight="duotone" className="w-4 h-4" />
                 <span>{category.label}</span>
               </div>
             ))}
@@ -159,7 +159,8 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
                       whileTap={{ scale: 0.98 }}
                       onClick={() => updateData({ [category.id]: !isSelected })}
                       className={cn(
-                        "relative flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-colors",
+                        "relative flex flex-col items-center gap-2 p-3 rounded-xl border text-center transition-colors",
+                        "min-h-[80px] touch-manipulation", // 48px+ touch target
                         "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                         // M3 State layers via hover/focus
                         isSelected
