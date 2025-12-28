@@ -2,6 +2,7 @@ import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
 import { investmentsContent } from "@/lib/zakatContent";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
+import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Input } from "@/components/ui/input";
@@ -30,7 +31,10 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
       householdReminder="Include investment accounts for yourself, spouse, and children."
     >
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Active Investments (Trading)</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">Active Investments (Trading)</h3>
+          <WhyTooltip {...fiqhExplanations.activeInvestments} />
+        </div>
         <CurrencyInput
           label="Stocks held for trading"
           description="Short-term holdings (<365 days) for capital gain. Include brokerage cash."
@@ -53,7 +57,10 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
       </div>
       
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Passive Investments (Long-Term)</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">Passive Investments (Long-Term)</h3>
+          <WhyTooltip {...fiqhExplanations.passiveInvestments} />
+        </div>
         <CurrencyInput
           label="Stocks held long-term"
           description="Buy-and-hold investments (>365 days)"
