@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Check, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Check, Settings } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -8,12 +9,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Step {
   id: string;
   title: string;
-  section: 'intro' | 'assets' | 'liabilities' | 'results' | 'settings';
-  isSettings?: boolean;
+  section: 'intro' | 'assets' | 'liabilities' | 'results';
 }
 
 interface StepNavigatorDrawerProps {
@@ -28,7 +29,6 @@ const sectionLabels = {
   assets: 'Zakatable Assets',
   liabilities: 'Deductions',
   results: 'Your Zakat',
-  settings: 'Settings',
 };
 
 const sectionColors = {
@@ -36,7 +36,6 @@ const sectionColors = {
   assets: 'bg-chart-1',
   liabilities: 'bg-chart-2',
   results: 'bg-chart-5',
-  settings: 'bg-muted-foreground',
 };
 
 export function StepNavigatorDrawer({
@@ -71,7 +70,7 @@ export function StepNavigatorDrawer({
           <DrawerTitle>Jump to step</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-8 overflow-y-auto">
-          {(['intro', 'assets', 'liabilities', 'results', 'settings'] as const).map((section) => {
+          {(['intro', 'assets', 'liabilities', 'results'] as const).map((section) => {
             const sectionSteps = groupedSteps[section];
             if (!sectionSteps?.length) return null;
 
@@ -138,6 +137,16 @@ export function StepNavigatorDrawer({
               </div>
             );
           })}
+
+          {/* Settings Link at the bottom */}
+          <div className="mt-6 pt-4 border-t border-border">
+            <Link to="/settings" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-3">
+                <Settings className="w-5 h-5 text-muted-foreground" />
+                <span className="text-muted-foreground">Settings</span>
+              </Button>
+            </Link>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

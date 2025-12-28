@@ -2,12 +2,14 @@ import { ZakatFormData, formatCurrency, formatPercent, CalculationMode } from "@
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn } from "lucide-react";
+import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn, Settings, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
+import { ShareDrawer } from "../ShareDrawer";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ZakatSankeyChart, SankeyChartData } from "../ZakatSankeyChart";
@@ -304,8 +306,28 @@ export function ResultsStep({ data, updateData, calculations, calculationName, s
               }
             />
           )}
+          <ShareDrawer 
+            formData={data} 
+            zakatDue={zakatDue}
+            calculationId={savedCalculationId}
+          >
+            <Button variant="outline" className="flex-1 gap-2">
+              <Share2 className="w-4 h-4" />
+              Share
+            </Button>
+          </ShareDrawer>
+        </div>
+
+        {/* Adjust Settings & Start Over */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link to="/settings" className="flex-1">
+            <Button variant="ghost" className="w-full gap-2">
+              <Settings className="w-4 h-4" />
+              Adjust Settings
+            </Button>
+          </Link>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             className="flex-1 gap-2"
             onClick={handleReset}
           >

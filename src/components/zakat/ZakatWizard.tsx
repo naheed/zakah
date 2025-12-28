@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { usePresence } from "@/hooks/usePresence";
 import { WelcomeStep } from "./steps/WelcomeStep";
-import { NisabStep } from "./steps/NisabStep";
-import { HawlStep } from "./steps/HawlStep";
-import { FamilyStep } from "./steps/FamilyStep";
 import { CategorySelectionStep } from "./steps/CategorySelectionStep";
 import { LiquidAssetsStep } from "./steps/LiquidAssetsStep";
 import { PreciousMetalsStep } from "./steps/PreciousMetalsStep";
@@ -24,12 +22,9 @@ import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
 import { ContinueSessionDialog } from "./ContinueSessionDialog";
 import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
-import { ShareDrawer } from "./ShareDrawer";
-import { DocumentsManager } from "./DocumentsManager";
 import { UserMenu } from "./UserMenu";
-import { SaveCalculationDialog } from "./SaveCalculationDialog";
 import { PresenceIndicator } from "./PresenceIndicator";
-import { Menu, Share2 } from "lucide-react";
+import { Menu, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
@@ -50,20 +45,16 @@ type StepId =
   | 'debt-owed-to-you'
   | 'liabilities'
   | 'tax'
-  | 'results'
-  | 'nisab'
-  | 'hawl'
-  | 'family';
+  | 'results';
 
 interface Step {
   id: StepId;
   title: string;
-  section: 'intro' | 'assets' | 'liabilities' | 'results' | 'settings';
+  section: 'intro' | 'assets' | 'liabilities' | 'results';
   condition?: (data: ZakatFormData) => boolean;
-  isSettings?: boolean;
 }
 
-// Reordered steps: Get to assets quickly, move nisab/hawl/family to end as settings
+// Simplified steps: Settings are now in a separate /settings page
 const allSteps: Step[] = [
   { id: 'welcome', title: 'Welcome', section: 'intro' },
   { id: 'categories', title: 'Asset Types', section: 'intro' },
@@ -84,10 +75,6 @@ const allSteps: Step[] = [
   { id: 'tax', title: 'Taxes', section: 'liabilities', condition: (data) => data.hasTaxPayments },
   // Results - the aha moment!
   { id: 'results', title: 'Your Zakat', section: 'results' },
-  // Settings/adjustments - can be modified after seeing results
-  { id: 'nisab', title: 'Niṣāb Standard', section: 'settings', isSettings: true },
-  { id: 'hawl', title: 'Calendar', section: 'settings', isSettings: true },
-  { id: 'family', title: 'Household', section: 'settings', isSettings: true },
 ];
 
 export function ZakatWizard() {
@@ -189,17 +176,15 @@ export function ZakatWizard() {
 
   // Check if we're on welcome page
   const isWelcomePage = currentStep.id === 'welcome';
-  // Check if we're on a settings page
-  const isSettingsPage = currentStep.isSettings;
 
   // Progress and question numbering should exclude the welcome step (but include results)
-  const progressSteps = activeSteps.filter(s => !s.isSettings && s.id !== 'welcome');
+  const progressSteps = activeSteps.filter(s => s.id !== 'welcome');
   const progressStepIndexRaw = progressSteps.findIndex(s => s.id === currentStep.id);
   const progressStepIndex = progressStepIndexRaw >= 0 ? progressStepIndexRaw : progressSteps.length - 1;
 
-  // Calculate question number (1-indexed, excluding welcome + settings)
+  // Calculate question number (1-indexed, excluding welcome)
   const getQuestionNumber = () => {
-    if (currentStep.id === 'welcome' || currentStep.isSettings) {
+    if (currentStep.id === 'welcome') {
       return undefined;
     }
     return progressStepIndex + 1;
@@ -221,12 +206,6 @@ export function ZakatWizard() {
     switch (currentStep.id) {
       case 'welcome':
         return <WelcomeStep onNext={goToNext} />;
-      case 'nisab':
-        return <NisabStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
-      case 'hawl':
-        return <HawlStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
-      case 'family':
-        return <FamilyStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'categories':
         return <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'liquid-assets':
@@ -301,27 +280,17 @@ export function ZakatWizard() {
                 <ProgressBar 
                   currentStep={progressStepIndex} 
                   totalSteps={progressSteps.length}
-                  section={isSettingsPage ? 'settings' : currentStep.section}
+                  section={currentStep.section}
                 />
               </div>
 
-              {/* Documents Manager */}
-              <DocumentsManager 
-                documents={uploadedDocuments} 
-                onRemoveDocument={removeDocument} 
-              />
-
-              {/* Share Button */}
-              <ShareDrawer 
-                formData={formData} 
-                zakatDue={calculations.zakatDue}
-                calculationId={savedCalculationId}
-              >
+              {/* Settings Button */}
+              <Link to="/settings">
                 <Button variant="ghost" size="icon" className="shrink-0">
-                  <Share2 className="h-5 w-5" />
-                  <span className="sr-only">Share with spouse</span>
+                  <SettingsIcon className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
                 </Button>
-              </ShareDrawer>
+              </Link>
 
               {/* Presence Indicator - shows other users editing */}
               {presentUsers.length > 0 && (
