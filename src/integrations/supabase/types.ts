@@ -138,6 +138,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_authenticated_email: { Args: never; Returns: string }
       is_share_recipient: { Args: { share_id: string }; Returns: boolean }
       update_calculation_with_version: {
         Args: {
