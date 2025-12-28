@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles, Share2 } from 'lucide-react';
+import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles, Share2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useReferral, getInviteUrl } from '@/hooks/useReferral';
 import { formatCurrency } from '@/lib/zakatCalculations';
@@ -25,6 +25,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
   } = useReferral();
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string>('');
+  const [generationFailed, setGenerationFailed] = useState(false);
   const initRef = useRef(false);
 
   // Generate referral code and fetch stats on mount (once)
@@ -36,12 +37,25 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
       const code = await generateReferralCode();
       if (code) {
         setInviteUrl(getInviteUrl(code));
+        setGenerationFailed(false);
+      } else {
+        setGenerationFailed(true);
       }
       fetchStats();
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleRetry = async () => {
+    setGenerationFailed(false);
+    const code = await generateReferralCode();
+    if (code) {
+      setInviteUrl(getInviteUrl(code));
+    } else {
+      setGenerationFailed(true);
+    }
+  };
 
   // Update invite URL when referral code changes
   useEffect(() => {
@@ -115,6 +129,16 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
           <div className="flex gap-2">
             {isGenerating ? (
               <Skeleton className="h-9 flex-1" />
+            ) : generationFailed && !inviteUrl ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                className="flex-1 gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </Button>
             ) : (
               <Input
                 readOnly
@@ -123,19 +147,21 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                 placeholder="Generating link..."
               />
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopy}
-              disabled={!inviteUrl || isGenerating}
-              className="shrink-0"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-primary" />
-              ) : (
-                <Copy className="w-4 h-4" />
-              )}
-            </Button>
+            {!generationFailed && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopy}
+                disabled={!inviteUrl || isGenerating}
+                className="shrink-0"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 text-primary" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+              </Button>
+            )}
           </div>
 
           {/* Quick share buttons */}
@@ -223,6 +249,15 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
           <div className="flex gap-2">
             {isGenerating ? (
               <Skeleton className="h-10 flex-1" />
+            ) : generationFailed && !inviteUrl ? (
+              <Button
+                variant="outline"
+                onClick={handleRetry}
+                className="flex-1 gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry generating link
+              </Button>
             ) : (
               <Input
                 readOnly
@@ -230,18 +265,20 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                 className="font-mono text-sm bg-muted/50"
               />
             )}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopy}
-              disabled={!inviteUrl || isGenerating}
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-primary" />
-              ) : (
-                <Copy className="w-4 h-4" />
-              )}
-            </Button>
+            {!generationFailed && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopy}
+                disabled={!inviteUrl || isGenerating}
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 text-primary" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+              </Button>
+            )}
           </div>
         </div>
 

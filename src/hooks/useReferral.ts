@@ -68,12 +68,11 @@ export function useReferral() {
     // Return existing code if available
     if (referralCode) return referralCode;
     
-    // Prevent concurrent generation
-    if (isGeneratingRef.current || hasGeneratedRef.current) return null;
+    // Prevent concurrent generation (but allow retry if previous failed)
+    if (isGeneratingRef.current) return null;
     
     isGeneratingRef.current = true;
     setIsGenerating(true);
-    hasGeneratedRef.current = true;
     
     try {
       const sessionId = getOrCreateSessionId();
@@ -88,20 +87,18 @@ export function useReferral() {
 
       if (error) {
         console.error('Error generating referral code:', error);
-        hasGeneratedRef.current = false;
         return null;
       }
 
       if (data?.code) {
         setReferralCode(data.code);
+        hasGeneratedRef.current = true; // Only set AFTER success
         return data.code;
       }
 
-      hasGeneratedRef.current = false;
       return null;
     } catch (error) {
       console.error('Error in generateReferralCode:', error);
-      hasGeneratedRef.current = false;
       return null;
     } finally {
       isGeneratingRef.current = false;
