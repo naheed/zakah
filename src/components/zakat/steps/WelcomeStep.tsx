@@ -10,7 +10,6 @@ import { RecentCalculations } from "../RecentCalculations";
 import { UserMenu } from "../UserMenu";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
 import { HowItWorks } from "../landing/HowItWorks";
-import { AssetTypeGrid } from "../landing/AssetTypeGrid";
 import { MethodologyTeaser } from "../landing/MethodologyTeaser";
 import { InteractiveDemo } from "../landing/InteractiveDemo";
 interface WelcomeStepProps {
@@ -286,13 +285,8 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* How It Works + Methodology */}
       <HowItWorks />
-
-      {/* Asset Type Coverage Grid */}
-      <AssetTypeGrid />
-
-      {/* Methodology Teaser */}
       <MethodologyTeaser />
 
       {/* Footer */}
