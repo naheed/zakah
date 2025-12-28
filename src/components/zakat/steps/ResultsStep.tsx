@@ -2,7 +2,7 @@ import { ZakatFormData, formatCurrency, formatPercent, CalculationMode } from "@
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Download, RotateCcw, Settings2, Save, LogIn, Share2, ChevronDown, ChevronUp, Edit, Mail, MessageCircle, Twitter, Facebook, Copy, Check, Heart, Sparkles, Users, AlertTriangle } from "lucide-react";
+import { CheckCircle, WarningCircle, DownloadSimple, ArrowCounterClockwise, GearSix, FloppyDisk, SignIn, ShareNetwork, CaretDown, CaretUp, PencilSimple, EnvelopeSimple, WhatsappLogo, XLogo, FacebookLogo, Copy, Check, Heart, Sparkle, Users, Warning } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
@@ -176,7 +176,7 @@ export function ResultsStep({
                   delay: 0.3 
                 }}
               >
-                <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-90" />
+                <CheckCircle weight="duotone" className="w-12 h-12 mx-auto mb-4 opacity-90" />
               </motion.div>
               <motion.p 
                 initial={{ opacity: 0, y: 10 }}
@@ -209,7 +209,7 @@ export function ResultsStep({
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
               >
-                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <WarningCircle weight="duotone" className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               </motion.div>
               <motion.p 
                 initial={{ opacity: 0, y: 10 }}
@@ -251,13 +251,13 @@ export function ResultsStep({
             className="flex-1 h-11 gap-2"
             onClick={handleEdit}
           >
-            <Edit className="w-4 h-4" />
+            <PencilSimple weight="duotone" className="w-4 h-4" />
             Review & Edit
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" className="flex-1 h-11 gap-2">
-                <RotateCcw className="w-4 h-4" />
+                <ArrowCounterClockwise weight="duotone" className="w-4 h-4" />
                 Start New
               </Button>
             </AlertDialogTrigger>
@@ -321,7 +321,7 @@ export function ResultsStep({
               </p>
             </div>
             <Button onClick={handleSignIn} className="gap-2">
-              <LogIn className="w-4 h-4" />
+              <SignIn weight="duotone" className="w-4 h-4" />
               Sign In / Create Account
             </Button>
           </motion.div>
@@ -340,7 +340,7 @@ export function ResultsStep({
             onClick={handleDownload}
             disabled={isGeneratingPDF}
           >
-            <Download className="w-4 h-4" />
+            <DownloadSimple weight="duotone" className="w-4 h-4" />
             {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
           {user && (
@@ -350,7 +350,7 @@ export function ResultsStep({
                 onSaved={onCalculationSaved}
                 trigger={
                   <Button variant="outline" className="flex-1 h-12 gap-2">
-                    <Save className="w-4 h-4" />
+                    <FloppyDisk weight="duotone" className="w-4 h-4" />
                     {savedCalculationId ? 'Save As New' : 'Save'}
                   </Button>
                 }
@@ -370,9 +370,9 @@ export function ResultsStep({
               <CollapsibleTrigger className="w-full p-4 border-b border-border bg-accent flex items-center justify-between hover:bg-accent/80 transition-colors">
                 <h3 className="font-semibold text-foreground">View Calculation Breakdown</h3>
                 {breakdownOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                  <CaretUp weight="bold" className="w-5 h-5 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  <CaretDown weight="bold" className="w-5 h-5 text-muted-foreground" />
                 )}
               </CollapsibleTrigger>
               
@@ -389,7 +389,7 @@ export function ResultsStep({
                         updateData({ calculationMode: newMode });
                       }}
                     >
-                      <Settings2 className="w-4 h-4 mr-1" />
+                      <GearSix weight="duotone" className="w-4 h-4 mr-1" />
                       {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
                     </Button>
                   </div>
@@ -467,13 +467,13 @@ export function ResultsStep({
             <div className="border border-border rounded-xl overflow-hidden bg-muted/30">
               <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <AlertTriangle className="w-4 h-4" />
+                  <Warning weight="duotone" className="w-4 h-4" />
                   <span className="text-sm font-medium">What this calculator doesn't cover</span>
                 </div>
                 {disclaimerOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                  <CaretUp weight="bold" className="w-5 h-5 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  <CaretDown weight="bold" className="w-5 h-5 text-muted-foreground" />
                 )}
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -580,7 +580,7 @@ function CelebrationShareSection({
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
         >
-          <Heart className="w-8 h-8 mx-auto mb-3 text-primary" />
+          <Heart weight="duotone" className="w-8 h-8 mx-auto mb-3 text-primary" />
         </motion.div>
         {isAboveNisab ? (
           <>
@@ -621,25 +621,25 @@ function CelebrationShareSection({
         <div className="flex flex-wrap gap-2 justify-center">
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.email} target="_blank" rel="noopener noreferrer">
-              <Mail className="w-4 h-4" />
+              <EnvelopeSimple weight="duotone" className="w-4 h-4" />
               Email
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
+              <WhatsappLogo weight="duotone" className="w-4 h-4" />
               WhatsApp
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer">
-              <Twitter className="w-4 h-4" />
+              <XLogo weight="duotone" className="w-4 h-4" />
               Twitter
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer">
-              <Facebook className="w-4 h-4" />
+              <FacebookLogo weight="duotone" className="w-4 h-4" />
               Facebook
             </a>
           </Button>
@@ -661,9 +661,9 @@ function CelebrationShareSection({
               disabled={!inviteUrl || isGenerating}
             >
               {copied ? (
-                <Check className="w-4 h-4 text-primary" />
+                <Check weight="bold" className="w-4 h-4 text-primary" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <Copy weight="duotone" className="w-4 h-4" />
               )}
             </Button>
           </div>
@@ -679,7 +679,7 @@ function CelebrationShareSection({
               className="bg-primary/10 rounded-lg p-3 text-center"
             >
               <div className="flex items-center justify-center gap-2 text-sm">
-                <Sparkles className="w-4 h-4 text-primary" />
+                <Sparkle weight="fill" className="w-4 h-4 text-primary" />
                 <span className="font-medium">{stats.totalReferrals}</span>
                 <span className="text-muted-foreground">
                   {stats.totalReferrals === 1 ? 'calculation' : 'calculations'} through your shares
@@ -697,7 +697,7 @@ function CelebrationShareSection({
             calculationId={savedCalculationId}
           >
             <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground">
-              <Share2 className="w-4 h-4" />
+              <ShareNetwork weight="duotone" className="w-4 h-4" />
               Share calculation with spouse
             </Button>
           </ShareDrawer>
