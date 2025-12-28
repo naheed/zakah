@@ -14,11 +14,11 @@ function MockReportPreview() {
       {/* Glassmorphic card effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl blur-xl" />
       
-      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-lg">
+      <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 sm:p-6 shadow-lg">
         {/* Header */}
         <div className="text-center mb-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Your Zakat Due</p>
-          <p className="text-4xl font-bold text-primary">$3,346</p>
+          <p className="text-3xl sm:text-4xl font-bold text-primary">$3,346</p>
           <p className="text-sm text-muted-foreground mt-1">2.5% of zakatable wealth</p>
         </div>
 
@@ -32,11 +32,6 @@ function MockReportPreview() {
           <span className="text-muted-foreground">Net Zakatable Wealth</span>
           <span className="font-semibold text-foreground">$133,850</span>
         </div>
-
-        {/* Overlay hint */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent rounded-2xl flex items-end justify-center pb-6 pointer-events-none">
-          <p className="text-sm text-muted-foreground">See your personalized report →</p>
-        </div>
       </div>
     </div>
   );
@@ -47,10 +42,21 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-6">
-      <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+      <div className="w-full max-w-5xl grid md:grid-cols-2 gap-6 md:gap-12 items-center">
         {/* Left Side - Mock Report Preview */}
         <div className="order-2 md:order-1">
           <MockReportPreview />
+          
+          {/* CTA pointer for mobile - hidden on desktop */}
+          <div className="mt-4 flex justify-center md:hidden">
+            <button 
+              onClick={onNext}
+              className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              <span>Start calculating above</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
           
           {/* Trust indicators below preview */}
           <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
@@ -68,11 +74,6 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
 
         {/* Right Side - CTA */}
         <div className="order-1 md:order-2 flex flex-col">
-          {/* Logo/Icon */}
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <span className="text-xl">🕌</span>
-          </div>
-          
           {/* Headline */}
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 tracking-tight">
             Calculate Your Zakat
@@ -136,6 +137,9 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             </Link>
             <p className="text-xs text-muted-foreground mt-2">
               Built by Naheed Vora • Provided as-is
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Questions or feedback? <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a>
             </p>
           </div>
         </div>
