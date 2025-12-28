@@ -174,11 +174,12 @@ export default function PrivacyPolicy() {
               </p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
                 <li><strong>Encryption Standard:</strong> AES-256-GCM symmetric encryption</li>
-                <li><strong>What's Encrypted:</strong> Calculation name, all financial data, Zakat amount, and all metadata</li>
+                <li><strong>What's Encrypted:</strong> Calculation name, year, all financial data, Zakat amount, and all metadata</li>
                 <li><strong>Key Storage:</strong> Encryption keys generated and stored locally in your browser's IndexedDB</li>
                 <li><strong>Device-Specific:</strong> Keys are unique to each browser/device and are never transmitted</li>
+                <li><strong>Sharing Security:</strong> RSA-4096 key exchange for securely sharing with others</li>
                 <li><strong>True Zero-Knowledge:</strong> Our servers store only encrypted blobs — we cannot see your 
-                    calculation names, financial details, or Zakat amounts</li>
+                    calculation names, years, financial details, or Zakat amounts</li>
                 <li><strong>Database Contents:</strong> Only encrypted data, timestamps, and your user ID are stored</li>
               </ul>
 
@@ -211,8 +212,19 @@ export default function PrivacyPolicy() {
               
               <h3 className="text-lg font-medium text-foreground mt-4">6.1 Shared Calculations</h3>
               <p className="text-muted-foreground">
-                When you share a calculation with another person (e.g., your spouse), the calculation is 
-                re-encrypted using their public key. Only the designated recipient can decrypt the shared data.
+                When you share a calculation with another person (e.g., your spouse):
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground ml-4 mt-2">
+                <li>You invite them by email address</li>
+                <li>When they sign in, their browser generates a unique public/private key pair</li>
+                <li>The shared data is then encrypted specifically for them using RSA-4096 key exchange</li>
+                <li>Only the designated recipient can decrypt the shared data with their private key</li>
+                <li>Your original calculation remains encrypted with your own keys</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                <strong>Note:</strong> The share is created when you invite someone, but the data is encrypted 
+                for them once they log in and their encryption keys are generated. Until then, they can see 
+                that a share exists but cannot access the encrypted financial details.
               </p>
 
               <h3 className="text-lg font-medium text-foreground mt-4">6.2 Service Providers</h3>

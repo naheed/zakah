@@ -7,7 +7,7 @@ const SYMMETRIC_ALGORITHM = 'AES-GCM';
 const ASYMMETRIC_ALGORITHM = 'RSA-OAEP';
 const HASH_ALGORITHM = 'SHA-256';
 const KEY_LENGTH = 256;
-const RSA_KEY_LENGTH = 2048;
+const RSA_KEY_LENGTH = 4096;
 
 // IndexedDB database name and store
 const DB_NAME = 'zakat-encryption-keys';
