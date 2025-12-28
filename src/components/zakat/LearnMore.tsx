@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { CaretDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -41,11 +41,12 @@ export function LearnMore({
             {variant === "tip" ? "💡 " : "📖 "}
             {title}
           </span>
-          <ChevronDown 
+          <CaretDown 
             className={cn(
               "h-4 w-4 text-muted-foreground transition-transform duration-200",
               isOpen && "rotate-180"
             )} 
+            weight="bold"
           />
         </button>
       </CollapsibleTrigger>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { parseMathExpression } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
-import { FileText, ChevronDown } from "lucide-react";
+import { FileDoc, CaretDown } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Collapsible,
@@ -169,15 +169,15 @@ export function CurrencyInput({
       
       {hasContributions ? (
         <Collapsible open={showBreakdown} onOpenChange={setShowBreakdown}>
-          <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:underline w-full">
-            <FileText className="w-3 h-3" />
+        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:underline w-full">
+            <FileDoc className="w-3 h-3" weight="fill" />
             <span>
               Includes ${totalFromDocs.toLocaleString()} from {documentContributions.length} document{documentContributions.length > 1 ? 's' : ''}
             </span>
-            <ChevronDown className={cn(
+            <CaretDown className={cn(
               "w-3 h-3 transition-transform ml-auto",
               showBreakdown && "rotate-180"
-            )} />
+            )} weight="bold" />
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
             <div className="bg-muted/50 rounded-lg p-3 space-y-2">

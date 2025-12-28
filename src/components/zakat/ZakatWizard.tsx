@@ -26,8 +26,9 @@ import { StepNavigation } from "./StepNavigation";
 import { ContinueSessionDialog } from "./ContinueSessionDialog";
 import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
 import { UserMenu } from "./UserMenu";
+import { SaveProgressPrompt } from "./SaveProgressPrompt";
 import { PresenceIndicator } from "./PresenceIndicator";
-import { Menu, Settings as SettingsIcon } from "lucide-react";
+import { List, GearSix } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
@@ -351,8 +352,8 @@ export function ZakatWizard() {
                 currentStepIndex={currentStepIndex}
                 onStepSelect={goToStep}
               >
-                <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
-                  <Menu className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="shrink-0 -ml-2 min-h-12 min-w-12">
+                  <List className="h-5 w-5" weight="bold" />
                   <span className="sr-only">Navigate steps</span>
                 </Button>
               </StepNavigatorDrawer>
@@ -368,8 +369,8 @@ export function ZakatWizard() {
 
               {/* Settings Button */}
               <Link to="/settings">
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <SettingsIcon className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="shrink-0 min-h-12 min-w-12">
+                  <GearSix className="h-5 w-5" weight="bold" />
                   <span className="sr-only">Settings</span>
                 </Button>
               </Link>
@@ -408,14 +409,21 @@ export function ZakatWizard() {
       </main>
       
       {!isWelcomePage && (
-        <StepNavigation
-          onPrevious={goToPrevious}
-          onNext={goToNext}
-          canGoBack={currentStepIndex > 0}
-          canGoForward={currentStepIndex < activeSteps.length - 1}
-          isLastStep={currentStep.id === 'results'}
-          currentStepTitle={currentStep.title}
-        />
+        <>
+          <SaveProgressPrompt
+            currentStepIndex={currentStepIndex}
+            totalSteps={activeSteps.length}
+            onDismiss={() => {}}
+          />
+          <StepNavigation
+            onPrevious={goToPrevious}
+            onNext={goToNext}
+            canGoBack={currentStepIndex > 0}
+            canGoForward={currentStepIndex < activeSteps.length - 1}
+            isLastStep={currentStep.id === 'results'}
+            currentStepTitle={currentStep.title}
+          />
+        </>
       )}
     </div>
   );
