@@ -27,10 +27,10 @@ export function QuestionLayout({ content, questionNumber, children }: QuestionLa
             </span>
           </div>
         )}
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-2 tracking-tight">
           {content.title}
         </h1>
-        <p className="text-base text-muted-foreground">
+        <p className="text-base text-muted-foreground leading-relaxed">
           {content.subtitle}
         </p>
       </div>

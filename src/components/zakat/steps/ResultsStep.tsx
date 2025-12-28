@@ -182,11 +182,11 @@ export function ResultsStep({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-lg opacity-90 mb-2"
+                className="text-lg opacity-90 mb-2 font-light"
               >
                 Your Zakat Due
               </motion.p>
-              <p className="text-5xl font-bold mb-4">
+              <p className="text-5xl font-semibold font-serif mb-4 tracking-tight">
                 <NumberTicker 
                   value={zakatDue} 
                   delay={0.5}
@@ -215,7 +215,7 @@ export function ResultsStep({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-lg mb-2"
+                className="text-lg mb-2 font-light"
               >
                 Below Niṣāb Threshold
               </motion.p>
@@ -223,7 +223,7 @@ export function ResultsStep({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-2xl font-semibold mb-4"
+                className="text-2xl font-serif font-medium mb-4"
               >
                 No Zakat Due This Year
               </motion.p>

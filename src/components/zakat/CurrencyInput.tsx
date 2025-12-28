@@ -151,6 +151,7 @@ export function CurrencyInput({
           placeholder={shouldFloat ? placeholder : ""}
           className={cn(
             "pl-10 pt-6 pb-2 h-14 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0",
+            "font-mono tabular-nums tracking-wide",
           )}
         />
         
