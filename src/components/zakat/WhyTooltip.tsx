@@ -122,6 +122,56 @@ export const fiqhExplanations = {
     title: "Which debts are deductible?",
     explanation: "Only immediate debts reduce zakatable wealth: bills due now, credit cards, 12 months of mortgage (AMJA opinion). Long-term debt is not fully deductible.",
   },
+  monthlyLiving: {
+    title: "Why one month's expenses?",
+    explanation: "Immediate living expenses (rent, food, utilities) are basic needs exempt from Zakat. Only the current month's obligations are deductible.",
+  },
+  mortgageDeduction: {
+    title: "Why 12 months of mortgage?",
+    explanation: "AMJA ruling: Only the next 12 installments are deductible, not the full mortgage balance. This balances debt relief with Zakat obligations.",
+  },
+  studentLoans: {
+    title: "Why only current payment?",
+    explanation: "Like mortgages, only the installment due now is deductible. Future payments aren't yet owed and don't reduce current wealth.",
+  },
+  
+  // Crypto
+  cryptoCurrency: {
+    title: "Why is crypto zakatable?",
+    explanation: "Major cryptocurrencies function as currency/store of value, taking the ruling of gold and silver (medium of exchange). Full market value is zakatable.",
+  },
+  cryptoTrading: {
+    title: "Trading vs. holding crypto",
+    explanation: "Actively traded tokens are commercial goods (urud al-tijarah). Even NFTs held for flipping are zakatable at full value.",
+  },
+  stakedAssets: {
+    title: "Staking and Zakat",
+    explanation: "Your staked principal remains your wealth and is fully zakatable. Locked staking doesn't affect ownership, only accessibility.",
+  },
+  defiLiquidity: {
+    title: "DeFi liquidity pools",
+    explanation: "LP tokens represent redeemable value. Calculate based on what you could withdraw now, even if subject to impermanent loss.",
+  },
+  
+  // Trusts
+  revocableTrust: {
+    title: "Why revocable = zakatable?",
+    explanation: "You retain full control and can dissolve the trust anytime. Legally and Islamically, the assets remain yours (Milk Tam - complete ownership).",
+  },
+  irrevocableTrust: {
+    title: "Why control matters?",
+    explanation: "Zakat requires Milk Tam (complete possession). If you irrevocably transferred assets and can't access principal, you lack this requirement.",
+  },
+  clatTrust: {
+    title: "CLAT treatment",
+    explanation: "During the annuity term, the charity owns the income stream (usufruct). The remainder interest is contingent until the term ends.",
+  },
+  
+  // Retirement - additional
+  hsaAccount: {
+    title: "Why is HSA zakatable?",
+    explanation: "HSA funds are fully yours and accessible for medical expenses at any time. No penalties for qualified medical use makes it complete ownership.",
+  },
   
   // Nisab
   silverNisab: {

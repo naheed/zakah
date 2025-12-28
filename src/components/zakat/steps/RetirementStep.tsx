@@ -6,6 +6,7 @@ import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 
 export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode);
@@ -35,7 +36,10 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       </div>
       
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">401(k) / 403(b)</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">401(k) / 403(b)</h3>
+          <WhyTooltip {...fiqhExplanations.retirementAccounts} />
+        </div>
         <CurrencyInput 
           label="Vested Balance" 
           description="Exclude unvested employer match"
@@ -73,7 +77,10 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       </div>
       
       <div className="space-y-3 pt-4 border-t border-border">
-        <h3 className="font-medium text-foreground">Roth IRA</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">Roth IRA</h3>
+          <WhyTooltip {...fiqhExplanations.rothIRA} />
+        </div>
         <CurrencyInput 
           label="Contributions (Principal)" 
           description="Always accessible, fully Zakatable" 
@@ -95,7 +102,10 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       </div>
       
       <div className="space-y-3 pt-4 border-t border-border">
-        <h3 className="font-medium text-foreground">HSA (Health Savings Account)</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">HSA (Health Savings Account)</h3>
+          <WhyTooltip {...fiqhExplanations.hsaAccount} />
+        </div>
         <CurrencyInput 
           label="HSA Balance" 
           description="Fully accessible for medical, fully Zakatable" 

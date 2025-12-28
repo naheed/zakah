@@ -8,6 +8,7 @@ import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDoc
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { TrustAllocationDialog } from "../TrustAllocationDialog";
+import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 
 export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
@@ -86,7 +87,12 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
         householdReminder="Include trusts benefiting yourself, spouse, and children."
       >
         <CurrencyInput
-          label="Revocable Trust Value"
+          label={
+            <span className="flex items-center gap-2">
+              Revocable Trust Value
+              <WhyTooltip {...fiqhExplanations.revocableTrust} />
+            </span>
+          }
           description="You retain control—fully Zakatable"
           householdDescription="Combined revocable trust value for all family members"
           isHousehold={isHousehold}
@@ -96,7 +102,10 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
         />
         
         <div className="space-y-3 pt-4 border-t border-border">
-          <h3 className="font-medium text-foreground">Irrevocable Trust</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-foreground">Irrevocable Trust</h3>
+            <WhyTooltip {...fiqhExplanations.irrevocableTrust} />
+          </div>
           
           <CurrencyInput
             label="Irrevocable Trust Value"
@@ -130,7 +139,10 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
         </div>
         
         <div className="space-y-3 pt-4 border-t border-border">
-          <h3 className="font-medium text-foreground">CLAT (Charitable Lead Annuity Trust)</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-foreground">CLAT (Charitable Lead Annuity Trust)</h3>
+            <WhyTooltip {...fiqhExplanations.clatTrust} />
+          </div>
           <CurrencyInput
             label="CLAT Value"
             description="Not Zakatable during annuity term"

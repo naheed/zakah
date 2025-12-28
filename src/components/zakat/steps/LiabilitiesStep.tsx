@@ -4,6 +4,7 @@ import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
+import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 
 export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
@@ -24,7 +25,12 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
       householdReminder="Include expenses and liabilities for your entire household."
     >
       <CurrencyInput
-        label="Monthly Living Expenses"
+        label={
+          <span className="flex items-center gap-2">
+            Monthly Living Expenses
+            <WhyTooltip {...fiqhExplanations.monthlyLiving} />
+          </span>
+        }
         description="Rent, utilities, groceries, transport"
         householdDescription="Combined living expenses for all family members"
         isHousehold={isHousehold}
@@ -34,7 +40,12 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
       />
       
       <CurrencyInput
-        label="Monthly Mortgage Payment"
+        label={
+          <span className="flex items-center gap-2">
+            Monthly Mortgage Payment
+            <WhyTooltip {...fiqhExplanations.mortgageDeduction} />
+          </span>
+        }
         description="12 months deductible per AMJA opinion"
         householdDescription="Combined mortgage for your household"
         isHousehold={isHousehold}
@@ -74,7 +85,12 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
       />
       
       <CurrencyInput
-        label="Student Loan Payments Due"
+        label={
+          <span className="flex items-center gap-2">
+            Student Loan Payments Due
+            <WhyTooltip {...fiqhExplanations.studentLoans} />
+          </span>
+        }
         description="Only current installment, not total balance"
         householdDescription="Combined student loan payments for all family members"
         isHousehold={isHousehold}
