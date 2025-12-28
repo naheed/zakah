@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useEncryptionKeys } from './useEncryptionKeys';
@@ -37,6 +37,10 @@ export function useSavedCalculations() {
   const { isReady, encrypt, decrypt } = useEncryptionKeys();
   const [calculations, setCalculations] = useState<SavedCalculation[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Refs to prevent concurrent fetches and track initialization
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
 
   const fetchCalculations = useCallback(async () => {
     if (!user) {
@@ -49,7 +53,14 @@ export function useSavedCalculations() {
       return;
     }
 
+    // Prevent concurrent fetches
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    isFetchingRef.current = true;
     setLoading(true);
+    
     const { data, error } = await supabase
       .from('zakat_calculations')
       .select('*')
@@ -64,6 +75,7 @@ export function useSavedCalculations() {
         variant: 'destructive',
       });
       setLoading(false);
+      isFetchingRef.current = false;
       return;
     }
 
@@ -149,11 +161,9 @@ export function useSavedCalculations() {
     // Filter out null values (failed decryptions)
     setCalculations(decryptedData.filter((c): c is SavedCalculation => c !== null));
     setLoading(false);
+    isFetchingRef.current = false;
+    hasFetchedRef.current = true;
   }, [user, toast, isReady, decrypt]);
-
-  useEffect(() => {
-    fetchCalculations();
-  }, [fetchCalculations]);
 
   const saveCalculation = async (
     name: string,

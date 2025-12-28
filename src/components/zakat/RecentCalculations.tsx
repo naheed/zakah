@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { Calculator, ChevronRight, Clock, Sparkles } from 'lucide-react';
@@ -20,11 +19,14 @@ export function RecentCalculations({
   limit = 3 
 }: RecentCalculationsProps) {
   const { calculations, loading, refreshCalculations } = useSavedCalculations();
-  const navigate = useNavigate();
+  const initRef = useRef(false);
 
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
     refreshCalculations();
-  }, [refreshCalculations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const recentCalcs = calculations.slice(0, limit);
 
