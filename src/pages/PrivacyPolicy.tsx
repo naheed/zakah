@@ -255,7 +255,7 @@ export default function PrivacyPolicy() {
               <h3 className="text-lg font-medium text-foreground mt-4">7.1 Your Rights</h3>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
                 <li><strong>Right to Know:</strong> Request information about the categories and specific pieces of personal data we collect, use, and disclose</li>
-                <li><strong>Right to Delete:</strong> Request deletion of your personal data, subject to certain exceptions</li>
+                <li><strong>Right to Delete:</strong> Delete your data directly in Settings, or request deletion by contacting us</li>
                 <li><strong>Right to Correct:</strong> Request correction of inaccurate personal data we maintain about you</li>
                 <li><strong>Right to Opt-Out of Sale/Sharing:</strong> We do not sell or share personal information, so this right does not apply</li>
                 <li><strong>Right to Limit Use of Sensitive Personal Information:</strong> Your financial data is encrypted and used only to provide the Service</li>
@@ -271,7 +271,14 @@ export default function PrivacyPolicy() {
 
               <h3 className="text-lg font-medium text-foreground mt-4">7.3 How to Exercise Your Rights</h3>
               <p className="text-muted-foreground">
-                To exercise your California privacy rights, contact us at{" "}
+                You can exercise most of your privacy rights directly within the app:
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground ml-4 mt-2">
+                <li><strong>Delete All Data:</strong> Go to Settings → Danger Zone → "Delete All Data" to remove all saved calculations while keeping your account</li>
+                <li><strong>Delete Account:</strong> Go to Settings → Danger Zone → "Delete Account" to permanently delete your account and all associated data</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                For other requests or if you prefer, contact us at{" "}
                 <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a>. 
                 We will respond to verifiable requests within 45 days. If we need more time (up to 90 days total), 
                 we will notify you.
@@ -293,19 +300,28 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-foreground">8. Data Retention</h2>
+              <h2 className="text-xl font-semibold text-foreground">8. Data Retention & Deletion</h2>
               <p className="text-muted-foreground">We retain your data for the following periods:</p>
               <ul className="list-disc list-inside text-muted-foreground ml-4">
                 <li><strong>Session Data:</strong> Encrypted in browser localStorage; effectively deleted when you close 
                     your browser (encryption key is cleared from sessionStorage)</li>
-                <li><strong>Account Information:</strong> Retained while your account is active and for up to 30 days after deletion request</li>
+                <li><strong>Account Information:</strong> Retained while your account is active; deleted immediately upon account deletion</li>
                 <li><strong>Saved Calculations:</strong> End-to-end encrypted and retained until you delete them or delete your account</li>
                 <li><strong>Uploaded Documents:</strong> Processed in memory only; not retained after extraction (typically seconds)</li>
                 <li><strong>Document Metadata:</strong> Shown during session only; not persisted to storage</li>
                 <li><strong>Usage Analytics:</strong> Aggregated data retained for up to 24 months</li>
               </ul>
-              <p className="text-muted-foreground mt-3">
-                You may delete your account and request deletion of all associated data at any time by contacting us.
+              
+              <h3 className="text-lg font-medium text-foreground mt-4">8.1 Self-Service Deletion</h3>
+              <p className="text-muted-foreground">
+                You can delete your data at any time through the Settings page:
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground ml-4 mt-2">
+                <li><strong>Delete All Data:</strong> Removes all saved calculations and shared access while keeping your account active</li>
+                <li><strong>Delete Account:</strong> Permanently deletes your account, profile, and all associated data</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                Both actions are immediate and irreversible. Local encryption keys stored in your browser are also cleared during deletion.
               </p>
             </section>
 
