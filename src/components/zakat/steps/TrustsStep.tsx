@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { TrustAllocationDialog } from "../TrustAllocationDialog";
 
-export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
   const [allocationDialog, setAllocationDialog] = useState<{
     open: boolean;
@@ -74,6 +74,7 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
       <AssetStepWrapper
         content={trustsContent}
         stepId="trusts"
+        questionNumber={questionNumber}
         data={data}
         updateData={updateData}
         uploadedDocuments={uploadedDocuments}

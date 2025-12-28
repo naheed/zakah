@@ -7,7 +7,7 @@ import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDoc
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const passiveZakatable = data.calculationMode === 'conservative' 
     ? data.passiveInvestmentsValue 
     : data.passiveInvestmentsValue * 0.30;
@@ -19,6 +19,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
     <AssetStepWrapper
       content={investmentsContent}
       stepId="investments"
+      questionNumber={questionNumber}
       data={data}
       updateData={updateData}
       uploadedDocuments={uploadedDocuments}

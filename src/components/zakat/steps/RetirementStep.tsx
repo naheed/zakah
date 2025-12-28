@@ -7,7 +7,7 @@ import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDoc
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument }: AssetStepProps) {
+export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode);
   const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.calculationMode);
   const isHousehold = data.isHousehold;
@@ -16,6 +16,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
     <AssetStepWrapper
       content={retirementContent}
       stepId="retirement"
+      questionNumber={questionNumber}
       data={data}
       updateData={updateData}
       uploadedDocuments={uploadedDocuments}

@@ -6,13 +6,14 @@ import { Users, User, CheckCircle } from "lucide-react";
 interface FamilyStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  questionNumber?: number;
 }
 
-export function FamilyStep({ data, updateData }: FamilyStepProps) {
+export function FamilyStep({ data, updateData, questionNumber }: FamilyStepProps) {
   const isHousehold = data.isHousehold;
 
   return (
-    <QuestionLayout content={familyContent}>
+    <QuestionLayout content={familyContent} questionNumber={questionNumber}>
       <div className="space-y-3">
         <button
           type="button"

@@ -196,6 +196,20 @@ export function ZakatWizard() {
   const mainStepIndex = mainSteps.findIndex(s => s.id === currentStep.id);
   const progressStepIndex = mainStepIndex >= 0 ? mainStepIndex : mainSteps.length - 1;
   
+  // Calculate question number (1-indexed, excluding welcome)
+  // This matches the progress bar's step numbering
+  const getQuestionNumber = () => {
+    // Welcome is not a question, so question numbers start from step index 1
+    // The progress bar shows "currentStep + 1 of totalSteps" where currentStep is 0-indexed
+    // So progressStepIndex + 1 should match the question number
+    if (currentStep.id === 'welcome' || currentStep.isSettings) {
+      return undefined; // No question number for welcome or settings
+    }
+    return progressStepIndex + 1;
+  };
+
+  const questionNumber = getQuestionNumber();
+  
   const renderStep = () => {
     // Common props for asset steps
     const assetStepProps = {
@@ -204,19 +218,20 @@ export function ZakatWizard() {
       uploadedDocuments,
       onDocumentAdded: handleDocumentAdded,
       onRemoveDocument: removeDocument,
+      questionNumber,
     };
 
     switch (currentStep.id) {
       case 'welcome':
         return <WelcomeStep onNext={goToNext} />;
       case 'nisab':
-        return <NisabStep data={formData} updateData={updateFormData} />;
+        return <NisabStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'hawl':
-        return <HawlStep data={formData} updateData={updateFormData} />;
+        return <HawlStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'family':
-        return <FamilyStep data={formData} updateData={updateFormData} />;
+        return <FamilyStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'categories':
-        return <CategorySelectionStep data={formData} updateData={updateFormData} />;
+        return <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'liquid-assets':
         return <LiquidAssetsStep {...assetStepProps} />;
       case 'precious-metals':

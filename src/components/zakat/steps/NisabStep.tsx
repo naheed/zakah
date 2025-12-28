@@ -7,15 +7,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 interface NisabStepProps {
   data: ZakatFormData;
   updateData: (updates: Partial<ZakatFormData>) => void;
+  questionNumber?: number;
 }
 
-export function NisabStep({ data, updateData }: NisabStepProps) {
+export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) {
   const silverNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
   const goldNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'gold');
   const currentNisab = data.nisabStandard === 'gold' ? goldNisab : silverNisab;
   
   return (
-    <QuestionLayout content={nisabContent}>
+    <QuestionLayout content={nisabContent} questionNumber={questionNumber}>
       <RadioGroup
         value={data.nisabStandard}
         onValueChange={(value) => updateData({ nisabStandard: value as NisabStandard })}
