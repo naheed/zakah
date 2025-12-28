@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      zakat_anonymous_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          id: string
+          session_hash: string
+          total_assets: number
+          zakat_due: number
+        }
+        Insert: {
+          created_at?: string
+          event_date?: string
+          id?: string
+          session_hash: string
+          total_assets?: number
+          zakat_due?: number
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          id?: string
+          session_hash?: string
+          total_assets?: number
+          zakat_due?: number
+        }
+        Relationships: []
+      }
       zakat_calculation_shares: {
         Row: {
           accepted_at: string | null
@@ -130,6 +157,36 @@ export type Database = {
           year_type?: string
           year_value?: number
           zakat_due?: number | null
+        }
+        Relationships: []
+      }
+      zakat_usage_aggregates: {
+        Row: {
+          calculation_count: number
+          period_type: string
+          period_value: string
+          total_assets: number
+          total_zakat: number
+          unique_sessions: number
+          updated_at: string
+        }
+        Insert: {
+          calculation_count?: number
+          period_type: string
+          period_value: string
+          total_assets?: number
+          total_zakat?: number
+          unique_sessions?: number
+          updated_at?: string
+        }
+        Update: {
+          calculation_count?: number
+          period_type?: string
+          period_value?: string
+          total_assets?: number
+          total_zakat?: number
+          unique_sessions?: number
+          updated_at?: string
         }
         Relationships: []
       }
