@@ -1,7 +1,7 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { categoriesContent } from "@/lib/zakatContent";
 import { cn } from "@/lib/utils";
-import { Check, Money, TrendUp, Bank } from "@phosphor-icons/react";
+import { Check, Money, TrendUp, Bank, Diamond, CurrencyBtc, Scroll, Buildings, Storefront, PaintBrush, Handshake, Receipt, IconProps } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Tooltip,
@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import React from "react";
 
 interface CategorySelectionStepProps {
   data: ZakatFormData;
@@ -22,52 +23,57 @@ const defaultCategories = [
   { icon: Bank, label: 'Retirement' },
 ];
 
-const optionalCategories = [
+const optionalCategories: {
+  id: keyof Pick<ZakatFormData, 'hasPreciousMetals' | 'hasCrypto' | 'hasTrusts' | 'hasRealEstate' | 'hasBusiness' | 'hasIlliquidAssets' | 'hasDebtOwedToYou' | 'hasTaxPayments'>;
+  icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
+  label: string;
+  description: string;
+}[] = [
   {
-    id: 'hasPreciousMetals' as const,
-    emoji: '💍',
+    id: 'hasPreciousMetals',
+    icon: Diamond,
     label: 'Precious Metals',
     description: 'Gold, silver, or jewelry',
   },
   {
-    id: 'hasCrypto' as const,
-    emoji: '₿',
+    id: 'hasCrypto',
+    icon: CurrencyBtc,
     label: 'Cryptocurrency',
     description: 'Bitcoin, Ethereum, staking, DeFi',
   },
   {
-    id: 'hasTrusts' as const,
-    emoji: '📜',
+    id: 'hasTrusts',
+    icon: Scroll,
     label: 'Trusts & Estates',
     description: 'Revocable or irrevocable trusts',
   },
   {
-    id: 'hasRealEstate' as const,
-    emoji: '🏘️',
+    id: 'hasRealEstate',
+    icon: Buildings,
     label: 'Investment Property',
     description: 'Real estate for sale or rental income',
   },
   {
-    id: 'hasBusiness' as const,
-    emoji: '🏪',
+    id: 'hasBusiness',
+    icon: Storefront,
     label: 'Business Assets',
     description: 'Inventory, receivables, business cash',
   },
   {
-    id: 'hasIlliquidAssets' as const,
-    emoji: '🖼️',
+    id: 'hasIlliquidAssets',
+    icon: PaintBrush,
     label: 'Collectibles',
     description: 'Art, antiques, or livestock for sale',
   },
   {
-    id: 'hasDebtOwedToYou' as const,
-    emoji: '🤝',
+    id: 'hasDebtOwedToYou',
+    icon: Handshake,
     label: 'Money Owed',
     description: 'Personal loans you expect to collect',
   },
   {
-    id: 'hasTaxPayments' as const,
-    emoji: '📋',
+    id: 'hasTaxPayments',
+    icon: Receipt,
     label: 'Outstanding Taxes',
     description: 'Property tax or late payments due',
   },
@@ -161,8 +167,14 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
                           : "bg-card border-border hover:bg-accent/50 hover:border-primary/30"
                       )}
                     >
-                      {/* Emoji */}
-                      <span className="text-xl">{category.emoji}</span>
+                      {/* Icon */}
+                      <category.icon 
+                        weight={isSelected ? "fill" : "duotone"} 
+                        className={cn(
+                          "w-7 h-7",
+                          isSelected ? "text-secondary-foreground" : "text-primary"
+                        )} 
+                      />
                       
                       {/* Label */}
                       <span className="text-xs font-medium leading-tight">
