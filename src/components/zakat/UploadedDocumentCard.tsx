@@ -1,4 +1,4 @@
-import { CheckCircle, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, Trash, CaretDown, CaretUp } from "@phosphor-icons/react";
 import { useState } from "react";
 import { UploadedDocument, fieldDisplayNames, fieldToStepMapping } from "@/lib/documentTypes";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export function UploadedDocumentCard({
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 flex-1">
-            <CheckCircle className="w-4 h-4 text-chart-1 mt-0.5 shrink-0" />
+            <CheckCircle className="w-4 h-4 text-chart-1 mt-0.5 shrink-0" weight="fill" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">
                 {document.institutionName || document.fileName}
@@ -69,9 +69,9 @@ export function UploadedDocumentCard({
             {compact && (
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4" />
+                  <CaretUp className="w-4 h-4" weight="bold" />
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
+                  <CaretDown className="w-4 h-4" weight="bold" />
                 )}
               </Button>
             )}
@@ -85,7 +85,7 @@ export function UploadedDocumentCard({
                   onRemove(document.id);
                 }}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash className="w-3.5 h-3.5" weight="bold" />
               </Button>
             )}
           </div>

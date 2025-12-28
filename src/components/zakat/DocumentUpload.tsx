@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Upload, FileText, Image, Loader2, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { UploadSimple, FileDoc, Image, SpinnerGap, CheckCircle, WarningCircle, Sparkle } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ZakatFormData } from "@/lib/zakatCalculations";
@@ -207,7 +207,7 @@ export function DocumentUpload({
     switch (status) {
       case "uploading":
       case "processing":
-        return <Loader2 className="w-5 h-5 animate-spin" />;
+        return <SpinnerGap className="w-5 h-5 animate-spin" weight="bold" />;
       case "success":
         return (
           <motion.div
@@ -215,13 +215,13 @@ export function DocumentUpload({
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
           >
-            <CheckCircle className="w-5 h-5 text-success" />
+            <CheckCircle className="w-5 h-5 text-success" weight="fill" />
           </motion.div>
         );
       case "error":
-        return <AlertCircle className="w-5 h-5 text-destructive" />;
+        return <WarningCircle className="w-5 h-5 text-destructive" weight="fill" />;
       default:
-        return <Upload className="w-5 h-5" />;
+        return <UploadSimple className="w-5 h-5" weight="bold" />;
     }
   };
 
@@ -300,7 +300,7 @@ export function DocumentUpload({
                   animate={{ scale: [0, 1.2, 1] }}
                   transition={{ duration: 0.5, times: [0, 0.6, 1] }}
                 >
-                  <Sparkles className="w-8 h-8 text-tertiary" />
+                  <Sparkle className="w-8 h-8 text-tertiary" weight="fill" />
                 </motion.div>
               </div>
             </motion.div>
@@ -336,10 +336,10 @@ export function DocumentUpload({
           </div>
           
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-            <FileText className="w-3 h-3" />
+            <FileDoc className="w-3 h-3" weight="fill" />
             <span>PDF</span>
             <span className="text-border">•</span>
-            <Image className="w-3 h-3" />
+            <Image className="w-3 h-3" weight="fill" />
             <span>PNG, JPG, WebP</span>
           </div>
           
@@ -367,7 +367,7 @@ export function DocumentUpload({
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
               >
-                <CheckCircle className="w-4 h-4 text-success shrink-0" />
+                <CheckCircle className="w-4 h-4 text-success shrink-0" weight="fill" />
               </motion.div>
               <p className="text-sm text-foreground">
                 <span className="font-medium">{lastResult.institutionName}</span> added successfully
@@ -383,8 +383,8 @@ export function DocumentUpload({
             exit={{ opacity: 0, y: -10 }}
             className="bg-destructive/10 border border-destructive/30 rounded-lg p-3"
           >
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+          <div className="flex items-start gap-2">
+              <WarningCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" weight="fill" />
               <p className="text-sm text-destructive">{lastResult.error}</p>
             </div>
           </motion.div>

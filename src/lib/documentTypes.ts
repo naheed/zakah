@@ -90,6 +90,7 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   nisabStandard: "nisab",
   calculationMode: "nisab",
   isHousehold: "family",
+  householdMembers: "family",
   email: "email",
   age: "tax",
   estimatedTaxRate: "tax",

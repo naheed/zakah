@@ -13,6 +13,12 @@ export type CalendarType = 'lunar' | 'solar';
 export type NisabStandard = 'silver' | 'gold';
 export type CalculationMode = 'conservative' | 'optimized';
 
+export interface HouseholdMember {
+  id: string;
+  name: string;
+  relationship: 'self' | 'spouse' | 'child' | 'other';
+}
+
 export interface ZakatFormData {
   // Preferences
   currency: string;
@@ -21,6 +27,7 @@ export interface ZakatFormData {
   calculationMode: CalculationMode;
   isHousehold: boolean; // Whether calculating for household or just self
   isSimpleMode: boolean; // Whether using simple 4-question mode
+  householdMembers: HouseholdMember[]; // Track family members for household mode
   
   // Personal Info
   email: string;
@@ -114,6 +121,7 @@ export const defaultFormData: ZakatFormData = {
   calculationMode: 'optimized',
   isHousehold: false,
   isSimpleMode: false,
+  householdMembers: [{ id: 'self', name: 'You', relationship: 'self' }],
   email: '',
   age: 30,
   estimatedTaxRate: 0.25,
