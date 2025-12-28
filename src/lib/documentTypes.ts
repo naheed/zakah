@@ -193,3 +193,23 @@ export const fieldDisplayNames: Record<string, string> = {
 export function generateDocumentId(): string {
   return `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
+
+/**
+ * Sanitize a document for storage by removing sensitive metadata.
+ * Only the extracted numeric data and minimal identifiers are kept.
+ * This ensures document filenames, institution names, and summaries
+ * are not persisted in localStorage.
+ */
+export function sanitizeDocumentForStorage(doc: UploadedDocument): UploadedDocument {
+  return {
+    id: doc.id,
+    fileName: '', // Don't persist filename
+    uploadedAt: doc.uploadedAt,
+    institutionName: '', // Don't persist institution name
+    documentDate: undefined, // Don't persist document date
+    summary: '', // Don't persist AI-generated summary
+    notes: undefined, // Don't persist notes
+    extractedData: doc.extractedData, // Keep the numeric values only
+    mimeType: '', // Don't persist mime type
+  };
+}
