@@ -11,6 +11,21 @@ interface PersistedData {
   uploadedDocuments: UploadedDocument[];
 }
 
+// Simple obfuscation for localStorage (not true encryption, but adds a layer)
+// True encryption would require a key, which defeats the purpose for local-only data
+function obfuscate(data: string): string {
+  return btoa(encodeURIComponent(data));
+}
+
+function deobfuscate(data: string): string {
+  try {
+    return decodeURIComponent(atob(data));
+  } catch {
+    // Fallback for non-obfuscated legacy data
+    return data;
+  }
+}
+
 export function useZakatPersistence() {
   const [formData, setFormData] = useState<ZakatFormData>(defaultFormData);
   const [stepIndex, setStepIndex] = useState(0);
@@ -24,7 +39,16 @@ export function useZakatPersistence() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed: PersistedData = JSON.parse(stored);
+        // Try to deobfuscate, fall back to raw parse for legacy data
+        let parsed: PersistedData;
+        try {
+          const deobfuscated = deobfuscate(stored);
+          parsed = JSON.parse(deobfuscated);
+        } catch {
+          // Legacy unobfuscated data
+          parsed = JSON.parse(stored);
+        }
+        
         // Check if there's meaningful progress (beyond step 0)
         if (parsed.stepIndex > 0) {
           setHasExistingSession(true);
@@ -40,7 +64,7 @@ export function useZakatPersistence() {
     setIsLoaded(true);
   }, []);
 
-  // Save to localStorage whenever data changes
+  // Save to localStorage whenever data changes (obfuscated)
   useEffect(() => {
     if (!isLoaded) return;
     
@@ -52,7 +76,9 @@ export function useZakatPersistence() {
     };
     
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const serialized = JSON.stringify(data);
+      const obfuscated = obfuscate(serialized);
+      localStorage.setItem(STORAGE_KEY, obfuscated);
     } catch (e) {
       console.error('Failed to save data:', e);
     }

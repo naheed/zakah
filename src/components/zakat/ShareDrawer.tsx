@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Mail, Trash2, LogIn, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { Users, Mail, Trash2, LogIn, CheckCircle, Clock, AlertCircle, Loader2, Shield, Lock } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -75,10 +75,11 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
 
     setIsSharing(true);
     try {
-      await createShare(calculationId, email);
+      // Pass formData so it can be encrypted for recipient if they have a public key
+      await createShare(calculationId, email, formData);
       toast.success(
         "Invitation sent!",
-        { description: `${email} will be able to view this calculation once they create an account with this email.` }
+        { description: `${email} will be able to view this calculation once they sign in with Google.` }
       );
       setEmail("");
     } catch (err: any) {
@@ -122,7 +123,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                 <div>
                   <p className="font-medium text-foreground">Account Required</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    To protect your financial data, sharing requires both you and your spouse to have verified accounts.
+                    To protect your financial data, sharing requires both you and your spouse to sign in with Google.
                   </p>
                 </div>
               </div>
@@ -132,27 +133,23 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
               <h4 className="font-medium text-sm">How secure sharing works:</h4>
               <ul className="text-sm text-muted-foreground space-y-2">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>You sign in and save your calculation</span>
+                  <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>Your data is encrypted with your unique keys</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>Shared data is re-encrypted for your spouse's keys</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>Enter your spouse's email to invite them</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>They create an account with that email (must verify)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span>They can view the shared calculation securely</span>
+                  <span>Only they can decrypt and view the shared calculation</span>
                 </li>
               </ul>
             </div>
             
             <Button onClick={handleSignIn} className="w-full gap-2">
               <LogIn className="w-4 h-4" />
-              Sign In to Share
+              Sign In with Google to Share
             </Button>
           </div>
         </DrawerContent>
@@ -226,7 +223,11 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                       <div>
                         <p className="text-sm font-medium">{share.shared_with_email}</p>
                         <p className="text-xs text-muted-foreground">
-                          {share.accepted_at ? "Joined" : "Pending verification"}
+                          {share.accepted_at 
+                            ? share.encrypted_form_data 
+                              ? "Encrypted access granted" 
+                              : "Access granted (pending encryption)"
+                            : "Pending sign-in"}
                         </p>
                       </div>
                     </div>
@@ -278,14 +279,16 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
           </div>
 
           <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
+            <div className="flex items-start gap-2">
+              <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                <strong>End-to-End Encrypted:</strong> Your data is encrypted in your browser 
+                and re-encrypted specifically for your spouse. No one else can read it.
+              </p>
+            </div>
             <p className="text-xs text-muted-foreground">
-              <strong>How it works:</strong> Your spouse will need to create an account 
-              using the email address you specify. Once they verify their email, 
-              they'll automatically have access to view this calculation.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              <strong>Security:</strong> No financial data is exposed in any links or emails. 
-              Only verified account holders with matching emails can view shared calculations.
+              <strong>How it works:</strong> Your spouse signs in with Google using the email 
+              you specify. Their unique encryption keys will be used to secure the shared data.
             </p>
           </div>
         </div>

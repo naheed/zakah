@@ -1,91 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield, Lock, Eye } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
   const { toast } = useToast();
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (user && !loading) {
       navigate('/');
     }
   }, [user, loading, navigate]);
-
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      toast({
-        title: 'Missing fields',
-        description: 'Please enter your email and password.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    const { error } = await signInWithEmail(email, password);
-    setIsSubmitting(false);
-    
-    if (error) {
-      toast({
-        title: 'Login failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleEmailSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      toast({
-        title: 'Missing fields',
-        description: 'Please enter your email and password.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    if (password.length < 6) {
-      toast({
-        title: 'Password too short',
-        description: 'Password must be at least 6 characters.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    const { error } = await signUpWithEmail(email, password, fullName);
-    setIsSubmitting(false);
-    
-    if (error) {
-      toast({
-        title: 'Signup failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Account created',
-        description: 'You can now sign in with your credentials.',
-      });
-    }
-  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -113,14 +43,45 @@ export default function Auth() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Zakat Calculator</CardTitle>
           <CardDescription>
-            Sign in to save and access your Zakat calculations
+            Sign in securely to save and access your Zakat calculations
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Security features */}
+          <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <Lock className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium text-sm text-foreground">End-to-End Encrypted</p>
+                <p className="text-xs text-muted-foreground">
+                  Your financial data is encrypted in your browser before storage
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Eye className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium text-sm text-foreground">Privacy First</p>
+                <p className="text-xs text-muted-foreground">
+                  Only you can access your saved calculations - not even our team
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium text-sm text-foreground">Secure Sharing</p>
+                <p className="text-xs text-muted-foreground">
+                  Share with your spouse using encrypted key exchange
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Google Login */}
           <Button 
-            variant="outline" 
-            className="w-full gap-2" 
+            variant="default" 
+            className="w-full gap-2 h-12 text-base" 
             onClick={handleGoogleLogin}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -144,93 +105,15 @@ export default function Auth() {
             Continue with Google
           </Button>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={handleEmailLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-login">Email</Label>
-                  <Input
-                    id="email-login"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-login">Password</Label>
-                  <Input
-                    id="password-login"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  Sign In
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleEmailSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullname">Full Name (optional)</Label>
-                  <Input
-                    id="fullname"
-                    type="text"
-                    placeholder="Your name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
-                  <Input
-                    id="email-signup"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password</Label>
-                  <Input
-                    id="password-signup"
-                    type="password"
-                    placeholder="Min 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  Create Account
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
           <p className="text-center text-sm text-muted-foreground">
             <a href="/" className="hover:text-primary underline">
               Continue without signing in
             </a>
+          </p>
+
+          <p className="text-center text-xs text-muted-foreground">
+            By signing in, you agree to our privacy-first approach. 
+            Your data remains encrypted and under your control.
           </p>
         </CardContent>
       </Card>
