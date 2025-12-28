@@ -9,12 +9,15 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
 import { ShareDrawer } from "../ShareDrawer";
+import { CharityRecommendations } from "../CharityRecommendations";
+import { YearOverYearChart } from "../YearOverYearChart";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ZakatSankeyChart } from "../ZakatSankeyChart";
 import { useTrackCalculation } from "@/hooks/useTrackCalculation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useReferral } from "@/hooks/useReferral";
+import { useSavedCalculations } from "@/hooks/useSavedCalculations";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -79,6 +82,9 @@ export function ResultsStep({
   const [breakdownOpen, setBreakdownOpen] = useState(!isMobile);
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   const { trackCalculation } = useTrackCalculation();
+  const { calculations: savedCalculations, refreshCalculations } = useSavedCalculations();
+  const [charityOpen, setCharityOpen] = useState(false);
+  const [trendOpen, setTrendOpen] = useState(false);
   const { currency } = data;
   const {
     totalAssets,
@@ -102,6 +108,13 @@ export function ResultsStep({
   useEffect(() => {
     trackCalculation({ totalAssets, zakatDue });
   }, [totalAssets, zakatDue, trackCalculation]);
+
+  // Fetch saved calculations for YoY chart
+  useEffect(() => {
+    if (user) {
+      refreshCalculations();
+    }
+  }, [user, refreshCalculations]);
 
   const handleSignIn = () => {
     navigate('/auth');
@@ -442,11 +455,75 @@ export function ResultsStep({
           </Collapsible>
         </motion.div>
         
-        {/* 7. Celebration & Share Section - Combined */}
+        {/* 7. Charity Recommendations (if Zakat due) */}
+        {isAboveNisab && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+          >
+            <Collapsible open={charityOpen} onOpenChange={setCharityOpen}>
+              <div className="border border-border rounded-xl overflow-hidden bg-card">
+                <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Heart weight="duotone" className="w-5 h-5 text-primary" />
+                    <span className="font-semibold text-foreground">Where to Give Your Zakat</span>
+                  </div>
+                  {charityOpen ? (
+                    <CaretUp weight="bold" className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <CaretDown weight="bold" className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 pt-0">
+                    <CharityRecommendations zakatDue={zakatDue} currency={currency} />
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          </motion.div>
+        )}
+
+        {/* 8. Year-over-Year Trend (for authenticated users with history) */}
+        {user && savedCalculations.length >= 2 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.15 }}
+          >
+            <Collapsible open={trendOpen} onOpenChange={setTrendOpen}>
+              <div className="border border-border rounded-xl overflow-hidden bg-card">
+                <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Sparkle weight="duotone" className="w-5 h-5 text-primary" />
+                    <span className="font-semibold text-foreground">Your Zakat History</span>
+                  </div>
+                  {trendOpen ? (
+                    <CaretUp weight="bold" className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <CaretDown weight="bold" className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 pt-0">
+                    <YearOverYearChart 
+                      calculations={savedCalculations} 
+                      currentZakatDue={zakatDue}
+                      currency={currency}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          </motion.div>
+        )}
+        
+        {/* 9. Celebration & Share Section - Combined */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1 }}
+          transition={{ delay: 1.2 }}
         >
           <CelebrationShareSection 
             isAboveNisab={isAboveNisab} 
@@ -457,11 +534,11 @@ export function ResultsStep({
           />
         </motion.div>
 
-        {/* 8. Collapsible Disclaimer */}
+        {/* 10. Collapsible Disclaimer */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
+          transition={{ delay: 1.25 }}
         >
           <Collapsible open={disclaimerOpen} onOpenChange={setDisclaimerOpen}>
             <div className="border border-border rounded-xl overflow-hidden bg-muted/30">
