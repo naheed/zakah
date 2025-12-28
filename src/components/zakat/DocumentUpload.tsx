@@ -228,6 +228,11 @@ export function DocumentUpload({
             <Image className="w-3 h-3" />
             <span>PNG, JPG, WebP</span>
           </div>
+          
+          {/* AI Processing Notice */}
+          <p className="text-xs text-muted-foreground/70 mt-3 max-w-xs mx-auto">
+            Documents are processed by AI to extract values. Original files are not stored.
+          </p>
         </div>
       </div>
 
