@@ -25,9 +25,11 @@ interface EncryptedPayload {
   name: string;
   zakatDue: number;
   isAboveNisab: boolean;
+  yearType: 'lunar' | 'gregorian';
+  yearValue: number;
 }
 
-const ENCRYPTION_VERSION = 2; // Bumped to indicate full metadata encryption
+const ENCRYPTION_VERSION = 3; // Bumped to indicate full metadata encryption including year
 
 export function useSavedCalculations() {
   const { user } = useAuth();
@@ -72,16 +74,34 @@ export function useSavedCalculations() {
         let name: string;
         let zakatDue: number;
         let isAboveNisab: boolean;
+        let yearType: 'lunar' | 'gregorian';
+        let yearValue: number;
         
         // Check encryption version to determine decryption strategy
-        if (calc.encryption_version && calc.encryption_version >= 2) {
-          // V2: Full zero-knowledge encryption - all metadata in encrypted blob
+        if (calc.encryption_version && calc.encryption_version >= 3) {
+          // V3: Full zero-knowledge encryption including year metadata
           try {
             const decrypted = await decrypt(calc.form_data as unknown as string) as EncryptedPayload;
             formData = decrypted.formData;
             name = decrypted.name;
             zakatDue = decrypted.zakatDue;
             isAboveNisab = decrypted.isAboveNisab;
+            yearType = decrypted.yearType;
+            yearValue = decrypted.yearValue;
+          } catch (err) {
+            console.error('Failed to decrypt calculation:', calc.id, err);
+            return null;
+          }
+        } else if (calc.encryption_version === 2) {
+          // V2: Zero-knowledge but year in plaintext
+          try {
+            const decrypted = await decrypt(calc.form_data as unknown as string) as Omit<EncryptedPayload, 'yearType' | 'yearValue'>;
+            formData = decrypted.formData;
+            name = decrypted.name;
+            zakatDue = decrypted.zakatDue;
+            isAboveNisab = decrypted.isAboveNisab;
+            yearType = calc.year_type as 'lunar' | 'gregorian';
+            yearValue = calc.year_value;
           } catch (err) {
             console.error('Failed to decrypt calculation:', calc.id, err);
             return null;
@@ -94,6 +114,8 @@ export function useSavedCalculations() {
             name = calc.name;
             zakatDue = calc.zakat_due ?? 0;
             isAboveNisab = calc.is_above_nisab ?? false;
+            yearType = calc.year_type as 'lunar' | 'gregorian';
+            yearValue = calc.year_value;
           } catch (err) {
             console.error('Failed to decrypt calculation:', calc.id, err);
             return null;
@@ -104,13 +126,15 @@ export function useSavedCalculations() {
           name = calc.name;
           zakatDue = calc.zakat_due ?? 0;
           isAboveNisab = calc.is_above_nisab ?? false;
+          yearType = calc.year_type as 'lunar' | 'gregorian';
+          yearValue = calc.year_value;
         }
 
         return {
           id: calc.id,
           name,
-          year_type: calc.year_type as 'lunar' | 'gregorian',
-          year_value: calc.year_value,
+          year_type: yearType,
+          year_value: yearValue,
           form_data: formData,
           zakat_due: zakatDue,
           is_above_nisab: isAboveNisab,
@@ -157,12 +181,14 @@ export function useSavedCalculations() {
 
     const result = calculateZakat(formData);
 
-    // Create zero-knowledge payload with ALL sensitive data
+    // Create zero-knowledge payload with ALL sensitive data including year
     const payload: EncryptedPayload = {
       formData,
       name,
       zakatDue: result.zakatDue,
       isAboveNisab: result.isAboveNisab,
+      yearType,
+      yearValue,
     };
 
     // Encrypt the entire payload
@@ -182,8 +208,8 @@ export function useSavedCalculations() {
       .insert({
         user_id: user.id,
         name: '🔒', // Placeholder - real name is encrypted
-        year_type: yearType,
-        year_value: yearValue,
+        year_type: 'gregorian', // Placeholder - real value is encrypted
+        year_value: 0, // Placeholder - real value is encrypted
         form_data: encryptedPayload as any,
         zakat_due: 0, // Placeholder - real value is encrypted
         is_above_nisab: false, // Placeholder - real value is encrypted
@@ -227,18 +253,22 @@ export function useSavedCalculations() {
       return null;
     }
 
-    // Get existing calculation to preserve name if not provided
+    // Get existing calculation to preserve name and year if not provided
     const existing = calculations.find(c => c.id === id);
     const calcName = name || existing?.name || 'Calculation';
+    const calcYearType = existing?.year_type || 'gregorian';
+    const calcYearValue = existing?.year_value || new Date().getFullYear();
 
     const result = calculateZakat(formData);
 
-    // Create zero-knowledge payload
+    // Create zero-knowledge payload with year metadata
     const payload: EncryptedPayload = {
       formData,
       name: calcName,
       zakatDue: result.zakatDue,
       isAboveNisab: result.isAboveNisab,
+      yearType: calcYearType,
+      yearValue: calcYearValue,
     };
 
     // Encrypt the entire payload
@@ -257,6 +287,8 @@ export function useSavedCalculations() {
       .update({
         form_data: encryptedPayload as any,
         name: '🔒', // Placeholder
+        year_type: 'gregorian', // Placeholder
+        year_value: 0, // Placeholder
         zakat_due: 0, // Placeholder
         is_above_nisab: false, // Placeholder
         encryption_version: ENCRYPTION_VERSION,
