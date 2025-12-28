@@ -196,6 +196,15 @@ export type Database = {
     }
     Functions: {
       get_authenticated_email: { Args: never; Returns: string }
+      increment_usage_aggregate: {
+        Args: {
+          p_assets: number
+          p_period_type: string
+          p_period_value: string
+          p_zakat: number
+        }
+        Returns: undefined
+      }
       is_share_recipient: { Args: { share_id: string }; Returns: boolean }
       update_calculation_with_version: {
         Args: {

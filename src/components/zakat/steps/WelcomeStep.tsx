@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Lock, Check } from "lucide-react";
+import { ArrowRight, BookOpen, Lock, Check, Calculator, DollarSign, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ZakatSankeyMock } from "../ZakatSankeyChart";
+import { useUsageMetrics, formatLargeNumber, formatCount } from "@/hooks/useUsageMetrics";
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface WelcomeStepProps {
   onNext: () => void;
 }
@@ -38,6 +41,7 @@ function MockReportPreview() {
 
 export function WelcomeStep({ onNext }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
+  const { data: metrics, isLoading: metricsLoading } = useUsageMetrics();
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-6">
@@ -57,8 +61,36 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             </button>
           </div>
           
+          {/* Usage Metrics */}
+          {(metricsLoading || (metrics && metrics.allTime.calculations > 0)) && (
+            <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm">
+              {metricsLoading ? (
+                <>
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 w-32" />
+                </>
+              ) : metrics && (
+                <>
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <Calculator className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-foreground">{formatCount(metrics.allTime.calculations)}</span> calculations
+                  </span>
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <DollarSign className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}</span> evaluated
+                  </span>
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <Heart className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span> Zakat calculated
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+          
           {/* Trust indicators below preview */}
-          <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Check className="w-3 h-3 text-primary" /> Based on scholarly guidance
             </span>

@@ -128,8 +128,31 @@ export default function PrivacyPolicy() {
                 <li>Enable you to save and retrieve your encrypted calculations</li>
                 <li>Allow you to share calculations with designated recipients (e.g., spouse)</li>
                 <li>Extract financial values from uploaded documents</li>
+                <li>Collect anonymous aggregate statistics for social proof (see 3.1)</li>
                 <li>Improve and maintain the Service</li>
               </ul>
+              
+              <h3 className="text-lg font-medium text-foreground mt-4">3.1 Anonymous Usage Metrics</h3>
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <p className="text-muted-foreground mb-3">
+                  We collect anonymous, aggregate statistics to display social proof on our landing page 
+                  (e.g., "1,234 calculations completed"). This data:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground ml-4">
+                  <li><strong>Is fully anonymous</strong> — we use a cryptographically hashed session ID 
+                      that cannot be reversed or linked to you</li>
+                  <li><strong>Contains no personal information</strong> — only rounded totals (assets rounded 
+                      to nearest $1,000, Zakat to nearest $100)</li>
+                  <li><strong>Is not linked to your account</strong> — even if you're signed in, 
+                      this data cannot identify you</li>
+                  <li><strong>Records only the date</strong> — no timestamp, IP address, or browser information</li>
+                  <li><strong>Is deduplicated per session per day</strong> — recalculating doesn't inflate numbers</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  This anonymous data helps demonstrate the utility of our tool to new visitors while 
+                  maintaining complete privacy for all users.
+                </p>
+              </div>
             </section>
 
             <section>
