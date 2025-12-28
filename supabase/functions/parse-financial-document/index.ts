@@ -20,9 +20,9 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY not configured");
       return new Response(
         JSON.stringify({ error: "AI service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -70,90 +70,96 @@ Return your analysis using the extract_financial_data function with the followin
 Always return numeric values only (no currency symbols). If a value is not found, omit it from the response.
 Also return a summary of what you found and any notes about the document.`;
 
-    const userContent: any[] = [
-      {
-        type: "text",
-        text: `Please analyze this ${documentType} document and extract all financial data for Zakat calculation. Focus on account balances, investment values, and any relevant financial figures.`
-      }
+    const userPrompt = `Please analyze this ${documentType} document and extract all financial data for Zakat calculation. Focus on account balances, investment values, and any relevant financial figures.`;
+
+    // Build content parts for Google Gemini API
+    const parts: any[] = [
+      { text: systemPrompt + "\n\n" + userPrompt }
     ];
 
-    // Add the document as an image if it's an image type
+    // Add the document as inline data
     if (mimeType.startsWith("image/") || mimeType === "application/pdf") {
-      userContent.push({
-        type: "image_url",
-        image_url: {
-          url: `data:${mimeType};base64,${documentBase64}`
+      parts.push({
+        inlineData: {
+          mimeType: mimeType,
+          data: documentBase64
         }
       });
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent }
+        contents: [
+          {
+            parts: parts
+          }
         ],
         tools: [
           {
-            type: "function",
-            function: {
-              name: "extract_financial_data",
-              description: "Extract and return structured financial data from the document",
-              parameters: {
-                type: "object",
-                properties: {
-                  // Liquid Assets
-                  checkingAccounts: { type: "number", description: "Total checking account balance" },
-                  savingsAccounts: { type: "number", description: "Total savings account balance" },
-                  cashOnHand: { type: "number", description: "Physical cash amount" },
-                  digitalWallets: { type: "number", description: "PayPal, Venmo, CashApp balances" },
-                  foreignCurrency: { type: "number", description: "Foreign currency converted to USD" },
-                  interestEarned: { type: "number", description: "Interest earned (for purification)" },
-                  
-                  // Investments
-                  activeInvestments: { type: "number", description: "Short-term trading positions value" },
-                  passiveInvestmentsValue: { type: "number", description: "Long-term stock/ETF holdings value" },
-                  dividends: { type: "number", description: "Dividend income received" },
-                  
-                  // Retirement
-                  rothIRAContributions: { type: "number", description: "Roth IRA contribution basis" },
-                  rothIRAEarnings: { type: "number", description: "Roth IRA earnings" },
-                  fourOhOneKVestedBalance: { type: "number", description: "401(k) vested balance" },
-                  traditionalIRABalance: { type: "number", description: "Traditional IRA balance" },
-                  hsaBalance: { type: "number", description: "HSA account balance" },
-                  
-                  // Crypto
-                  cryptoCurrency: { type: "number", description: "Major crypto (BTC, ETH) value" },
-                  cryptoTrading: { type: "number", description: "Altcoins and trading positions" },
-                  
-                  // Precious Metals
-                  goldValue: { type: "number", description: "Gold holdings value" },
-                  silverValue: { type: "number", description: "Silver holdings value" },
-                  
-                  // Metadata
-                  summary: { type: "string", description: "Brief summary of what was found" },
-                  documentDate: { type: "string", description: "Statement date if found" },
-                  institutionName: { type: "string", description: "Bank or brokerage name" },
-                  notes: { type: "string", description: "Any important notes or caveats" }
-                },
-                required: ["summary"]
+            functionDeclarations: [
+              {
+                name: "extract_financial_data",
+                description: "Extract and return structured financial data from the document",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    // Liquid Assets
+                    checkingAccounts: { type: "number", description: "Total checking account balance" },
+                    savingsAccounts: { type: "number", description: "Total savings account balance" },
+                    cashOnHand: { type: "number", description: "Physical cash amount" },
+                    digitalWallets: { type: "number", description: "PayPal, Venmo, CashApp balances" },
+                    foreignCurrency: { type: "number", description: "Foreign currency converted to USD" },
+                    interestEarned: { type: "number", description: "Interest earned (for purification)" },
+                    
+                    // Investments
+                    activeInvestments: { type: "number", description: "Short-term trading positions value" },
+                    passiveInvestmentsValue: { type: "number", description: "Long-term stock/ETF holdings value" },
+                    dividends: { type: "number", description: "Dividend income received" },
+                    
+                    // Retirement
+                    rothIRAContributions: { type: "number", description: "Roth IRA contribution basis" },
+                    rothIRAEarnings: { type: "number", description: "Roth IRA earnings" },
+                    fourOhOneKVestedBalance: { type: "number", description: "401(k) vested balance" },
+                    traditionalIRABalance: { type: "number", description: "Traditional IRA balance" },
+                    hsaBalance: { type: "number", description: "HSA account balance" },
+                    
+                    // Crypto
+                    cryptoCurrency: { type: "number", description: "Major crypto (BTC, ETH) value" },
+                    cryptoTrading: { type: "number", description: "Altcoins and trading positions" },
+                    
+                    // Precious Metals
+                    goldValue: { type: "number", description: "Gold holdings value" },
+                    silverValue: { type: "number", description: "Silver holdings value" },
+                    
+                    // Metadata
+                    summary: { type: "string", description: "Brief summary of what was found" },
+                    documentDate: { type: "string", description: "Statement date if found" },
+                    institutionName: { type: "string", description: "Bank or brokerage name" },
+                    notes: { type: "string", description: "Any important notes or caveats" }
+                  },
+                  required: ["summary"]
+                }
               }
-            }
+            ]
           }
         ],
-        tool_choice: { type: "function", function: { name: "extract_financial_data" } }
+        toolConfig: {
+          functionCallingConfig: {
+            mode: "ANY"
+          }
+        }
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(
@@ -161,10 +167,10 @@ Also return a summary of what you found and any notes about the document.`;
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 403) {
         return new Response(
-          JSON.stringify({ error: "AI service credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "API key invalid or quota exceeded." }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       
@@ -175,12 +181,15 @@ Also return a summary of what you found and any notes about the document.`;
     }
 
     const data = await response.json();
-    console.log("AI response received");
+    console.log("Gemini response received:", JSON.stringify(data).substring(0, 500));
 
-    // Extract the function call result
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall || toolCall.function?.name !== "extract_financial_data") {
-      console.error("No valid tool call in response:", JSON.stringify(data));
+    // Extract the function call result from Google's response format
+    const candidate = data.candidates?.[0];
+    const content = candidate?.content;
+    const functionCallPart = content?.parts?.find((part: any) => part.functionCall);
+    
+    if (!functionCallPart || functionCallPart.functionCall?.name !== "extract_financial_data") {
+      console.error("No valid function call in response:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ 
           error: "Could not extract data from document",
@@ -191,7 +200,8 @@ Also return a summary of what you found and any notes about the document.`;
       );
     }
 
-    const extractedData = JSON.parse(toolCall.function.arguments);
+    // Google returns args directly as an object, not as a JSON string
+    const extractedData = functionCallPart.functionCall.args;
     console.log("Extracted data:", JSON.stringify(extractedData));
 
     return new Response(
