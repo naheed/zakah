@@ -1,12 +1,39 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
+  'https://zakahflow.com',
+  'https://www.zakahflow.com',
+  'https://zakatflow.com',
+  'https://www.zakatflow.com',
+];
+
+function isOriginAllowed(origin: string | null): boolean {
+  if (!origin) return false;
+  if (/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/.test(origin)) return true;
+  if (/^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(origin)) return true;
+  if (origin.startsWith('http://localhost:')) return true;
+  return ALLOWED_ORIGINS.includes(origin);
+}
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
+
+// Maximum reasonable values for validation
+const MAX_TOTAL_ASSETS = 100_000_000_000; // $100 billion
+const MAX_ZAKAT_DUE = 10_000_000_000; // $10 billion
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -24,18 +51,27 @@ serve(async (req) => {
       );
     }
 
-    if (typeof totalAssets !== "number" || totalAssets < 0) {
+    if (typeof totalAssets !== "number" || totalAssets < 0 || totalAssets > MAX_TOTAL_ASSETS) {
       console.error("Invalid totalAssets:", totalAssets);
       return new Response(
-        JSON.stringify({ error: "Invalid totalAssets" }),
+        JSON.stringify({ error: "Invalid totalAssets value" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (typeof zakatDue !== "number" || zakatDue < 0) {
+    if (typeof zakatDue !== "number" || zakatDue < 0 || zakatDue > MAX_ZAKAT_DUE) {
       console.error("Invalid zakatDue:", zakatDue);
       return new Response(
-        JSON.stringify({ error: "Invalid zakatDue" }),
+        JSON.stringify({ error: "Invalid zakatDue value" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate that zakatDue doesn't exceed totalAssets (basic sanity check)
+    if (zakatDue > totalAssets) {
+      console.error("zakatDue exceeds totalAssets:", { zakatDue, totalAssets });
+      return new Response(
+        JSON.stringify({ error: "Invalid calculation values" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -130,7 +166,7 @@ serve(async (req) => {
       }
 
       // Handle referral tracking if referredBy code is provided
-      if (referredBy && typeof referredBy === "string" && referredBy.length > 0) {
+      if (referredBy && typeof referredBy === "string" && referredBy.length > 0 && referredBy.length <= 20) {
         console.log("Processing referral from code:", referredBy);
         
         // Get the referral aggregate to find the referrer

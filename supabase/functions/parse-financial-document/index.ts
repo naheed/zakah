@@ -1,9 +1,31 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
+  'https://zakahflow.com',
+  'https://www.zakahflow.com',
+  'https://zakatflow.com',
+  'https://www.zakatflow.com',
+];
+
+function isOriginAllowed(origin: string | null): boolean {
+  if (!origin) return false;
+  // Allow Lovable preview domains
+  if (/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/.test(origin)) return true;
+  if (/^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(origin)) return true;
+  // Allow localhost for dev
+  if (origin.startsWith('http://localhost:')) return true;
+  return ALLOWED_ORIGINS.includes(origin);
+}
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 // Build document-type-specific extraction guidance
 function getDocumentTypeGuidance(documentType: string): string {
@@ -43,9 +65,15 @@ function getDocumentTypeGuidance(documentType: string): string {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // JWT is verified by Supabase (verify_jwt = true in config)
+  // The request will be rejected before reaching here if no valid JWT
 
   try {
     const { documentBase64, documentType, mimeType } = await req.json();
@@ -53,6 +81,14 @@ serve(async (req) => {
     if (!documentBase64) {
       return new Response(
         JSON.stringify({ error: "Document data is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate document size (max 10MB base64 ~ 7.5MB file)
+    if (documentBase64.length > 10 * 1024 * 1024) {
+      return new Response(
+        JSON.stringify({ error: "Document too large. Maximum size is 10MB." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
