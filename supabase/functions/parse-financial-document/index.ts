@@ -19,7 +19,15 @@ function getDocumentTypeGuidance(documentType: string): string {
     return `RETIREMENT ACCOUNT: For 401k use fourOhOneKVestedBalance. For Traditional IRA use traditionalIRABalance. For Roth IRA separate contributions vs earnings. For HSA use hsaBalance.`;
   }
   if (normalizedType.includes("credit card")) {
-    return `CREDIT CARD: Extract statement balance as creditCardBalance. Analyze transactions to estimate monthlyLivingExpenses (rent, utilities, groceries, transport) and insuranceExpenses (health, auto, life, home insurance payments).`;
+    return `CREDIT CARD STATEMENT ANALYSIS:
+1. Extract the statement/closing balance as creditCardBalance
+2. Categorize ALL transactions into these expense categories:
+   - utilitiesExpenses: Electric, gas, water, internet, phone, cable, streaming services (Netflix, Spotify, etc.)
+   - groceriesExpenses: Supermarkets, grocery stores (Costco, Safeway, Whole Foods, Trader Joe's, etc.), food delivery
+   - transportExpenses: Gas stations, public transit, Uber/Lyft, parking, tolls, car maintenance
+   - insuranceExpenses: Health insurance, auto insurance, life insurance, home/renters insurance premiums
+   - monthlyLivingExpenses: Sum of utilities + groceries + transport for total essential spending
+3. Sum up each category from the transaction list. Be thorough - scan every transaction.`;
   }
   if (normalizedType.includes("crypto")) {
     return `CRYPTO: Extract BTC/ETH as cryptoCurrency. Altcoins as cryptoTrading. Note staked assets.`;
@@ -85,9 +93,12 @@ ASSET FIELDS:
 - realEstateForSale, rentalPropertyIncome: Real estate
 - businessCashAndReceivables, businessInventory: Business assets
 
-LIABILITY FIELDS:
-- monthlyLivingExpenses: Estimate monthly essentials (rent, utilities, groceries, transport) from spending patterns
-- insuranceExpenses: Monthly insurance costs (health, auto, life, home)
+LIABILITY/EXPENSE FIELDS:
+- utilitiesExpenses: Electric, gas, water, internet, phone, cable, streaming (Netflix, Spotify, etc.)
+- groceriesExpenses: Supermarkets, grocery stores, food delivery apps
+- transportExpenses: Gas, public transit, rideshare (Uber/Lyft), parking, tolls
+- insuranceExpenses: Health, auto, life, home/renters insurance premiums
+- monthlyLivingExpenses: Total of utilities + groceries + transport
 - monthlyMortgage: Monthly mortgage payment
 - creditCardBalance: Credit card statement balance
 - unpaidBills: Outstanding bills
@@ -99,7 +110,8 @@ RULES:
 - Use field names exactly as listed above (e.g., checkingAccounts, creditCardBalance)
 - Return numeric values only (no currency symbols)
 - Omit fields with no data found (do not return 0)
-- For credit cards: analyze transactions to estimate monthlyLivingExpenses and insuranceExpenses
+- For credit cards: SCAN EVERY TRANSACTION and categorize into utilitiesExpenses, groceriesExpenses, transportExpenses, insuranceExpenses
+- Calculate monthlyLivingExpenses as sum of utilities + groceries + transport
 - Also include summary, documentDate, institutionName, and notes`;
 
     const userPrompt = `Analyze this ${documentType} and extract financial data for Zakat calculation.`;
