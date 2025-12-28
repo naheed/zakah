@@ -1,7 +1,7 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { categoriesContent } from "@/lib/zakatContent";
 import { cn } from "@/lib/utils";
-import { Check, Banknote, TrendingUp, Landmark } from "lucide-react";
+import { Check, Money, TrendUp, Bank } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Tooltip,
@@ -17,9 +17,9 @@ interface CategorySelectionStepProps {
 }
 
 const defaultCategories = [
-  { icon: Banknote, label: 'Cash & Bank' },
-  { icon: TrendingUp, label: 'Investments' },
-  { icon: Landmark, label: 'Retirement' },
+  { icon: Money, label: 'Cash & Bank' },
+  { icon: TrendUp, label: 'Investments' },
+  { icon: Bank, label: 'Retirement' },
 ];
 
 const optionalCategories = [
@@ -108,8 +108,8 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
                 key={category.label}
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container border border-border/50 text-sm text-muted-foreground"
               >
-                <Check className="w-3.5 h-3.5 text-primary" />
-                <category.icon className="w-3.5 h-3.5" />
+                <Check weight="bold" className="w-3.5 h-3.5 text-primary" />
+                <category.icon weight="duotone" className="w-3.5 h-3.5" />
                 <span>{category.label}</span>
               </div>
             ))}
@@ -179,7 +179,7 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
                             transition={springConfig}
                             className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tertiary flex items-center justify-center shadow-sm"
                           >
-                            <Check className="w-3 h-3 text-tertiary-foreground" />
+                            <Check weight="bold" className="w-3 h-3 text-tertiary-foreground" />
                           </motion.div>
                         )}
                       </AnimatePresence>
