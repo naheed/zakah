@@ -20,6 +20,7 @@ export interface ZakatFormData {
   nisabStandard: NisabStandard;
   calculationMode: CalculationMode;
   isHousehold: boolean; // Whether calculating for household or just self
+  isSimpleMode: boolean; // Whether using simple 4-question mode
   
   // Personal Info
   email: string;
@@ -112,6 +113,7 @@ export const defaultFormData: ZakatFormData = {
   nisabStandard: 'silver',
   calculationMode: 'optimized',
   isHousehold: false,
+  isSimpleMode: false,
   email: '',
   age: 30,
   estimatedTaxRate: 0.25,

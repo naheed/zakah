@@ -6,6 +6,7 @@ import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { usePresence } from "@/hooks/usePresence";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { CategorySelectionStep } from "./steps/CategorySelectionStep";
+import { SimpleModeStep } from "./steps/SimpleModeStep";
 import { LiquidAssetsStep } from "./steps/LiquidAssetsStep";
 import { PreciousMetalsStep } from "./steps/PreciousMetalsStep";
 import { CryptoStep } from "./steps/CryptoStep";
@@ -19,6 +20,7 @@ import { DebtOwedToYouStep } from "./steps/DebtOwedToYouStep";
 import { LiabilitiesStep } from "./steps/LiabilitiesStep";
 import { TaxStep } from "./steps/TaxStep";
 import { ResultsStep } from "./steps/ResultsStep";
+import { SimpleModeToggle } from "./SimpleModeToggle";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
 import { ContinueSessionDialog } from "./ContinueSessionDialog";
@@ -59,6 +61,7 @@ type StepId =
   | 'welcome'
   | 'currency'
   | 'categories'
+  | 'simple-mode'
   | 'liquid-assets'
   | 'precious-metals'
   | 'crypto'
@@ -84,21 +87,23 @@ interface Step {
 const allSteps: Step[] = [
   { id: 'welcome', title: 'Welcome', section: 'intro' },
   { id: 'categories', title: 'Asset Types', section: 'intro' },
-  // Core assets - get to the "aha moment" fast
-  { id: 'liquid-assets', title: 'Cash & Bank', section: 'assets' },
-  { id: 'investments', title: 'Investments', section: 'assets' },
-  { id: 'retirement', title: 'Retirement', section: 'assets' },
-  // Conditional assets
-  { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => data.hasPreciousMetals },
-  { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => data.hasCrypto },
-  { id: 'trusts', title: 'Trusts', section: 'assets', condition: (data) => data.hasTrusts },
-  { id: 'real-estate', title: 'Real Estate', section: 'assets', condition: (data) => data.hasRealEstate },
-  { id: 'business', title: 'Business', section: 'assets', condition: (data) => data.hasBusiness },
-  { id: 'illiquid-assets', title: 'Other Assets', section: 'assets', condition: (data) => data.hasIlliquidAssets },
-  { id: 'debt-owed-to-you', title: 'Receivables', section: 'assets', condition: (data) => data.hasDebtOwedToYou },
-  // Liabilities
-  { id: 'liabilities', title: 'Deductions', section: 'liabilities' },
-  { id: 'tax', title: 'Taxes', section: 'liabilities', condition: (data) => data.hasTaxPayments },
+  // Simple mode step (replaces detailed steps when active)
+  { id: 'simple-mode', title: 'Quick Calculate', section: 'assets', condition: (data) => data.isSimpleMode },
+  // Core assets - get to the "aha moment" fast (hidden in simple mode)
+  { id: 'liquid-assets', title: 'Cash & Bank', section: 'assets', condition: (data) => !data.isSimpleMode },
+  { id: 'investments', title: 'Investments', section: 'assets', condition: (data) => !data.isSimpleMode },
+  { id: 'retirement', title: 'Retirement', section: 'assets', condition: (data) => !data.isSimpleMode },
+  // Conditional assets (hidden in simple mode)
+  { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasPreciousMetals },
+  { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasCrypto },
+  { id: 'trusts', title: 'Trusts', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasTrusts },
+  { id: 'real-estate', title: 'Real Estate', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasRealEstate },
+  { id: 'business', title: 'Business', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasBusiness },
+  { id: 'illiquid-assets', title: 'Other Assets', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasIlliquidAssets },
+  { id: 'debt-owed-to-you', title: 'Receivables', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasDebtOwedToYou },
+  // Liabilities (hidden in simple mode)
+  { id: 'liabilities', title: 'Deductions', section: 'liabilities', condition: (data) => !data.isSimpleMode },
+  { id: 'tax', title: 'Taxes', section: 'liabilities', condition: (data) => !data.isSimpleMode && data.hasTaxPayments },
   // Results - the aha moment!
   { id: 'results', title: 'Your Zakat', section: 'results' },
 ];
@@ -270,7 +275,19 @@ export function ZakatWizard() {
       case 'welcome':
         return <WelcomeStep onNext={goToNext} onLoadCalculation={handleLoadCalculation} />;
       case 'categories':
-        return <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
+        return (
+          <div className="space-y-6">
+            <SimpleModeToggle
+              isSimpleMode={formData.isSimpleMode}
+              onToggle={(value) => updateFormData({ isSimpleMode: value })}
+            />
+            {!formData.isSimpleMode && (
+              <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />
+            )}
+          </div>
+        );
+      case 'simple-mode':
+        return <SimpleModeStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />;
       case 'liquid-assets':
         return <LiquidAssetsStep {...assetStepProps} />;
       case 'precious-metals':

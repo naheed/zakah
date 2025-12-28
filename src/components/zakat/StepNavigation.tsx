@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 
 interface StepNavigationProps {
@@ -32,9 +32,9 @@ export function StepNavigation({
               variant="ghost"
               onClick={onPrevious}
               disabled={!canGoBack}
-              className="gap-2"
+              className="gap-2 h-12 min-w-[100px] touch-manipulation"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <CaretLeft weight="bold" className="h-5 w-5" />
               Previous
             </Button>
           </motion.div>
@@ -44,10 +44,10 @@ export function StepNavigation({
               <Button
                 onClick={onNext}
                 disabled={!canGoForward}
-                className="gap-2"
+                className="gap-2 h-12 min-w-[120px] touch-manipulation"
               >
                 Continue
-                <ChevronRight className="h-4 w-4" />
+                <CaretRight weight="bold" className="h-5 w-5" />
               </Button>
             </motion.div>
           )}

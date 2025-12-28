@@ -101,6 +101,7 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   hasTaxPayments: "category-selection",
   hasCrypto: "category-selection",
   hasTrusts: "category-selection",
+  isSimpleMode: "category-selection",
 };
 
 // Get documents that have data relevant to a specific step
