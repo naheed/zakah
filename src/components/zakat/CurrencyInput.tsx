@@ -2,8 +2,14 @@ import { useState, useEffect, useRef, ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { parseMathExpression } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
-import { FileDoc, CaretDown } from "@phosphor-icons/react";
+import { FileDoc, CaretDown, Calculator } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Collapsible,
   CollapsibleContent,
@@ -139,6 +145,28 @@ export function CurrencyInput({
           {currency}
         </span>
         
+        {/* Math Hint Icon */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                tabIndex={-1}
+                className={cn(
+                  "absolute right-3 top-1/2 -translate-y-1/2 transition-colors",
+                  "text-muted-foreground/50 hover:text-primary"
+                )}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Calculator className="w-4 h-4" weight="regular" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p className="text-xs">Supports math: e.g. 100 + 200</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
         {/* Input */}
         <Input
           ref={inputRef}
@@ -167,9 +195,9 @@ export function CurrencyInput({
         />
       </motion.div>
       
-      {hasContributions ? (
+      {hasContributions && (
         <Collapsible open={showBreakdown} onOpenChange={setShowBreakdown}>
-        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:underline w-full">
+          <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:underline w-full">
             <FileDoc className="w-3 h-3" weight="fill" />
             <span>
               Includes ${totalFromDocs.toLocaleString()} from {documentContributions.length} document{documentContributions.length > 1 ? 's' : ''}
@@ -203,10 +231,6 @@ export function CurrencyInput({
             </div>
           </CollapsibleContent>
         </Collapsible>
-      ) : (
-        <p className="text-xs text-muted-foreground">
-          You can do math here e.g. 100 + 200
-        </p>
       )}
     </div>
   );
