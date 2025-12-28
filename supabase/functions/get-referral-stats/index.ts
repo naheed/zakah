@@ -6,6 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Privacy threshold: minimum referrals before showing financial stats
+// This prevents deanonymization of individual users' financial data
+const PRIVACY_THRESHOLD = 5;
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -53,20 +57,30 @@ serve(async (req) => {
         JSON.stringify({
           referralCode: null,
           totalReferrals: 0,
-          totalZakatCalculated: 0,
-          totalAssetsCalculated: 0,
+          totalZakatCalculated: null,
+          totalAssetsCalculated: null,
+          thresholdMet: false,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Fetched referral stats:", data);
+    const thresholdMet = data.total_referrals >= PRIVACY_THRESHOLD;
+    
+    console.log("Fetched referral stats:", { 
+      ...data, 
+      thresholdMet,
+      privacyThreshold: PRIVACY_THRESHOLD 
+    });
+    
     return new Response(
       JSON.stringify({
         referralCode: data.referral_code,
         totalReferrals: data.total_referrals,
-        totalZakatCalculated: data.total_zakat_calculated,
-        totalAssetsCalculated: data.total_assets_calculated,
+        // Only reveal financial stats if privacy threshold is met
+        totalZakatCalculated: thresholdMet ? data.total_zakat_calculated : null,
+        totalAssetsCalculated: thresholdMet ? data.total_assets_calculated : null,
+        thresholdMet,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

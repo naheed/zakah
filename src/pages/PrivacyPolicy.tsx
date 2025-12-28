@@ -153,6 +153,25 @@ export default function PrivacyPolicy() {
                   maintaining complete privacy for all users.
                 </p>
               </div>
+              
+              <h3 className="text-lg font-medium text-foreground mt-4">3.2 Referral Tracking</h3>
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <p className="text-muted-foreground mb-3">
+                  When you share your personal invite link, we track anonymous referral statistics:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground ml-4">
+                  <li><strong>Referral counts</strong> — we track how many people used your invite link to calculate their Zakat</li>
+                  <li><strong>Privacy threshold</strong> — aggregate financial metrics (total Zakat calculated) are only shown 
+                      to you after a minimum of 5 referrals to prevent individual identification</li>
+                  <li><strong>Same privacy protections</strong> — referral data uses hashed session IDs and rounded values, 
+                      just like general usage metrics</li>
+                  <li><strong>No personal data shared</strong> — referrers never see individual calculations, only aggregate totals</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  This threshold ensures that no individual's financial calculation can be identified or attributed, 
+                  even by the person who shared the link with them.
+                </p>
+              </div>
             </section>
 
             <section>

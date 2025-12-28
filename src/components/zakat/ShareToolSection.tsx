@@ -185,7 +185,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
                 Through your shares
               </p>
             </div>
-            <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex flex-col items-center gap-2 text-sm">
               <div className="flex items-center gap-1.5">
                 <Users className="w-4 h-4 text-muted-foreground" />
                 <span className="font-semibold">{stats.totalReferrals}</span>
@@ -193,11 +193,18 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
                   {stats.totalReferrals === 1 ? 'calculation' : 'calculations'}
                 </span>
               </div>
-              <div className="text-muted-foreground">|</div>
-              <div>
-                <span className="font-semibold">{formatCurrency(stats.totalZakatCalculated, currency)}</span>
-                <span className="text-muted-foreground ml-1">Zakat</span>
-              </div>
+              {/* Only show financial stats if privacy threshold is met */}
+              {stats.thresholdMet && stats.totalZakatCalculated !== null ? (
+                <div className="flex items-center gap-1.5">
+                  <Heart className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-semibold">{formatCurrency(stats.totalZakatCalculated, currency)}</span>
+                  <span className="text-muted-foreground">Zakat calculated</span>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Refer {5 - stats.totalReferrals} more to see Zakat impact
+                </p>
+              )}
             </div>
           </div>
         )}
