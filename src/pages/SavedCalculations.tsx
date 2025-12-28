@@ -52,7 +52,7 @@ export default function SavedCalculations() {
     return (
       <div className="min-h-screen bg-background p-4">
         <Helmet>
-          <title>Saved Calculations - Zakah Flow</title>
+          <title>Saved Calculations - Zakat Flow</title>
         </Helmet>
         <div className="max-w-2xl mx-auto pt-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
@@ -76,7 +76,7 @@ export default function SavedCalculations() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Saved Calculations - Zakah Flow</title>
+        <title>Saved Calculations - Zakat Flow</title>
       </Helmet>
 
       {/* Header */}
