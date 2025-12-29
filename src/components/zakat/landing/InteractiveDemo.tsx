@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FileText, Check, Loader2, Play, RotateCcw, Landmark } from "lucide-react";
+import { FileText, Check, Loader2, Play, RotateCcw, Landmark, Wallet } from "lucide-react";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -237,6 +237,7 @@ export function InteractiveDemo() {
   const isCelebrating = phase === "celebrating";
   const isRetirementScanning = phase === "retirement-scanning";
   const isRetirementComplete = ["retirement-upload-complete", "aggregating", "sankey-reveal", "zakat-reveal", "celebrating", "complete"].includes(phase);
+  const showCompletedCashValue = !["idle", "typing-cash"].includes(phase);
   
   const currentZakat = selectedMode === "conservative" ? DEMO_DATA.conservativeZakat : DEMO_DATA.optimizedZakat;
   const otherZakat = selectedMode === "conservative" ? DEMO_DATA.optimizedZakat : DEMO_DATA.conservativeZakat;
@@ -399,15 +400,32 @@ export function InteractiveDemo() {
               showCashInput ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            <div className="bg-muted/50 rounded-lg p-2 border border-border">
-              <label className="text-[9px] text-muted-foreground mb-0.5 block">Cash & Savings</label>
-              <div className="flex items-center">
-                <span className="text-sm font-semibold text-foreground">
-                  {phase === "complete" || phase === "celebrating" ? "$24,500" : typedCash}
-                  <span className={`inline-block w-0.5 h-3.5 bg-primary ml-0.5 ${
-                    phase === "typing-cash" ? "animate-pulse" : "opacity-0"
-                  }`} />
-                </span>
+            <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${
+              showCompletedCashValue ? "border-primary/20" : "border-border"
+            }`}>
+              <div className="flex items-center gap-2">
+                <motion.div 
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
+                    showCompletedCashValue ? "bg-primary/20" : "bg-[hsl(var(--surface-container-high))]"
+                  }`}
+                  animate={phase === "typed-cash" ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  {showCompletedCashValue ? (
+                    <Check className="w-3.5 h-3.5 text-primary" />
+                  ) : (
+                    <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+                  )}
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <label className="text-[9px] text-muted-foreground mb-0.5 block">Cash & Savings</label>
+                  <span className="text-sm font-semibold text-foreground">
+                    {showCompletedCashValue ? "$24,500" : typedCash}
+                    <span className={`inline-block w-0.5 h-3.5 bg-primary ml-0.5 ${
+                      phase === "typing-cash" ? "animate-pulse" : "opacity-0"
+                    }`} />
+                  </span>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -421,7 +439,9 @@ export function InteractiveDemo() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.4, ease: M3_EASING.emphasizedDecelerate }}
               >
-                <div className="bg-muted/50 rounded-lg p-2 border border-border">
+                <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${
+                  showRetirementUpload ? "border-primary/20" : "border-border"
+                }`}>
                   <div className="flex items-center gap-2">
                     <motion.div 
                       className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
@@ -471,7 +491,9 @@ export function InteractiveDemo() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.4, ease: M3_EASING.emphasizedDecelerate }}
               >
-                <div className="bg-muted/50 rounded-lg p-2 border border-border">
+                <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${
+                  isRetirementComplete ? "border-primary/20" : "border-border"
+                }`}>
                   <div className="flex items-center gap-2">
                     {/* Icon with scan animation */}
                     <motion.div 
