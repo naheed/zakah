@@ -391,7 +391,7 @@ export async function generateZakatPDF(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...COLORS.textLight);
-  doc.text("Computed by ZakahFlow • zakah.vora.dev", cardX + pad, footerY);
+  doc.text("Computed by ZakahFlow • zakat.vora.dev", cardX + pad, footerY);
   doc.text(`Generated ${dateStr}`, cardX + cardW - pad, footerY, { align: "right" });
 
   // Save PDF
