@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { InteractiveDemo } from '@/components/zakat/landing/InteractiveDemo';
 import { Logo } from '@/components/zakat/Logo';
 import { Footer } from '@/components/zakat/Footer';
+import { getPrimaryUrl } from '@/lib/domainConfig';
 
 // Asset coverage inline text
 const assetTypes = ["401(k)s", "Crypto", "Real Estate", "RSUs"];
@@ -34,8 +35,10 @@ export default function Invite() {
   return (
     <>
       <Helmet>
-        <title>You're Invited to Calculate Your Zakat | Zakat Flow</title>
-        <meta name="description" content="A friend invited you to calculate your Zakat using Zakat Flow - a free, privacy-focused tool based on authentic Islamic methodology." />
+        <title>You're Invited to Calculate Your Zakat | ZakatFlow</title>
+        <meta name="description" content="A friend invited you to calculate your Zakat using ZakatFlow - a free, privacy-focused tool based on authentic Islamic methodology." />
+        <link rel="canonical" href={getPrimaryUrl('/invite')} />
+        <meta property="og:url" content={getPrimaryUrl('/invite')} />
       </Helmet>
 
       <div className="min-h-screen flex flex-col">
