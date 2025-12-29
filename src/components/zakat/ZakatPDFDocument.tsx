@@ -10,6 +10,7 @@ import {
   Rect,
   Path,
 } from "@react-pdf/renderer";
+import { DOMAIN_CONFIG } from "@/lib/domainConfig";
 
 import loraRegular from "@/assets/pdf-fonts/Lora-Regular.ttf?url";
 import loraItalic from "@/assets/pdf-fonts/Lora-Italic.ttf?url";
@@ -967,8 +968,8 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.footerLeft}>
-            <Text style={styles.footerBrand}>ZakahFlow</Text>
-            <Text style={styles.footerUrl}>zakat.vora.dev</Text>
+            <Text style={styles.footerBrand}>{DOMAIN_CONFIG.brandName}</Text>
+            <Text style={styles.footerUrl}>{DOMAIN_CONFIG.primary}</Text>
           </View>
           <View style={styles.footerRight}>
             <Text style={styles.footerDate}>{dateStr}</Text>

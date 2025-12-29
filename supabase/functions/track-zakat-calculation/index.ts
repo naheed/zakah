@@ -1,32 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-// Allowed origins for CORS
-const ALLOWED_ORIGINS = [
-  'https://zakahflow.com',
-  'https://www.zakahflow.com',
-  'https://zakatflow.com',
-  'https://www.zakatflow.com',
-  'https://zakat.vora.dev',
-  'https://www.zakat.vora.dev',
-];
-
-function isOriginAllowed(origin: string | null): boolean {
-  if (!origin) return false;
-  if (/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/.test(origin)) return true;
-  if (/^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(origin)) return true;
-  if (origin.startsWith('http://localhost:')) return true;
-  return ALLOWED_ORIGINS.includes(origin);
-}
-
-function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
-}
+import { getCorsHeaders } from "../_shared/domainConfig.ts";
 
 // Maximum reasonable values for validation
 const MAX_TOTAL_ASSETS = 100_000_000_000; // $100 billion

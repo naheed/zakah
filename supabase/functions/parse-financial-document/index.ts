@@ -1,31 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-// Allowed origins for CORS
-const ALLOWED_ORIGINS = [
-  'https://zakahflow.com',
-  'https://www.zakahflow.com',
-  'https://zakatflow.com',
-  'https://www.zakatflow.com',
-];
-
-function isOriginAllowed(origin: string | null): boolean {
-  if (!origin) return false;
-  // Allow Lovable preview domains
-  if (/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/.test(origin)) return true;
-  if (/^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(origin)) return true;
-  // Allow localhost for dev
-  if (origin.startsWith('http://localhost:')) return true;
-  return ALLOWED_ORIGINS.includes(origin);
-}
-
-function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
-}
+import { getCorsHeaders } from "../_shared/domainConfig.ts";
 
 // Build document-type-specific extraction guidance
 function getDocumentTypeGuidance(documentType: string): string {
