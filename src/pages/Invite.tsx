@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useReferral } from '@/hooks/useReferral';
 import { useUsageMetrics, formatLargeNumber, formatCount } from '@/hooks/useUsageMetrics';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Lock, Calculator, Heart, BookOpen } from 'lucide-react';
+import { ArrowRight, Lock, Calculator, Heart } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { InteractiveDemo } from '@/components/zakat/landing/InteractiveDemo';
+import { Logo } from '@/components/zakat/Logo';
 
 // Asset coverage inline text
 const assetTypes = ["401(k)s", "Crypto", "Real Estate", "RSUs"];
@@ -42,10 +43,8 @@ export default function Invite() {
           <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             {/* Left Side - CTA */}
             <div className="order-1 flex flex-col">
-              {/* Brand Name */}
-              <span className="text-2xl font-semibold font-serif text-transparent bg-clip-text mb-4" style={{ backgroundImage: 'var(--gradient-brand)' }}>
-                Zakat Flow
-              </span>
+              {/* Brand Logo */}
+              <Logo size="lg" className="mb-4" />
               
               {/* Main Headline - Invitation focused */}
               <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-3 tracking-tight leading-tight">

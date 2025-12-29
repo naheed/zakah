@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Shield, Lock, Eye } from 'lucide-react';
+import { Logo } from '@/components/zakat/Logo';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -40,11 +41,13 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Zakat Flow</CardTitle>
-          <CardDescription>
+        <CardHeader className="text-center space-y-3">
+          <div className="flex justify-center">
+            <Logo size="lg" />
+          </div>
+          <p className="text-sm text-muted-foreground">
             Sign in securely to save and access your Zakat calculations
-          </CardDescription>
+          </p>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Security features */}
