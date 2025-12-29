@@ -21,14 +21,14 @@ export function Footer({ className = "" }: FooterProps) {
           <span className="text-muted-foreground/50">•</span>
           <Link 
             to="/privacy" 
-            className="hover:text-foreground transition-colors"
+            className="text-primary hover:underline"
           >
             Privacy
           </Link>
           <span className="text-muted-foreground/50">•</span>
           <Link 
             to="/terms" 
-            className="hover:text-foreground transition-colors"
+            className="text-primary hover:underline"
           >
             Terms
           </Link>
