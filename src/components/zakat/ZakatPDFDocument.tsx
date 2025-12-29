@@ -504,6 +504,11 @@ interface SankeyChartProps {
   height: number;
 }
 
+// Helper to format numbers for SVG paths (avoid scientific notation)
+function n(num: number): string {
+  return num.toFixed(2);
+}
+
 function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   const padding = { left: 4, right: 4, top: 8, bottom: 8 };
   const chartWidth = width - padding.left - padding.right;
@@ -572,7 +577,7 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   } : null;
 
   // Generate curved Bezier path for flowing ribbon between two points
-  // sourceX, sourceTopY, sourceBottomY -> targetX, targetTopY, targetBottomY
+  // Uses explicit path with no whitespace issues for react-pdf compatibility
   const generateCurvedPath = (
     sourceX: number,
     sourceTopY: number,
@@ -581,18 +586,13 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     targetTopY: number,
     targetBottomY: number
   ): string => {
-    // Control point offset for smooth S-curve (like web version)
+    // Control point offset for smooth S-curve
     const curveStrength = (targetX - sourceX) * 0.5;
+    const cp1x = sourceX + curveStrength;
+    const cp2x = targetX - curveStrength;
     
-    // Top curve: source top -> target top
-    // Bottom curve: target bottom -> source bottom (reverse direction)
-    return `
-      M ${sourceX} ${sourceTopY}
-      C ${sourceX + curveStrength} ${sourceTopY}, ${targetX - curveStrength} ${targetTopY}, ${targetX} ${targetTopY}
-      L ${targetX} ${targetBottomY}
-      C ${targetX - curveStrength} ${targetBottomY}, ${sourceX + curveStrength} ${sourceBottomY}, ${sourceX} ${sourceBottomY}
-      Z
-    `;
+    // Build path with explicit formatting for react-pdf
+    return `M${n(sourceX)},${n(sourceTopY)} C${n(cp1x)},${n(sourceTopY)} ${n(cp2x)},${n(targetTopY)} ${n(targetX)},${n(targetTopY)} L${n(targetX)},${n(targetBottomY)} C${n(cp2x)},${n(targetBottomY)} ${n(cp1x)},${n(sourceBottomY)} ${n(sourceX)},${n(sourceBottomY)} Z`;
   };
 
   // Build links from assets to center - each asset flows into center at proportional position
@@ -653,29 +653,55 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     });
   }
 
+  // react-pdf requires explicit keys on array children in Svg
+  const leftLinkPaths = leftLinks.map((link, i) => (
+    <Path key={`left-link-${i}`} d={link.path} fill={link.color} fillOpacity={link.opacity} />
+  ));
+  
+  const rightLinkPaths = rightLinks.map((link, i) => (
+    <Path key={`right-link-${i}`} d={link.path} fill={link.color} fillOpacity={link.opacity} />
+  ));
+  
+  const leftNodeRects = leftNodes.map((node, i) => (
+    <Rect 
+      key={`left-node-${i}`} 
+      x={leftNodeX} 
+      y={node.y} 
+      width={nodeWidth} 
+      height={node.height} 
+      fill={node.color} 
+    />
+  ));
+
   return (
-    <Svg width={width} height={height}>
+    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       {/* Links from assets to center */}
-      {leftLinks.map((link, i) => (
-        <Path key={`left-${i}`} d={link.path} fill={link.color} fillOpacity={link.opacity} />
-      ))}
+      {leftLinkPaths}
       
       {/* Links from center to zakat */}
-      {rightLinks.map((link, i) => (
-        <Path key={`right-${i}`} d={link.path} fill={link.color} fillOpacity={link.opacity} />
-      ))}
+      {rightLinkPaths}
       
       {/* Left nodes (assets) */}
-      {leftNodes.map((node, i) => (
-        <Rect key={`left-node-${i}`} x={leftNodeX} y={node.y} width={nodeWidth} height={node.height} fill={node.color} rx={1} />
-      ))}
+      {leftNodeRects}
       
       {/* Center node */}
-      <Rect x={centerNode.x} y={centerNode.y} width={nodeWidth} height={centerNode.height} fill={centerNode.color} rx={1} />
+      <Rect 
+        x={centerNode.x} 
+        y={centerNode.y} 
+        width={nodeWidth} 
+        height={centerNode.height} 
+        fill={centerNode.color} 
+      />
       
       {/* Right node (zakat) */}
       {rightNode && (
-        <Rect x={rightNode.x} y={rightNode.y} width={nodeWidth} height={rightNode.height} fill={rightNode.color} rx={1} />
+        <Rect 
+          x={rightNode.x} 
+          y={rightNode.y} 
+          width={nodeWidth} 
+          height={rightNode.height} 
+          fill={rightNode.color} 
+        />
       )}
     </Svg>
   );
