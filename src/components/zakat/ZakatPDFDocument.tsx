@@ -18,7 +18,6 @@ import workSansRegular from "@/assets/pdf-fonts/WorkSans-Regular.ttf?url";
 import workSansMedium from "@/assets/pdf-fonts/WorkSans-Medium.ttf?url";
 import workSansSemiBold from "@/assets/pdf-fonts/WorkSans-SemiBold.ttf?url";
 import amiriRegular from "@/assets/pdf-fonts/Amiri-Regular.ttf?url";
-import notoNaskhArabic from "@/assets/pdf-fonts/NotoNaskhArabic-Regular.ttf?url";
 
 // Register fonts
 Font.register({
@@ -39,10 +38,10 @@ Font.register({
   ],
 });
 
-// Arabic font for Bismillah - Noto Naskh Arabic for high quality rendering
+// Arabic font for Bismillah - Amiri is a high-quality Arabic font
 Font.register({
-  family: "NotoNaskhArabic",
-  src: notoNaskhArabic,
+  family: "Amiri",
+  src: amiriRegular,
 });
 
 // Printer-friendly color palette (minimal ink usage)
@@ -83,9 +82,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bismillahArabic: {
-    fontFamily: "NotoNaskhArabic",
-    fontSize: 22,
-    color: COLORS.text,
+    fontFamily: "Amiri",
+    fontSize: 24,
+    color: COLORS.gold,
     marginBottom: 6,
     textAlign: "center",
   },
