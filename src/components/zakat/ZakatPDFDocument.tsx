@@ -77,22 +77,17 @@ const styles = StyleSheet.create({
     fontFamily: "WorkSans",
     fontSize: 9,
   },
-  // Bismillah section - positioned top right
+  // Bismillah section (Arabic) — keep simple to avoid font shaping crashes
   bismillahSection: {
-    position: "absolute",
-    top: 24,
-    right: 24,
     alignItems: "flex-end",
+    marginBottom: 10,
   },
   bismillahArabic: {
     fontFamily: "NotoNaskhArabic",
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 1.2,
     color: COLORS.gold,
-  },
-  bismillahEnglish: {
-    fontSize: 7,
-    color: COLORS.textMuted,
-    marginTop: 2,
+    width: 260,
     textAlign: "right",
   },
   goldLine: {
@@ -744,9 +739,9 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
   return (
     <Document title={calculationName || "Zakat Report"} author="ZakahFlow">
       <Page size="A4" style={styles.page}>
-        {/* Bismillah Section - Top Right */}
+        {/* Bismillah (Arabic) — no diacritics for reliable rendering */}
         <View style={styles.bismillahSection}>
-          <Text style={styles.bismillahArabic}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</Text>
+          <Text style={styles.bismillahArabic}>بسم الله الرحمن الرحيم</Text>
         </View>
 
         {/* Header with Hero Amount - Outline style for printer friendliness */}
