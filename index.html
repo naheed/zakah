@@ -9,6 +9,9 @@
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="canonical" href="https://zakatflow.org" />
 
+    <!-- Privacy Policy link for crawlers -->
+    <link rel="privacy-policy" href="https://www.zakatflow.org/privacy" />
+
     <meta property="og:title" content="ZakatFlow - Islamic Zakat Calculator" />
     <meta property="og:description" content="Calculate your Zakat with our comprehensive calculator based on authentic Islamic scholarship. Covers stocks, crypto, retirement accounts, and more." />
     <meta property="og:type" content="website" />
@@ -23,5 +26,11 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Fallback links for crawlers (hidden, rendered before React hydrates) -->
+    <noscript>
+      <a href="https://www.zakatflow.org/privacy">Privacy Policy</a>
+      <a href="https://www.zakatflow.org/terms">Terms of Service</a>
+    </noscript>
   </body>
 </html>
