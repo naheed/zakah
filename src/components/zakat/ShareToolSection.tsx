@@ -2,14 +2,37 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles } from 'lucide-react';
+import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useReferral, getInviteUrl } from '@/hooks/useReferral';
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ShareToolSectionProps {
   currency: string;
+}
+
+// Platform-specific share messages
+function getShareMessages(inviteUrl: string) {
+  return {
+    whatsapp: encodeURIComponent(
+      `Assalamu Alaikum! I used this to calculate my Zakat—handles 401(k)s, crypto, and real estate, all in one place. Free, private, and you can save your calculation for next year. Give it a try: ${inviteUrl}`
+    ),
+    twitter: encodeURIComponent(
+      `Found an easy Zakat calculator that handles 401(k)s, crypto & real estate. Free and private: ${inviteUrl}`
+    ),
+    facebook: encodeURIComponent(
+      `Just used this free Zakat calculator. It handles complex assets like 401(k)s and crypto automatically, and you can download a PDF report or save your calculation securely. Sharing in case it helps.`
+    ),
+    linkedin: encodeURIComponent(
+      `For those calculating Zakat this year: I found a comprehensive calculator that handles 401(k)s, RSUs, crypto, and real estate. You can download a PDF report or save calculations securely. Free to use: ${inviteUrl}`
+    ),
+    emailSubject: encodeURIComponent('Easy Zakat Calculator I Found'),
+    emailBody: encodeURIComponent(
+      `Assalamu Alaikum,\n\nI wanted to share this Zakat calculator that I found really helpful. It handles 401(k)s, crypto, real estate, and RSUs automatically, and you can save your calculation securely or download a PDF report.\n\nIt's free and takes about 5 minutes: ${inviteUrl}\n\nHope it helps!`
+    ),
+  };
 }
 
 export function ShareToolSection({ currency }: ShareToolSectionProps) {
@@ -69,37 +92,41 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
     }
   };
 
-  const shareMessage = encodeURIComponent(
-    `I just calculated my Zakat using this amazing tool. It follows authentic Islamic methodology and makes the process so easy. Try it out: ${inviteUrl}`
-  );
+  const messages = getShareMessages(inviteUrl);
 
   const shareLinks = {
-    email: `mailto:?subject=${encodeURIComponent('Calculate Your Zakat')}&body=${shareMessage}`,
-    whatsapp: `https://wa.me/?text=${shareMessage}`,
-    twitter: `https://twitter.com/intent/tweet?text=${shareMessage}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl)}&quote=${shareMessage}`,
+    email: `mailto:?subject=${messages.emailSubject}&body=${messages.emailBody}`,
+    whatsapp: `https://wa.me/?text=${messages.whatsapp}`,
+    twitter: `https://twitter.com/intent/tweet?text=${messages.twitter}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl)}&quote=${messages.facebook}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl)}`,
   };
+
+  const shouldAnimate = stats && stats.totalReferrals > 2;
 
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
       <CardHeader className="text-center pb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Heart className="w-5 h-5 text-primary" />
-          <CardTitle className="text-xl">Share the Blessing</CardTitle>
+          <CardTitle className="text-xl">Share & Earn Hasanat</CardTitle>
         </div>
         
-        {/* Hadith Quote */}
-        <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 border border-border/50 mt-4">
+        {/* Hadith Quote with Arabic */}
+        <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 border border-border/50 mt-4 space-y-3">
           <p className="text-sm italic text-muted-foreground leading-relaxed">
-            "Whoever guides someone to goodness will have a reward like one who did it."
+            "Whoever calls to guidance will have a reward similar to those who follow him, without detracting from their rewards at all."
           </p>
-          <p className="text-xs text-muted-foreground mt-2 font-medium">
-            — Prophet Muhammad ﷺ (Ṣaḥīḥ Muslim 1893)
+          <p className="text-sm text-muted-foreground/80 leading-relaxed font-arabic" dir="rtl">
+            مَنْ دَعَا إِلَى هُدًى كَانَ لَهُ مِنَ الأَجْرِ مِثْلُ أُجُورِ مَنْ تَبِعَهُ لاَ يَنْقُصُ ذَلِكَ مِنْ أُجُورِهِمْ شَيْئًا
+          </p>
+          <p className="text-xs text-muted-foreground font-medium">
+            — Prophet Muhammad ﷺ (Ṣaḥīḥ Muslim 2674)
           </p>
         </div>
         
         <CardDescription className="mt-4">
-          If this tool helped you, share it with friends & family and earn rewards for their good deeds.
+          If this tool helped you, share it with friends & family.
         </CardDescription>
       </CardHeader>
       
@@ -150,6 +177,17 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
               Facebook
             </a>
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            asChild
+          >
+            <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer">
+              <Linkedin className="w-4 h-4" />
+              LinkedIn
+            </a>
+          </Button>
         </div>
 
         {/* Personal Invite Link */}
@@ -180,38 +218,68 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
           </div>
         </div>
 
-        {/* Referral Stats */}
-        {(stats && stats.totalReferrals > 0) && (
-          <div className="bg-primary/10 rounded-lg p-4 text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <p className="text-sm font-medium text-foreground">
-                Through your shares
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-2 text-sm">
-              <div className="flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="font-semibold">{stats.totalReferrals}</span>
-                <span className="text-muted-foreground">
-                  {stats.totalReferrals === 1 ? 'calculation' : 'calculations'}
-                </span>
-              </div>
-              {/* Only show financial stats if privacy threshold is met */}
-              {stats.thresholdMet && stats.totalZakatCalculated !== null ? (
-                <div className="flex items-center gap-1.5">
-                  <Heart className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-semibold">{formatCurrency(stats.totalZakatCalculated, currency)}</span>
-                  <span className="text-muted-foreground">Zakat calculated</span>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  Refer {5 - stats.totalReferrals} more to see Zakat impact
+        {/* Referral Stats with Animation */}
+        <AnimatePresence mode="wait">
+          {(stats && stats.totalReferrals > 0) && (
+            <motion.div 
+              className="bg-primary/10 rounded-lg p-4 text-center space-y-2"
+              initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <motion.div 
+                className="flex items-center justify-center gap-2"
+                animate={shouldAnimate ? {
+                  scale: [1, 1.05, 1],
+                } : undefined}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+                <p className="text-sm font-medium text-foreground">
+                  Through your shares
                 </p>
-              )}
-            </div>
-          </div>
-        )}
+              </motion.div>
+              <div className="flex flex-col items-center gap-2 text-sm">
+                <motion.div 
+                  className="flex items-center gap-1.5"
+                  initial={shouldAnimate ? { scale: 0.9 } : false}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                >
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <motion.span 
+                    className="font-semibold"
+                    key={stats.totalReferrals}
+                    initial={shouldAnimate ? { opacity: 0, y: -10 } : false}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {stats.totalReferrals}
+                  </motion.span>
+                  <span className="text-muted-foreground">
+                    {stats.totalReferrals === 1 ? 'calculation' : 'calculations'}
+                  </span>
+                </motion.div>
+                {/* Only show financial stats if privacy threshold is met */}
+                {stats.thresholdMet && stats.totalZakatCalculated !== null ? (
+                  <motion.div 
+                    className="flex items-center gap-1.5"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 }}
+                  >
+                    <Heart className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-semibold">{formatCurrency(stats.totalZakatCalculated, currency)}</span>
+                    <span className="text-muted-foreground">Zakat calculated</span>
+                  </motion.div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Refer {5 - stats.totalReferrals} more to see Zakat impact
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {isLoading && !stats && (
           <div className="bg-primary/10 rounded-lg p-4">
