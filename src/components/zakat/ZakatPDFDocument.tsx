@@ -18,6 +18,7 @@ import workSansRegular from "@/assets/pdf-fonts/WorkSans-Regular.ttf?url";
 import workSansMedium from "@/assets/pdf-fonts/WorkSans-Medium.ttf?url";
 import workSansSemiBold from "@/assets/pdf-fonts/WorkSans-SemiBold.ttf?url";
 import amiriRegular from "@/assets/pdf-fonts/Amiri-Regular.ttf?url";
+import notoNaskhArabic from "@/assets/pdf-fonts/NotoNaskhArabic-Regular.ttf?url";
 
 // Register fonts
 Font.register({
@@ -38,10 +39,10 @@ Font.register({
   ],
 });
 
-// Arabic font for Bismillah - Amiri is a high-quality Arabic font
+// Arabic font for Bismillah - Noto Naskh Arabic for beautiful rendering
 Font.register({
-  family: "Amiri",
-  src: amiriRegular,
+  family: "NotoNaskhArabic",
+  src: notoNaskhArabic,
 });
 
 // Printer-friendly color palette (minimal ink usage)
@@ -76,22 +77,23 @@ const styles = StyleSheet.create({
     fontFamily: "WorkSans",
     fontSize: 9,
   },
-  // Bismillah section
+  // Bismillah section - positioned top right
   bismillahSection: {
-    textAlign: "center",
-    marginBottom: 12,
+    position: "absolute",
+    top: 24,
+    right: 24,
+    alignItems: "flex-end",
   },
   bismillahArabic: {
-    fontFamily: "Amiri",
-    fontSize: 24,
+    fontFamily: "NotoNaskhArabic",
+    fontSize: 16,
     color: COLORS.gold,
-    marginBottom: 6,
-    textAlign: "center",
   },
   bismillahEnglish: {
-    fontSize: 8,
+    fontSize: 7,
     color: COLORS.textMuted,
-    marginBottom: 6,
+    marginTop: 2,
+    textAlign: "right",
   },
   goldLine: {
     height: 1,
@@ -742,13 +744,9 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
   return (
     <Document title={calculationName || "Zakat Report"} author="ZakahFlow">
       <Page size="A4" style={styles.page}>
-        {/* Bismillah Section */}
+        {/* Bismillah Section - Top Right */}
         <View style={styles.bismillahSection}>
           <Text style={styles.bismillahArabic}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</Text>
-          <Text style={styles.bismillahEnglish}>
-            In the name of Allah, the Most Gracious, the Most Merciful
-          </Text>
-          <View style={styles.goldLine} />
         </View>
 
         {/* Header with Hero Amount - Outline style for printer friendliness */}
