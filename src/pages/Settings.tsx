@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/zakat/Footer";
+import { getPrimaryUrl } from "@/lib/domainConfig";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -120,8 +121,10 @@ export default function Settings() {
   return (
     <>
       <Helmet>
-        <title>Settings | Zakat Flow</title>
+        <title>Settings | ZakatFlow</title>
         <meta name="description" content="Configure your Zakat calculation settings including Nisab standard, calendar type, and household mode." />
+        <link rel="canonical" href={getPrimaryUrl('/settings')} />
+        <meta property="og:url" content={getPrimaryUrl('/settings')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">

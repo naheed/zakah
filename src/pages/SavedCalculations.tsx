@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { ArrowLeft, Plus, Trash2, Calendar, CheckCircle, XCircle, Loader2, Users } from 'lucide-react';
 import { Footer } from '@/components/zakat/Footer';
+import { getPrimaryUrl } from '@/lib/domainConfig';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +54,9 @@ export default function SavedCalculations() {
     return (
       <div className="min-h-screen bg-background p-4">
         <Helmet>
-          <title>Saved Calculations - Zakat Flow</title>
+          <title>Saved Calculations - ZakatFlow</title>
+          <link rel="canonical" href={getPrimaryUrl('/saved')} />
+          <meta property="og:url" content={getPrimaryUrl('/saved')} />
         </Helmet>
         <div className="max-w-2xl mx-auto pt-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
@@ -77,7 +80,9 @@ export default function SavedCalculations() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Saved Calculations - Zakat Flow</title>
+        <title>Saved Calculations - ZakatFlow</title>
+        <link rel="canonical" href={getPrimaryUrl('/saved')} />
+        <meta property="og:url" content={getPrimaryUrl('/saved')} />
       </Helmet>
 
       {/* Header */}

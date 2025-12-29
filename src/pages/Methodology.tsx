@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Footer } from "@/components/zakat/Footer";
+import { getPrimaryUrl } from "@/lib/domainConfig";
 
 const Methodology = () => {
   const navigate = useNavigate();
@@ -47,11 +48,13 @@ const Methodology = () => {
   return (
     <>
       <Helmet>
-        <title>Zakat Methodology & References - Zakat Flow</title>
+        <title>Zakat Methodology & References - ZakatFlow</title>
         <meta 
           name="description" 
-          content="Comprehensive scholarly methodology and Islamic jurisprudence behind Zakat Flow's Zakat calculations. Based on AMJA guidance, Joe Bradford's works, and Islamic Finance Guru." 
+          content="Comprehensive scholarly methodology and Islamic jurisprudence behind ZakatFlow's Zakat calculations. Based on AMJA guidance, Joe Bradford's works, and Islamic Finance Guru." 
         />
+        <link rel="canonical" href={getPrimaryUrl('/methodology')} />
+        <meta property="og:url" content={getPrimaryUrl('/methodology')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">

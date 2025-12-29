@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft, FileText, Building2, Calendar, ChevronRight, Trash2 } from "lucide-react";
 import { Footer } from "@/components/zakat/Footer";
+import { getPrimaryUrl } from "@/lib/domainConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +76,12 @@ export default function Documents() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Uploaded Documents | ZakatFlow</title>
+        <meta name="description" content="View and manage your uploaded financial documents for Zakat calculation." />
+        <link rel="canonical" href={getPrimaryUrl('/documents')} />
+        <meta property="og:url" content={getPrimaryUrl('/documents')} />
+      </Helmet>
       {/* Header */}
       <div className="sticky top-0 z-10 bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4">

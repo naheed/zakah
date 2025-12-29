@@ -3,13 +3,16 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/zakat/Footer";
+import { getPrimaryUrl } from "@/lib/domainConfig";
 
 export default function Terms() {
   return (
     <>
       <Helmet>
-        <title>Terms of Service | Zakat Flow</title>
-        <meta name="description" content="Terms of Service for the Zakat Flow application." />
+        <title>Terms of Service | ZakatFlow</title>
+        <meta name="description" content="Terms of Service for the ZakatFlow application." />
+        <link rel="canonical" href={getPrimaryUrl('/terms')} />
+        <meta property="og:url" content={getPrimaryUrl('/terms')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">

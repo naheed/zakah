@@ -3,13 +3,16 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Shield, Lock, Eye, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/zakat/Footer";
+import { getPrimaryUrl } from "@/lib/domainConfig";
 
 export default function PrivacyPolicy() {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | Zakat Flow</title>
-        <meta name="description" content="Privacy Policy for Zakat Flow - Learn how we protect your financial data with end-to-end encryption." />
+        <title>Privacy Policy | ZakatFlow</title>
+        <meta name="description" content="Privacy Policy for ZakatFlow - Learn how we protect your financial data with end-to-end encryption." />
+        <link rel="canonical" href={getPrimaryUrl('/privacy')} />
+        <meta property="og:url" content={getPrimaryUrl('/privacy')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
