@@ -118,27 +118,29 @@ export async function generateZakatPDF(
   let y = cardY + pad;
 
   // === BISMILLAH SECTION (Top) ===
-  const bismillahArabic = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+  // Using transliteration since jsPDF doesn't support Arabic fonts natively
+  const bismillahTranslit = "Bismillāhir Raḥmānir Raḥīm";
   const bismillahEnglish = "In the name of Allah, the Most Gracious, the Most Merciful";
   
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(12);
   doc.setTextColor(...COLORS.text);
-  doc.text(bismillahArabic, pageWidth / 2, y, { align: "center" });
+  doc.text(bismillahTranslit, pageWidth / 2, y, { align: "center" });
   
-  y += 6;
+  y += 5;
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...COLORS.textMuted);
   doc.text(bismillahEnglish, pageWidth / 2, y, { align: "center" });
   
   // Gold accent line under Bismillah
   y += 6;
-  const lineW = 40;
+  const lineW = 50;
   doc.setDrawColor(...COLORS.gold);
   doc.setLineWidth(0.5);
   doc.line(pageWidth / 2 - lineW / 2, y, pageWidth / 2 + lineW / 2, y);
   
-  y += 12;
+  y += 10;
 
   // === HEADER SECTION ===
   const headerH = 50;
