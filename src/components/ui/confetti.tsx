@@ -36,28 +36,29 @@ export function Confetti({
   const [isVisible, setIsVisible] = useState(isActive);
 
   useEffect(() => {
-    if (isActive) {
-      // Generate particles
-      const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
-        id: i,
-        x: (Math.random() - 0.5) * spread,
-        y: Math.random() * -200 - 50,
-        rotation: Math.random() * 720 - 360,
-        scale: Math.random() * 0.5 + 0.5,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        delay: Math.random() * 0.3,
-      }));
-      setParticles(newParticles);
-      setIsVisible(true);
+    if (!isActive) return;
+    
+    // Generate particles only once when activated
+    const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
+      id: i,
+      x: (Math.random() - 0.5) * spread,
+      y: Math.random() * -200 - 50,
+      rotation: Math.random() * 720 - 360,
+      scale: Math.random() * 0.5 + 0.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      delay: Math.random() * 0.3,
+    }));
+    setParticles(newParticles);
+    setIsVisible(true);
 
-      // Clean up after duration
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, duration);
+    // Clean up after duration
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+    }, duration);
 
-      return () => clearTimeout(timer);
-    }
-  }, [isActive, particleCount, colors, spread, duration]);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   return (
     <AnimatePresence>
