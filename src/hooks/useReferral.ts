@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { getInviteUrl as getInviteUrlFromConfig } from '@/lib/domainConfig';
 
 const REFERRAL_CODE_KEY = 'zakat_referred_by';
 const SESSION_ID_KEY = 'zakat_session_id';
@@ -28,10 +29,8 @@ async function hashSessionId(sessionId: string): Promise<string> {
   return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-// Pure function - no dependencies, stable reference
-export function getInviteUrl(code: string): string {
-  return `https://zakat.vora.dev/invite/${code}`;
-}
+// Re-export for backward compatibility - uses centralized domain config
+export const getInviteUrl = getInviteUrlFromConfig;
 
 export interface ReferralStats {
   referralCode: string | null;
