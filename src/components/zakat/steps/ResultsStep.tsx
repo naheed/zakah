@@ -129,10 +129,13 @@ export function ResultsStep({
         description: "Your Zakat calculation report has been downloaded.",
       });
     } catch (error) {
-      console.error('PDF generation error:', error);
+      console.error("PDF generation error:", error);
+      const details = error instanceof Error ? error.message : String(error);
       toast({
         title: "Download Failed",
-        description: "There was an error generating your PDF. Please try again.",
+        description: details
+          ? `PDF error: ${details}`
+          : "There was an error generating your PDF. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -11,23 +11,30 @@ import {
   Path,
 } from "@react-pdf/renderer";
 
-// Register fonts from local TTF files in public/fonts/
-// Using local files ensures reliable PDF generation without CDN 404s
+import loraRegular from "@/assets/pdf-fonts/Lora-Regular.ttf?url";
+import loraItalic from "@/assets/pdf-fonts/Lora-Italic.ttf?url";
+import loraSemiBold from "@/assets/pdf-fonts/Lora-SemiBold.ttf?url";
+import workSansRegular from "@/assets/pdf-fonts/WorkSans-Regular.ttf?url";
+import workSansMedium from "@/assets/pdf-fonts/WorkSans-Medium.ttf?url";
+import workSansSemiBold from "@/assets/pdf-fonts/WorkSans-SemiBold.ttf?url";
+
+// Register fonts from bundled local TTF files.
+// Using imports is more reliable than absolute "/fonts" paths (especially in embedded previews).
 Font.register({
   family: "Lora",
   fonts: [
-    { src: "/fonts/Lora-Regular.ttf", fontWeight: 400 },
-    { src: "/fonts/Lora-Italic.ttf", fontWeight: 400, fontStyle: "italic" },
-    { src: "/fonts/Lora-SemiBold.ttf", fontWeight: 600 },
+    { src: loraRegular, fontWeight: 400 },
+    { src: loraItalic, fontWeight: 400, fontStyle: "italic" },
+    { src: loraSemiBold, fontWeight: 600 },
   ],
 });
 
 Font.register({
   family: "WorkSans",
   fonts: [
-    { src: "/fonts/WorkSans-Regular.ttf", fontWeight: 400 },
-    { src: "/fonts/WorkSans-Medium.ttf", fontWeight: 500 },
-    { src: "/fonts/WorkSans-SemiBold.ttf", fontWeight: 600 },
+    { src: workSansRegular, fontWeight: 400 },
+    { src: workSansMedium, fontWeight: 500 },
+    { src: workSansSemiBold, fontWeight: 600 },
   ],
 });
 
