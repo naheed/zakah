@@ -617,21 +617,26 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     };
   });
 
-  // Build links from center to zakat - each asset contributes proportionally
+  // Build links from center to zakat - matching web version architecture
+  // Each asset's flow has SAME WIDTH at source and target (based on zakat proportion)
   const rightLinks: { path: string; color: string; opacity: number }[] = [];
   if (rightNode && data.zakatDue > 0) {
     let sourceYOffset = padding.top;
     let targetYOffset = rightNode.y;
     
-    // Each asset flows from center to zakat proportionally
     leftNodes.forEach((node) => {
+      // Each asset contributes proportionally to zakat
       const assetProportion = node.value / totalAssets;
-      const zakatContribution = assetProportion * zakatHeight;
+      // Flow width = proportion of zakatHeight (same at source and target, like web version)
+      const flowWidth = Math.max(2, assetProportion * zakatHeight);
       
+      // Source: position within the center bar at the TOP EDGE of this asset's zone
       const sourceTopY = sourceYOffset;
-      const sourceBottomY = sourceYOffset + node.height;
+      const sourceBottomY = sourceYOffset + flowWidth;
+      
+      // Target: stacked in the zakat bar
       const targetTopY = targetYOffset;
-      const targetBottomY = targetYOffset + zakatContribution;
+      const targetBottomY = targetYOffset + flowWidth;
       
       rightLinks.push({
         path: generateCurvedPath(
@@ -642,8 +647,9 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
         opacity: 0.5,
       });
       
+      // Move to next position based on the full asset height in center, not flow width
       sourceYOffset += node.height + nodePadding;
-      targetYOffset += zakatContribution;
+      targetYOffset += flowWidth;
     });
   }
 
