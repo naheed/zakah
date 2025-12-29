@@ -17,6 +17,7 @@ import loraSemiBold from "@/assets/pdf-fonts/Lora-SemiBold.ttf?url";
 import workSansRegular from "@/assets/pdf-fonts/WorkSans-Regular.ttf?url";
 import workSansMedium from "@/assets/pdf-fonts/WorkSans-Medium.ttf?url";
 import workSansSemiBold from "@/assets/pdf-fonts/WorkSans-SemiBold.ttf?url";
+import amiriRegular from "@/assets/pdf-fonts/Amiri-Regular.ttf?url";
 
 // Register fonts
 Font.register({
@@ -35,6 +36,12 @@ Font.register({
     { src: workSansMedium, fontWeight: 500 },
     { src: workSansSemiBold, fontWeight: 600 },
   ],
+});
+
+// Arabic font for Bismillah
+Font.register({
+  family: "Amiri",
+  src: amiriRegular,
 });
 
 // Printer-friendly color palette (minimal ink usage)
@@ -74,17 +81,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 12,
   },
-  bismillahText: {
-    fontFamily: "Lora",
-    fontSize: 13,
-    fontStyle: "italic",
+  bismillahArabic: {
+    fontFamily: "Amiri",
+    fontSize: 18,
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: 4,
+    direction: "rtl",
   },
   bismillahEnglish: {
     fontSize: 8,
     color: COLORS.textMuted,
     marginBottom: 6,
+    fontStyle: "italic",
   },
   goldLine: {
     height: 1,
@@ -737,7 +745,7 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
       <Page size="A4" style={styles.page}>
         {/* Bismillah Section */}
         <View style={styles.bismillahSection}>
-          <Text style={styles.bismillahText}>Bismillāhir Raḥmānir Raḥīm</Text>
+          <Text style={styles.bismillahArabic}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</Text>
           <Text style={styles.bismillahEnglish}>
             In the name of Allah, the Most Gracious, the Most Merciful
           </Text>
