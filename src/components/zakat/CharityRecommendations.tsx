@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ArrowSquareOut, Globe, Users, Lightbulb, HandHeart, CaretDown } from "@phosphor-icons/react";
+import { ArrowSquareOut, Globe, Users, Lightbulb, HandHeart, CaretDown } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/zakatCalculations";
@@ -9,7 +9,7 @@ interface Charity {
   id: string;
   name: string;
   category: string;
-  icon: typeof Heart;
+  icon: typeof Globe;
   accentColor: string;
   description: string;
   donateUrl: string;
@@ -34,7 +34,7 @@ const charities: Charity[] = [
     icon: Users,
     accentColor: "hsl(220, 70%, 50%)", // Blue
     description: "Provides disaster relief, hunger prevention, refugee assistance, and women's transitional housing across the United States and internationally.",
-    donateUrl: "https://icnarelief.org/zakat/",
+    donateUrl: "https://icnarelief.org/donate/",
     websiteUrl: "https://icnarelief.org",
   },
   {
@@ -44,28 +44,18 @@ const charities: Charity[] = [
     icon: HandHeart,
     accentColor: "hsl(45, 90%, 45%)", // Gold
     description: "Dedicated exclusively to Zakat distribution, helping those in need through emergency aid, education, healthcare, and economic empowerment programs.",
-    donateUrl: "https://www.zakat.org/give-zakat",
+    donateUrl: "https://secure.zakat.org/np/clients/zakat/donation.jsp",
     websiteUrl: "https://www.zakat.org",
   },
   {
-    id: "giving-light",
-    name: "Giving Light Foundation",
+    id: "givelight",
+    name: "GiveLight Foundation",
     category: "Orphan Care & Education",
     icon: Lightbulb,
     accentColor: "hsl(280, 60%, 50%)", // Purple
     description: "Focuses on orphan care, education, and sustainable community development, providing holistic support to vulnerable children and families.",
-    donateUrl: "https://givinglightfoundation.org/donate/",
-    websiteUrl: "https://givinglightfoundation.org",
-  },
-  {
-    id: "penny-appeal",
-    name: "Penny Appeal USA",
-    category: "Healthcare & Emergency Response",
-    icon: Heart,
-    accentColor: "hsl(350, 70%, 50%)", // Red
-    description: "Delivers healthcare, clean water, emergency relief, and orphan support through innovative campaigns that transform small donations into life-changing impact.",
-    donateUrl: "https://pennyappealusa.org/appeals/zakat/",
-    websiteUrl: "https://pennyappealusa.org",
+    donateUrl: "https://givelight.org/donate/",
+    websiteUrl: "https://givelight.org",
   },
 ];
 
