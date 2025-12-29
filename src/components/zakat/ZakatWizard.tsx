@@ -55,8 +55,8 @@ const stepTransition = {
   damping: 35,
 };
 
-const SWIPE_THRESHOLD = 50;
-const SWIPE_VELOCITY_THRESHOLD = 500;
+const SWIPE_THRESHOLD = 100; // Increased to prevent accidental swipes on button taps
+const SWIPE_VELOCITY_THRESHOLD = 800; // Increased to require more deliberate swipes
 
 type StepId = 
   | 'welcome'

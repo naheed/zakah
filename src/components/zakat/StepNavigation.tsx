@@ -30,9 +30,13 @@ export function StepNavigation({
           <motion.div whileTap={{ scale: 0.95 }}>
             <Button
               variant="ghost"
-              onClick={onPrevious}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrevious();
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
               disabled={!canGoBack}
-              className="gap-2 h-12 min-w-[100px] touch-manipulation"
+              className="gap-2 h-12 min-w-[100px] touch-manipulation select-none"
             >
               <CaretLeft weight="bold" className="h-5 w-5" />
               Previous
@@ -42,9 +46,13 @@ export function StepNavigation({
           {!isLastStep && (
             <motion.div whileTap={{ scale: 0.95 }}>
               <Button
-                onClick={onNext}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNext();
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
                 disabled={!canGoForward}
-                className="gap-2 h-12 min-w-[120px] touch-manipulation"
+                className="gap-2 h-12 min-w-[120px] touch-manipulation select-none"
               >
                 Continue
                 <CaretRight weight="bold" className="h-5 w-5" />
