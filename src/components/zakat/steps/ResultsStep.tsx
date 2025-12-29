@@ -4,7 +4,7 @@ import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, WarningCircle, DownloadSimple, ArrowCounterClockwise, GearSix, FloppyDisk, SignIn, ShareNetwork, CaretDown, CaretUp, PencilSimple, EnvelopeSimple, WhatsappLogo, XLogo, FacebookLogo, Copy, Check, Heart, Sparkle, Users, Warning } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { generateZakatPDF } from "@/lib/generatePDF";
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
@@ -14,7 +14,6 @@ import { YearOverYearChart } from "../YearOverYearChart";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ZakatSankeyChart } from "../ZakatSankeyChart";
-import { SankeyChartForPDF } from "../SankeyChartForPDF";
 import { useTrackCalculation } from "@/hooks/useTrackCalculation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useReferral } from "@/hooks/useReferral";
@@ -24,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Confetti, useConfetti } from "@/components/ui/confetti";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { toPng } from "html-to-image";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,7 +85,6 @@ export function ResultsStep({
   const { calculations: savedCalculations, refreshCalculations } = useSavedCalculations();
   const [charityOpen, setCharityOpen] = useState(false);
   const [trendOpen, setTrendOpen] = useState(false);
-  const sankeyPdfRef = useRef<HTMLDivElement>(null);
   const { currency } = data;
   const {
     totalAssets,
@@ -123,47 +120,10 @@ export function ResultsStep({
     navigate('/auth');
   };
   
-  // Capture Sankey chart as image for PDF
-  const captureSankeyChart = useCallback(async (): Promise<string | undefined> => {
-    if (!sankeyPdfRef.current) return undefined;
-    try {
-      // Temporarily move element on-screen for capture (off-screen elements don't render)
-      const el = sankeyPdfRef.current;
-      const originalStyle = el.getAttribute('style') || '';
-      el.style.position = 'fixed';
-      el.style.left = '0';
-      el.style.top = '0';
-      el.style.zIndex = '-9999';
-      el.style.opacity = '1';
-      
-      // Wait for paint
-      await new Promise(r => setTimeout(r, 100));
-      
-      const dataUrl = await toPng(el, {
-        quality: 1,
-        pixelRatio: 2,
-        backgroundColor: '#FAF9F7',
-      });
-      
-      // Restore original style
-      el.setAttribute('style', originalStyle);
-      
-      return dataUrl;
-    } catch (error) {
-      console.error('Failed to capture Sankey chart:', error);
-      return undefined;
-    }
-  }, []);
-  
   const handleDownload = async () => {
     setIsGeneratingPDF(true);
     try {
-      // Capture Sankey chart image first
-      const sankeyImageDataUrl = await captureSankeyChart();
-      
-      await generateZakatPDF(data, calculations, calculationName, {
-        sankeyImageDataUrl,
-      });
+      await generateZakatPDF(data, calculations, calculationName);
       toast({
         title: "PDF Downloaded",
         description: "Your Zakat calculation report has been downloaded.",
@@ -192,36 +152,6 @@ export function ResultsStep({
   
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Hidden Sankey chart for PDF capture */}
-      <div 
-        ref={sankeyPdfRef}
-        style={{ 
-          position: 'absolute', 
-          left: '-9999px', 
-          top: 0,
-          width: '500px',
-          height: '220px',
-        }}
-      >
-        <SankeyChartForPDF 
-          data={{
-            liquidAssets: assetBreakdown.liquidAssets,
-            investments: assetBreakdown.investments,
-            retirement: assetBreakdown.retirement,
-            realEstate: assetBreakdown.realEstate,
-            business: assetBreakdown.business,
-            otherAssets: assetBreakdown.otherAssets,
-            totalLiabilities,
-            zakatDue,
-            netZakatableWealth,
-            zakatRate,
-          }}
-          currency={currency}
-          width={500}
-          height={220}
-        />
-      </div>
-
       {/* Confetti celebration for above nisab */}
       <Confetti isActive={showConfetti} />
 
