@@ -6,9 +6,9 @@ interface LogoProps {
 }
 
 const sizeClasses = {
-  sm: "h-6",
-  md: "h-8",
-  lg: "h-10",
+  sm: "h-8",
+  md: "h-10",
+  lg: "h-12",
 };
 
 export function Logo({ className = "", size = "md" }: LogoProps) {
@@ -16,7 +16,14 @@ export function Logo({ className = "", size = "md" }: LogoProps) {
     <img
       src={zakatflowLogo}
       alt="ZakatFlow"
-      className={`${sizeClasses[size]} w-auto ${className}`}
+      className={`${sizeClasses[size]} w-auto object-contain ${className}`}
+      style={{
+        // Crop out the whitespace by using clip-path
+        clipPath: "inset(28% 5% 28% 5%)",
+        // Scale up to compensate for the cropped area
+        transform: "scale(1.8)",
+        transformOrigin: "left center",
+      }}
     />
   );
 }
