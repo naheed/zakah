@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Footer } from "@/components/zakat/Footer";
 
 export default function Terms() {
   return (
@@ -245,6 +246,7 @@ export default function Terms() {
 
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );

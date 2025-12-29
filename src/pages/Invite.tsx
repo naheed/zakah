@@ -8,6 +8,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { InteractiveDemo } from '@/components/zakat/landing/InteractiveDemo';
 import { Logo } from '@/components/zakat/Logo';
+import { Footer } from '@/components/zakat/Footer';
 
 // Asset coverage inline text
 const assetTypes = ["401(k)s", "Crypto", "Real Estate", "RSUs"];
@@ -96,39 +97,7 @@ export default function Invite() {
           </div>
         </section>
 
-        {/* Consolidated Footer */}
-        <footer className="py-6 px-4 border-t border-border">
-          <div className="max-w-4xl mx-auto">
-            {/* Methodology citation + links in one row */}
-            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground mb-3">
-              <span>Based on AMJA, AAOIFI & Sheikh Joe Bradford</span>
-              <span className="text-muted-foreground/50">•</span>
-              <Link 
-                to="/methodology" 
-                className="text-primary hover:underline"
-              >
-                Methodology
-              </Link>
-              <span className="text-muted-foreground/50">•</span>
-              <Link 
-                to="/privacy" 
-                className="hover:text-foreground transition-colors"
-              >
-                Privacy
-              </Link>
-              <span className="text-muted-foreground/50">•</span>
-              <Link 
-                to="/terms" 
-                className="hover:text-foreground transition-colors"
-              >
-                Terms
-              </Link>
-            </div>
-            <div className="text-center text-xs text-muted-foreground">
-              <p>Built by Naheed Vora • <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a></p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

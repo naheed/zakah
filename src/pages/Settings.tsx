@@ -35,6 +35,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { Footer } from "@/components/zakat/Footer";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -424,6 +425,7 @@ export default function Settings() {
             </Collapsible>
           )}
         </main>
+        <Footer />
       </div>
     </>
   );

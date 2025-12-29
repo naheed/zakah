@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { ArrowLeft, Plus, Trash2, Calendar, CheckCircle, XCircle, Loader2, Users } from 'lucide-react';
+import { Footer } from '@/components/zakat/Footer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -181,6 +182,7 @@ export default function SavedCalculations() {
           </TabsContent>
         </Tabs>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield, Lock, Eye, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Footer } from "@/components/zakat/Footer";
 
 export default function PrivacyPolicy() {
   return (
@@ -409,6 +410,7 @@ export default function PrivacyPolicy() {
 
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
