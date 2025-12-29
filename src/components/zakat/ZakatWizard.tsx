@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
@@ -110,6 +110,8 @@ const allSteps: Step[] = [
 ];
 
 export function ZakatWizard() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const {
     formData,
     stepIndex: currentStepIndex,
@@ -125,6 +127,16 @@ export function ZakatWizard() {
     isLoaded,
     setFormData,
   } = useZakatPersistence();
+
+  // Handle ?start=1 query param to skip welcome step
+  useEffect(() => {
+    if (searchParams.get('start') === '1' && currentStepIndex === 0 && isLoaded) {
+      setCurrentStepIndex(1);
+      // Clean up the URL
+      searchParams.delete('start');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, currentStepIndex, setCurrentStepIndex, isLoaded]);
 
   const [calculationName, setCalculationName] = useState<string | undefined>();
   const [savedCalculationId, setSavedCalculationId] = useState<string | undefined>();

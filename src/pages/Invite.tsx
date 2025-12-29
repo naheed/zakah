@@ -25,7 +25,8 @@ export default function Invite() {
   }, [code, storeReferralCode]);
 
   const handleStartCalculation = () => {
-    navigate('/');
+    // Navigate with query param to skip welcome and go directly to calculation
+    navigate('/?start=1');
   };
 
   return (
@@ -71,7 +72,7 @@ export default function Invite() {
               {/* Consolidated Trust Badge */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                 <Lock className="w-4 h-4 text-primary" />
-                <span>Free • No account required • Takes about 5 minutes</span>
+                <span>Free • Save & resume securely • Takes about 5 minutes</span>
               </div>
             </div>
 
