@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: COLORS.textMuted,
     marginBottom: 6,
-    fontStyle: "italic",
   },
   goldLine: {
     height: 1,
