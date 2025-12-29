@@ -11,37 +11,23 @@ import {
   Path,
 } from "@react-pdf/renderer";
 
-// Register fonts from Google Fonts
-// Note: we avoid remote *italic* variants because some CDN URLs 404 and break PDF generation.
+// Register fonts from local TTF files in public/fonts/
+// Using local files ensures reliable PDF generation without CDN 404s
 Font.register({
   family: "Lora",
   fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787weuyJGmKxemMeZ.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787z5vCJGmKxemMeZ.ttf",
-      fontWeight: 600,
-    },
+    { src: "/fonts/Lora-Regular.ttf", fontWeight: 400 },
+    { src: "/fonts/Lora-Italic.ttf", fontWeight: 400, fontStyle: "italic" },
+    { src: "/fonts/Lora-SemiBold.ttf", fontWeight: 600 },
   ],
 });
 
 Font.register({
   family: "WorkSans",
   fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/worksans/v19/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K0nXNigDp6_cOyA.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/worksans/v19/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K3fQNigDp6_cOyA.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/worksans/v19/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K5vXNigDp6_cOyA.ttf",
-      fontWeight: 600,
-    },
+    { src: "/fonts/WorkSans-Regular.ttf", fontWeight: 400 },
+    { src: "/fonts/WorkSans-Medium.ttf", fontWeight: 500 },
+    { src: "/fonts/WorkSans-SemiBold.ttf", fontWeight: 600 },
   ],
 });
 

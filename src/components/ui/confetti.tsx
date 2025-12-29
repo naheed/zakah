@@ -111,10 +111,12 @@ export function useConfetti(shouldTrigger: boolean) {
   const [triggered, setTriggered] = useState(false);
 
   useEffect(() => {
-    if (shouldTrigger && !triggered) {
+    if (shouldTrigger) {
       setTriggered(true);
     }
-  }, [shouldTrigger, triggered]);
+    // Only run when shouldTrigger changes from false to true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldTrigger]);
 
   return triggered;
 }
