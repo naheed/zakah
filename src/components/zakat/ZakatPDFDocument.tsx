@@ -18,8 +18,7 @@ import workSansRegular from "@/assets/pdf-fonts/WorkSans-Regular.ttf?url";
 import workSansMedium from "@/assets/pdf-fonts/WorkSans-Medium.ttf?url";
 import workSansSemiBold from "@/assets/pdf-fonts/WorkSans-SemiBold.ttf?url";
 
-// Register fonts from bundled local TTF files.
-// Using imports is more reliable than absolute "/fonts" paths (especially in embedded previews).
+// Register fonts
 Font.register({
   family: "Lora",
   fonts: [
@@ -38,18 +37,22 @@ Font.register({
   ],
 });
 
-// Color palette
+// Stripe-inspired color palette
 const COLORS = {
   pageBg: "#FAF9F7",
   cardBg: "#FFFFFF",
   headerBg: "#1C1A18",
   primary: "#10B981",
+  primaryLight: "#D1FAE5",
   gold: "#DAA520",
   text: "#1C1A18",
-  textMuted: "#807666",
-  textLight: "#B4AA9B",
-  border: "#E2DCD2",
+  textMuted: "#6B7280",
+  textLight: "#9CA3AF",
+  border: "#E5E7EB",
+  borderLight: "#F3F4F6",
   danger: "#DC2626",
+  dangerLight: "#FEE2E2",
+  totalRowBg: "#F5F3F0",
   // Asset colors
   cash: "#22C55E",
   investments: "#3B82F6",
@@ -63,24 +66,24 @@ const COLORS = {
 const styles = StyleSheet.create({
   page: {
     backgroundColor: COLORS.pageBg,
-    padding: 24,
+    padding: 28,
     fontFamily: "WorkSans",
     fontSize: 10,
   },
   card: {
     backgroundColor: COLORS.cardBg,
-    borderRadius: 8,
+    borderRadius: 12,
     border: `1px solid ${COLORS.border}`,
-    padding: 20,
+    padding: 24,
   },
   // Bismillah section
   bismillahSection: {
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   bismillahText: {
     fontFamily: "Lora",
-    fontSize: 14,
+    fontSize: 15,
     fontStyle: "italic",
     color: COLORS.text,
     marginBottom: 4,
@@ -88,194 +91,340 @@ const styles = StyleSheet.create({
   bismillahEnglish: {
     fontSize: 9,
     color: COLORS.textMuted,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   goldLine: {
     height: 1,
     backgroundColor: COLORS.gold,
-    width: 80,
+    width: 100,
     marginHorizontal: "auto",
     marginVertical: 8,
   },
   // Header section
   headerBox: {
     backgroundColor: COLORS.headerBg,
-    borderRadius: 6,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 8,
+    padding: 20,
+    marginBottom: 20,
   },
   headerAccent: {
-    height: 3,
+    height: 4,
     backgroundColor: COLORS.primary,
-    marginHorizontal: -16,
-    marginTop: -16,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-    marginBottom: 12,
+    marginHorizontal: -20,
+    marginTop: -20,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    marginBottom: 16,
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: 11,
     fontWeight: 600,
     color: "#FFFFFF",
-    letterSpacing: 0.5,
+    letterSpacing: 2,
   },
   headerSubtitle: {
-    fontSize: 8,
-    color: "#C8C3BE",
+    fontSize: 9,
+    color: "#9CA3AF",
     marginTop: 4,
   },
+  calculationName: {
+    fontFamily: "Lora",
+    fontSize: 14,
+    color: "#FFFFFF",
+    marginTop: 6,
+  },
+  dateBox: {
+    textAlign: "right",
+  },
   dateLabel: {
-    fontSize: 7,
-    color: "#B4AFA5",
+    fontSize: 8,
+    color: "#9CA3AF",
+    letterSpacing: 0.5,
   },
   dateText: {
-    fontSize: 9,
-    fontWeight: 600,
+    fontSize: 10,
+    fontWeight: 500,
     color: "#FFFFFF",
     marginTop: 2,
   },
   // Hero amount
+  heroSection: {
+    marginTop: 8,
+  },
   heroLabel: {
-    fontSize: 9,
-    color: "#C8C3BE",
-    marginBottom: 4,
+    fontSize: 10,
+    color: "#9CA3AF",
+    marginBottom: 6,
+    letterSpacing: 0.5,
   },
   heroAmount: {
     fontFamily: "Lora",
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: 600,
     color: "#FFFFFF",
+  },
+  heroAmountShadow: {
+    fontFamily: "Lora",
+    fontSize: 36,
+    fontWeight: 600,
+    color: COLORS.primary,
+    position: "absolute",
+    left: 1,
+    top: 1,
+    opacity: 0.3,
   },
   heroAmountBelow: {
     fontFamily: "Lora",
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 600,
     color: "#FFFFFF",
   },
-  // Sankey section
+  // Section headers
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  sectionAccent: {
+    width: 3,
+    height: 14,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+    marginRight: 8,
+  },
   sectionLabel: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 600,
     color: COLORS.textMuted,
-    marginBottom: 8,
-    letterSpacing: 0.5,
+    letterSpacing: 1.5,
   },
+  // Sankey section
   sankeyContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
     backgroundColor: COLORS.pageBg,
-    borderRadius: 6,
-    padding: 8,
+    borderRadius: 8,
+    padding: 12,
+    border: `1px solid ${COLORS.borderLight}`,
   },
   // Asset breakdown table
   tableContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   tableBox: {
     backgroundColor: COLORS.cardBg,
-    borderRadius: 4,
+    borderRadius: 6,
     border: `1px solid ${COLORS.border}`,
-    padding: 8,
+    overflow: "hidden",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.borderLight,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  tableHeaderText: {
+    fontSize: 8,
+    fontWeight: 600,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
   },
   tableRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+  },
+  tableRowAlt: {
+    backgroundColor: "#FAFAFA",
+  },
+  tableRowTotal: {
+    backgroundColor: COLORS.totalRowBg,
+    borderBottomWidth: 0,
   },
   colorDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 10,
   },
   assetName: {
     flex: 1,
-    fontSize: 9,
+    fontSize: 10,
     color: COLORS.text,
+  },
+  assetNameTotal: {
+    flex: 1,
+    fontSize: 10,
+    fontWeight: 600,
+    color: COLORS.text,
+  },
+  barContainer: {
+    width: 80,
+    height: 6,
+    backgroundColor: COLORS.borderLight,
+    borderRadius: 3,
+    marginRight: 12,
+    overflow: "hidden",
   },
   assetPercent: {
     fontSize: 9,
     color: COLORS.textMuted,
     marginRight: 16,
-    width: 40,
+    width: 36,
     textAlign: "right",
   },
   assetValue: {
-    fontSize: 9,
+    fontSize: 10,
+    fontWeight: 500,
+    color: COLORS.text,
+    width: 90,
+    textAlign: "right",
+  },
+  assetValueTotal: {
+    fontSize: 11,
     fontWeight: 600,
     color: COLORS.text,
-    width: 80,
+    width: 90,
     textAlign: "right",
   },
   // Two-column layout
   twoColumn: {
     flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
+    gap: 16,
+    marginBottom: 20,
   },
   column: {
     flex: 1,
   },
   columnBox: {
     backgroundColor: COLORS.cardBg,
-    borderRadius: 4,
+    borderRadius: 6,
     border: `1px solid ${COLORS.border}`,
-    padding: 10,
+    padding: 14,
   },
   ledgerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 6,
+    paddingVertical: 6,
+  },
+  ledgerRowHighlight: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    marginHorizontal: -8,
+    marginTop: 6,
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: 4,
   },
   ledgerLabel: {
     fontSize: 9,
     color: COLORS.textMuted,
   },
+  ledgerLabelBold: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: COLORS.text,
+  },
   ledgerValue: {
-    fontSize: 9,
+    fontSize: 10,
+    fontWeight: 500,
+    color: COLORS.text,
+  },
+  ledgerValueBold: {
+    fontSize: 11,
     fontWeight: 600,
     color: COLORS.text,
   },
   ledgerValueDanger: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 500,
     color: COLORS.danger,
   },
+  ledgerDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 8,
+  },
   // Purification alert
   alertBox: {
-    backgroundColor: "#FFF8F0",
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 4,
-    padding: 10,
-    marginBottom: 16,
+    backgroundColor: COLORS.dangerLight,
+    border: `1px solid ${COLORS.danger}`,
+    borderRadius: 6,
+    padding: 14,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  alertIcon: {
+    width: 20,
+    marginRight: 10,
+  },
+  alertContent: {
+    flex: 1,
   },
   alertTitle: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 600,
     color: COLORS.danger,
     marginBottom: 4,
   },
   alertText: {
+    fontSize: 9,
+    color: COLORS.text,
+    lineHeight: 1.4,
+  },
+  alertRecommendation: {
     fontSize: 8,
     color: COLORS.textMuted,
+    marginTop: 6,
+    fontStyle: "italic",
   },
   // Footer
   footer: {
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    paddingTop: 8,
+    paddingTop: 12,
     marginTop: "auto",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
-  footerText: {
+  footerLeft: {
+    flexDirection: "column",
+  },
+  footerBrand: {
+    fontSize: 9,
+    fontWeight: 600,
+    color: COLORS.textMuted,
+  },
+  footerUrl: {
     fontSize: 7,
     color: COLORS.textLight,
+    marginTop: 2,
+  },
+  footerRight: {
+    textAlign: "right",
+  },
+  footerDate: {
+    fontSize: 8,
+    color: COLORS.textMuted,
+  },
+  footerRef: {
+    fontSize: 7,
+    color: COLORS.textLight,
+    marginTop: 2,
   },
 });
 
@@ -318,6 +467,18 @@ function formatCurrency(amount: number, currency: string = "USD"): string {
   }).format(amount);
 }
 
+function formatCurrencyCompact(amount: number, currency: string = "USD"): string {
+  if (amount >= 1000000) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(amount);
+  }
+  return formatCurrency(amount, currency);
+}
+
 function formatPercent(rate: number): string {
   return `${(rate * 100).toFixed(2)}%`;
 }
@@ -325,6 +486,15 @@ function formatPercent(rate: number): string {
 function formatAllocationPercent(value: number, total: number): string {
   if (!total || total <= 0) return "0%";
   return `${((value / total) * 100).toFixed(0)}%`;
+}
+
+function generateRefNumber(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "ZF-";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }
 
 // Asset configuration
@@ -338,10 +508,10 @@ const ASSET_CONFIG: {
   { key: "retirement", name: "Retirement", color: COLORS.retirement },
   { key: "realEstate", name: "Real Estate", color: COLORS.realEstate },
   { key: "business", name: "Business", color: COLORS.business },
-  { key: "otherAssets", name: "Other", color: COLORS.other },
+  { key: "otherAssets", name: "Other Assets", color: COLORS.other },
 ];
 
-// Vector Sankey Chart Component
+// Vector Sankey Chart with Labels
 interface SankeyChartProps {
   data: ZakatPDFData;
   width: number;
@@ -349,10 +519,12 @@ interface SankeyChartProps {
 }
 
 function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
-  const padding = { left: 100, right: 80, top: 10, bottom: 30 };
-  const chartWidth = width - padding.left - padding.right;
+  const padding = { left: 12, right: 12, top: 24, bottom: 24 };
+  const labelWidth = 90;
+  const valueWidth = 70;
+  const chartWidth = width - padding.left - padding.right - labelWidth * 2 - valueWidth * 2;
   const chartHeight = height - padding.top - padding.bottom;
-  const nodeWidth = 12;
+  const nodeWidth = 10;
 
   // Get assets with positive values
   const assets = ASSET_CONFIG
@@ -373,15 +545,16 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   }
 
   // Calculate node positions
-  const nodePadding = 6;
+  const nodePadding = 4;
   const availableHeight = chartHeight - (assets.length - 1) * nodePadding;
   
   // Left side nodes (assets)
+  const leftNodeX = padding.left + labelWidth + valueWidth;
   const leftNodes: { name: string; value: number; color: string; y: number; height: number }[] = [];
   let currentY = padding.top;
   assets.forEach((asset) => {
     const proportionalHeight = (asset.value / totalAssets) * availableHeight;
-    const nodeHeight = Math.max(16, proportionalHeight);
+    const nodeHeight = Math.max(12, proportionalHeight);
     leftNodes.push({
       name: asset.name,
       value: asset.value,
@@ -393,19 +566,21 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   });
 
   // Center node (Net Zakatable Wealth)
-  const centerX = padding.left + chartWidth * 0.5 - nodeWidth / 2;
+  const centerX = leftNodeX + chartWidth * 0.45;
+  const centerNodeHeight = chartHeight * 0.8;
   const centerNode = {
     x: centerX,
-    y: padding.top,
-    height: chartHeight,
+    y: padding.top + (chartHeight - centerNodeHeight) / 2,
+    height: centerNodeHeight,
     color: COLORS.netWealth,
     value: data.netZakatableWealth,
   };
 
   // Right node (Zakat Due)
-  const zakatHeight = Math.max(30, chartHeight * 0.3);
+  const rightNodeX = width - padding.right - labelWidth - valueWidth - nodeWidth;
+  const zakatHeight = Math.max(24, chartHeight * 0.25);
   const rightNode = data.zakatDue > 0 ? {
-    x: width - padding.right - nodeWidth,
+    x: rightNodeX,
     y: padding.top + (chartHeight - zakatHeight) / 2,
     height: zakatHeight,
     color: COLORS.primary,
@@ -431,47 +606,36 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   // Build links from assets to center
   let sourceYOffset = 0;
   const leftLinks = leftNodes.map((node) => {
-    const linkHeight = (node.value / totalAssets) * chartHeight;
+    const linkHeight = (node.value / totalAssets) * centerNode.height;
     const sourceY = node.y + node.height / 2;
-    const targetY = padding.top + sourceYOffset + linkHeight / 2;
+    const targetY = centerNode.y + sourceYOffset + linkHeight / 2;
     sourceYOffset += linkHeight;
     return {
       path: generatePath(
-        padding.left + nodeWidth, sourceY,
+        leftNodeX + nodeWidth, sourceY,
         centerX, targetY,
-        Math.max(4, (node.value / totalAssets) * (height - 60))
+        Math.max(3, linkHeight * 0.8)
       ),
       color: node.color,
-      opacity: 0.35,
+      opacity: 0.4,
     };
   });
 
   // Build links from center to zakat
   const rightLinks: { path: string; color: string; opacity: number }[] = [];
   if (rightNode && data.zakatDue > 0) {
-    let centerYOffset = 0;
-    let zakatYOffset = 0;
-    leftNodes.forEach((node) => {
-      const assetContribution = (node.value / totalAssets) * data.zakatDue;
-      const proportionOfZakat = assetContribution / data.zakatDue;
-      const rightLinkHeight = Math.max(3, proportionOfZakat * rightNode.height);
-      const assetPortionHeight = (node.value / totalAssets) * chartHeight;
-      
-      const sourceY = padding.top + centerYOffset + assetPortionHeight / 2;
-      const targetY = rightNode.y + zakatYOffset + rightLinkHeight / 2;
-      
-      rightLinks.push({
-        path: generatePath(
-          centerX + nodeWidth, sourceY,
-          rightNode.x, targetY,
-          rightLinkHeight
-        ),
-        color: node.color,
-        opacity: 0.5,
-      });
-      
-      centerYOffset += assetPortionHeight;
-      zakatYOffset += rightLinkHeight;
+    const zakatLinkHeight = rightNode.height * 0.8;
+    const sourceY = centerNode.y + centerNode.height / 2;
+    const targetY = rightNode.y + rightNode.height / 2;
+    
+    rightLinks.push({
+      path: generatePath(
+        centerX + nodeWidth, sourceY,
+        rightNode.x, targetY,
+        zakatLinkHeight
+      ),
+      color: COLORS.primary,
+      opacity: 0.5,
     });
   }
 
@@ -487,10 +651,10 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
         <Path key={`right-${i}`} d={link.path} fill={link.color} fillOpacity={link.opacity} />
       ))}
       
-      {/* Left nodes (assets) */}
+      {/* Left nodes (assets) with labels */}
       {leftNodes.map((node, i) => (
         <React.Fragment key={`left-node-${i}`}>
-          <Rect x={padding.left} y={node.y} width={nodeWidth} height={node.height} fill={node.color} rx={3} />
+          <Rect x={leftNodeX} y={node.y} width={nodeWidth} height={node.height} fill={node.color} rx={2} />
         </React.Fragment>
       ))}
       
@@ -505,6 +669,65 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   );
 }
 
+// Sankey Labels Component (rendered separately for better text control)
+function SankeyLabels({ data, width }: { data: ZakatPDFData; width: number }) {
+  const assets = ASSET_CONFIG
+    .map((cfg) => ({
+      ...cfg,
+      value: data.assetBreakdown[cfg.key] || 0,
+    }))
+    .filter((a) => a.value > 0)
+    .sort((a, b) => b.value - a.value);
+
+  const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
+  if (totalAssets === 0) return null;
+
+  return (
+    <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 4 }}>
+      {/* Left labels - Assets */}
+      <View style={{ width: 130 }}>
+        {assets.map((asset, i) => (
+          <View key={i} style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: asset.color, marginRight: 6 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 8, color: COLORS.text }}>{asset.name}</Text>
+              <Text style={{ fontSize: 7, color: COLORS.textLight }}>{formatCurrencyCompact(asset.value, data.currency)}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Center label */}
+      <View style={{ alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ fontSize: 8, color: COLORS.textMuted, marginBottom: 2 }}>Net Zakatable</Text>
+        <Text style={{ fontSize: 10, fontWeight: 600, color: COLORS.text }}>{formatCurrencyCompact(data.netZakatableWealth, data.currency)}</Text>
+      </View>
+
+      {/* Right label - Zakat */}
+      <View style={{ width: 100, alignItems: "flex-end", justifyContent: "center" }}>
+        {data.zakatDue > 0 ? (
+          <>
+            <Text style={{ fontSize: 8, color: COLORS.textMuted, marginBottom: 2 }}>Zakat Due</Text>
+            <Text style={{ fontSize: 12, fontWeight: 600, color: COLORS.primary }}>{formatCurrencyCompact(data.zakatDue, data.currency)}</Text>
+          </>
+        ) : (
+          <Text style={{ fontSize: 9, color: COLORS.textMuted }}>No Zakat Due</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// Horizontal bar for asset table
+function AssetBar({ percentage, color }: { percentage: number; color: string }) {
+  const barWidth = Math.min(100, Math.max(2, percentage));
+  return (
+    <View style={styles.barContainer}>
+      <View style={{ width: `${barWidth}%`, height: "100%", backgroundColor: color, borderRadius: 3 }} />
+    </View>
+  );
+}
+
 // Main PDF Document Component
 export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProps) {
   const date = new Date();
@@ -513,6 +736,7 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
     month: "long",
     day: "2-digit",
   });
+  const refNumber = generateRefNumber();
 
   const calendarLabel = data.calendarType === "lunar" ? "Lunar (Hijri)" : "Solar (Gregorian)";
   const nisabLabel = data.nisabStandard === "silver" ? "Silver Standard" : "Gold Standard";
@@ -546,54 +770,97 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
             <View style={styles.headerRow}>
               <View>
                 <Text style={styles.headerTitle}>ZAKAT REPORT</Text>
+                {calculationName && (
+                  <Text style={styles.calculationName}>{calculationName}</Text>
+                )}
                 <Text style={styles.headerSubtitle}>
                   {calendarLabel} • {formatPercent(data.zakatRate)} Rate
                 </Text>
               </View>
-              <View style={{ textAlign: "right" }}>
-                <Text style={styles.dateLabel}>Generated</Text>
+              <View style={styles.dateBox}>
+                <Text style={styles.dateLabel}>GENERATED</Text>
                 <Text style={styles.dateText}>{dateStr}</Text>
               </View>
             </View>
             
-            {data.isAboveNisab ? (
-              <View>
-                <Text style={styles.heroLabel}>Your Zakat Due</Text>
-                <Text style={styles.heroAmount}>
-                  {formatCurrency(data.zakatDue, data.currency)}
-                </Text>
-              </View>
-            ) : (
-              <View>
-                <Text style={styles.heroLabel}>Below Nisāb Threshold</Text>
-                <Text style={styles.heroAmountBelow}>No Zakat Due This Year</Text>
-              </View>
-            )}
+            <View style={styles.heroSection}>
+              {data.isAboveNisab ? (
+                <>
+                  <Text style={styles.heroLabel}>YOUR ZAKAT DUE</Text>
+                  <View style={{ position: "relative" }}>
+                    <Text style={styles.heroAmountShadow}>
+                      {formatCurrency(data.zakatDue, data.currency)}
+                    </Text>
+                    <Text style={styles.heroAmount}>
+                      {formatCurrency(data.zakatDue, data.currency)}
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.heroLabel}>BELOW NISĀB THRESHOLD</Text>
+                  <Text style={styles.heroAmountBelow}>No Zakat Due This Year</Text>
+                </>
+              )}
+            </View>
           </View>
 
           {/* Sankey Chart */}
           <View style={styles.sankeyContainer}>
-            <Text style={styles.sectionLabel}>ASSET FLOW TO ZAKAT</Text>
-            <VectorSankeyChart data={data} width={500} height={140} />
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionAccent} />
+              <Text style={styles.sectionLabel}>ASSET FLOW TO ZAKAT</Text>
+            </View>
+            <VectorSankeyChart data={data} width={490} height={100} />
+            <SankeyLabels data={data} width={490} />
           </View>
 
           {/* Asset Breakdown */}
           {activeAssets.length > 0 && (
             <View style={styles.tableContainer}>
-              <Text style={styles.sectionLabel}>ASSET COMPOSITION</Text>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionAccent} />
+                <Text style={styles.sectionLabel}>ASSET COMPOSITION</Text>
+              </View>
               <View style={styles.tableBox}>
-                {activeAssets.map((asset) => (
-                  <View key={asset.key} style={styles.tableRow}>
-                    <View style={[styles.colorDot, { backgroundColor: asset.color }]} />
-                    <Text style={styles.assetName}>{asset.name}</Text>
-                    <Text style={styles.assetPercent}>
-                      {formatAllocationPercent(asset.value, data.totalAssets)}
-                    </Text>
-                    <Text style={styles.assetValue}>
-                      {formatCurrency(asset.value, data.currency)}
-                    </Text>
-                  </View>
-                ))}
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderText, { flex: 1, marginLeft: 20 }]}>ASSET TYPE</Text>
+                  <Text style={[styles.tableHeaderText, { width: 80, textAlign: "center" }]}>ALLOCATION</Text>
+                  <Text style={[styles.tableHeaderText, { width: 36, textAlign: "right" }]}>%</Text>
+                  <Text style={[styles.tableHeaderText, { width: 90, textAlign: "right" }]}>VALUE</Text>
+                </View>
+                {activeAssets.map((asset, index) => {
+                  const percentage = (asset.value / data.totalAssets) * 100;
+                  return (
+                    <View 
+                      key={asset.key} 
+                      style={[
+                        styles.tableRow, 
+                        index % 2 === 1 && styles.tableRowAlt
+                      ]}
+                    >
+                      <View style={[styles.colorDot, { backgroundColor: asset.color }]} />
+                      <Text style={styles.assetName}>{asset.name}</Text>
+                      <AssetBar percentage={percentage} color={asset.color} />
+                      <Text style={styles.assetPercent}>
+                        {formatAllocationPercent(asset.value, data.totalAssets)}
+                      </Text>
+                      <Text style={styles.assetValue}>
+                        {formatCurrency(asset.value, data.currency)}
+                      </Text>
+                    </View>
+                  );
+                })}
+                {/* Total row */}
+                <View style={[styles.tableRow, styles.tableRowTotal]}>
+                  <View style={[styles.colorDot, { backgroundColor: "transparent" }]} />
+                  <Text style={styles.assetNameTotal}>Total Assets</Text>
+                  <View style={{ width: 80, marginRight: 12 }} />
+                  <Text style={[styles.assetPercent, { fontWeight: 600 }]}>100%</Text>
+                  <Text style={styles.assetValueTotal}>
+                    {formatCurrency(data.totalAssets, data.currency)}
+                  </Text>
+                </View>
               </View>
             </View>
           )}
@@ -601,7 +868,10 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
           {/* Two-Column: Ledger + Configuration */}
           <View style={styles.twoColumn}>
             <View style={styles.column}>
-              <Text style={styles.sectionLabel}>CALCULATION LEDGER</Text>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionAccent} />
+                <Text style={styles.sectionLabel}>CALCULATION LEDGER</Text>
+              </View>
               <View style={styles.columnBox}>
                 <View style={styles.ledgerRow}>
                   <Text style={styles.ledgerLabel}>Total Assets</Text>
@@ -610,14 +880,15 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
                   </Text>
                 </View>
                 <View style={styles.ledgerRow}>
-                  <Text style={styles.ledgerLabel}>Liabilities</Text>
+                  <Text style={styles.ledgerLabel}>Less: Deductible Liabilities</Text>
                   <Text style={styles.ledgerValueDanger}>
-                    -{formatCurrency(data.totalLiabilities, data.currency)}
+                    ({formatCurrency(data.totalLiabilities, data.currency)})
                   </Text>
                 </View>
-                <View style={[styles.ledgerRow, { marginTop: 4, paddingTop: 4, borderTopWidth: 1, borderTopColor: COLORS.border }]}>
-                  <Text style={[styles.ledgerLabel, { fontWeight: 600 }]}>Net Zakatable</Text>
-                  <Text style={styles.ledgerValue}>
+                <View style={styles.ledgerDivider} />
+                <View style={styles.ledgerRowHighlight}>
+                  <Text style={styles.ledgerLabelBold}>Net Zakatable Wealth</Text>
+                  <Text style={styles.ledgerValueBold}>
                     {formatCurrency(data.netZakatableWealth, data.currency)}
                   </Text>
                 </View>
@@ -625,20 +896,27 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
             </View>
 
             <View style={styles.column}>
-              <Text style={styles.sectionLabel}>CONFIGURATION</Text>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionAccent} />
+                <Text style={styles.sectionLabel}>CONFIGURATION</Text>
+              </View>
               <View style={styles.columnBox}>
                 <View style={styles.ledgerRow}>
-                  <Text style={styles.ledgerLabel}>Nisāb ({nisabLabel})</Text>
+                  <Text style={styles.ledgerLabel}>Nisāb Threshold</Text>
                   <Text style={styles.ledgerValue}>
                     {formatCurrency(data.nisab, data.currency)}
                   </Text>
                 </View>
                 <View style={styles.ledgerRow}>
-                  <Text style={styles.ledgerLabel}>Calendar</Text>
+                  <Text style={styles.ledgerLabel}>Standard Used</Text>
+                  <Text style={styles.ledgerValue}>{nisabLabel}</Text>
+                </View>
+                <View style={styles.ledgerRow}>
+                  <Text style={styles.ledgerLabel}>Calendar Type</Text>
                   <Text style={styles.ledgerValue}>{calendarLabel}</Text>
                 </View>
                 <View style={styles.ledgerRow}>
-                  <Text style={styles.ledgerLabel}>Rate Applied</Text>
+                  <Text style={styles.ledgerLabel}>Zakat Rate</Text>
                   <Text style={styles.ledgerValue}>{formatPercent(data.zakatRate)}</Text>
                 </View>
               </View>
@@ -648,19 +926,33 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
           {/* Purification Alert */}
           {totalPurification > 0 && (
             <View style={styles.alertBox}>
-              <Text style={styles.alertTitle}>✦ Purification Required</Text>
-              <Text style={styles.alertText}>
-                {data.interestToPurify > 0 && `Interest: ${formatCurrency(data.interestToPurify, data.currency)}`}
-                {data.interestToPurify > 0 && data.dividendsToPurify > 0 && "  •  "}
-                {data.dividendsToPurify > 0 && `Non-Halal Dividends: ${formatCurrency(data.dividendsToPurify, data.currency)}`}
-              </Text>
+              <View style={styles.alertIcon}>
+                <Text style={{ fontSize: 14 }}>⚠</Text>
+              </View>
+              <View style={styles.alertContent}>
+                <Text style={styles.alertTitle}>Purification Required</Text>
+                <Text style={styles.alertText}>
+                  {data.interestToPurify > 0 && `Interest to purify: ${formatCurrency(data.interestToPurify, data.currency)}`}
+                  {data.interestToPurify > 0 && data.dividendsToPurify > 0 && "\n"}
+                  {data.dividendsToPurify > 0 && `Non-halal dividends: ${formatCurrency(data.dividendsToPurify, data.currency)}`}
+                </Text>
+                <Text style={styles.alertRecommendation}>
+                  These amounts should be given to charity separately from Zakat, as they represent wealth that requires purification.
+                </Text>
+              </View>
             </View>
           )}
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Computed by ZakahFlow • zakat.vora.dev</Text>
-            <Text style={styles.footerText}>Generated {dateStr}</Text>
+            <View style={styles.footerLeft}>
+              <Text style={styles.footerBrand}>ZakahFlow</Text>
+              <Text style={styles.footerUrl}>zakat.vora.dev</Text>
+            </View>
+            <View style={styles.footerRight}>
+              <Text style={styles.footerDate}>{dateStr}</Text>
+              <Text style={styles.footerRef}>Ref: {refNumber}</Text>
+            </View>
           </View>
         </View>
       </Page>
