@@ -16,6 +16,7 @@ Font.register({
   family: "Lora",
   fonts: [
     { src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787weuyJGmKxemMeZ.ttf", fontWeight: 400 },
+    { src: "https://fonts.gstatic.com/s/lora/v35/0QI8MX1D_JOuMw_LIftLtfOm84TX.ttf", fontWeight: 400, fontStyle: "italic" },
     { src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787z5vCJGmKxemMeZ.ttf", fontWeight: 600 },
   ],
 });
