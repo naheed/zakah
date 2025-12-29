@@ -497,7 +497,7 @@ const ASSET_CONFIG: {
   { key: "otherAssets", name: "Other Assets", color: COLORS.other },
 ];
 
-// Vector Sankey Chart with Labels
+// Vector Sankey Chart with proper proportional flows
 interface SankeyChartProps {
   data: ZakatPDFData;
   width: number;
@@ -505,11 +505,10 @@ interface SankeyChartProps {
 }
 
 function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
-  const padding = { left: 8, right: 8, top: 16, bottom: 16 };
-  const labelWidth = 70;
-  const chartWidth = width - padding.left - padding.right - labelWidth * 2;
+  const padding = { left: 4, right: 4, top: 8, bottom: 8 };
+  const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
-  const nodeWidth = 8;
+  const nodeWidth = 6;
 
   // Get assets with positive values
   const assets = ASSET_CONFIG
@@ -529,17 +528,20 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     );
   }
 
-  // Calculate node positions
-  const nodePadding = 3;
-  const availableHeight = chartHeight - (assets.length - 1) * nodePadding;
+  // Node X positions
+  const leftNodeX = padding.left;
+  const centerNodeX = padding.left + chartWidth * 0.42;
+  const rightNodeX = padding.left + chartWidth - nodeWidth;
+
+  // Calculate left nodes (assets) - heights proportional to value
+  const nodePadding = 2;
+  const leftTotalPadding = (assets.length - 1) * nodePadding;
+  const leftAvailableHeight = chartHeight - leftTotalPadding;
   
-  // Left side nodes (assets)
-  const leftNodeX = padding.left + labelWidth;
   const leftNodes: { name: string; value: number; color: string; y: number; height: number }[] = [];
   let currentY = padding.top;
   assets.forEach((asset) => {
-    const proportionalHeight = (asset.value / totalAssets) * availableHeight;
-    const nodeHeight = Math.max(10, proportionalHeight);
+    const nodeHeight = Math.max(4, (asset.value / totalAssets) * leftAvailableHeight);
     leftNodes.push({
       name: asset.name,
       value: asset.value,
@@ -550,77 +552,81 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     currentY += nodeHeight + nodePadding;
   });
 
-  // Center node (Net Zakatable Wealth)
-  const centerX = leftNodeX + chartWidth * 0.45;
-  const centerNodeHeight = chartHeight * 0.75;
+  // Center node height = total of all left nodes (represents net zakatable wealth)
+  const centerNodeHeight = leftNodes.reduce((sum, n) => sum + n.height, 0) + leftTotalPadding;
   const centerNode = {
-    x: centerX,
-    y: padding.top + (chartHeight - centerNodeHeight) / 2,
+    x: centerNodeX,
+    y: padding.top,
     height: centerNodeHeight,
     color: COLORS.netWealth,
-    value: data.netZakatableWealth,
   };
 
-  // Right node (Zakat Due)
-  const rightNodeX = width - padding.right - labelWidth - nodeWidth;
-  const zakatHeight = Math.max(20, chartHeight * 0.22);
+  // Right node (Zakat Due) - height proportional to zakat rate (2.5% of center)
+  const zakatRatio = data.zakatDue / data.netZakatableWealth;
+  const zakatHeight = Math.max(6, centerNodeHeight * zakatRatio * 4); // Scale up for visibility
   const rightNode = data.zakatDue > 0 ? {
     x: rightNodeX,
-    y: padding.top + (chartHeight - zakatHeight) / 2,
+    y: padding.top + (centerNodeHeight - zakatHeight) / 2,
     height: zakatHeight,
     color: COLORS.primary,
-    value: data.zakatDue,
   } : null;
 
-  // Generate curved paths for links
+  // Generate curved path between two points with given heights
   const generatePath = (
-    sourceX: number, sourceY: number,
-    targetX: number, targetY: number,
-    linkHeight: number
+    x1: number, y1: number, h1: number,
+    x2: number, y2: number, h2: number,
   ): string => {
-    const midX = (sourceX + targetX) / 2;
+    const midX = (x1 + x2) / 2;
+    // Top edge
+    const topStart = y1 - h1 / 2;
+    const topEnd = y2 - h2 / 2;
+    // Bottom edge
+    const botStart = y1 + h1 / 2;
+    const botEnd = y2 + h2 / 2;
+    
     return `
-      M ${sourceX} ${sourceY - linkHeight / 2}
-      C ${midX} ${sourceY - linkHeight / 2}, ${midX} ${targetY - linkHeight / 2}, ${targetX} ${targetY - linkHeight / 2}
-      L ${targetX} ${targetY + linkHeight / 2}
-      C ${midX} ${targetY + linkHeight / 2}, ${midX} ${sourceY + linkHeight / 2}, ${sourceX} ${sourceY + linkHeight / 2}
+      M ${x1} ${topStart}
+      C ${midX} ${topStart}, ${midX} ${topEnd}, ${x2} ${topEnd}
+      L ${x2} ${botEnd}
+      C ${midX} ${botEnd}, ${midX} ${botStart}, ${x1} ${botStart}
       Z
     `;
   };
 
-  // Build links from assets to center
-  let sourceYOffset = 0;
+  // Build links from assets to center - each asset flows into center at proportional position
+  let centerYOffset = padding.top;
   const leftLinks = leftNodes.map((node) => {
-    const linkHeight = (node.value / totalAssets) * centerNode.height;
     const sourceY = node.y + node.height / 2;
-    const targetY = centerNode.y + sourceYOffset + linkHeight / 2;
-    sourceYOffset += linkHeight;
+    const targetY = centerYOffset + node.height / 2;
+    const flowHeight = node.height;
+    
+    const path = generatePath(
+      leftNodeX + nodeWidth, sourceY, flowHeight,
+      centerNodeX, targetY, flowHeight
+    );
+    
+    centerYOffset += node.height + nodePadding;
+    
     return {
-      path: generatePath(
-        leftNodeX + nodeWidth, sourceY,
-        centerX, targetY,
-        Math.max(2, linkHeight * 0.7)
-      ),
+      path,
       color: node.color,
-      opacity: 0.35,
+      opacity: 0.4,
     };
   });
 
-  // Build links from center to zakat
+  // Build link from center to zakat - single flow
   const rightLinks: { path: string; color: string; opacity: number }[] = [];
   if (rightNode && data.zakatDue > 0) {
-    const zakatLinkHeight = rightNode.height * 0.7;
     const sourceY = centerNode.y + centerNode.height / 2;
     const targetY = rightNode.y + rightNode.height / 2;
     
     rightLinks.push({
       path: generatePath(
-        centerX + nodeWidth, sourceY,
-        rightNode.x, targetY,
-        zakatLinkHeight
+        centerNodeX + nodeWidth, sourceY, zakatHeight,
+        rightNodeX, targetY, zakatHeight
       ),
       color: COLORS.primary,
-      opacity: 0.45,
+      opacity: 0.5,
     });
   }
 
@@ -638,17 +644,15 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
       
       {/* Left nodes (assets) */}
       {leftNodes.map((node, i) => (
-        <React.Fragment key={`left-node-${i}`}>
-          <Rect x={leftNodeX} y={node.y} width={nodeWidth} height={node.height} fill={node.color} rx={2} />
-        </React.Fragment>
+        <Rect key={`left-node-${i}`} x={leftNodeX} y={node.y} width={nodeWidth} height={node.height} fill={node.color} rx={1} />
       ))}
       
       {/* Center node */}
-      <Rect x={centerNode.x} y={centerNode.y} width={nodeWidth} height={centerNode.height} fill={centerNode.color} rx={2} />
+      <Rect x={centerNode.x} y={centerNode.y} width={nodeWidth} height={centerNode.height} fill={centerNode.color} rx={1} />
       
       {/* Right node (zakat) */}
       {rightNode && (
-        <Rect x={rightNode.x} y={rightNode.y} width={nodeWidth} height={rightNode.height} fill={rightNode.color} rx={2} />
+        <Rect x={rightNode.x} y={rightNode.y} width={nodeWidth} height={rightNode.height} fill={rightNode.color} rx={1} />
       )}
     </Svg>
   );
@@ -794,7 +798,7 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
             <View style={styles.sectionAccent} />
             <Text style={styles.sectionLabel}>ASSET FLOW TO ZAKAT</Text>
           </View>
-          <VectorSankeyChart data={data} width={500} height={70} />
+          <VectorSankeyChart data={data} width={500} height={80} />
           <SankeyLabels data={data} width={500} />
         </View>
 
