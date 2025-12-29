@@ -127,11 +127,27 @@ export function ResultsStep({
   const captureSankeyChart = useCallback(async (): Promise<string | undefined> => {
     if (!sankeyPdfRef.current) return undefined;
     try {
-      const dataUrl = await toPng(sankeyPdfRef.current, {
+      // Temporarily move element on-screen for capture (off-screen elements don't render)
+      const el = sankeyPdfRef.current;
+      const originalStyle = el.getAttribute('style') || '';
+      el.style.position = 'fixed';
+      el.style.left = '0';
+      el.style.top = '0';
+      el.style.zIndex = '-9999';
+      el.style.opacity = '1';
+      
+      // Wait for paint
+      await new Promise(r => setTimeout(r, 100));
+      
+      const dataUrl = await toPng(el, {
         quality: 1,
         pixelRatio: 2,
         backgroundColor: '#FAF9F7',
       });
+      
+      // Restore original style
+      el.setAttribute('style', originalStyle);
+      
       return dataUrl;
     } catch (error) {
       console.error('Failed to capture Sankey chart:', error);
