@@ -571,24 +571,26 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     color: COLORS.primary,
   } : null;
 
-  // Generate curved path between two points with given heights
-  const generatePath = (
-    x1: number, y1: number, h1: number,
-    x2: number, y2: number, h2: number,
+  // Generate curved Bezier path for flowing ribbon between two points
+  // sourceX, sourceTopY, sourceBottomY -> targetX, targetTopY, targetBottomY
+  const generateCurvedPath = (
+    sourceX: number,
+    sourceTopY: number,
+    sourceBottomY: number,
+    targetX: number,
+    targetTopY: number,
+    targetBottomY: number
   ): string => {
-    const midX = (x1 + x2) / 2;
-    // Top edge
-    const topStart = y1 - h1 / 2;
-    const topEnd = y2 - h2 / 2;
-    // Bottom edge
-    const botStart = y1 + h1 / 2;
-    const botEnd = y2 + h2 / 2;
+    // Control point offset for smooth S-curve (like web version)
+    const curveStrength = (targetX - sourceX) * 0.5;
     
+    // Top curve: source top -> target top
+    // Bottom curve: target bottom -> source bottom (reverse direction)
     return `
-      M ${x1} ${topStart}
-      C ${midX} ${topStart}, ${midX} ${topEnd}, ${x2} ${topEnd}
-      L ${x2} ${botEnd}
-      C ${midX} ${botEnd}, ${midX} ${botStart}, ${x1} ${botStart}
+      M ${sourceX} ${sourceTopY}
+      C ${sourceX + curveStrength} ${sourceTopY}, ${targetX - curveStrength} ${targetTopY}, ${targetX} ${targetTopY}
+      L ${targetX} ${targetBottomY}
+      C ${targetX - curveStrength} ${targetBottomY}, ${sourceX + curveStrength} ${sourceBottomY}, ${sourceX} ${sourceBottomY}
       Z
     `;
   };
@@ -596,13 +598,14 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
   // Build links from assets to center - each asset flows into center at proportional position
   let centerYOffset = padding.top;
   const leftLinks = leftNodes.map((node) => {
-    const sourceY = node.y + node.height / 2;
-    const targetY = centerYOffset + node.height / 2;
-    const flowHeight = node.height;
+    const sourceTopY = node.y;
+    const sourceBottomY = node.y + node.height;
+    const targetTopY = centerYOffset;
+    const targetBottomY = centerYOffset + node.height;
     
-    const path = generatePath(
-      leftNodeX + nodeWidth, sourceY, flowHeight,
-      centerNodeX, targetY, flowHeight
+    const path = generateCurvedPath(
+      leftNodeX + nodeWidth, sourceTopY, sourceBottomY,
+      centerNodeX, targetTopY, targetBottomY
     );
     
     centerYOffset += node.height + nodePadding;
@@ -614,19 +617,33 @@ function VectorSankeyChart({ data, width, height }: SankeyChartProps) {
     };
   });
 
-  // Build link from center to zakat - single flow
+  // Build links from center to zakat - each asset contributes proportionally
   const rightLinks: { path: string; color: string; opacity: number }[] = [];
   if (rightNode && data.zakatDue > 0) {
-    const sourceY = centerNode.y + centerNode.height / 2;
-    const targetY = rightNode.y + rightNode.height / 2;
+    let sourceYOffset = padding.top;
+    let targetYOffset = rightNode.y;
     
-    rightLinks.push({
-      path: generatePath(
-        centerNodeX + nodeWidth, sourceY, zakatHeight,
-        rightNodeX, targetY, zakatHeight
-      ),
-      color: COLORS.primary,
-      opacity: 0.5,
+    // Each asset flows from center to zakat proportionally
+    leftNodes.forEach((node) => {
+      const assetProportion = node.value / totalAssets;
+      const zakatContribution = assetProportion * zakatHeight;
+      
+      const sourceTopY = sourceYOffset;
+      const sourceBottomY = sourceYOffset + node.height;
+      const targetTopY = targetYOffset;
+      const targetBottomY = targetYOffset + zakatContribution;
+      
+      rightLinks.push({
+        path: generateCurvedPath(
+          centerNodeX + nodeWidth, sourceTopY, sourceBottomY,
+          rightNodeX, targetTopY, targetBottomY
+        ),
+        color: node.color,
+        opacity: 0.5,
+      });
+      
+      sourceYOffset += node.height + nodePadding;
+      targetYOffset += zakatContribution;
     });
   }
 
