@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, Scale, Calendar, Coins, Building, TrendingUp, Shield, Landmark, Wallet, HandCoins, FileText, AlertCircle, Users, ChevronUp, ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Footer } from "@/components/zakat/Footer";
 
 const Methodology = () => {
   const navigate = useNavigate();
@@ -1025,17 +1026,16 @@ const Methodology = () => {
             </section>
           </div>
 
-          {/* Footer */}
-          <footer className="mt-16 pt-8 border-t border-border text-center space-y-4">
+          {/* CTA Button */}
+          <div className="mt-16 pt-8 border-t border-border text-center">
             <Button onClick={() => navigate("/")} className="gap-2">
               Start Calculating Your Zakat
               <ArrowLeft className="w-4 h-4 rotate-180" />
             </Button>
-            <p className="text-xs text-muted-foreground">
-              Built by Naheed Vora. This calculator is provided on an as-is basis.
-            </p>
-          </footer>
+          </div>
         </div>
+        
+        <Footer />
         
         {/* Back to Top Button - Mobile */}
         {showBackToTop && (

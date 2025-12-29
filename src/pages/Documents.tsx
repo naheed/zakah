@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, FileText, Building2, Calendar, ChevronRight, Trash2 } from "lucide-react";
+import { Footer } from "@/components/zakat/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -230,6 +231,7 @@ export default function Documents() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
