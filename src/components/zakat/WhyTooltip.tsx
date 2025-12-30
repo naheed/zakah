@@ -81,17 +81,49 @@ export function WhyTooltip({ title, explanation, className }: WhyTooltipProps) {
 
 // Pre-defined fiqh explanations for common fields
 export const fiqhExplanations = {
-  // Calculation Modes
+  // ==========================================================================
+  // CORE LEGAL PRINCIPLES (New in Phase 3)
+  // ==========================================================================
+  milkTam: {
+    title: "Milk Tām (Complete Ownership)",
+    explanation: "Full, unrestricted ownership with legal title (raqabah) and ability to dispose (yad). Required for Zakat liability on any asset.",
+  },
+  qudrahTasarruf: {
+    title: "Qudrah 'ala al-Tasarruf",
+    explanation: "The legal and practical ability to dispose of wealth freely. Without this capacity, wealth may be exempt from Zakat.",
+  },
+  malDimar: {
+    title: "Māl Ḍimār (Inaccessible Wealth)",
+    explanation: "Wealth that is out of hand and may not return—like seized property or contested inheritance. Classical exemption applies.",
+  },
+  nama: {
+    title: "Namā' (Growth Potential)",
+    explanation: "Assets must have potential for growth to be zakatable. Personal items like furniture lack namā' and are exempt.",
+  },
+
+  // ==========================================================================
+  // CALCULATION MODES
+  // ==========================================================================
   calculationModes: {
-    title: "Three approaches to Zakat calculation",
-    explanation: "Conservative uses full asset values. Optimized deducts taxes/penalties. Bradford Exclusion Rule fully exempts Traditional 401(k)/IRA under 59½ per Sheikh Joe Bradford's ruling on milk tām (complete ownership).",
+    title: "Three Approaches to Zakat",
+    explanation: "Conservative: full asset values. Optimized: deducts taxes/penalties. Bradford Exclusion: fully exempts Traditional 401(k)/IRA under 59½ based on lack of milk tām.",
+  },
+  conservativeMode: {
+    title: "Conservative Mode",
+    explanation: "Pay Zakat on the full vested balance of all accounts. The safest approach that ensures no obligation is missed.",
+  },
+  optimizedMode: {
+    title: "Optimized Mode",
+    explanation: "Deduct taxes and 10% early withdrawal penalty from retirement accounts. Pay on what you could actually access today.",
   },
   bradfordExclusion: {
     title: "Bradford Exclusion Rule",
-    explanation: "Traditional 401(k)/IRA accounts under 59½ lack milk tām (complete ownership) and qudrah 'ala al-tasarruf (ability to dispose). The 10% penalty plus taxes create a legal barrier similar to māl ḍimār (inaccessible wealth).",
+    explanation: "Traditional 401(k)/IRA under 59½ lack milk tām and qudrah 'ala al-tasarruf. The 10% penalty plus taxes create a barrier similar to māl ḍimār.",
   },
-  
-  // Liquid Assets
+
+  // ==========================================================================
+  // LIQUID ASSETS
+  // ==========================================================================
   checkingAccounts: {
     title: "Why is cash zakatable?",
     explanation: "Fiat currency takes the ruling of gold and silver as a store of value. The full closing balance is zakatable.",
@@ -100,100 +132,130 @@ export const fiqhExplanations = {
     title: "Why purify interest?",
     explanation: "Interest (riba) is impure money that does not belong to you. It must be donated to charity without reward expectation.",
   },
-  
-  // Investments
+
+  // ==========================================================================
+  // INVESTMENTS (Updated with Mudir/Muhtakir)
+  // ==========================================================================
   activeInvestments: {
-    title: "Why 100% for trading stocks?",
-    explanation: "Stocks held for short-term capital gain are commercial merchandise (urud al-tijarah). Zakat is due on full market value.",
+    title: "Mudir (Active Trader)",
+    explanation: "One who trades frequently with short-term intent. Stocks are commercial merchandise (ʿurūḍ al-tijārah)—100% of market value is zakatable.",
   },
   passiveInvestments: {
-    title: "Why the 30% rule?",
-    explanation: "For long-term holdings, Zakat shifts to the company's zakatable assets. Research shows ~30% of market cap is liquid/zakatable (AAOIFI Standard 35).",
+    title: "Muḥtakir (Long-Term Investor)",
+    explanation: "One who holds for appreciation/dividends. Zakat shifts to the company's zakatable assets—approximately 30% of market value (AAOIFI Standard 35).",
   },
-  
-  // Retirement
+  thirtyPercentRule: {
+    title: "The 30% Rule Derivation",
+    explanation: "Research on Shariah-compliant indices shows ~30% of market cap consists of liquid/zakatable assets. This proxy gives an effective rate of 0.75%.",
+  },
+
+  // ==========================================================================
+  // RETIREMENT (Enhanced for Bradford Rule)
+  // ==========================================================================
   retirementAccounts: {
-    title: "Why deduct taxes & penalties?",
-    explanation: "The accessible balance method: only pay Zakat on what you could actually access. Taxes and early withdrawal penalties reduce your actual ownership.",
+    title: "Three Approaches to Retirement",
+    explanation: "Conservative: full balance. Optimized: after taxes/penalties. Bradford: Traditional accounts under 59½ fully exempt due to lack of complete ownership.",
   },
   rothIRA: {
-    title: "Roth IRA treatment",
-    explanation: "Contributions can be withdrawn tax-free anytime (fully zakatable). Earnings are subject to penalty if under 59½, treated like 401(k).",
+    title: "Roth IRA Dual Treatment",
+    explanation: "Contributions: accessible tax-free anytime, fully zakatable in all modes. Earnings: subject to penalty under 59½, treated per your chosen calculation mode.",
   },
-  
-  // Precious Metals
+  rothContributions: {
+    title: "Roth Contributions (Principal)",
+    explanation: "Your after-tax contributions can be withdrawn anytime without penalty. This represents complete ownership—fully zakatable regardless of mode.",
+  },
+  rothEarnings: {
+    title: "Roth Earnings (Growth)",
+    explanation: "Investment gains are subject to 10% penalty plus taxes if withdrawn before 59½. Bradford mode exempts these; Optimized deducts penalties.",
+  },
+  traditional401k: {
+    title: "Traditional 401(k)/403(b)",
+    explanation: "Pre-tax contributions with 10% penalty plus income tax on early withdrawal. Bradford mode: fully exempt under 59½. Optimized: after-penalty value.",
+  },
+  hsaAccount: {
+    title: "Why is HSA zakatable?",
+    explanation: "HSA funds are fully yours and accessible for qualified medical expenses at any time. Complete ownership (milk tām) applies.",
+  },
+
+  // ==========================================================================
+  // PRECIOUS METALS
+  // ==========================================================================
   goldSilver: {
     title: "Why melt value only?",
     explanation: "Zakat is due on the metal content only. Gemstones and craftsmanship are not zakatable unless the jewelry is trade inventory.",
   },
   jewelryExemption: {
     title: "The jewelry debate",
-    explanation: "Majority view: worn jewelry is exempt (like clothing). Hanafi view: gold/silver are inherently zakatable. Both are valid.",
+    explanation: "Majority view: worn jewelry is exempt (like clothing). Hanafi view: gold/silver are inherently zakatable. Both are valid scholarly positions.",
   },
-  
-  // Liabilities
+
+  // ==========================================================================
+  // LIABILITIES (Enhanced with Maliki framing)
+  // ==========================================================================
   deductibleDebts: {
-    title: "Which debts are deductible?",
-    explanation: "Only immediate debts reduce zakatable wealth: bills due now, credit cards, 12 months of mortgage (AMJA opinion). Long-term debt is not fully deductible.",
+    title: "The Maliki Middle Path",
+    explanation: "Only immediate debts reduce zakatable wealth: current bills, credit cards, 12 months of installments. This avoids the extremes of full deduction or no deduction.",
+  },
+  daynMustaghriq: {
+    title: "Dayn al-Mustaghriq",
+    explanation: "Overwhelming debt that consumes all assets. Classical scholars debated whether this eliminates Zakat—the modern synthesis limits deduction to current obligations.",
   },
   monthlyLiving: {
     title: "Why one month's expenses?",
-    explanation: "Immediate living expenses (rent, food, utilities) are basic needs exempt from Zakat. Only the current month's obligations are deductible.",
+    explanation: "Immediate living expenses (rent, food, utilities) are basic needs. Only the current month's obligations are deductible as ḥājiyyāt (necessities).",
   },
   mortgageDeduction: {
     title: "Why 12 months of mortgage?",
-    explanation: "AMJA ruling: Only the next 12 installments are deductible, not the full mortgage balance. This balances debt relief with Zakat obligations.",
+    explanation: "AMJA ruling: Only the next 12 installments are deductible, not the full balance. This balances debt relief with Zakat obligations to the poor.",
   },
   studentLoans: {
     title: "Why only current payment?",
-    explanation: "Like mortgages, only the installment due now is deductible. Future payments aren't yet owed and don't reduce current wealth.",
+    explanation: "Like mortgages, only the installment due now is deductible. Future payments are not yet owed and do not reduce current wealth.",
   },
-  
-  // Crypto
+
+  // ==========================================================================
+  // CRYPTO
+  // ==========================================================================
   cryptoCurrency: {
     title: "Why is crypto zakatable?",
     explanation: "Major cryptocurrencies function as currency/store of value, taking the ruling of gold and silver (medium of exchange). Full market value is zakatable.",
   },
   cryptoTrading: {
     title: "Trading vs. holding crypto",
-    explanation: "Actively traded tokens are commercial goods (urud al-tijarah). Even NFTs held for flipping are zakatable at full value.",
+    explanation: "Actively traded tokens are commercial goods (ʿurūḍ al-tijārah). Even NFTs held for flipping are zakatable at full value.",
   },
   stakedAssets: {
     title: "Staking and Zakat",
-    explanation: "Your staked principal remains your wealth and is fully zakatable. Locked staking doesn't affect ownership, only accessibility.",
+    explanation: "Your staked principal remains your wealth and is fully zakatable. Locked staking affects accessibility, not ownership.",
   },
   defiLiquidity: {
     title: "DeFi liquidity pools",
-    explanation: "LP tokens represent redeemable value. Calculate based on what you could withdraw now, even if subject to impermanent loss.",
+    explanation: "LP tokens represent redeemable value. Calculate based on what you could withdraw now, accounting for impermanent loss.",
   },
-  
-  // Trusts
+
+  // ==========================================================================
+  // TRUSTS
+  // ==========================================================================
   revocableTrust: {
     title: "Why revocable = zakatable?",
-    explanation: "You retain full control and can dissolve the trust anytime. Legally and Islamically, the assets remain yours (Milk Tam - complete ownership).",
+    explanation: "You retain full control (milk tām) and can dissolve the trust anytime. The assets remain yours legally and Islamically.",
   },
   irrevocableTrust: {
     title: "Why control matters?",
-    explanation: "Zakat requires Milk Tam (complete possession). If you irrevocably transferred assets and can't access principal, you lack this requirement.",
+    explanation: "Zakat requires milk tām (complete possession). If you irrevocably transferred assets and cannot access principal, you lack this requirement.",
   },
   clatTrust: {
     title: "CLAT treatment",
     explanation: "During the annuity term, the charity owns the income stream (usufruct). The remainder interest is contingent until the term ends.",
   },
-  
-  // Retirement - additional
-  hsaAccount: {
-    title: "Why is HSA zakatable?",
-    explanation: "HSA funds are fully yours and accessible for medical expenses at any time. No penalties for qualified medical use makes it complete ownership.",
-  },
-  
-  // Nisab
+
+  // ==========================================================================
+  // NISAB & CALENDAR
+  // ==========================================================================
   silverNisab: {
     title: "Why silver standard?",
-    explanation: "Silver captures more Muslims in the obligation (most beneficial for the poor). Gold standard is valid for those holding wealth exclusively in gold.",
+    explanation: "Silver captures more Muslims in the obligation (anfa' li'l-fuqarā'—most beneficial for the poor). Gold standard is valid for those holding wealth exclusively in gold.",
   },
-  
-  // Calendar
   lunarYear: {
     title: "Why adjust for solar year?",
     explanation: "The solar year is 11 days longer. Rate is adjusted to 2.577% to prevent shortchanging recipients over a lifetime.",
