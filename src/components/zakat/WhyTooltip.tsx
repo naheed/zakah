@@ -81,6 +81,16 @@ export function WhyTooltip({ title, explanation, className }: WhyTooltipProps) {
 
 // Pre-defined fiqh explanations for common fields
 export const fiqhExplanations = {
+  // Calculation Modes
+  calculationModes: {
+    title: "Three approaches to Zakat calculation",
+    explanation: "Conservative uses full asset values. Optimized deducts taxes/penalties. Bradford Exclusion Rule fully exempts Traditional 401(k)/IRA under 59½ per Sheikh Joe Bradford's ruling on milk tām (complete ownership).",
+  },
+  bradfordExclusion: {
+    title: "Bradford Exclusion Rule",
+    explanation: "Traditional 401(k)/IRA accounts under 59½ lack milk tām (complete ownership) and qudrah 'ala al-tasarruf (ability to dispose). The 10% penalty plus taxes create a legal barrier similar to māl ḍimār (inaccessible wealth).",
+  },
+  
   // Liquid Assets
   checkingAccounts: {
     title: "Why is cash zakatable?",

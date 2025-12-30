@@ -11,7 +11,7 @@ export const SOLAR_ZAKAT_RATE = 0.02577; // Adjusted for solar year (2.5% * 365.
 
 export type CalendarType = 'lunar' | 'solar';
 export type NisabStandard = 'silver' | 'gold';
-export type CalculationMode = 'conservative' | 'optimized';
+export type CalculationMode = 'conservative' | 'optimized' | 'bradford';
 
 export interface HouseholdMember {
   id: string;
@@ -207,7 +207,14 @@ export function calculateRetirementAccessible(
     return vestedBalance;
   }
   
-  // Optimized mode: deduct taxes and penalties
+  // Bradford Exclusion Rule: Traditional 401(k)/IRA fully exempt under 59½
+  // Based on Sheikh Joe Bradford's ruling that these accounts lack milk tām
+  // (complete ownership) and qudrah 'ala al-tasarruf (ability to dispose)
+  if (mode === 'bradford' && age < 59.5) {
+    return 0; // Fully exempt - treated as māl ḍimār (inaccessible wealth)
+  }
+  
+  // Optimized mode OR Bradford mode for 59½+: deduct taxes and penalties
   const penaltyRate = age < 59.5 ? 0.10 : 0;
   const accessFactor = Math.max(0, 1 - (taxRate + penaltyRate));
   return vestedBalance * accessFactor;
@@ -255,12 +262,17 @@ export function calculateTotalAssets(data: ZakatFormData): number {
   total += data.dividends - purificationAmount;
   
   // Module C: Retirement Accounts
-  // Roth IRA: Principal always accessible
+  // Roth IRA Contributions: Always 100% zakatable (can withdraw tax-free anytime)
   total += data.rothIRAContributions;
   
-  // Roth IRA Earnings: treated like 401k if under 59.5
+  // Roth IRA Earnings: 
+  // - Bradford mode under 59½: EXEMPT (follows exclusion rule)
+  // - Other modes: treated like 401k (tax/penalty deduction)
   if (data.isOver59Half) {
     total += data.rothIRAEarnings;
+  } else if (calculationMode === 'bradford') {
+    // Roth earnings exempt under Bradford rule (lacks accessibility)
+    // Contributions remain zakatable above
   } else {
     total += calculateRetirementAccessible(
       data.rothIRAEarnings,
