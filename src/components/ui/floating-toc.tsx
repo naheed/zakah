@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { List, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TocItem {
   id: string;
@@ -19,6 +20,7 @@ export function FloatingToc({ items, className }: FloatingTocProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showFab, setShowFab] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,7 +67,7 @@ export function FloatingToc({ items, className }: FloatingTocProps) {
             <Button
               size="icon"
               variant="default"
-              className="h-14 w-14 rounded-full shadow-lg"
+              className="h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg"
               onClick={() => setIsOpen(!isOpen)}
             >
               <AnimatePresence mode="wait">
@@ -77,7 +79,7 @@ export function FloatingToc({ items, className }: FloatingTocProps) {
                     exit={{ rotate: 90, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <X weight="bold" className="h-6 w-6" />
+                    <X weight="bold" className="h-5 w-5 md:h-6 md:w-6" />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -87,7 +89,7 @@ export function FloatingToc({ items, className }: FloatingTocProps) {
                     exit={{ rotate: -90, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <List weight="bold" className="h-6 w-6" />
+                    <List weight="bold" className="h-5 w-5 md:h-6 md:w-6" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -109,32 +111,44 @@ export function FloatingToc({ items, className }: FloatingTocProps) {
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Panel */}
+            {/* Panel - Mobile: bottom sheet, Desktop: floating panel */}
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={isMobile ? { opacity: 0, y: 100 } : { opacity: 0, y: 20, scale: 0.95 }}
+              animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={isMobile ? { opacity: 0, y: 100 } : { opacity: 0, y: 20, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed bottom-24 right-6 w-72 max-h-[60vh] overflow-y-auto rounded-2xl bg-surface-container border border-border shadow-xl z-50"
+              className={cn(
+                "fixed z-50 bg-surface-container border border-border shadow-xl overflow-hidden",
+                isMobile 
+                  ? "bottom-0 left-0 right-0 rounded-t-2xl max-h-[50vh]" 
+                  : "bottom-24 right-6 w-72 max-h-[60vh] rounded-2xl"
+              )}
             >
-              <div className="p-4">
+              {/* Drag indicator for mobile */}
+              {isMobile && (
+                <div className="flex justify-center py-2">
+                  <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+                </div>
+              )}
+              
+              <div className={cn("p-4 overflow-y-auto", isMobile ? "max-h-[calc(50vh-24px)]" : "max-h-[60vh]")}>
                 <h3 className="text-sm font-semibold text-foreground mb-3">
                   Table of Contents
                 </h3>
-                <nav className="space-y-1">
+                <nav className={cn("space-y-1", isMobile && "pb-safe")}>
                   {items.map((item, index) => (
                     <motion.button
                       key={item.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.03 }}
+                      transition={{ delay: index * 0.02 }}
                       onClick={() => scrollToSection(item.id)}
                       className={cn(
-                        "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
-                        "flex items-center gap-2",
+                        "w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors",
+                        "flex items-center gap-2 min-h-[44px]",
                         activeId === item.id
                           ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
                       )}
                     >
                       {item.number !== undefined && (
