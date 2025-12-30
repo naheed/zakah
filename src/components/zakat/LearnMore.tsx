@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CaretDown } from "@phosphor-icons/react";
+import { CaretDown, BookOpen, Lightbulb } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -22,41 +22,49 @@ export function LearnMore({
 }: LearnMoreProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  const Icon = variant === "tip" ? Lightbulb : BookOpen;
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
         <button
           className={cn(
-            "w-full flex items-center justify-between p-4 rounded-lg text-left transition-all",
+            "w-full flex items-center gap-2 p-4 rounded-lg text-left transition-colors duration-200",
             variant === "tip" 
-              ? "bg-chart-1/10 hover:bg-chart-1/15 border border-chart-1/20"
-              : "bg-accent hover:bg-accent/80 border border-border",
+              ? "bg-tertiary/10 hover:bg-tertiary/15 border border-tertiary/30"
+              : "bg-surface-container hover:bg-surface-container-high border border-border",
             isOpen && "rounded-b-none"
           )}
         >
+          <Icon 
+            className={cn(
+              "h-4 w-4 shrink-0",
+              variant === "tip" ? "text-tertiary" : "text-primary"
+            )}
+            weight="duotone"
+          />
           <span className={cn(
-            "text-sm font-medium",
-            variant === "tip" ? "text-chart-1" : "text-foreground"
+            "text-sm font-medium flex-1",
+            variant === "tip" ? "text-tertiary" : "text-foreground"
           )}>
-            {variant === "tip" ? "💡 " : "📖 "}
             {title}
           </span>
           <CaretDown 
             className={cn(
-              "h-4 w-4 text-muted-foreground transition-transform duration-200",
+              "h-4 w-4 text-muted-foreground transition-transform duration-200 shrink-0",
               isOpen && "rotate-180"
             )} 
             weight="bold"
           />
         </button>
       </CollapsibleTrigger>
-      <CollapsibleContent>
+      <CollapsibleContent className="animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
         <div 
           className={cn(
-            "p-4 rounded-b-lg border border-t-0 text-sm text-muted-foreground leading-relaxed",
+            "p-4 rounded-b-lg border border-t-0 text-sm leading-relaxed",
             variant === "tip" 
-              ? "bg-chart-1/5 border-chart-1/20"
-              : "bg-accent/50 border-border"
+              ? "bg-tertiary/5 border-tertiary/30 border-l-[3px] border-l-tertiary/50 text-foreground/85"
+              : "bg-surface-container-low border-border border-l-[3px] border-l-primary/40 text-foreground/85"
           )}
         >
           {children}
@@ -90,8 +98,8 @@ export function LearnMoreMarkdown({
     let currentList: string[] = [];
 
     const processText = (line: string) => {
-      // Bold
-      line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      // Bold - use class for styling
+      line = line.replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>');
       // Italic
       line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
       return line;
@@ -100,10 +108,11 @@ export function LearnMoreMarkdown({
     const flushList = () => {
       if (currentList.length > 0) {
         elements.push(
-          <ul key={`list-${elements.length}`} className="list-disc list-inside space-y-1 my-2">
+          <ul key={`list-${elements.length}`} className="list-disc pl-5 space-y-1.5 my-3 marker:text-primary/70">
             {currentList.map((item, i) => (
               <li 
                 key={i} 
+                className="pl-1"
                 dangerouslySetInnerHTML={{ __html: processText(item) }} 
               />
             ))}
@@ -128,7 +137,7 @@ export function LearnMoreMarkdown({
         elements.push(
           <p 
             key={`p-${index}`} 
-            className="my-2 first:mt-0 last:mb-0"
+            className="my-3 first:mt-0 last:mb-0"
             dangerouslySetInnerHTML={{ __html: processText(trimmed) }} 
           />
         );
