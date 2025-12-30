@@ -220,9 +220,9 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
             {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 We've helped evaluate{' '}
-                <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}+</span>{' '}
+                <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}</span>{' '}
                 in assets and calculate{' '}
-                <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}+</span>{' '}
+                <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span>{' '}
                 in Zakat.
               </p>
             )}
