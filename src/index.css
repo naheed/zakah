@@ -104,24 +104,24 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Warm dark neutrals */
+    /* Warm dark neutrals - M3 On-Surface (87% lightness) */
     --background: 30 8% 9%;
-    --foreground: 38 15% 95%;
+    --foreground: 35 8% 87%;
 
     --card: 32 10% 14%;
-    --card-foreground: 38 15% 95%;
+    --card-foreground: 35 8% 87%;
 
     --popover: 30 12% 18%;
-    --popover-foreground: 38 15% 95%;
+    --popover-foreground: 35 8% 87%;
 
     --primary: 158 64% 51%;
     --primary-foreground: 165 91% 9%;
 
     --secondary: 35 8% 45%;
-    --secondary-foreground: 38 15% 95%;
+    --secondary-foreground: 35 8% 87%;
 
     --muted: 35 8% 45%;
-    --muted-foreground: 38 10% 70%;
+    --muted-foreground: 35 6% 65%;
 
     --accent: 178 84% 10%;
     --accent-foreground: 172 66% 50%;
@@ -149,7 +149,7 @@ All colors MUST be HSL.
     --ring: 158 64% 51%;
 
     --sidebar-background: 30 10% 10%;
-    --sidebar-foreground: 38 15% 95%;
+    --sidebar-foreground: 35 8% 87%;
     --sidebar-primary: 158 64% 51%;
     --sidebar-primary-foreground: 165 91% 9%;
     --sidebar-accent: 172 66% 50%;
