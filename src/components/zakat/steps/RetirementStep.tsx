@@ -7,11 +7,16 @@ import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDoc
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { Badge } from "@/components/ui/badge";
+import { ShieldCheck } from "@phosphor-icons/react";
 
 export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode);
   const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.calculationMode);
   const isHousehold = data.isHousehold;
+  const isBradfordMode = data.calculationMode === 'bradford';
+  const isUnder59Half = !data.isOver59Half;
+  const showBradfordExempt = isBradfordMode && isUnder59Half;
 
   return (
     <AssetStepWrapper
@@ -27,6 +32,24 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       uploadDescription="Auto-fill from your 401(k) or IRA statement"
       householdReminder="Include retirement accounts for yourself, spouse, and children."
     >
+      {/* Bradford Mode Callout */}
+      {isBradfordMode && (
+        <div className="flex items-start gap-3 p-4 bg-tertiary/10 border border-tertiary/20 rounded-lg">
+          <ShieldCheck weight="duotone" className="w-5 h-5 text-tertiary shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">Bradford Exclusion Rule Active</p>
+            <p className="text-xs text-muted-foreground">
+              Traditional 401(k)/IRA accounts are {isUnder59Half ? (
+                <strong className="text-tertiary">fully exempt</strong>
+              ) : (
+                "tax-adjusted"
+              )} under this mode.
+              {isUnder59Half && " Roth IRA contributions remain 100% zakatable."}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
         <div>
           <Label className="text-foreground">Are you over 59½?</Label>
@@ -38,7 +61,12 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">401(k) / 403(b)</h3>
-          <WhyTooltip {...fiqhExplanations.retirementAccounts} />
+          <WhyTooltip {...(showBradfordExempt ? fiqhExplanations.bradfordExclusion : fiqhExplanations.retirementAccounts)} />
+          {showBradfordExempt && (
+            <Badge variant="secondary" className="text-xs bg-tertiary/15 text-tertiary border-0">
+              Exempt
+            </Badge>
+          )}
         </div>
         <CurrencyInput 
           label="Vested Balance" 
@@ -49,16 +77,29 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           onChange={(value) => updateData({ fourOhOneKVestedBalance: value })} 
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'fourOhOneKVestedBalance')}
         />
-        {data.fourOhOneKVestedBalance > 0 && data.calculationMode === 'optimized' && (
+        {data.fourOhOneKVestedBalance > 0 && (
           <div className="p-3 bg-accent rounded-lg text-sm">
-            <span className="text-muted-foreground">Zakatable (after tax/penalty): </span>
-            <span className="font-medium text-primary">{formatCurrency(accessible401k, data.currency)}</span>
+            <span className="text-muted-foreground">Zakatable amount: </span>
+            {showBradfordExempt ? (
+              <span className="font-medium text-tertiary">$0.00 (Exempt)</span>
+            ) : data.calculationMode === 'conservative' ? (
+              <span className="font-medium text-foreground">{formatCurrency(data.fourOhOneKVestedBalance, data.currency)} (Full value)</span>
+            ) : (
+              <span className="font-medium text-primary">{formatCurrency(accessible401k, data.currency)} (After tax/penalty)</span>
+            )}
           </div>
         )}
       </div>
       
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Traditional IRA</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-foreground">Traditional IRA</h3>
+          {showBradfordExempt && (
+            <Badge variant="secondary" className="text-xs bg-tertiary/15 text-tertiary border-0">
+              Exempt
+            </Badge>
+          )}
+        </div>
         <CurrencyInput 
           label="IRA Balance" 
           description="Total Traditional IRA balance"
@@ -68,10 +109,16 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           onChange={(value) => updateData({ traditionalIRABalance: value })} 
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'traditionalIRABalance')}
         />
-        {data.traditionalIRABalance > 0 && data.calculationMode === 'optimized' && (
+        {data.traditionalIRABalance > 0 && (
           <div className="p-3 bg-accent rounded-lg text-sm">
-            <span className="text-muted-foreground">Zakatable (after tax/penalty): </span>
-            <span className="font-medium text-primary">{formatCurrency(accessibleIRA, data.currency)}</span>
+            <span className="text-muted-foreground">Zakatable amount: </span>
+            {showBradfordExempt ? (
+              <span className="font-medium text-tertiary">$0.00 (Exempt)</span>
+            ) : data.calculationMode === 'conservative' ? (
+              <span className="font-medium text-foreground">{formatCurrency(data.traditionalIRABalance, data.currency)} (Full value)</span>
+            ) : (
+              <span className="font-medium text-primary">{formatCurrency(accessibleIRA, data.currency)} (After tax/penalty)</span>
+            )}
           </div>
         )}
       </div>
@@ -92,13 +139,19 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         />
         <CurrencyInput 
           label="Earnings (Growth)" 
-          description="Subject to penalty if under 59½" 
+          description={showBradfordExempt ? "Exempt under Bradford rule" : "Subject to penalty if under 59½"} 
           householdDescription="Combined Roth IRA earnings for all family members"
           isHousehold={isHousehold}
           value={data.rothIRAEarnings} 
           onChange={(value) => updateData({ rothIRAEarnings: value })} 
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'rothIRAEarnings')}
         />
+        {data.rothIRAEarnings > 0 && showBradfordExempt && (
+          <div className="p-3 bg-accent rounded-lg text-sm">
+            <span className="text-muted-foreground">Roth earnings: </span>
+            <span className="font-medium text-tertiary">$0.00 (Exempt under Bradford rule)</span>
+          </div>
+        )}
       </div>
       
       <div className="space-y-3 pt-4 border-t border-border">
