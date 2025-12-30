@@ -52,15 +52,25 @@ The Prophet Muhammad (ﷺ) set the niṣāb for gold at 20 mithqals (≈85 grams
 
 **Scholarly Consensus:**
 The majority of scholars, relief organizations, and researchers advocate for the **silver standard** for cash and mixed assets, based on:
-• *Anfa' li'l-fuqara* — most beneficial for the poor
-• *Ahwat* — the precautionary principle
+• *Anfa' li'l-fuqarā'* — most beneficial for the poor
+• *Aḥwaṭ* — the precautionary principle
 
-The gold standard remains valid for those holding wealth exclusively in gold bullion.`,
+The gold standard remains valid for those holding wealth exclusively in gold bullion.
+
+**Calculation Mode Selection:**
+On this page, you also choose how to treat complex assets like retirement accounts:
+• **Conservative** — Pay on full asset values (safest)
+• **Optimized** — Deduct taxes and penalties (accessible balance)
+• **Bradford Exclusion** — Exempt Traditional 401(k)/IRA under 59½ (per Sheikh Joe Bradford's ruling on *milk tām*)`,
   },
   tips: [
     {
       title: "Why Silver is Recommended",
       content: "If one possesses wealth exceeding the silver niṣāb, they are undoubtedly wealthy enough to contribute. This ensures no eligible Zakat is missed.",
+    },
+    {
+      title: "Choosing a Calculation Mode",
+      content: "All three modes are valid scholarly positions. Conservative is safest, Optimized balances practicality, and Bradford Exclusion follows a specific fiqh ruling on ownership requirements.",
     },
   ],
 };
@@ -212,24 +222,30 @@ export const investmentsContent: StepContent = {
   title: "What investments do you have?",
   subtitle: "Stocks, funds, and brokerage accounts.",
   learnMore: {
-    title: "Stocks & The Intent-Based Distinction",
-    content: `The treatment of stocks depends on your **intent**. The shareholder owns a percentage of the company entity—this creates two categories:
+    title: "Stocks & The Mudir/Muḥtakir Distinction",
+    content: `The treatment of stocks depends on your **intent and trading behavior**. Classical scholars distinguished between two types of investors:
 
-**Active Holdings (Trading):**
-If you buy stocks to sell short-term for capital gain (day trading, swing trading), the stock is **commercial merchandise**. Zakat is due on **100% of market value**.
+**Mudir (Active Trader):**
+If you buy stocks to sell short-term for capital gain (day trading, swing trading), the stock is **commercial merchandise** (ʿurūḍ al-tijārah). Zakat is due on **100% of market value**.
 
-*Note: Unvested RSUs, ESPP, and restricted shares are NOT Zakatable—you don't own them yet.*
+*Note: Unvested RSUs, ESPP, and restricted shares are NOT Zakatable—you lack milk tām (complete ownership).*
 
-**Passive Holdings (Long-Term):**
+**Muḥtakir (Long-Term Investor):**
 If shares are held for appreciation and dividends (buy and hold), Zakat shifts to the **company's Zakatable assets** (cash, receivables, inventory).
 
-**The 30% Rule (AAOIFI Standard 35):**
-Calculating precise Net Current Assets for hundreds of companies is impractical. Research shows the liquid/zakatable assets of Shariah-compliant companies average ~30% of market cap. This proxy gives an effective rate of **0.75% of market value**.
+**The 30% Rule (AAOIFI Shariah Standard 35):**
+Calculating precise Net Current Assets for hundreds of companies is impractical. AAOIFI's research shows the liquid/zakatable assets of Shariah-compliant companies average ~30% of market cap.
+
+This proxy gives an effective rate of **0.75% of market value** (30% × 2.5%).
 
 **Dividend Purification:**
 If a company derives <5% revenue from impermissible sources (interest, alcohol, gambling), that portion of dividends must be donated to charity—separate from Zakat.`,
   },
   tips: [
+    {
+      title: "Which Category Are You?",
+      content: "Mudir: trades frequently, holds < 1 year, intent is capital gain. Muḥtakir: buy-and-hold, holds > 1 year, intent is dividends/long-term growth.",
+    },
     {
       title: "Conservative vs Optimized",
       content: "Conservative mode pays on 100% of passive investments. Optimized mode applies the 30% rule. Both are valid scholarly positions.",
@@ -242,31 +258,39 @@ export const retirementContent: StepContent = {
   title: "What retirement accounts do you have?",
   subtitle: "401(k), IRA, Roth, HSA, and other tax-advantaged accounts.",
   learnMore: {
-    title: "Retirement Accounts & Milk Tam (Complete Possession)",
-    content: `Retirement accounts present the most complex Zakat challenge due to access restrictions and deferred taxes. The debate centers on **Milk Tam**—complete possession.
+    title: "Three Approaches to Retirement Account Zakat",
+    content: `Retirement accounts present the most complex Zakat challenge due to access restrictions and deferred taxes. The debate centers on **Milk Tām** (complete ownership) and **Qudrah ʿala al-Taṣarruf** (ability to dispose).
 
-**The AMJA/Bradford Position:**
-The funds ARE accessible—the penalty is a deterrent, not a prohibition. You can liquidate your 401(k) tomorrow if you choose. However, it's unjust to pay Zakat on money that belongs to the government (taxes) or will be lost to penalties.
+**1. Conservative Mode:**
+Pay Zakat on the **full vested balance**. This is the safest approach—if in doubt, pay more.
 
-**The Accessible Balance Method:**
-1. Start with **Vested Balance** (unvested employer match is exempt)
-2. Subtract 10% early withdrawal penalty (if under 59½)
-3. Subtract estimated federal + state taxes
-4. Result = Net Zakatable Value
+**2. Optimized Mode (AMJA Position):**
+The funds ARE accessible—the penalty is a deterrent, not a prohibition. However, it's unjust to pay Zakat on money that belongs to the government.
+• Start with **Vested Balance**
+• Subtract 10% early withdrawal penalty (if under 59½)
+• Subtract estimated federal + state taxes
+• Result = Net Zakatable Value
 
-**Roth IRA Special Treatment:**
-• **Contributions (Principal)** — Withdrawn tax-free anytime, fully Zakatable
-• **Earnings** — Subject to penalty if under 59½, treat like 401(k)
+**3. Bradford Exclusion Rule:**
+Sheikh Joe Bradford argues that Traditional 401(k)/IRA accounts under age 59½ **lack milk tām entirely**:
+• The 10% penalty + taxes create a legal barrier
+• This resembles **māl ḍimār** (inaccessible wealth)
+• Such accounts are fully **exempt** until age 59½
 
-**HSA Accounts:**
-Fully accessible for medical expenses, therefore fully Zakatable.
+**Roth IRA (Dual Treatment):**
+• **Contributions** — Accessible tax-free anytime → Fully Zakatable in ALL modes
+• **Earnings** — Subject to penalty if under 59½ → Treated per your chosen mode
 
-**Important:** Unvested 401(k) employer match is NOT Zakatable—you don't own it yet.`,
+**HSA Accounts:** Fully accessible for medical expenses → Fully Zakatable.`,
   },
   tips: [
     {
+      title: "Which Mode Should I Choose?",
+      content: "Conservative if you want certainty. Optimized for practical balance. Bradford if you follow Sheikh Joe Bradford's fiqh reasoning on ownership requirements.",
+    },
+    {
       title: "401(k) Loans",
-      content: "If you've taken a 401(k) loan, that money is now cash in hand (Zakatable). The loan is NOT a deductible liability—you owe it to yourself.",
+      content: "If you have taken a 401(k) loan, that money is now cash in hand (Zakatable). The loan is NOT a deductible liability—you owe it to yourself.",
     },
   ],
 };
@@ -446,29 +470,37 @@ export const liabilitiesContent: StepContent = {
   title: "What are your immediate expenses?",
   subtitle: "Debts and expenses that reduce your Zakatable amount.",
   learnMore: {
-    title: "The Debt Deduction Controversy",
-    content: `Debt deductibility is one of the most contentious issues in modern Zakat jurisprudence.
+    title: "The Maliki Middle Path on Debt Deduction",
+    content: `Debt deductibility is one of the most contentious issues in modern Zakat jurisprudence. The classical schools held opposing views:
 
-**The Classical Views:**
-• **Hanafi:** All debts deductible (leads to a millionaire with a large mortgage paying $0)
-• **Shafi'i:** Debt doesn't prevent Zakat at all
+**The Classical Extremes:**
+• **Hanafi:** All debts fully deductible → A millionaire with a large mortgage pays $0 Zakat
+• **Shāfiʿī:** Debt does not prevent Zakat at all → Even the heavily indebted must pay
 
-**The Modern Synthesis (AMJA/Bradford):**
-Only **immediate debts due within the Zakat period** are deductible. Long-term debts are not fully deductible.
+**The Maliki Middle Path (Modern Synthesis):**
+The Maliki position—adopted by AMJA and contemporary scholars—offers a balanced approach: only **immediate debts due within the Zakat period** are deductible.
 
-**Deductible:**
+This prevents *dayn al-mustaghriq* (overwhelming debt) from eliminating Zakat obligations entirely, while still providing relief for genuine short-term obligations.
+
+**Deductible (Immediate Obligations):**
 • Credit card balances (due in full)
 • Unpaid bills (utility, medical) due immediately
-• Upcoming 12 months of mortgage payments
+• Next 12 months of mortgage/rent payments
 • Current student loan payments due
 
-**NOT Deductible:**
+**NOT Deductible (Future Obligations):**
 • Remaining 29 years of mortgage principal
 • Deferred student loans not yet due
 • 401(k) loans (you owe it to yourself!)
 
-This prevents the absurdity of the wealthy homeowner paying no Zakat while renters with modest savings must pay.`,
+This ensures the wealthy homeowner cannot escape Zakat through long-term leverage, while renters with modest savings are not unfairly burdened.`,
   },
+  tips: [
+    {
+      title: "Why 12 Months?",
+      content: "The 12-month rule for mortgages comes from AMJA guidance—it represents the immediate portion of a long-term obligation that affects your current liquidity.",
+    },
+  ],
 };
 
 export const taxContent: StepContent = {
