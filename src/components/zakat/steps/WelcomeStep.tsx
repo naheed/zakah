@@ -218,16 +218,13 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
             
             {/* Usage Metrics - Social Proof (only show when 5+ unique sessions for privacy) */}
             {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
-              <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Calculator className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-foreground">{formatCount(metrics.allTime.calculations)}</span> calculations
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Heart className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span> Zakat calculated
-                </span>
-              </div>
+              <p className="mt-6 text-center text-sm text-muted-foreground">
+                We've helped evaluate{' '}
+                <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalAssets)}+</span>{' '}
+                in assets and calculate{' '}
+                <span className="font-medium text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}+</span>{' '}
+                in Zakat.
+              </p>
             )}
           </div>
         </div>
