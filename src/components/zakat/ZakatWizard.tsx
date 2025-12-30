@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { useTheme } from "next-themes";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { usePresence } from "@/hooks/usePresence";
@@ -28,7 +29,7 @@ import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
 import { UserMenu } from "./UserMenu";
 import { SaveProgressPrompt } from "./SaveProgressPrompt";
 import { PresenceIndicator } from "./PresenceIndicator";
-import { List, GearSix } from "@phosphor-icons/react";
+import { List, GearSix, Sun, Moon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
@@ -137,6 +138,9 @@ export function ZakatWizard() {
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams, currentStepIndex, setCurrentStepIndex, isLoaded]);
+
+  // Theme toggle
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   const [calculationName, setCalculationName] = useState<string | undefined>();
   const [savedCalculationId, setSavedCalculationId] = useState<string | undefined>();
@@ -378,6 +382,21 @@ export function ZakatWizard() {
                   section={currentStep.section}
                 />
               </div>
+
+              {/* Theme Toggle Button */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="shrink-0 min-h-12 min-w-12"
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              >
+                {resolvedTheme === 'dark' ? (
+                  <Sun className="h-5 w-5" weight="bold" />
+                ) : (
+                  <Moon className="h-5 w-5" weight="bold" />
+                )}
+                <span className="sr-only">Toggle theme</span>
+              </Button>
 
               {/* Settings Button */}
               <Link to="/settings">
