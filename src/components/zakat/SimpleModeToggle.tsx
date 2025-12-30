@@ -53,8 +53,8 @@ export function SimpleModeToggle({ isSimpleMode, onToggle, className }: SimpleMo
       
       <Switch
         id="simple-mode"
-        checked={isSimpleMode}
-        onCheckedChange={onToggle}
+        checked={!isSimpleMode}
+        onCheckedChange={(value) => onToggle(!value)}
       />
     </div>
   );
