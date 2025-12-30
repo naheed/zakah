@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, FileText, Trash2, UserX, ChevronDown, User, Users, Check } from "lucide-react";
+import { ArrowLeft, FileText, Trash2, UserX, ChevronDown, User, Users, Check, Sun, Moon, Monitor } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -41,8 +42,10 @@ import { getPrimaryUrl } from "@/lib/domainConfig";
 export default function Settings() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [calculationOpen, setCalculationOpen] = useState(true);
+  const [appearanceOpen, setAppearanceOpen] = useState(true);
+  const [calculationOpen, setCalculationOpen] = useState(false);
   const [documentsOpen, setDocumentsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   
@@ -142,6 +145,76 @@ export default function Settings() {
         </div>
 
         <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+          {/* Appearance Group */}
+          <Collapsible open={appearanceOpen} onOpenChange={setAppearanceOpen}>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                <span className="font-medium text-foreground">Appearance</span>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", appearanceOpen && "rotate-180")} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 p-4 bg-card rounded-lg border border-border space-y-2">
+                <h3 className="text-sm font-medium text-foreground mb-3">Theme</h3>
+                <div className="space-y-2">
+                  <label className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                    theme === 'light' 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                  onClick={() => setTheme('light')}
+                  >
+                    <Sun className={cn("h-4 w-4", theme === 'light' ? "text-primary" : "text-muted-foreground")} />
+                    <div className="flex-1 flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">Light</span>
+                      {theme === 'light' && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                  </label>
+                  
+                  <label className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                    theme === 'dark' 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                  onClick={() => setTheme('dark')}
+                  >
+                    <Moon className={cn("h-4 w-4", theme === 'dark' ? "text-primary" : "text-muted-foreground")} />
+                    <div className="flex-1 flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">Dark</span>
+                      {theme === 'dark' && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                  </label>
+                  
+                  <label className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                    theme === 'system' 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                  onClick={() => setTheme('system')}
+                  >
+                    <Monitor className={cn("h-4 w-4", theme === 'system' ? "text-primary" : "text-muted-foreground")} />
+                    <div className="flex-1 flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-foreground">System</span>
+                        <p className="text-xs text-muted-foreground">Auto-detect from device</p>
+                      </div>
+                      {theme === 'system' && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
           {/* Calculation Settings Group */}
           <Collapsible open={calculationOpen} onOpenChange={setCalculationOpen}>
             <CollapsibleTrigger asChild>
