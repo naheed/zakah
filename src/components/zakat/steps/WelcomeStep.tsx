@@ -169,7 +169,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
           {/* Left Side - CTA (Primary focus) */}
           <div className="order-1 flex flex-col">
            {/* Brand Logo - Hero placement, sized to match headline */}
-            <Logo size="lg" className="mb-6 h-16 md:h-20" />
+            <Logo size="lg" className="mb-6 h-16 md:h-20 -ml-1" />
             
             {/* Main Headline - Benefit-focused */}
             <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-3 tracking-tight leading-tight">

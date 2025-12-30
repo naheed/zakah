@@ -16,7 +16,7 @@ export function Logo({ className = "", size = "md" }: LogoProps) {
     <img
       src={zakatflowLogo}
       alt="ZakatFlow"
-      className={`${sizeClasses[size]} w-auto object-contain ${className}`}
+      className={`${sizeClasses[size]} w-auto object-contain object-left ${className}`}
     />
   );
 }
