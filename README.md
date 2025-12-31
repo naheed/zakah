@@ -1,73 +1,109 @@
-# Welcome to your Lovable project
+# ZakatFlow
 
-## Project info
+**"TurboTax for Zakat"**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+ZakatFlow is a comprehensive web application designed to simplify the Zakat calculation process for Muslims. Just like TurboTax guides you through your taxes, ZakatFlow offers a guided, step-by-step approach to calculating Zakat with accuracy and ease.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Guided Calculation Wizard**: 
+    - **Simple Mode**: For users who want a quick estimate based on standard assets.
+    - **Detailed Mode**: A granular walkthrough covering all asset classes (Gold, Silver, Stocks, Business Assets, etc.) ensuring no deductible is missed.
+- **Authentication**: Secure login via Google (powered by Supabase) to save and manage your calculations.
+- **Methodology**: Extensive documentation explaining the ruling for each asset class, backed by scholarly sources.
+- **Sharing**: Generate personalized referral links to invite friends and family to calculate their Zakat.
+- **History**: View and manage your past Zakat calculations.
+- **Privacy First**: Secure handling of financial data.
 
-**Use Lovable**
+## Web CUJs (Critical User Journeys)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+This project supports the following critical user journeys:
 
-Changes made via Lovable will be committed automatically to this repo.
+1.  **First time user on direct landing page**: Users land on the attractive home page, see the value proposition ("Simple, Accurate Zakat Calculation"), and can start immediately.
+2.  **First time user coming via referral link**: A personalized welcome experience acknowledging the referrer, encouraging the user to start their own flow.
+3.  **Returning user with login**: Seamless access to saved calculations and settings upon authentication.
+4.  **Returning user without login**: Ability to start a new anonymous calculation or log in to retrieve past data.
+5.  **User login and creating new calculation**: Authenticated workflow to start a fresh calculation session.
+6.  **Doing simple calculation**: A streamlined path for users with straightforward finances (Cash + Gold/Silver).
+7.  **Doing detailed calculation**: The full "TurboTax" style questionnaire covering debts, investments, 401k/Superannuation, business inventory, and more.
+8.  **Viewing calculation report page**: A clean breakdown of Zakatable assets, showing exactly how the final figure was derived.
+9.  **Downloading report pdf**: Export the calculation report as a formatted PDF for records or offline sharing.
+10. **Sharing tool using personalized referral link**: Dashboard allowing users to copy their unique invite link to spread the benefit.
+11. **Review terms of service**: Access to legal terms governing the usage of the platform.
+12. **Review privacy policy**: Transparency about how user data is collected and used.
+13. **Review about page**: Information about the project's mission, team, and adherence to Islamic financial principles.
 
-**Use your preferred IDE**
+## Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+This project is built with a modern, type-safe stack:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+-   **Frontend**: [React](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
+-   **Build Tool**: [Vite](https://vitejs.dev/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix UI + Tailwind)
+-   **State Management**: [TanStack Query](https://tanstack.com/query/latest) (React Query)
+-   **Backend / Auth**: [Supabase](https://supabase.com/)
+-   **Icons**: [Phosphor Icons](https://phosphoricons.com/) & [Lucide React](https://lucide.dev/)
 
-Follow these steps:
+## Getting Started
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Follow these steps to run the project locally.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+-   Node.js & npm installed (Recommended: Use `nvm`)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### Installation
 
-**Edit a file directly in GitHub**
+1.  **Clone the repository**:
+    ```sh
+    git clone <YOUR_GIT_URL>
+    cd zakah
+    ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+2.  **Install dependencies**:
+    ```sh
+    npm install
+    ```
 
-**Use GitHub Codespaces**
+3.  **Setup Environment Variables**:
+    Create a `.env` file in the root directory and add your Supabase credentials. You need a project set up on [Supabase](https://supabase.com/).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+    ```env
+    VITE_SUPABASE_PROJECT_ID="your-project-id"
+    VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-key"
+    VITE_SUPABASE_URL="https://your-project-id.supabase.co"
+    ```
 
-## What technologies are used for this project?
+4.  **Configure Google Authentication**:
+    -   **Google Cloud Console**:
+        -   Create a new project (or use existing).
+        -   Go to **APIs & Services > Credentials**.
+        -   Create **OAuth Client ID** (Web Application).
+        -   Add `http://localhost:8080` to **Authorized JavaScript origins**.
+        -   Add `https://<your-project-id>.supabase.co/auth/v1/callback` to **Authorized redirect URIs**.
+    -   **Supabase Dashboard**:
+        -   Go to **Authentication > Providers > Google**.
+        -   Enable Google provider and paste the **Client ID** and **Client Secret** from Google Cloud.
+        -   Go to **Authentication > URL Configuration**.
+        -   Set **Site URL** to `http://localhost:8080`.
+        -   Add `http://localhost:8080/*` to **Redirect URLs**.
 
-This project is built with:
+5.  **Run the development server**:
+    ```sh
+    npm run dev
+    ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+    The app should now be running at `http://localhost:8080` (or similar).
 
-## How can I deploy this project?
+## Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+-   `src/pages`: Contains the main route components (Index, Documents, Auth, Methodology, etc.).
+-   `src/components`: Reusable UI components button, inputs, dialogs (Shadcn UI) and custom domain specific components.
+-   `src/integrations/supabase`: Supabase client configuration and types.
+-   `src/hooks`: Custom React hooks (e.g., `useAuth`, `useToast`).
+-   `src/lib`: Utility functions and helper classes.
 
-## Can I connect a custom domain to my Lovable project?
+## Deployment
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project is ready to be deployed on platforms like Vercel, Netlify, or directly via Lovable if applicable. Ensure your build settings are configured for a Vite project (`npm run build` as build command, `dist` as output directory).
