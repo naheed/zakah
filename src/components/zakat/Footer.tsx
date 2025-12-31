@@ -32,9 +32,13 @@ export function Footer({ className = "" }: FooterProps) {
           >
             Terms
           </Link>
-        </div>
-        <div className="text-center text-xs text-muted-foreground">
-          <p>Designed & Managed by <a href="https://www.vora.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Naheed</a></p>
+          <span className="text-muted-foreground/50">•</span>
+          <Link 
+            to="/about" 
+            className="text-primary hover:underline"
+          >
+            About
+          </Link>
         </div>
       </div>
     </footer>
