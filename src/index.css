@@ -129,9 +129,10 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 85% 97%;
 
-    /* Tertiary: Gold for celebration */
-    --tertiary: 45 85% 55%;
-    --tertiary-foreground: 40 70% 10%;
+    /* Tertiary: Gold - ENHANCED for dark mode visibility */
+    /* Increased lightness from 55% to 70% for better contrast on dark backgrounds */
+    --tertiary: 45 85% 70%;
+    --tertiary-foreground: 40 50% 8%;
 
     /* Success: Warm green */
     --success: 145 60% 50%;
