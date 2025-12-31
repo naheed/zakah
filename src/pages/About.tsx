@@ -9,9 +9,9 @@ export default function About() {
     <>
       <Helmet>
         <title>About | ZakatFlow</title>
-        <meta 
-          name="description" 
-          content="Islam is beautiful, and our worship deserves perfection. Learn about ZakatFlow's mission and values." 
+        <meta
+          name="description"
+          content="Islam is beautiful, and our worship deserves perfection. Learn about ZakatFlow's mission and values."
         />
         <link rel="canonical" href="https://www.zakatflow.org/about" />
       </Helmet>
@@ -29,9 +29,7 @@ export default function About() {
         <StaggerContainer className="text-center max-w-2xl" staggerDelay={0.15}>
           {/* Opening Quote Mark */}
           <StaggerItem variant="fade">
-            <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none">
-              "
-            </span>
+            <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none">"</span>
           </StaggerItem>
 
           {/* Main Quote - First Part */}
@@ -62,14 +60,12 @@ export default function About() {
           {/* Attribution */}
           <StaggerItem variant="fade">
             <footer className="space-y-1">
-              <p className="text-lg text-muted-foreground">
-                Developed with care in California,
-              </p>
+              <p className="text-lg text-muted-foreground">Crafted with care in California,</p>
               <p className="text-lg">
                 by{" "}
-                <a 
-                  href="https://www.vora.dev" 
-                  target="_blank" 
+                <a
+                  href="https://www.vora.dev"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline font-medium"
                 >
