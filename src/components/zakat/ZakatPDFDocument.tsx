@@ -420,6 +420,7 @@ export interface ZakatPDFData {
   currency: string;
   calendarType: "lunar" | "solar";
   nisabStandard: "gold" | "silver";
+  calculationMode?: "conservative" | "optimized" | "bradford";
   zakatRate: number;
   totalAssets: number;
   totalLiabilities: number;
@@ -932,6 +933,16 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
               <Text style={styles.sectionLabel}>CONFIGURATION</Text>
             </View>
             <View style={styles.columnBox}>
+              <View style={styles.ledgerRow}>
+                <Text style={styles.ledgerLabel}>Calculation Mode</Text>
+                <Text style={styles.ledgerValue}>
+                  {data.calculationMode === 'conservative' 
+                    ? 'Conservative' 
+                    : data.calculationMode === 'bradford' 
+                      ? 'Bradford' 
+                      : 'Optimized'}
+                </Text>
+              </View>
               <View style={styles.ledgerRow}>
                 <Text style={styles.ledgerLabel}>Nisāb ({nisabLabel})</Text>
                 <Text style={styles.ledgerValue}>

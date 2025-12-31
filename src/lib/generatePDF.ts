@@ -33,6 +33,7 @@ export async function generateZakatPDF(
     currency: data.currency,
     calendarType: data.calendarType,
     nisabStandard: data.nisabStandard,
+    calculationMode: data.calculationMode,
     zakatRate: calculations.zakatRate,
     totalAssets: calculations.totalAssets,
     totalLiabilities: calculations.totalLiabilities,

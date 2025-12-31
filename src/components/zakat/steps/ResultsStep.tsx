@@ -401,12 +401,19 @@ export function ResultsStep({
                       variant="ghost" 
                       size="sm" 
                       onClick={() => {
-                        const newMode = data.calculationMode === 'conservative' ? 'optimized' : 'conservative';
-                        updateData({ calculationMode: newMode });
+                        // Cycle through all three modes
+                        const modes: Array<'conservative' | 'optimized' | 'bradford'> = ['conservative', 'optimized', 'bradford'];
+                        const currentIndex = modes.indexOf(data.calculationMode);
+                        const nextIndex = (currentIndex + 1) % modes.length;
+                        updateData({ calculationMode: modes[nextIndex] });
                       }}
                     >
                       <GearSix weight="duotone" className="w-4 h-4 mr-1" />
-                      {data.calculationMode === 'conservative' ? 'Conservative' : 'Optimized'}
+                      {data.calculationMode === 'conservative' 
+                        ? 'Conservative' 
+                        : data.calculationMode === 'bradford' 
+                          ? 'Bradford' 
+                          : 'Optimized'}
                     </Button>
                   </div>
                   
@@ -415,8 +422,11 @@ export function ResultsStep({
                       <p className="text-sm text-muted-foreground mb-2">
                         <strong>Conservative:</strong> Pay on full asset values (safer)
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground mb-2">
                         <strong>Optimized:</strong> Apply 30% rule for passive investments, deduct taxes/penalties from retirement
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Bradford:</strong> Traditional 401(k)/IRA exempt under 59½ (Sheikh Joe Bradford's ruling)
                       </p>
                     </div>
                   )}
