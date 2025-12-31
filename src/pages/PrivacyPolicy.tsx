@@ -1,9 +1,10 @@
 
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { privacyPolicyContent, HighlightItem, SectionContent } from "@/lib/content/privacy";
+import { privacyHighlights, privacySections, HighlightItem, SectionContent } from "@/lib/content/privacy";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text, Heading, List, ListItem } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
+import { ShieldCheck } from "@phosphor-icons/react";
 
 const HighlightSection: React.FC<{ highlights: HighlightItem[] }> = ({ highlights }) => (
   <StaggerContainer className="grid gap-4 mt-8" staggerDelay={0.1}>
@@ -86,7 +87,11 @@ const SectionRenderer: React.FC<{ section: SectionContent; index: number }> = ({
 );
 
 const PrivacyPolicy = () => {
-  const { header, highlights, sections } = privacyPolicyContent;
+  const header = {
+    title: "Privacy Policy",
+    lastUpdated: "December 30, 2024",
+    icon: ShieldCheck
+  };
 
   const headerContent = (
     <div>
@@ -97,13 +102,13 @@ const PrivacyPolicy = () => {
             <header.icon className="w-5 h-5 text-primary" weight="duotone" />
             <h2 className="font-semibold text-foreground">Key Privacy Highlights</h2>
           </div>
-          <HighlightSection highlights={highlights} />
+          <HighlightSection highlights={privacyHighlights} />
         </div>
       </ScrollReveal>
     </div>
   );
   // Generate ToC items from sections
-  const tocItems = sections.map((section, index) => ({
+  const tocItems = privacySections.map((section, index) => ({
     id: section.id,
     label: section.title,
     number: index + 1
@@ -117,7 +122,7 @@ const PrivacyPolicy = () => {
       headerContent={headerContent}
       tocItems={tocItems}
     >
-      {sections.map((section, index) => (
+      {privacySections.map((section, index) => (
         <SectionRenderer key={section.id} section={section} index={index} />
       ))}
     </ArticleLayout>

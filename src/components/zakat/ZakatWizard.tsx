@@ -37,29 +37,33 @@ import { SavedCalculation } from "@/hooks/useSavedCalculations";
 // Animation variants for step transitions
 const stepVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 80 : -80,
+    x: direction > 0 ? 50 : -50, // Reduced offset for subtler movement
     opacity: 0,
+    scale: 0.98, // Slight scale effect
   }),
   center: {
     x: 0,
     opacity: 1,
+    scale: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 80 : -80,
+    x: direction < 0 ? 50 : -50,
     opacity: 0,
+    scale: 0.98,
   }),
 };
 
 const stepTransition = {
   type: "spring" as const,
-  stiffness: 400,
-  damping: 35,
+  stiffness: 300,
+  damping: 28, // Slightly bouncier
+  mass: 0.8,
 };
 
 const SWIPE_THRESHOLD = 100; // Increased to prevent accidental swipes on button taps
 const SWIPE_VELOCITY_THRESHOLD = 800; // Increased to require more deliberate swipes
 
-type StepId = 
+type StepId =
   | 'welcome'
   | 'currency'
   | 'categories'
@@ -112,7 +116,7 @@ const allSteps: Step[] = [
 
 export function ZakatWizard() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const {
     formData,
     stepIndex: currentStepIndex,
@@ -148,7 +152,7 @@ export function ZakatWizard() {
 
   // Presence tracking for collaborative editing
   const { presentUsers, updatePresence } = usePresence(savedCalculationId);
-  
+
   // Check for loaded calculation from saved calculations page
   useEffect(() => {
     const loadedCalc = localStorage.getItem('zakat-load-calculation');
@@ -170,15 +174,15 @@ export function ZakatWizard() {
       localStorage.removeItem('zakat-load-calculation');
     }
   }, [setFormData, setCurrentStepIndex]);
-  
+
   const getActiveSteps = () => {
     return allSteps.filter(step => !step.condition || step.condition(formData));
   };
-  
+
   const activeSteps = getActiveSteps();
   const currentStep = activeSteps[currentStepIndex] || activeSteps[0];
-  
-  
+
+
   const goToNext = useCallback(() => {
     if (currentStepIndex < activeSteps.length - 1) {
       setDirection(1);
@@ -186,7 +190,7 @@ export function ZakatWizard() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentStepIndex, activeSteps.length, setCurrentStepIndex]);
-  
+
   const goToPrevious = useCallback(() => {
     if (currentStepIndex > 0) {
       setDirection(-1);
@@ -234,7 +238,7 @@ export function ZakatWizard() {
   const handleDocumentAdded = (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => {
     addDocument(doc);
   };
-  
+
   const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
   // Don't render until we've loaded persisted data
@@ -263,7 +267,7 @@ export function ZakatWizard() {
   };
 
   const questionNumber = getQuestionNumber();
-  
+
   // Handle loading a saved calculation from WelcomeStep
   const handleLoadCalculation = (calc: SavedCalculation) => {
     setFormData(calc.form_data);
@@ -331,10 +335,10 @@ export function ZakatWizard() {
         return <TaxStep {...assetStepProps} />;
       case 'results':
         return (
-          <ResultsStep 
-            data={formData} 
-            updateData={updateFormData} 
-            calculations={calculations} 
+          <ResultsStep
+            data={formData}
+            updateData={updateFormData}
+            calculations={calculations}
             calculationName={calculationName}
             savedCalculationId={savedCalculationId}
             onCalculationSaved={setSavedCalculationId}
@@ -345,7 +349,7 @@ export function ZakatWizard() {
         return null;
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-background">
       {/* Continue Session Dialog */}
@@ -376,17 +380,17 @@ export function ZakatWizard() {
 
               {/* Progress Bar */}
               <div className="flex-1">
-                <ProgressBar 
-                  currentStep={progressStepIndex} 
+                <ProgressBar
+                  currentStep={progressStepIndex}
                   totalSteps={progressSteps.length}
                   section={currentStep.section}
                 />
               </div>
 
               {/* Theme Toggle Button */}
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="shrink-0 min-h-12 min-w-12"
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               >
@@ -417,7 +421,7 @@ export function ZakatWizard() {
           </div>
         </div>
       )}
-      
+
       <main className={`max-w-4xl mx-auto px-4 ${isWelcomePage ? 'py-4' : 'py-8 pb-32'}`}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
@@ -438,13 +442,13 @@ export function ZakatWizard() {
           </motion.div>
         </AnimatePresence>
       </main>
-      
+
       {!isWelcomePage && (
         <>
           <SaveProgressPrompt
             currentStepIndex={currentStepIndex}
             totalSteps={activeSteps.length}
-            onDismiss={() => {}}
+            onDismiss={() => { }}
           />
           <StepNavigation
             onPrevious={goToPrevious}
