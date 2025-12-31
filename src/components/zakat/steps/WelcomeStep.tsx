@@ -136,21 +136,25 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                     to="/privacy" 
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Privacy Policy
+                    Privacy
                   </Link>
                   <span className="text-muted-foreground/50">•</span>
                   <Link 
                     to="/terms" 
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Terms of Service
+                    Terms
+                  </Link>
+                  <span className="text-muted-foreground/50">•</span>
+                  <Link 
+                    to="/about" 
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    About
                   </Link>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Built by Naheed Vora • Provided as-is
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Questions or feedback? <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a>
+                  Questions? <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">naheed@vora.dev</a>
                 </p>
               </div>
             </div>
