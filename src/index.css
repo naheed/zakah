@@ -38,7 +38,7 @@ All colors MUST be HSL.
     --destructive-foreground: 0 85% 97%;
 
     /* Tertiary: Gold for celebration and reverence */
-    --tertiary: 45 90% 48%;
+    --tertiary: 45 90% 35%;
     --tertiary-foreground: 40 60% 15%;
 
     /* Success: Warm green for positive outcomes */
