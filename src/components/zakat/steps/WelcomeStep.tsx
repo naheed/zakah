@@ -4,8 +4,10 @@ import { ArrowRight, BookOpen, Lock, Calculator, Heart, GearSix, FolderOpen, Tra
 import { Logo } from "../Logo";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useUsageMetrics, formatLargeNumber, formatCount } from "@/hooks/useUsageMetrics";
+import { useUsageMetrics } from "@/hooks/useUsageMetrics";
+import { formatLargeNumber, formatCount } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MetricsDisplay } from "../MetricsDisplay";
 import { ReferralWidget } from "../ReferralWidget";
 import { RecentCalculations } from "../RecentCalculations";
 import { UserMenu } from "../UserMenu";
@@ -220,8 +222,8 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               variants={itemVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight leading-[1.1]"
             >
-              Know Your Zakat<br />
-              <span className="text-primary">in 5 Minutes</span>
+              Zakat,<br />
+              <span className="text-primary">Clarified.</span>
             </motion.h1>
 
             {/* Asset Types Badges */}
@@ -242,7 +244,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               variants={itemVariants}
               className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
             >
-              The most accurate Zakat calculator for modern finances. We handle the complexity of complex assets so you can fulfill your obligation with confidence.
+              Calculate your obligations with confidence. We help you navigate the complexity of modern assets—from RSUs to Crypto—so you can make informed choices.
             </motion.p>
 
             {/* Primary CTA */}
@@ -300,16 +302,17 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
 
             {/* Usage Metrics */}
             {!metricsLoading && metrics && metrics.allTime.uniqueSessions >= 5 && (
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
-                className="mt-8 text-center text-sm text-muted-foreground"
+                className="mt-8"
               >
-                Trusted by thousands to calculate over{' '}
-                <span className="font-semibold text-foreground">{formatLargeNumber(metrics.allTime.totalZakat)}</span>{' '}
-                in Zakat.
-              </motion.p>
+                <MetricsDisplay
+                  assets={metrics.allTime.totalAssets}
+                  zakat={metrics.allTime.totalZakat}
+                />
+              </motion.div>
             )}
           </motion.div>
         </div>

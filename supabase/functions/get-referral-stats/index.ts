@@ -47,25 +47,41 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    let query = supabase
-      .from("referral_aggregates")
-      .select("referral_code, total_referrals, total_zakat_calculated, total_assets_calculated");
+    // Use the recursive RPC function to get total stats
+    const { data: stats, error: statsError } = await supabase.rpc(
+      'get_recursive_referral_stats',
+      {
+        p_referral_code: referralCode,
+        p_session_hash: sessionHash
+      }
+    );
 
-    if (referralCode) {
-      query = query.eq("referral_code", referralCode);
-    } else if (sessionHash) {
-      query = query.eq("referrer_session_hash", sessionHash);
-    }
-
-    const { data, error } = await query.maybeSingle();
-
-    if (error) {
-      console.error("Error fetching referral stats:", error);
+    if (statsError) {
+      console.error("Error fetching referral stats:", statsError);
       return new Response(
         JSON.stringify({ error: "Failed to fetch referral stats" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Also get the referral code if we only have session hash (for UI display)
+    let finalReferralCode = referralCode;
+    if (!finalReferralCode && sessionHash) {
+      const { data: codeData } = await supabase
+        .from("referral_aggregates")
+        .select("referral_code")
+        .eq("referrer_session_hash", sessionHash)
+        .maybeSingle();
+
+      if (codeData) {
+        finalReferralCode = codeData.referral_code;
+      }
+    }
+
+    // The RPC returns an array of rows (even though it's just one row)
+    const data = stats && stats.length > 0 ? stats[0] : null;
+
+
 
     if (!data) {
       return new Response(
@@ -81,16 +97,16 @@ serve(async (req) => {
     }
 
     const thresholdMet = data.total_referrals >= PRIVACY_THRESHOLD;
-    
-    console.log("Fetched referral stats:", { 
-      ...data, 
+
+    console.log("Fetched referral stats:", {
+      ...data,
       thresholdMet,
-      privacyThreshold: PRIVACY_THRESHOLD 
+      privacyThreshold: PRIVACY_THRESHOLD
     });
-    
+
     return new Response(
       JSON.stringify({
-        referralCode: data.referral_code,
+        referralCode: finalReferralCode,
         totalReferrals: data.total_referrals,
         // Only reveal financial stats if privacy threshold is met
         totalZakatCalculated: thresholdMet ? data.total_zakat_calculated : null,

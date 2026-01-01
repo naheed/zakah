@@ -8,6 +8,7 @@ import { useReferral, getInviteUrl } from '@/hooks/useReferral';
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MetricsDisplay } from './MetricsDisplay';
 
 interface ReferralWidgetProps {
   currency?: string;
@@ -38,12 +39,12 @@ function getShareMessages(inviteUrl: string) {
 
 export function ReferralWidget({ currency = 'USD', variant = 'compact' }: ReferralWidgetProps) {
   const { toast } = useToast();
-  const { 
-    referralCode, 
-    stats, 
-    isLoading, 
+  const {
+    referralCode,
+    stats,
+    isLoading,
     isGenerating,
-    generateReferralCode, 
+    generateReferralCode,
     fetchStats,
   } = useReferral();
   const [copied, setCopied] = useState(false);
@@ -56,7 +57,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
-    
+
     const init = async () => {
       const code = await generateReferralCode();
       if (code) {
@@ -97,7 +98,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
 
   const handleCopy = async () => {
     if (!inviteUrl) return;
-    
+
     try {
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
@@ -141,30 +142,30 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
             "Whoever calls to guidance will have a reward similar to those who follow him..."
             <span className="block text-[10px] mt-0.5 not-italic">— Ṣaḥīḥ Muslim 2674</span>
           </div>
-          
+
           {/* Stats summary with animation */}
           <AnimatePresence mode="wait">
             {stats && stats.totalReferrals > 0 && (
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-3 text-sm"
                 initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : false}
-                animate={shouldAnimate ? { 
-                  opacity: 1, 
+                animate={shouldAnimate ? {
+                  opacity: 1,
                   scale: 1,
                 } : undefined}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 20 
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20
                 }}
               >
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-1.5"
                   animate={shouldAnimate ? {
                     scale: [1, 1.1, 1],
                   } : undefined}
-                  transition={{ 
-                    duration: 0.5, 
+                  transition={{
+                    duration: 0.5,
                     ease: "easeInOut",
                     repeat: 0
                   }}
@@ -174,7 +175,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                   <span className="text-muted-foreground">referrals</span>
                 </motion.div>
                 {stats.thresholdMet && stats.totalZakatCalculated !== null && (
-                  <motion.div 
+                  <motion.div
                     className="flex items-center gap-1.5"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -191,7 +192,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
           {isLoading && !stats && (
             <Skeleton className="h-5 w-24" />
           )}
-          
+
           {/* Copy link button */}
           <div className="flex gap-2">
             {isGenerating ? (
@@ -272,7 +273,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
           <Heart className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold">Share & Earn Hasanat</h3>
         </div>
-        
+
         {/* Hadith Quote with Arabic */}
         <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 border border-border/50 space-y-3">
           <p className="text-sm italic text-muted-foreground leading-relaxed text-center">
@@ -285,7 +286,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
             — Prophet Muhammad ﷺ (Ṣaḥīḥ Muslim 2674)
           </p>
         </div>
-        
+
         <p className="text-sm text-muted-foreground text-center">
           If this tool helped you, share it with friends & family.
         </p>
@@ -366,13 +367,13 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
         {/* Referral Stats with Animation */}
         <AnimatePresence mode="wait">
           {(stats && stats.totalReferrals > 0) && (
-            <motion.div 
+            <motion.div
               className="bg-primary/10 rounded-lg p-4 text-center space-y-2"
               initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              <motion.div 
+              <motion.div
                 className="flex items-center justify-center gap-2"
                 animate={shouldAnimate ? {
                   scale: [1, 1.05, 1],
@@ -385,14 +386,14 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                 </p>
               </motion.div>
               <div className="flex flex-col items-center gap-2 text-sm">
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-1.5"
                   initial={shouldAnimate ? { scale: 0.9 } : false}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 15 }}
                 >
                   <Users className="w-4 h-4 text-muted-foreground" />
-                  <motion.span 
+                  <motion.span
                     className="font-semibold"
                     key={stats.totalReferrals}
                     initial={shouldAnimate ? { opacity: 0, y: -10 } : false}
@@ -405,15 +406,18 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                   </span>
                 </motion.div>
                 {stats.thresholdMet && stats.totalZakatCalculated !== null ? (
-                  <motion.div 
-                    className="flex items-center gap-1.5"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 }}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="pt-2"
                   >
-                    <Heart className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-semibold">{formatCurrency(stats.totalZakatCalculated, currency)}</span>
-                    <span className="text-muted-foreground">Zakat calculated</span>
+                    <MetricsDisplay
+                      variant="referral"
+                      assets={stats.totalAssetsCalculated || 0}
+                      zakat={stats.totalZakatCalculated}
+                      className="text-xs"
+                    />
                   </motion.div>
                 ) : (
                   <p className="text-xs text-muted-foreground">
