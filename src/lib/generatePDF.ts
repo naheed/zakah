@@ -24,8 +24,8 @@ interface ZakatCalculations {
 }
 
 export async function generateZakatPDF(
-  data: ZakatFormData, 
-  calculations: ZakatCalculations, 
+  data: ZakatFormData,
+  calculations: ZakatCalculations,
   calculationName?: string,
 ): Promise<void> {
   // Transform data for PDF component
@@ -59,17 +59,22 @@ export async function generateZakatPDF(
   ).toBlob();
 
   // Trigger download
+  // Trigger download
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  
+
   const fileName = calculationName
     ? `zakat-report-${calculationName.replace(/\s+/g, "-").toLowerCase()}.pdf`
     : `zakat-report-${new Date().toISOString().split("T")[0]}.pdf`;
-  
+
   link.download = fileName;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+
+  // Cleanup with delay to ensure download starts
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 500);
 }
