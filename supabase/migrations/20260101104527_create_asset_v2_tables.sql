@@ -4,7 +4,7 @@
 -- 1. Portfolios Table
 create table if not exists portfolios (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) not null,
+  user_id uuid not null,
   currency text default 'USD' not null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
