@@ -268,6 +268,14 @@ export type Database = {
     }
     Functions: {
       get_authenticated_email: { Args: never; Returns: string }
+      get_recursive_referral_stats: {
+        Args: { p_referral_code: string; p_session_hash?: string }
+        Returns: {
+          total_assets_calculated: number
+          total_referrals: number
+          total_zakat_calculated: number
+        }[]
+      }
       increment_referral_aggregate: {
         Args: {
           p_assets: number
