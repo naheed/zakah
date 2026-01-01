@@ -1,41 +1,93 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/domainConfig.ts";
 
-// Build document-type-specific extraction guidance
-function getDocumentTypeGuidance(documentType: string): string {
-  const normalizedType = documentType.toLowerCase();
-  
-  if (normalizedType.includes("bank")) {
-    return `BANK STATEMENT: Extract ending balance as checkingAccounts or savingsAccounts. Note interest earned.`;
+// --- Types & Interfaces ---
+
+interface ExtractionLineItem {
+  description: string;
+  amount: number;
+  inferredCategory: string;
+  confidence?: number;
+}
+
+interface LegacyExtractedData {
+  [key: string]: number;
+}
+
+// --- Helper Functions ---
+
+// Maps AI inferred category to Legacy Zakat Field
+function mapLineItemToLegacyField(item: ExtractionLineItem): string | null {
+  const cat = item.inferredCategory.toUpperCase();
+  const desc = item.description.toLowerCase();
+
+  // 1. CASH / LIQUID
+  if (cat.includes("CASH") || cat.includes("CHECKING") || cat.includes("SAVINGS") || cat.includes("MONEY_MARKET")) {
+    if (desc.includes("check")) return "checkingAccounts";
+    return "savingsAccounts";
   }
-  if (normalizedType.includes("brokerage") || normalizedType.includes("investment")) {
-    return `BROKERAGE: Extract total portfolio value as passiveInvestmentsValue. Note dividends received.`;
+
+  // 2. RETIREMENT
+  if (cat.includes("RETIREMENT") || cat.includes("401K") || cat.includes("IRA")) {
+    if (desc.includes("roth")) return "rothIRAEarnings";
+    if (desc.includes("401")) return "fourOhOneKVestedBalance";
+    return "traditionalIRABalance";
   }
-  if (normalizedType.includes("401") || normalizedType.includes("retirement") || normalizedType.includes("ira") || normalizedType.includes("hsa")) {
-    return `RETIREMENT ACCOUNT: For 401k use fourOhOneKVestedBalance. For Traditional IRA use traditionalIRABalance. For Roth IRA separate contributions vs earnings. For HSA use hsaBalance.`;
+
+  // 3. INVESTMENTS
+  if (cat.includes("EQUITY") || cat.includes("STOCK") || cat.includes("ETF") || cat.includes("MUTUAL")) {
+    return "passiveInvestmentsValue";
   }
-  if (normalizedType.includes("credit card")) {
-    return `CREDIT CARD STATEMENT ANALYSIS:
-1. Extract the statement/closing balance as creditCardBalance
-2. Categorize ALL transactions into these expense categories:
-   - utilitiesExpenses: Electric, gas, water, internet, phone, cable, streaming services (Netflix, Spotify, etc.)
-   - groceriesExpenses: Supermarkets, grocery stores (Costco, Safeway, Whole Foods, Trader Joe's, etc.), food delivery
-   - transportExpenses: Gas stations, public transit, Uber/Lyft, parking, tolls, car maintenance
-   - insuranceExpenses: Health insurance, auto insurance, life insurance, home/renters insurance premiums
-   - monthlyLivingExpenses: Sum of utilities + groceries + transport for total essential spending
-3. Sum up each category from the transaction list. Be thorough - scan every transaction.`;
+  if (cat.includes("FIXED_INCOME") || cat.includes("BOND")) {
+    return "passiveInvestmentsValue";
   }
-  if (normalizedType.includes("crypto")) {
-    return `CRYPTO: Extract BTC/ETH as cryptoCurrency. Altcoins as cryptoTrading. Note staked assets.`;
+  if (cat.includes("CRYPTO")) {
+    return "cryptoCurrency";
   }
-  if (normalizedType.includes("mortgage")) {
-    return `MORTGAGE: Extract monthly payment as monthlyMortgage.`;
+  if (cat.includes("COMMODITY") || cat.includes("GOLD") || cat.includes("SILVER")) {
+    return "goldValue";
   }
-  if (normalizedType.includes("insurance")) {
-    return `INSURANCE: Extract premium as insuranceExpenses.`;
+
+  // 4. LIABILITIES / EXPENSES
+  if (cat.includes("EXPENSE") || cat.includes("BILL") || cat.includes("UTILITY")) {
+    if (desc.includes("grocery") || desc.includes("food")) return "groceriesExpenses";
+    if (desc.includes("transport") || desc.includes("gas") || desc.includes("uber")) return "transportExpenses";
+    if (desc.includes("insurance")) return "insuranceExpenses";
+    return "utilitiesExpenses";
   }
-  
-  return `GENERAL: Extract all account balances and categorize appropriately.`;
+  if (cat.includes("DEBT") || cat.includes("LOAN") || cat.includes("CREDIT")) {
+    if (desc.includes("student")) return "studentLoansDue";
+    if (desc.includes("mortgage")) return "monthlyMortgage";
+    return "creditCardBalance";
+  }
+
+  // 5. INCOME
+  if (cat.includes("DIVIDEND")) return "dividends";
+  if (cat.includes("INTEREST")) return "interestEarned";
+
+  return null;
+}
+
+// Aggregates granular line items into the flat legacy format
+function aggregateLegacyData(lineItems: ExtractionLineItem[]): LegacyExtractedData {
+  const legacyData: LegacyExtractedData = {};
+
+  for (const item of lineItems) {
+    const field = mapLineItemToLegacyField(item);
+    if (field) {
+      legacyData[field] = (legacyData[field] || 0) + item.amount;
+    }
+  }
+
+  // Derived fields
+  if (legacyData["utilitiesExpenses"] || legacyData["groceriesExpenses"] || legacyData["transportExpenses"]) {
+    legacyData["monthlyLivingExpenses"] =
+      (legacyData["utilitiesExpenses"] || 0) +
+      (legacyData["groceriesExpenses"] || 0) +
+      (legacyData["transportExpenses"] || 0);
+  }
+
+  return legacyData;
 }
 
 serve(async (req) => {
@@ -45,9 +97,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
-  // JWT is verified by Supabase (verify_jwt = true in config)
-  // The request will be rejected before reaching here if no valid JWT
 
   try {
     const { documentBase64, documentType, mimeType } = await req.json();
@@ -59,7 +108,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate document size (max 10MB base64 ~ 7.5MB file)
     if (documentBase64.length > 10 * 1024 * 1024) {
       return new Response(
         JSON.stringify({ error: "Document too large. Maximum size is 10MB." }),
@@ -78,51 +126,40 @@ serve(async (req) => {
 
     console.log(`Processing ${documentType} document (${mimeType}), base64 length: ${documentBase64.length}`);
 
-    const documentGuidance = getDocumentTypeGuidance(documentType);
+    // V2 System Prompt: Line Item Extraction
+    const systemPrompt = `You are an expert financial auditor for Zakat purification.
 
-    const systemPrompt = `You are a financial document analyzer for Zakat calculations. Extract ALL monetary values accurately.
+OBJECTIVE:
+Extract every financial line item from the document with extreme precision. Do not aggregate values yourself. List them individually so they can be classified correctly.
 
-DOCUMENT TYPE: ${documentType}
-${documentGuidance}
-
-ASSET FIELDS:
-- checkingAccounts, savingsAccounts: Bank account balances
-- digitalWallets: PayPal, Venmo, CashApp balances
-- interestEarned: Interest income for purification
-- activeInvestments: Short-term trading positions
-- passiveInvestmentsValue: Long-term stocks, ETFs, mutual funds
-- dividends: Dividend income received
-- rothIRAContributions: Roth IRA contributions basis
-- rothIRAEarnings: Roth IRA earnings
-- fourOhOneKVestedBalance: 401k vested balance
-- traditionalIRABalance: Traditional IRA balance
-- hsaBalance: HSA balance
-- cryptoCurrency: Bitcoin, Ethereum value
-- cryptoTrading: Altcoins value
-- goldValue, silverValue: Precious metals
-- realEstateForSale, rentalPropertyIncome: Real estate
-- businessCashAndReceivables, businessInventory: Business assets
-
-LIABILITY/EXPENSE FIELDS:
-- utilitiesExpenses: Electric, gas, water, internet, phone, cable, streaming (Netflix, Spotify, etc.)
-- groceriesExpenses: Supermarkets, grocery stores, food delivery apps
-- transportExpenses: Gas, public transit, rideshare (Uber/Lyft), parking, tolls
-- insuranceExpenses: Health, auto, life, home/renters insurance premiums
-- monthlyLivingExpenses: Total of utilities + groceries + transport
-- monthlyMortgage: Monthly mortgage payment
-- creditCardBalance: Credit card statement balance
-- unpaidBills: Outstanding bills
-- studentLoansDue: Student loans due in 12 months
-- propertyTax: Property tax due
+OUTPUT CATEGORIES (use these for inferredCategory):
+- CASH_CHECKING: Checking account balances
+- CASH_SAVINGS: Savings, Money Market, CD balances
+- INVESTMENT_EQUITY: Stocks, ETFs, Mutual Funds
+- INVESTMENT_FIXED_INCOME: Bonds, Sukuk, Fixed Income funds
+- RETIREMENT_401K: 401k balances
+- RETIREMENT_IRA: Traditional or Sep IRA
+- RETIREMENT_ROTH: Roth IRA
+- CRYPTO: Cryptocurrency holdings
+- COMMODITY_GOLD: Gold holdings
+- COMMODITY_SILVER: Silver holdings
+- EXPENSE_UTILITY: Electricity, water, internet, phone
+- EXPENSE_GROCERY: Food and household supplies
+- EXPENSE_TRANSPORT: Gas, public transit, vehicle maintenance
+- EXPENSE_INSURANCE: Health, auto, home premiums
+- LIABILITY_CREDIT_CARD: Credit card debt
+- LIABILITY_LOAN: Installment loans, mortgages
+- INCOME_DIVIDEND: Dividend payments
+- INCOME_INTEREST: Interest/Riba payments (for purification)
+- OTHER: Anything that doesn't fit
 
 RULES:
-- Put ALL numeric fields into extractedData as an array of objects: { field: string, amount: number }
-- Use field names exactly as listed above (e.g., checkingAccounts, creditCardBalance)
-- Return numeric values only (no currency symbols)
-- Omit fields with no data found (do not return 0)
-- For credit cards: SCAN EVERY TRANSACTION and categorize into utilitiesExpenses, groceriesExpenses, transportExpenses, insuranceExpenses
-- Calculate monthlyLivingExpenses as sum of utilities + groceries + transport
-- Also include summary, documentDate, institutionName, and notes`;
+1. Extract exact amounts as numbers (no currency symbols).
+2. For "Cash & Cash Equivalents" in a brokerage, use CASH_SAVINGS.
+3. Extract the 'description' exactly as it appears on the statement.
+4. Provide a 'confidence' score (0.0 to 1.0) for your categorization.
+5. For each distinct holding or balance, create a separate line item.
+`;
 
     const userPrompt = `Analyze this ${documentType} and extract financial data for Zakat calculation.`;
 
@@ -139,8 +176,8 @@ RULES:
       });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
-    
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
     const requestBody = {
       contents: [{ parts }],
       tools: [
@@ -148,29 +185,30 @@ RULES:
           functionDeclarations: [
             {
               name: "extract_financial_data",
-              description: "Extract structured financial data from document",
-parameters: {
+              description: "Extract structured financial line items from document",
+              parameters: {
                 type: "object",
                 properties: {
-                  extractedData: {
+                  lineItems: {
                     type: "array",
-                    description:
-                      "List of extracted numeric fields as {field, amount}. Use only field names listed in the prompt.",
+                    description: "List of extracted line items.",
                     items: {
                       type: "object",
                       properties: {
-                        field: { type: "string", description: "Zakat field name" },
+                        description: { type: "string", description: "Description as shown on statement" },
                         amount: { type: "number", description: "Numeric value" },
+                        inferredCategory: { type: "string", description: "One of the OUTPUT CATEGORIES" },
+                        confidence: { type: "number", description: "Confidence 0.0-1.0" }
                       },
-                      required: ["field", "amount"],
-                    },
+                      required: ["description", "amount", "inferredCategory"]
+                    }
                   },
-                  summary: { type: "string", description: "Summary of extracted data" },
-                  documentDate: { type: "string", description: "Statement date" },
-                  institutionName: { type: "string", description: "Institution name" },
-                  notes: { type: "string", description: "Important notes" },
+                  summary: { type: "string", description: "Brief summary of the document" },
+                  documentDate: { type: "string", description: "Statement date if found" },
+                  institutionName: { type: "string", description: "Institution name if found" },
+                  notes: { type: "string", description: "Any important notes" },
                 },
-                required: ["summary", "extractedData"],
+                required: ["lineItems", "summary"]
               }
             }
           ]
@@ -183,7 +221,7 @@ parameters: {
         },
       },
     };
-    
+
     console.log("Request body size:", JSON.stringify(requestBody).length);
 
     const response = await fetch(endpoint, {
@@ -197,7 +235,7 @@ parameters: {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini API error:", response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
@@ -210,7 +248,7 @@ parameters: {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      
+
       return new Response(
         JSON.stringify({ error: "Failed to process document", details: errorText }),
         { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -223,13 +261,14 @@ parameters: {
     const candidate = data.candidates?.[0];
     const content = candidate?.content;
     const functionCallPart = content?.parts?.find((part: any) => part.functionCall);
-    
+
     if (!functionCallPart || functionCallPart.functionCall?.name !== "extract_financial_data") {
       console.error("No valid function call in response:", JSON.stringify(data));
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Could not extract data from document",
           extractedData: {},
+          lineItems: [],
           summary: "Unable to parse the document. Please ensure it is a clear image of a financial statement."
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -237,30 +276,20 @@ parameters: {
     }
 
     const args = functionCallPart.functionCall.args || {};
+    const lineItems: ExtractionLineItem[] = (args as any).lineItems || [];
 
-    const extractedData: Record<string, number> = {};
-    const raw = (args as any).extractedData;
+    // Aggregate for backward compatibility with existing UI
+    const extractedData = aggregateLegacyData(lineItems);
 
-    if (Array.isArray(raw)) {
-      for (const item of raw) {
-        const field = item?.field;
-        const amount = item?.amount;
-        if (typeof field === "string" && typeof amount === "number" && Number.isFinite(amount)) {
-          extractedData[field] = amount;
-        }
-      }
-    } else if (raw && typeof raw === "object") {
-      // Backwards compatibility if model returns an object map
-      for (const [k, v] of Object.entries(raw)) {
-        if (typeof v === "number" && Number.isFinite(v)) extractedData[k] = v;
-      }
-    }
-
-    console.log("Extracted data:", JSON.stringify({ extractedData, summary: (args as any).summary }));
+    console.log("Extracted line items count:", lineItems.length);
+    console.log("Aggregated Legacy Data:", JSON.stringify(extractedData));
 
     return new Response(
       JSON.stringify({
         success: true,
+        // V2 Data (granular)
+        lineItems,
+        // Legacy Data (aggregated for existing UI)
         extractedData,
         summary: (args as any).summary || "Data extracted successfully",
         documentDate: (args as any).documentDate,
