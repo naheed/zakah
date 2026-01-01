@@ -17,6 +17,7 @@ import Terms from "./pages/Terms";
 import Invite from "./pages/Invite";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import ZakatAdapterTest from "./components/debug/ZakatAdapterTest";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/invite/:code" element={<Invite />} />
+                <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
