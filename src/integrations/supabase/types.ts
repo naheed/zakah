@@ -14,6 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
+      asset_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          institution_name: string
+          mask: string | null
+          metadata: Json | null
+          name: string
+          portfolio_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution_name: string
+          mask?: string | null
+          metadata?: Json | null
+          name: string
+          portfolio_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution_name?: string
+          mask?: string | null
+          metadata?: Json | null
+          name?: string
+          portfolio_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_accounts_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_line_items: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          inferred_category: string | null
+          raw_category: string | null
+          snapshot_id: string
+          zakat_category: string
+          zakat_rule_override: number | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          description: string
+          id?: string
+          inferred_category?: string | null
+          raw_category?: string | null
+          snapshot_id: string
+          zakat_category: string
+          zakat_rule_override?: number | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          inferred_category?: string | null
+          raw_category?: string | null
+          snapshot_id?: string
+          zakat_category?: string
+          zakat_rule_override?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_line_items_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "asset_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_snapshots: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          method: string
+          source_document_path: string | null
+          statement_date: string
+          status: string
+          total_value: number
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          method: string
+          source_document_path?: string | null
+          statement_date: string
+          status?: string
+          total_value?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          method?: string
+          source_document_path?: string | null
+          statement_date?: string
+          status?: string
+          total_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_snapshots_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "asset_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolios: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
