@@ -279,7 +279,10 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                 Zero-Knowledge Encryption
               </div>
               <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline">Scholar Verified</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
+                <Trash className="w-3.5 h-3.5" weight="duotone" />
+                Session-Only Storage
+              </div>
             </motion.div>
           </motion.div>
 

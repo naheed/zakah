@@ -5,6 +5,7 @@ import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text, Heading } from "@/components/ui/typography";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Warning } from "@phosphor-icons/react";
+import { ZakatModeComparisonChart } from "@/components/zakat/ZakatModeComparisonChart";
 
 const tocItems = [
   { id: "principles", number: 1, label: "Core Legal Principles" },
@@ -736,6 +737,10 @@ const Methodology = () => {
                 </div>
               </div>
 
+              <div className="mt-8">
+                <ZakatModeComparisonChart />
+              </div>
+
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
                 <p className="text-sm font-medium text-foreground">{content.example.summary.title}</p>
                 <p className="text-sm text-muted-foreground mt-1">{content.example.summary.text}</p>
@@ -770,24 +775,16 @@ const Methodology = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-t border-border">
-                      <td className="p-3 font-medium text-foreground">Cash & Liquid Assets</td>
-                      <td className="p-3 text-center text-muted-foreground">100%</td>
-                      <td className="p-3 text-center text-muted-foreground">100%</td>
-                      <td className="p-3 text-center text-muted-foreground">100%</td>
-                    </tr>
-                    <tr className="border-t border-border bg-muted/30">
-                      <td className="p-3 font-medium text-foreground">Stock Portfolio</td>
-                      <td className="p-3 text-center text-muted-foreground">100%</td>
-                      <td className="p-3 text-center text-primary font-medium">30% rule</td>
-                      <td className="p-3 text-center text-primary font-medium">30% rule</td>
-                    </tr>
-                    <tr className="border-t border-border">
-                      <td className="p-3 font-medium text-foreground">Retirement (Pre-Access)</td>
-                      <td className="p-3 text-center text-muted-foreground">100%</td>
-                      <td className="p-3 text-center text-primary font-medium">After tax/pen</td>
-                      <td className="p-3 text-center text-tertiary font-bold">EXEMPT</td>
-                    </tr>
+                    {content.modes.comparisonTable.map((row, i) => (
+                      <tr key={i} className={`border-t border-border ${i % 2 === 1 ? 'bg-muted/20' : ''} hover:bg-muted/40 transition-colors`}>
+                        <td className="p-3 font-medium text-foreground text-sm">{row.asset}</td>
+                        <td className="p-3 text-center text-sm text-muted-foreground">{row.conservative}</td>
+                        <td className="p-3 text-center text-sm font-medium text-primary">{row.optimized}</td>
+                        <td className={`p-3 text-center text-sm font-bold ${row.bradford === 'EXEMPT' ? 'text-tertiary' : 'text-primary'}`}>
+                          {row.bradford}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

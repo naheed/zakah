@@ -532,6 +532,18 @@ export const methodologyContent = {
         title: "Calculation Modes Compared",
         icon: Table,
         intro: "ZakatFlow offers three calculation modes to accommodate different scholarly interpretations. This table summarizes how each asset type is treated under each mode.",
+        comparisonTable: [
+            { asset: "Cash & Liquid Assets", conservative: "100%", optimized: "100%", bradford: "100%" },
+            { asset: "Active Stocks (Trading)", conservative: "100%", optimized: "100%", bradford: "100%" },
+            { asset: "Passive Stocks (Long-term)", conservative: "100%", optimized: "30% rule", bradford: "30% rule" },
+            { asset: "401(k)/IRA (under 59½)", conservative: "100%", optimized: "After tax/penalty", bradford: "EXEMPT" },
+            { asset: "401(k)/IRA (59½+)", conservative: "100%", optimized: "After tax", bradford: "After tax" },
+            { asset: "Roth IRA Contributions", conservative: "100%", optimized: "100%", bradford: "100%" },
+            { asset: "Roth IRA Earnings (under 59½)", conservative: "100%", optimized: "After penalty", bradford: "EXEMPT" },
+            { asset: "HSA Balance", conservative: "100%", optimized: "100%", bradford: "100%" },
+            { asset: "Cryptocurrency", conservative: "100%", optimized: "100%", bradford: "100%" },
+            { asset: "Gold & Silver", conservative: "100%", optimized: "100%", bradford: "100%" }
+        ],
         notes: {
             title: "Choosing a Mode",
             text: "Conservative is for those who prefer maximum certainty and precaution. Optimized balances scholarly opinion with practical accessibility. Bradford follows Sheikh Joe Bradford's specific ruling on retirement accounts. All three are valid scholarly positions."

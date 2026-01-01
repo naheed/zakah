@@ -71,6 +71,12 @@ const SectionRenderer: React.FC<{ section: SectionContent; index: number }> = ({
         </div>
       )}
 
+      {section.note && (
+        <div className="mt-4 p-3 bg-muted/30 rounded border border-border text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">Note:</span> {section.note}
+        </div>
+      )}
+
       {section.warning && (
         <ScrollReveal>
           <div className="mt-4 p-4 rounded-lg bg-tertiary/10 border border-tertiary/20 text-muted-foreground">
