@@ -40,11 +40,11 @@ export const Heading: React.FC<HeadingProps> = ({ children, className, level = 2
         4: "font-medium text-foreground mt-4 mb-2"
     };
 
-    const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+    const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
 
     return (
         <ScrollReveal>
-            <Tag className={cn(styles[level], className)} {...props}>
+            <Tag className={cn(styles[level], className)} {...(props as React.HTMLAttributes<HTMLHeadingElement>)}>
                 {children}
             </Tag>
         </ScrollReveal>
