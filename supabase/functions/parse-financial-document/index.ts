@@ -156,12 +156,25 @@ OUTPUT CATEGORIES (use these for inferredCategory):
 - INCOME_INTEREST: Interest/Riba payments (for purification)
 - OTHER: Anything that doesn't fit
 
-RULES:
+CRITICAL EXTRACTION RULES:
 1. Extract exact amounts as numbers (no currency symbols).
 2. For "Cash & Cash Equivalents" in a brokerage, use CASH_SAVINGS.
 3. Extract the 'description' exactly as it appears on the statement.
 4. Provide a 'confidence' score (0.0 to 1.0) for your categorization.
 5. For each distinct holding or balance, create a separate line item.
+
+DATE EXTRACTION (CRITICAL):
+- Look for "Statement Date", "Statement Period", "As of", or similar.
+- The date MUST be a real date from the document, NOT made up.
+- Format MUST be YYYY-MM-DD (e.g., 2025-11-29, NOT 2030-10-31).
+- Financial statements are historical - dates should be in the PAST.
+- If you cannot find a clear date, use today's date or leave empty.
+
+ACCOUNT NAME EXTRACTION (CRITICAL):
+- Look for the specific account type like "Brokerage Account", "Individual Account", "IRA", "401(k)", "Roth IRA", "Joint Account".
+- This is DIFFERENT from the institution name (e.g., "Charles Schwab").
+- The accountName helps distinguish multiple accounts at the same institution.
+- Example: institutionName="Charles Schwab", accountName="Brokerage Account"
 `;
 
     const userPrompt = `Analyze this ${documentType} and extract financial data for Zakat calculation.`;
@@ -207,12 +220,12 @@ RULES:
                     }
                   },
                   summary: { type: "string", description: "Brief summary of the document" },
-                  documentDate: { type: "string", description: "Statement date in YYYY-MM-DD format if found" },
-                  institutionName: { type: "string", description: "Institution name if found (e.g., Charles Schwab)" },
-                  accountName: { type: "string", description: "Account name/type if found (e.g., Brokerage Account, IRA, 401k)" },
+                  documentDate: { type: "string", description: "Statement date in YYYY-MM-DD format. MUST be a real date from the document, in the past. Example: 2025-11-29" },
+                  institutionName: { type: "string", description: "Financial institution name (e.g., Charles Schwab, Fidelity, Vanguard)" },
+                  accountName: { type: "string", description: "Specific account type (e.g., Brokerage Account, IRA, 401k, Roth IRA). This distinguishes accounts at the same institution." },
                   notes: { type: "string", description: "Any important notes" },
                 },
-                required: ["lineItems", "summary"]
+                required: ["lineItems", "summary", "documentDate", "institutionName", "accountName"]
               }
             }
           ]
