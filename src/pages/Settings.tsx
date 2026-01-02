@@ -41,7 +41,7 @@ import { getPrimaryUrl } from "@/lib/domainConfig";
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(true);
@@ -85,25 +85,24 @@ export default function Settings() {
     if (!user) return;
     setIsDeleting(true);
     try {
-      await supabase
-        .from('zakat_calculation_shares')
-        .delete()
-        .eq('owner_id', user.id);
+      // 1. Delete data (legacy cleanup, kept for safety)
+      await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
+      await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
+      await supabase.from('profiles').delete().eq('user_id', user.id);
 
-      await supabase
-        .from('zakat_calculations')
-        .delete()
-        .eq('user_id', user.id);
+      // 2. Call Edge Function to delete the actual Auth User (Critical Security Fix)
+      const { error: functionError } = await supabase.functions.invoke('delete-account');
+      if (functionError) throw functionError;
 
-      await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', user.id);
-
+      // 3. Clear local keys
       localStorage.removeItem('zakat_private_key');
 
-      await supabase.auth.signOut();
-      toast.success('Your account and all data have been deleted');
+      // 4. Client-side sign out to clear session/local storage
+      await signOut(); // Uses the robust signOut from useAuth
+
+      // Navigation is handled by signOut usually, but safety net:
+      // toast is shown by signOut? No, usually not.
+      toast.success('Your account has been permanently deleted');
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
