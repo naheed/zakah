@@ -6,6 +6,7 @@ export interface UploadedDocument {
   fileName: string;
   uploadedAt: string;
   institutionName: string;
+  accountName?: string;  // NEW: Account name for deduplication (e.g., "Brokerage", "IRA")
   documentDate?: string;
   summary: string;
   notes?: string;
@@ -22,13 +23,13 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   digitalWallets: "liquid-assets",
   foreignCurrency: "liquid-assets",
   interestEarned: "liquid-assets",
-  
+
   // Investments
   activeInvestments: "investments",
   passiveInvestmentsValue: "investments",
   dividends: "investments",
   dividendPurificationPercent: "investments",
-  
+
   // Retirement
   rothIRAContributions: "retirement",
   rothIRAEarnings: "retirement",
@@ -40,40 +41,40 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   fiveTwentyNineWithdrawals: "retirement",
   hsaBalance: "retirement",
   isOver59Half: "retirement",
-  
+
   // Precious Metals
   goldValue: "precious-metals",
   silverValue: "precious-metals",
-  
+
   // Crypto
   cryptoCurrency: "crypto",
   cryptoTrading: "crypto",
   stakedAssets: "crypto",
   stakedRewardsVested: "crypto",
   liquidityPoolValue: "crypto",
-  
+
   // Trusts
   revocableTrustValue: "trusts",
   irrevocableTrustAccessible: "trusts",
   irrevocableTrustValue: "trusts",
   clatValue: "trusts",
-  
+
   // Real Estate
   realEstateForSale: "real-estate",
   rentalPropertyIncome: "real-estate",
-  
+
   // Business
   businessCashAndReceivables: "business",
   businessInventory: "business",
-  
+
   // Illiquid Assets
   illiquidAssetsValue: "illiquid-assets",
   livestockValue: "illiquid-assets",
-  
+
   // Debt Owed To You
   goodDebtOwedToYou: "debt-owed",
   badDebtRecovered: "debt-owed",
-  
+
   // Liabilities
   monthlyLivingExpenses: "liabilities",
   insuranceExpenses: "liabilities",
@@ -83,7 +84,7 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   studentLoansDue: "liabilities",
   propertyTax: "liabilities",
   lateTaxPayments: "liabilities",
-  
+
   // Non-asset fields (not shown on asset pages)
   currency: "currency",
   calendarType: "nisab",
@@ -133,7 +134,7 @@ export function getExtractedValuesForStep(
 ): Record<string, number | boolean> {
   const result: Record<string, number | boolean> = {};
   const extractedFields = Object.keys(doc.extractedData) as (keyof ZakatFormData)[];
-  
+
   for (const field of extractedFields) {
     if (fieldToStepMapping[field] === stepId) {
       const value = doc.extractedData[field];
@@ -142,7 +143,7 @@ export function getExtractedValuesForStep(
       }
     }
   }
-  
+
   return result;
 }
 

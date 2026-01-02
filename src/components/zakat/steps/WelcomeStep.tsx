@@ -14,6 +14,7 @@ import { Logo } from "../Logo";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUsageMetrics } from "@/hooks/useUsageMetrics";
+import { useAssetPersistence } from "@/hooks/useAssetPersistence";
 import { formatLargeNumber, formatCount } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MetricsDisplay } from "../MetricsDisplay";
@@ -23,7 +24,10 @@ import { UserMenu } from "../UserMenu";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
 import { InteractiveDemo } from "../landing/InteractiveDemo";
 import { Footer } from "../Footer";
+import { AccountCard } from "@/components/assets/AccountCard";
 import { motion, Variants } from "framer-motion";
+import { useState, useEffect } from "react";
+import { AssetAccount } from "@/types/assets";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -36,6 +40,23 @@ const assetTypes = ["401(k) / IRA", "Crypto & NFTs", "Real Estate", "Stocks & RS
 export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
   const { data: metrics, isLoading: metricsLoading } = useUsageMetrics();
+  const { fetchAccounts } = useAssetPersistence();
+  const [accounts, setAccounts] = useState<AssetAccount[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(false);
+
+  // Fetch accounts for logged-in user
+  useEffect(() => {
+    if (user) {
+      setAccountsLoading(true);
+      fetchAccounts().then(data => {
+        setAccounts(data);
+        setAccountsLoading(false);
+      });
+    }
+  }, [user, fetchAccounts]);
+
+  // Get user's first name
+  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'back';
 
   const handleLoadCalculation = (calc: SavedCalculation) => {
     if (onLoadCalculation) {
@@ -87,7 +108,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
             {/* Welcome + Primary CTA */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+                <h1 className="text-2xl font-bold text-foreground">Welcome back, {firstName}</h1>
                 <p className="text-muted-foreground mt-1">Ready to calculate your Zakat?</p>
               </div>
               <Button onClick={onNext} size="lg" className="gap-2 shadow-lg shadow-primary/20">
@@ -101,7 +122,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               <RecentCalculations onLoadCalculation={handleLoadCalculation} limit={3} />
             </section>
 
-            {/* P1: Assets Preview - NEW */}
+            {/* P1: Assets Preview - Shows actual accounts */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium text-muted-foreground">Your Accounts</h2>
@@ -112,7 +133,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                 </Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {/* Quick add card */}
+                {/* Quick add card - always first */}
                 <Link to="/assets/add">
                   <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer h-full flex flex-col items-center justify-center min-h-[100px]">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mb-2">
@@ -121,10 +142,23 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                     <p className="text-sm font-medium text-muted-foreground">Add Account</p>
                   </div>
                 </Link>
+                {/* Show up to 3 account cards */}
+                {accountsLoading ? (
+                  <>
+                    <Skeleton className="h-[100px] rounded-lg" />
+                    <Skeleton className="h-[100px] rounded-lg" />
+                  </>
+                ) : (
+                  accounts.slice(0, 3).map(account => (
+                    <AccountCard key={account.id} account={account} compact />
+                  ))
+                )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Connect your accounts to auto-fill your Zakat calculation.
-              </p>
+              {accounts.length === 0 && !accountsLoading && (
+                <p className="text-xs text-muted-foreground">
+                  Upload statements to auto-fill your Zakat calculation.
+                </p>
+              )}
             </section>
 
             {/* P3: Referral Widget */}

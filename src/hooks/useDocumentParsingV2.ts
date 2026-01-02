@@ -21,6 +21,7 @@ export interface DocumentExtractionResult {
     summary: string;
     documentDate?: string;
     institutionName?: string;
+    accountName?: string;  // NEW: Account name/type for deduplication
     notes?: string;
     error?: string;
 }

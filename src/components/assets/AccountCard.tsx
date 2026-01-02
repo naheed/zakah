@@ -15,14 +15,15 @@ import { Badge } from "@/components/ui/badge";
 import { AssetAccount, AccountType } from "@/types/assets";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface AccountCardProps {
     account: AssetAccount;
     latestValue?: number;
     lastUpdated?: string;
     onClick?: () => void;
+    compact?: boolean;  // Smaller version for dashboard preview
 }
-
 // Icon mapping for account types
 const accountTypeIcons: Record<AccountType, React.ReactNode> = {
     CHECKING: <Bank className="w-5 h-5" weight="duotone" />,
@@ -71,7 +72,7 @@ const accountTypeLabels: Record<AccountType, string> = {
     OTHER: "Other",
 };
 
-export function AccountCard({ account, latestValue, lastUpdated, onClick }: AccountCardProps) {
+export function AccountCard({ account, latestValue, lastUpdated, onClick, compact }: AccountCardProps) {
     const icon = accountTypeIcons[account.type] || accountTypeIcons.OTHER;
     const badgeColor = accountTypeBadgeColors[account.type] || accountTypeBadgeColors.OTHER;
     const typeLabel = accountTypeLabels[account.type] || account.type;
@@ -82,6 +83,32 @@ export function AccountCard({ account, latestValue, lastUpdated, onClick }: Acco
         : null;
 
     const isStale = daysSinceUpdate !== null && daysSinceUpdate > 30;
+
+    // Compact version for dashboard preview
+    if (compact) {
+        return (
+            <Link to={`/assets/${account.id}`}>
+                <Card className="cursor-pointer hover:shadow-md transition-all group h-full">
+                    <CardContent className="p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                {icon}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <h3 className="font-medium text-sm text-foreground truncate">{account.institution_name}</h3>
+                                <p className="text-xs text-muted-foreground truncate">{account.name}</p>
+                            </div>
+                        </div>
+                        {latestValue !== undefined && (
+                            <p className="text-lg font-bold text-foreground">
+                                {formatCurrency(latestValue, 'USD')}
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
+            </Link>
+        );
+    }
 
     return (
         <Card

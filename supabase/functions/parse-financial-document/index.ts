@@ -207,8 +207,9 @@ RULES:
                     }
                   },
                   summary: { type: "string", description: "Brief summary of the document" },
-                  documentDate: { type: "string", description: "Statement date if found" },
-                  institutionName: { type: "string", description: "Institution name if found" },
+                  documentDate: { type: "string", description: "Statement date in YYYY-MM-DD format if found" },
+                  institutionName: { type: "string", description: "Institution name if found (e.g., Charles Schwab)" },
+                  accountName: { type: "string", description: "Account name/type if found (e.g., Brokerage Account, IRA, 401k)" },
                   notes: { type: "string", description: "Any important notes" },
                 },
                 required: ["lineItems", "summary"]
@@ -287,6 +288,21 @@ RULES:
     console.log("Extracted line items count:", lineItems.length);
     console.log("Aggregated Legacy Data:", JSON.stringify(extractedData));
 
+    // Validate and sanitize documentDate
+    let documentDate = (args as any).documentDate;
+    if (documentDate) {
+      const parsedDate = new Date(documentDate);
+      const today = new Date();
+      // If date is in the future or invalid, use today's date
+      if (isNaN(parsedDate.getTime()) || parsedDate > today) {
+        console.log(`Invalid or future date detected: ${documentDate}, using today's date`);
+        documentDate = today.toISOString().split('T')[0];
+      }
+    } else {
+      // No date found, use today
+      documentDate = new Date().toISOString().split('T')[0];
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -295,8 +311,9 @@ RULES:
         // Legacy Data (aggregated for existing UI)
         extractedData,
         summary: (args as any).summary || "Data extracted successfully",
-        documentDate: (args as any).documentDate,
+        documentDate,
         institutionName: (args as any).institutionName,
+        accountName: (args as any).accountName,
         notes: (args as any).notes,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -23,6 +23,7 @@ interface ExtractedResult {
   summary: string;
   documentDate?: string;
   institutionName?: string;
+  accountName?: string;  // NEW: Account name for deduplication
   notes?: string;
   error?: string;
 }
@@ -62,7 +63,7 @@ export function DocumentUpload({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       processFile(files[0]);
@@ -98,7 +99,7 @@ export function DocumentUpload({
     try {
       // Convert file to base64
       const base64 = await fileToBase64(file);
-      
+
       setStatus("processing");
 
       // Determine document type from filename
@@ -154,6 +155,7 @@ export function DocumentUpload({
         onDocumentAdded({
           fileName: file.name,
           institutionName: data.institutionName || file.name,
+          accountName: data.accountName,  // NEW: Pass account name
           documentDate: data.documentDate,
           summary: data.summary || "Financial data extracted",
           notes: data.notes,
@@ -179,7 +181,7 @@ export function DocumentUpload({
         summary: "",
         error: error instanceof Error ? error.message : "Failed to process document",
       });
-      
+
       toast({
         title: "Processing failed",
         description: error instanceof Error ? error.message : "Failed to process document",
@@ -249,8 +251,8 @@ export function DocumentUpload({
         onChange={handleFileSelect}
         className="hidden"
       />
-      
-      <motion.div 
+
+      <motion.div
         onClick={handleClick}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -258,17 +260,17 @@ export function DocumentUpload({
         onDrop={handleDrop}
         className={cn(
           "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors relative overflow-hidden",
-          status === "idle" || status === "success" 
-            ? "border-border hover:border-primary hover:bg-primary/5" 
+          status === "idle" || status === "success"
+            ? "border-border hover:border-primary hover:bg-primary/5"
             : "",
-          status === "uploading" || status === "processing" 
-            ? "border-primary bg-primary/5 pointer-events-none" 
+          status === "uploading" || status === "processing"
+            ? "border-primary bg-primary/5 pointer-events-none"
             : "",
-          status === "error" 
-            ? "border-destructive bg-destructive/5" 
+          status === "error"
+            ? "border-destructive bg-destructive/5"
             : "",
-          isDragging 
-            ? "border-primary bg-primary/10 border-solid" 
+          isDragging
+            ? "border-primary bg-primary/10 border-solid"
             : ""
         )}
         initial={false}
@@ -308,7 +310,7 @@ export function DocumentUpload({
         </AnimatePresence>
 
         <div className="flex flex-col items-center gap-2 relative z-10">
-          <motion.div 
+          <motion.div
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center transition-colors",
               status === "idle" || status === "success" ? "bg-muted" : "",
@@ -324,9 +326,9 @@ export function DocumentUpload({
           >
             {getStatusIcon()}
           </motion.div>
-          
+
           <div>
-            <motion.p 
+            <motion.p
               className="font-medium text-foreground"
               animate={{ y: isDragging ? -2 : 0 }}
             >
@@ -334,7 +336,7 @@ export function DocumentUpload({
             </motion.p>
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           </div>
-          
+
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
             <FileDoc className="w-3 h-3" weight="fill" />
             <span>PDF</span>
@@ -342,10 +344,10 @@ export function DocumentUpload({
             <Image className="w-3 h-3" weight="fill" />
             <span>PNG, JPG, WebP</span>
           </div>
-          
+
           {/* AI Processing Notice */}
           <p className="text-xs text-muted-foreground/70 mt-3 max-w-xs mx-auto">
-            Documents are processed by AI to extract values. Only numeric values are saved; 
+            Documents are processed by AI to extract values. Only numeric values are saved;
             document names and summaries are cleared when you close your browser.
           </p>
         </div>
@@ -354,7 +356,7 @@ export function DocumentUpload({
       {/* Show last upload result with animation */}
       <AnimatePresence mode="wait">
         {lastResult && lastResult.success && status === "success" && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -377,13 +379,13 @@ export function DocumentUpload({
         )}
 
         {lastResult && !lastResult.success && lastResult.error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="bg-destructive/10 border border-destructive/30 rounded-lg p-3"
           >
-          <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2">
               <WarningCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" weight="fill" />
               <p className="text-sm text-destructive">{lastResult.error}</p>
             </div>
