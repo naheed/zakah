@@ -71,7 +71,14 @@ export function useDocumentParsingV2() {
             });
 
             if (invokeError) {
-                throw new Error(invokeError.message);
+                // Try to extract error message from the response
+                const errorMsg = invokeError.message || 'Edge function error';
+                console.error('Edge function invoke error:', invokeError);
+                throw new Error(errorMsg);
+            }
+
+            if (!data) {
+                throw new Error('No response from document parser');
             }
 
             if (data.error) {
