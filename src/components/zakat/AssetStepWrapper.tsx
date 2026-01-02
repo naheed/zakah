@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useCallback } from "react";
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { StepContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "./QuestionLayout";
@@ -6,6 +6,9 @@ import { DocumentUpload } from "./DocumentUpload";
 import { StepDocumentsDisplay } from "./DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { useDocumentExtraction } from "@/hooks/useDocumentExtraction";
+import { useAssetPersistence, inferAccountTypeFromStep } from "@/hooks/useAssetPersistence";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { ProTip } from "./ProTip";
 
 interface AssetStepWrapperProps {
@@ -41,7 +44,53 @@ export function AssetStepWrapper({
   children,
 }: AssetStepWrapperProps) {
   const { handleDataExtracted } = useDocumentExtraction(stepId, data, updateData);
+  const { persistExtraction } = useAssetPersistence();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const isHousehold = data.isHousehold;
+
+  // Wrap onDocumentAdded to also persist to V2 tables
+  const handleDocumentAddedWithPersistence = useCallback(async (
+    doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>
+  ) => {
+    // First, call the original callback to update local state
+    onDocumentAdded(doc);
+
+    // If user is logged in, persist to V2 tables
+    if (user && doc.institutionName) {
+      try {
+        // Convert legacy extractedData to V2 lineItems format
+        const lineItems = Object.entries(doc.extractedData)
+          .filter(([_, value]) => typeof value === 'number' && value > 0)
+          .map(([field, value]) => ({
+            description: field,
+            amount: value as number,
+            inferredCategory: mapLegacyFieldToCategory(field),
+            confidence: 0.9,
+          }));
+
+        if (lineItems.length > 0) {
+          const result = await persistExtraction(
+            doc.institutionName,
+            doc.documentDate,
+            lineItems,
+            stepId
+          );
+
+          if (result.success && !result.skipped) {
+            toast({
+              title: "Saved to your accounts",
+              description: `${doc.institutionName} data saved`,
+            });
+          }
+          // If skipped, no toast - duplicate was silently ignored
+        }
+      } catch (err) {
+        console.error('Error persisting to V2:', err);
+        // Don't show error to user - V2 persistence is silent enhancement
+      }
+    }
+  }, [onDocumentAdded, user, persistExtraction, stepId, toast]);
 
   return (
     <QuestionLayout content={content} questionNumber={questionNumber}>
@@ -60,8 +109,8 @@ export function AssetStepWrapper({
       )}
 
       {/* Show previously uploaded documents with relevant data */}
-      <StepDocumentsDisplay 
-        documents={uploadedDocuments} 
+      <StepDocumentsDisplay
+        documents={uploadedDocuments}
         stepId={stepId}
         onRemoveDocument={onRemoveDocument}
       />
@@ -70,13 +119,53 @@ export function AssetStepWrapper({
       {showUpload && (
         <DocumentUpload
           onDataExtracted={handleDataExtracted}
-          onDocumentAdded={onDocumentAdded}
+          onDocumentAdded={handleDocumentAddedWithPersistence}
           label={uploadLabel}
           description={uploadDescription}
         />
       )}
-      
+
       {children}
     </QuestionLayout>
   );
 }
+
+// Map legacy form field names to V2 category format
+function mapLegacyFieldToCategory(field: string): string {
+  const mapping: Record<string, string> = {
+    // Liquid
+    checkingAccounts: 'CASH_CHECKING',
+    savingsAccounts: 'CASH_SAVINGS',
+    cashOnHand: 'CASH_SAVINGS',
+    digitalWallets: 'CASH_SAVINGS',
+    foreignCurrency: 'CASH_SAVINGS',
+    interestEarned: 'INCOME_INTEREST',
+    // Investments
+    activeInvestments: 'INVESTMENT_EQUITY',
+    passiveInvestmentsValue: 'INVESTMENT_EQUITY',
+    dividends: 'INCOME_DIVIDEND',
+    // Retirement
+    rothIRAContributions: 'RETIREMENT_ROTH',
+    rothIRAEarnings: 'RETIREMENT_ROTH',
+    traditionalIRABalance: 'RETIREMENT_IRA',
+    fourOhOneKVestedBalance: 'RETIREMENT_401K',
+    hsaBalance: 'CASH_SAVINGS',
+    // Crypto
+    cryptoCurrency: 'CRYPTO',
+    cryptoTrading: 'CRYPTO',
+    stakedAssets: 'CRYPTO',
+    stakedRewardsVested: 'CRYPTO',
+    liquidityPoolValue: 'CRYPTO',
+    // Metals
+    goldValue: 'COMMODITY_GOLD',
+    silverValue: 'COMMODITY_SILVER',
+    // Liabilities
+    creditCardBalance: 'LIABILITY_CREDIT_CARD',
+    monthlyLivingExpenses: 'EXPENSE_UTILITY',
+    insuranceExpenses: 'EXPENSE_INSURANCE',
+    monthlyMortgage: 'LIABILITY_LOAN',
+    studentLoansDue: 'LIABILITY_LOAN',
+  };
+  return mapping[field] || 'OTHER';
+}
+
