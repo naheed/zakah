@@ -5,10 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
-import { 
-  calculateNisab, 
-  formatCurrency, 
-  SILVER_PRICE_PER_OUNCE, 
+import {
+  calculateNisab,
+  formatCurrency,
+  SILVER_PRICE_PER_OUNCE,
   GOLD_PRICE_PER_OUNCE,
   NisabStandard,
   CalendarType,
@@ -48,11 +48,11 @@ export default function Settings() {
   const [calculationOpen, setCalculationOpen] = useState(false);
   const [documentsOpen, setDocumentsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  
-  const { 
-    formData, 
-    updateFormData, 
-    uploadedDocuments, 
+
+  const {
+    formData,
+    updateFormData,
+    uploadedDocuments,
   } = useZakatPersistence();
 
   const handleDeleteAllData = async () => {
@@ -70,7 +70,7 @@ export default function Settings() {
         .eq('user_id', user.id);
 
       localStorage.removeItem('zakat_private_key');
-      
+
       toast.success('All your data has been deleted');
       navigate('/');
     } catch (error) {
@@ -129,7 +129,7 @@ export default function Settings() {
         <link rel="canonical" href={getPrimaryUrl('/settings')} />
         <meta property="og:url" content={getPrimaryUrl('/settings')} />
       </Helmet>
-      
+
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card border-b border-border">
@@ -159,11 +159,11 @@ export default function Settings() {
                 <div className="space-y-2">
                   <label className={cn(
                     "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                    theme === 'light' 
-                      ? "border-primary bg-primary/5" 
+                    theme === 'light'
+                      ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   )}
-                  onClick={() => setTheme('light')}
+                    onClick={() => setTheme('light')}
                   >
                     <Sun className={cn("h-4 w-4", theme === 'light' ? "text-primary" : "text-muted-foreground")} />
                     <div className="flex-1 flex items-center justify-between">
@@ -173,14 +173,14 @@ export default function Settings() {
                       )}
                     </div>
                   </label>
-                  
+
                   <label className={cn(
                     "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                    theme === 'dark' 
-                      ? "border-primary bg-primary/5" 
+                    theme === 'dark'
+                      ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   )}
-                  onClick={() => setTheme('dark')}
+                    onClick={() => setTheme('dark')}
                   >
                     <Moon className={cn("h-4 w-4", theme === 'dark' ? "text-primary" : "text-muted-foreground")} />
                     <div className="flex-1 flex items-center justify-between">
@@ -190,14 +190,14 @@ export default function Settings() {
                       )}
                     </div>
                   </label>
-                  
+
                   <label className={cn(
                     "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                    theme === 'system' 
-                      ? "border-primary bg-primary/5" 
+                    theme === 'system'
+                      ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   )}
-                  onClick={() => setTheme('system')}
+                    onClick={() => setTheme('system')}
                   >
                     <Monitor className={cn("h-4 w-4", theme === 'system' ? "text-primary" : "text-muted-foreground")} />
                     <div className="flex-1 flex items-center justify-between">
@@ -235,8 +235,8 @@ export default function Settings() {
                   >
                     <label className={cn(
                       "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.nisabStandard === 'silver' 
-                        ? "border-primary bg-primary/5" 
+                      formData.nisabStandard === 'silver'
+                        ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     )}>
                       <RadioGroupItem value="silver" className="h-4 w-4" />
@@ -253,11 +253,11 @@ export default function Settings() {
                         )}
                       </div>
                     </label>
-                    
+
                     <label className={cn(
                       "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.nisabStandard === 'gold' 
-                        ? "border-primary bg-primary/5" 
+                      formData.nisabStandard === 'gold'
+                        ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     )}>
                       <RadioGroupItem value="gold" className="h-4 w-4" />
@@ -272,7 +272,7 @@ export default function Settings() {
                       </div>
                     </label>
                   </RadioGroup>
-                  
+
                   <LearnMore title="Why Silver vs Gold?">
                     <p>The <strong>silver standard</strong> (595g) results in a lower threshold, meaning more people qualify to pay Zakat. This is the more cautious opinion, recommended by most scholars including Sheikh Joe Bradford.</p>
                     <p className="mt-2">The <strong>gold standard</strong> (85g) results in a higher threshold. Some scholars permit this, especially in regions where gold is the primary measure of wealth.</p>
@@ -289,8 +289,8 @@ export default function Settings() {
                   >
                     <label className={cn(
                       "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.calendarType === 'lunar' 
-                        ? "border-primary bg-primary/5" 
+                      formData.calendarType === 'lunar'
+                        ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     )}>
                       <RadioGroupItem value="lunar" className="h-4 w-4" />
@@ -304,11 +304,11 @@ export default function Settings() {
                         )}
                       </div>
                     </label>
-                    
+
                     <label className={cn(
                       "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.calendarType === 'solar' 
-                        ? "border-primary bg-primary/5" 
+                      formData.calendarType === 'solar'
+                        ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     )}>
                       <RadioGroupItem value="solar" className="h-4 w-4" />
@@ -323,7 +323,7 @@ export default function Settings() {
                       </div>
                     </label>
                   </RadioGroup>
-                  
+
                   <LearnMore title="Lunar vs Solar calendar">
                     <p>The <strong>lunar year</strong> (354 days) is the traditional Islamic calendar used for Zakat. The standard 2.5% rate applies.</p>
                     <p className="mt-2">If you track your finances by <strong>solar year</strong> (365 days), the rate is adjusted to 2.577% to account for the extra 11 days.</p>
@@ -339,22 +339,22 @@ export default function Settings() {
                       onClick={() => updateFormData({ isHousehold: false })}
                       className={cn(
                         "flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all",
-                        !formData.isHousehold 
-                          ? "border-primary bg-primary/5" 
+                        !formData.isHousehold
+                          ? "border-primary bg-primary/5"
                           : "border-border hover:border-primary/50"
                       )}
                     >
                       <User className={cn("w-4 h-4", !formData.isHousehold ? "text-primary" : "text-muted-foreground")} />
                       <span className={cn("text-sm font-medium", !formData.isHousehold ? "text-primary" : "text-foreground")}>Just me</span>
                     </button>
-                    
+
                     <button
                       type="button"
                       onClick={() => updateFormData({ isHousehold: true })}
                       className={cn(
                         "flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all",
-                        formData.isHousehold 
-                          ? "border-primary bg-primary/5" 
+                        formData.isHousehold
+                          ? "border-primary bg-primary/5"
                           : "border-border hover:border-primary/50"
                       )}
                     >
@@ -362,7 +362,7 @@ export default function Settings() {
                       <span className={cn("text-sm font-medium", formData.isHousehold ? "text-primary" : "text-foreground")}>Household</span>
                     </button>
                   </div>
-                  
+
                   {formData.isHousehold && (
                     <p className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
                       Include combined assets of spouse and children in your calculation.
@@ -394,9 +394,9 @@ export default function Settings() {
                       <FileText className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm text-foreground">{uploadedDocuments.length} document{uploadedDocuments.length !== 1 ? 's' : ''} uploaded</span>
                     </div>
-                    <Link to="/documents">
+                    <Link to="/assets">
                       <Button variant="ghost" size="sm" className="text-xs">
-                        View All →
+                        View assets →
                       </Button>
                     </Link>
                   </div>
@@ -422,7 +422,7 @@ export default function Settings() {
               <CollapsibleContent>
                 <div className="mt-2 p-4 bg-card rounded-lg border border-destructive/30 space-y-3">
                   <p className="text-xs text-muted-foreground">These actions are irreversible.</p>
-                  
+
                   {/* Delete All Data */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
@@ -442,8 +442,8 @@ export default function Settings() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete all your data?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will permanently delete all your saved Zakat calculations and shared access. 
-                            Your account will remain active but all financial data will be removed. 
+                            This will permanently delete all your saved Zakat calculations and shared access.
+                            Your account will remain active but all financial data will be removed.
                             This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
@@ -479,8 +479,8 @@ export default function Settings() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will permanently delete your account, profile, all saved calculations, 
-                            and shared access. You will be signed out immediately. 
+                            This will permanently delete your account, profile, all saved calculations,
+                            and shared access. You will be signed out immediately.
                             This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>

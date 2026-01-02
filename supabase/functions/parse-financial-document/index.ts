@@ -166,7 +166,9 @@ CRITICAL EXTRACTION RULES:
 DATE EXTRACTION (CRITICAL):
 - Look for "Statement Date", "Statement Period", "As of", or similar.
 - The date MUST be a real date from the document, NOT made up.
-- Format MUST be YYYY-MM-DD (e.g., 2025-11-29, NOT 2030-10-31).
+- **CONVERSION REQUIRED:** You MUST convert the found date to **YYYY-MM-DD** format.
+  - Source: "October 31, 2025" -> Output: "2025-10-31"
+  - Source: "10/31/25" -> Output: "2025-10-31"
 - Financial statements are historical - dates should be in the PAST.
 - If you cannot find a clear date, use today's date or leave empty.
 

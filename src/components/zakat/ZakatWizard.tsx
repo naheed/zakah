@@ -24,7 +24,6 @@ import { ResultsStep } from "./steps/ResultsStep";
 import { SimpleModeToggle } from "./SimpleModeToggle";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
-import { ContinueSessionDialog } from "./ContinueSessionDialog";
 import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
 import { UserMenu } from "./UserMenu";
 import { SaveProgressPrompt } from "./SaveProgressPrompt";
@@ -352,14 +351,7 @@ export function ZakatWizard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Continue Session Dialog */}
-      <ContinueSessionDialog
-        open={hasExistingSession}
-        lastUpdated={lastUpdated}
-        onContinue={continueSession}
-        onStartFresh={startFresh}
-        onLoadServerCalculation={handleLoadCalculation}
-      />
+
 
       {/* Header with Progress - hidden on welcome page */}
       {!isWelcomePage && (
