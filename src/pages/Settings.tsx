@@ -85,19 +85,14 @@ export default function Settings() {
     if (!user) return;
     setIsDeleting(true);
     try {
-      // 1. Delete data (legacy cleanup, kept for safety)
-      await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
-      await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
-      await supabase.from('profiles').delete().eq('user_id', user.id);
-
-      // 2. Call Edge Function to delete the actual Auth User (Critical Security Fix)
+      // 1. Call Edge Function to delete data AND local user (Server-side cleanup)
       const { error: functionError } = await supabase.functions.invoke('delete-account');
       if (functionError) throw functionError;
 
-      // 3. Clear local keys
+      // 2. Clear local keys
       localStorage.removeItem('zakat_private_key');
 
-      // 4. Client-side sign out to clear session/local storage
+      // 3. Client-side sign out to clear session/local storage
       await signOut(); // Uses the robust signOut from useAuth
 
       // Navigation is handled by signOut usually, but safety net:

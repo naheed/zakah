@@ -46,10 +46,24 @@ serve(async (req: Request) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
         );
 
-        // 3. Delete the user from Auth (this usually cascades to public tables if configured, 
-        //    but we'll assume the client does cleanup or cascades are set)
-        //    Ideally, this function should handle EVERYTHING to be atomic, but 
-        //    existing client code deletes some data. We'll proceed with Auth deletion which is the missing piece.
+        // 3. Clean up user data (admin client bypasses RLS)
+        // We delete in order of dependencies (shares -> calculations -> profile -> auth)
+
+        console.log("Cleaning up user data...");
+
+        // Delete shares
+        await supabaseAdmin.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
+
+        // Delete calculations
+        await supabaseAdmin.from('zakat_calculations').delete().eq('user_id', user.id);
+
+        // Delete profile
+        // Try both 'id' and 'user_id' to be safe, or just 'id' if we knew schema. 
+        // Based on client code using 'user_id', we'll use that. 
+        // But usually profiles.id IS the user_id. We'll try user_id matches.
+        await supabaseAdmin.from('profiles').delete().eq('user_id', user.id);
+
+        // 4. Delete the user from Auth
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(
             user.id
         );
