@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Plus, Calendar, Loader2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, Loader2, ChevronRight, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAssetPersistence } from '@/hooks/useAssetPersistence';
 import { Button } from '@/components/ui/button';
@@ -13,12 +13,24 @@ import { formatCurrency } from '@/lib/zakatCalculations';
 import { AssetAccount, AssetSnapshot, AssetLineItem, AccountType } from '@/types/assets';
 import { accountTypeLabels, accountTypeIcons } from '@/components/assets/AccountCard';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function AccountDetail() {
     const navigate = useNavigate();
     const { accountId } = useParams<{ accountId: string }>();
     const { user, loading: authLoading } = useAuth();
-    const { fetchAccounts, fetchSnapshots, fetchLineItems } = useAssetPersistence();
+    const { fetchAccounts, fetchSnapshots, fetchLineItems, deleteAccount } = useAssetPersistence();
 
     const [account, setAccount] = useState<AssetAccount | null>(null);
     const [snapshots, setSnapshots] = useState<AssetSnapshot[]>([]);
@@ -26,6 +38,22 @@ export default function AccountDetail() {
     const [lineItems, setLineItems] = useState<AssetLineItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingLineItems, setLoadingLineItems] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteAccount = async () => {
+        if (!accountId) return;
+
+        setIsDeleting(true);
+        const success = await deleteAccount(accountId);
+        setIsDeleting(false);
+
+        if (success) {
+            toast.success('Account deleted successfully');
+            navigate('/assets');
+        } else {
+            toast.error('Failed to delete account');
+        }
+    };
 
     // Load account and snapshots
     useEffect(() => {
@@ -119,10 +147,38 @@ export default function AccountDetail() {
                             </div>
                         </div>
                     </div>
-                    <Button variant="outline" onClick={() => navigate('/assets/add')}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Upload Statement
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" disabled={isDeleting}>
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete this account?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will permanently delete {account.institution_name} ({account.name}),
+                                        including all {snapshots.length} statement{snapshots.length !== 1 ? 's' : ''} and their line items.
+                                        This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleDeleteAccount}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                        {isDeleting ? 'Deleting...' : 'Delete Account'}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button variant="outline" onClick={() => navigate('/assets/add')}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Upload Statement
+                        </Button>
+                    </div>
                 </div>
             </header>
 

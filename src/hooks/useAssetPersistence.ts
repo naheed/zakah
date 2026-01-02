@@ -114,12 +114,13 @@ export function useAssetPersistence() {
         return created?.id || null;
     }, [user]);
 
-    // Find account by institution name (fuzzy match)
-    const findAccountByInstitution = useCallback(async (
+    // Find account by institution AND account name (exact match for account name)
+    const findAccount = useCallback(async (
         portfolioId: string,
-        institutionName: string
+        institutionName: string,
+        accountName?: string
     ): Promise<AssetAccount | null> => {
-        const normalizedName = institutionName.toLowerCase().trim();
+        const normalizedInstitution = institutionName.toLowerCase().trim();
 
         const { data, error } = await supabase
             .from('asset_accounts')
@@ -128,12 +129,28 @@ export function useAssetPersistence() {
 
         if (error || !data) return null;
 
-        // Fuzzy match - check if names are similar
+        // Match by institution AND account name if provided
         const match = data.find(account => {
-            const existingName = account.institution_name.toLowerCase().trim();
-            return existingName.includes(normalizedName) ||
-                normalizedName.includes(existingName) ||
-                existingName === normalizedName;
+            const existingInstitution = account.institution_name.toLowerCase().trim();
+            const institutionMatch = existingInstitution.includes(normalizedInstitution) ||
+                normalizedInstitution.includes(existingInstitution) ||
+                existingInstitution === normalizedInstitution;
+
+            // If account name is provided, also match on that (exact match)
+            if (accountName) {
+                const normalizedAccountName = accountName.toLowerCase().trim();
+                const existingAccountName = (account.name || '').toLowerCase().trim();
+                return institutionMatch && existingAccountName === normalizedAccountName;
+            }
+
+            // If no account name provided, only match if there's ONE account from this institution
+            // Otherwise create a new one to avoid merging different accounts
+            const sameInstitutionAccounts = data.filter(a => {
+                const inst = a.institution_name.toLowerCase().trim();
+                return inst.includes(normalizedInstitution) || normalizedInstitution.includes(inst);
+            });
+
+            return institutionMatch && sameInstitutionAccounts.length === 1;
         });
 
         if (!match) return null;
@@ -242,7 +259,8 @@ export function useAssetPersistence() {
         institutionName: string,
         statementDate: string | undefined,
         lineItems: ExtractionLineItem[],
-        stepId?: string
+        stepId?: string,
+        accountName?: string  // NEW: Optional account name for deduplication
     ): Promise<PersistResult> => {
         if (!user) {
             return { success: false, error: 'User not authenticated' };
@@ -258,15 +276,17 @@ export function useAssetPersistence() {
                 throw new Error('Failed to get/create portfolio');
             }
 
-            // 2. Find or create account
-            let account = await findAccountByInstitution(portfolioId, institutionName);
+            // 2. Find or create account - now uses account name for deduplication
+            let account = await findAccount(portfolioId, institutionName, accountName);
             let accountId: string;
 
             if (account) {
                 accountId = account.id;
             } else {
                 const accountType = stepId ? inferAccountTypeFromStep(stepId) : 'OTHER';
-                const newAccountId = await createAccount(portfolioId, institutionName, accountType);
+                // Use provided accountName or generate one
+                const displayName = accountName || `${institutionName} Account`;
+                const newAccountId = await createAccount(portfolioId, institutionName, accountType, displayName);
                 if (!newAccountId) {
                     throw new Error('Failed to create account');
                 }
@@ -306,7 +326,7 @@ export function useAssetPersistence() {
             setLoading(false);
             return { success: false, error: errorMessage };
         }
-    }, [user, getOrCreatePortfolio, findAccountByInstitution, createAccount, isDuplicateSnapshot, createSnapshot]);
+    }, [user, getOrCreatePortfolio, findAccount, createAccount, isDuplicateSnapshot, createSnapshot]);
 
     // Fetch all accounts for current user
     const fetchAccounts = useCallback(async (): Promise<AssetAccount[]> => {
@@ -374,11 +394,55 @@ export function useAssetPersistence() {
         })) as AssetLineItem[];
     }, []);
 
+    // Delete an account (cascades to snapshots and line_items via RLS)
+    const deleteAccount = useCallback(async (accountId: string): Promise<boolean> => {
+        if (!user) return false;
+
+        try {
+            // First delete all line items for all snapshots of this account
+            const { data: snapshots } = await supabase
+                .from('asset_snapshots')
+                .select('id')
+                .eq('account_id', accountId);
+
+            if (snapshots && snapshots.length > 0) {
+                const snapshotIds = snapshots.map(s => s.id);
+                await supabase
+                    .from('asset_line_items')
+                    .delete()
+                    .in('snapshot_id', snapshotIds);
+            }
+
+            // Delete all snapshots for this account
+            await supabase
+                .from('asset_snapshots')
+                .delete()
+                .eq('account_id', accountId);
+
+            // Finally delete the account
+            const { error } = await supabase
+                .from('asset_accounts')
+                .delete()
+                .eq('id', accountId);
+
+            if (error) {
+                console.error('Error deleting account:', error);
+                return false;
+            }
+
+            return true;
+        } catch (err) {
+            console.error('Error deleting account:', err);
+            return false;
+        }
+    }, [user]);
+
     return {
         persistExtraction,
         fetchAccounts,
         fetchSnapshots,
         fetchLineItems,
+        deleteAccount,
         loading,
         error,
     };
