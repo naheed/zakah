@@ -1,10 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useDocumentParsingV2, ExtractionLineItem, DocumentExtractionResult } from '@/hooks/useDocumentParsingV2';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+
+// Display limits for large datasets
+const INITIAL_DISPLAY_LIMIT = 20;
+const LOAD_MORE_INCREMENT = 50;
 
 // Category badge colors
 const getCategoryColor = (category: string): string => {
@@ -17,6 +21,19 @@ const getCategoryColor = (category: string): string => {
     if (cat.includes('EXPENSE') || cat.includes('LIABILITY')) return 'bg-red-100 text-red-800';
     if (cat.includes('INCOME')) return 'bg-yellow-100 text-yellow-800';
     return 'bg-gray-100 text-gray-800';
+};
+
+// Group line items by category for summary view
+const groupByCategory = (items: ExtractionLineItem[]): Record<string, { count: number; total: number }> => {
+    return items.reduce((acc, item) => {
+        const cat = item.inferredCategory;
+        if (!acc[cat]) {
+            acc[cat] = { count: 0, total: 0 };
+        }
+        acc[cat].count += 1;
+        acc[cat].total += item.amount;
+        return acc;
+    }, {} as Record<string, { count: number; total: number }>);
 };
 
 export default function ExtractionTestPage() {
