@@ -90,8 +90,16 @@ export default function Settings() {
       await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
       await supabase.from('profiles').delete().eq('user_id', user.id);
 
-      // 2. Call Edge Function to delete the actual Auth User (Critical Security Fix)
-      const { error: functionError } = await supabase.functions.invoke('delete-account');
+      // 2. Call backend function to delete the actual Auth User
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+
+      const { error: functionError } = await supabase.functions.invoke('delete-account', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (functionError) throw functionError;
 
       // 3. Clear local keys
