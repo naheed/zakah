@@ -22,6 +22,7 @@ import ExtractionTest from "./pages/ExtractionTest";
 import Assets from "./pages/Assets";
 import AddAccount from "./pages/AddAccount";
 import AccountDetail from "./pages/AccountDetail";
+import LogoutSuccess from "./pages/LogoutSuccess";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="/assets" element={<Assets />} />
                 <Route path="/assets/add" element={<AddAccount />} />
                 <Route path="/assets/:accountId" element={<AccountDetail />} />
+                <Route path="/logout" element={<LogoutSuccess />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

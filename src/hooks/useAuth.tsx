@@ -48,7 +48,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Use global scope to sign out from all devices/sessions
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      // Force clear localStorage as fallback - Supabase stores tokens with project ref prefix
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('sb-') && key.includes('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Clear any app-specific cached data tied to user
+      localStorage.removeItem('zakat_my_referral_code');
+
+      // Reset state immediately
+      setUser(null);
+      setSession(null);
+    }
   };
 
   return (

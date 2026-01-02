@@ -35,11 +35,11 @@ export function UserMenu() {
 
   const initials = user.user_metadata?.full_name
     ? user.user_metadata.full_name
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+      .split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
     : user.email?.slice(0, 2).toUpperCase() || 'U';
 
   const avatarUrl = user.user_metadata?.avatar_url;
@@ -73,7 +73,10 @@ export function UserMenu() {
           Saved Calculations
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()}>
+        <DropdownMenuItem onClick={async () => {
+          await signOut();
+          navigate('/logout');
+        }}>
           <LogOut className="mr-2 h-4 w-4" />
           Sign Out
         </DropdownMenuItem>
