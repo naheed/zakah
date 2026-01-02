@@ -98,10 +98,10 @@ Follow these steps to run the project locally.
 
 ## Project Structure
 
--   `src/pages`: Contains the main route components (Index, Documents, Auth, Methodology, etc.).
--   `src/components`: Reusable UI components button, inputs, dialogs (Shadcn UI) and custom domain specific components.
+-   `src/pages`: Contains the main route components (Index, Assets, Auth, Methodology, Settings, etc.).
+-   `src/components`: Reusable UI components (buttons, inputs, dialogs via Shadcn UI) and custom domain-specific components.
 -   `src/integrations/supabase`: Supabase client configuration and types.
--   `src/hooks`: Custom React hooks (e.g., `useAuth`, `useToast`).
+-   `src/hooks`: Custom React hooks (e.g., `useAuth`, `useAssetPersistence`, `useDocumentParsingV2`).
 -   `src/lib`: Utility functions and helper classes.
 
 ## Deployment

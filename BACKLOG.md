@@ -158,7 +158,7 @@ User → Portfolio → Account → Snapshot → LineItem
 
 | # | Phase | Status | Next Action |
 |---|-------|--------|-------------|
-| 1 | Deploy Phase 2 Edge Function | 🔴 Blocked | Deploy to production |
-| 2 | Phase 4: Plaid API | ⬜ | Set up Plaid account |
-| 3 | Phase 5: Charity Program | ⬜ | Design `/charities` page |
-| 4 | Phase 6: Reports | ⬜ | Create `/reports` route |
+| 1 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
+| 2 | Phase 5: Charity Program | ⬜ Planned | Design `/charities` page |
+| 3 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
+| 4 | Phase 7: Migration | ⬜ Future | Design consent flow |

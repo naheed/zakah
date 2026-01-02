@@ -23,6 +23,7 @@ import Assets from "./pages/Assets";
 import AddAccount from "./pages/AddAccount";
 import AccountDetail from "./pages/AccountDetail";
 import LogoutSuccess from "./pages/LogoutSuccess";
+import DevTools from "./pages/DevTools";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,9 @@ const App = () => (
                 <Route path="/assets/add" element={<AddAccount />} />
                 <Route path="/assets/:accountId" element={<AccountDetail />} />
                 <Route path="/logout" element={<LogoutSuccess />} />
+                <Route path="/dev" element={<DevTools />} />
+                <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
+                <Route path="/extraction-test" element={<ExtractionTest />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
