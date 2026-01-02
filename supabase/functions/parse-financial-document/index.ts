@@ -21,8 +21,11 @@ function mapLineItemToLegacyField(item: ExtractionLineItem): string | null {
   const cat = item.inferredCategory.toUpperCase();
   const desc = item.description.toLowerCase();
 
-  // 1. CASH / LIQUID
-  if (cat.includes("CASH") || cat.includes("CHECKING") || cat.includes("SAVINGS") || cat.includes("MONEY_MARKET")) {
+  // 1. CASH / LIQUID - Prioritize category over description
+  if (cat.includes("CHECKING")) return "checkingAccounts";
+  if (cat.includes("CASH") || cat.includes("SAVINGS") || cat.includes("MONEY_MARKET")) {
+    if (cat.includes("SAVINGS")) return "savingsAccounts";
+    // Default cash to checking if not explicitly savings
     if (desc.includes("check")) return "checkingAccounts";
     return "savingsAccounts";
   }
