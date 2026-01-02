@@ -60,7 +60,7 @@ serve(async (req) => {
     // PRIORITY 2: Check if this SESSION already has a referral code (anonymous users)
     const { data: existingAggregate } = await supabase
       .from("referral_aggregates")
-      .select("referral_code")
+      .select("referral_code, referrer_user_id")
       .eq("referrer_session_hash", sessionHash)
       .maybeSingle();
 
