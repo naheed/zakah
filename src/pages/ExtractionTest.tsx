@@ -41,6 +41,23 @@ export default function ExtractionTestPage() {
     const { parseDocument, reset, status, result, error } = useDocumentParsingV2();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [displayLimit, setDisplayLimit] = useState(INITIAL_DISPLAY_LIMIT);
+
+    // Compute category summary for large datasets
+    const categorySummary = useMemo(() => {
+        if (!result?.lineItems) return {};
+        return groupByCategory(result.lineItems);
+    }, [result?.lineItems]);
+
+    // Paginated line items
+    const displayedItems = useMemo(() => {
+        if (!result?.lineItems) return [];
+        return result.lineItems.slice(0, displayLimit);
+    }, [result?.lineItems, displayLimit]);
+
+    const hasMore = result?.lineItems && result.lineItems.length > displayLimit;
+    const totalItems = result?.lineItems?.length || 0;
+    const isLargeDataset = totalItems > INITIAL_DISPLAY_LIMIT;
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -51,15 +68,25 @@ export default function ExtractionTestPage() {
 
     const handleParse = async () => {
         if (!selectedFile) return;
+        setDisplayLimit(INITIAL_DISPLAY_LIMIT); // Reset pagination on new parse
         await parseDocument(selectedFile);
     };
 
     const handleReset = () => {
         reset();
         setSelectedFile(null);
+        setDisplayLimit(INITIAL_DISPLAY_LIMIT);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
+    };
+
+    const handleLoadMore = () => {
+        setDisplayLimit(prev => prev + LOAD_MORE_INCREMENT);
+    };
+
+    const handleShowAll = () => {
+        setDisplayLimit(totalItems);
     };
 
     const formatCurrency = (amount: number) => {
@@ -152,41 +179,89 @@ export default function ExtractionTestPage() {
 
                             {/* V2 Line Items Table */}
                             <div>
-                                <h3 className="font-bold text-lg mb-3">V2 Line Items (Granular)</h3>
-                                <div className="border rounded-lg overflow-hidden">
-                                    <table className="w-full text-sm">
-                                        <thead className="bg-slate-100 dark:bg-slate-800">
-                                            <tr>
-                                                <th className="text-left p-3">Description</th>
-                                                <th className="text-left p-3">Category</th>
-                                                <th className="text-right p-3">Amount</th>
-                                                <th className="text-right p-3">Confidence</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {result.lineItems.map((item, idx) => (
-                                                <tr key={idx} className="border-t hover:bg-slate-50 dark:hover:bg-slate-900">
-                                                    <td className="p-3 font-medium">{item.description}</td>
-                                                    <td className="p-3">
-                                                        <Badge variant="secondary" className={getCategoryColor(item.inferredCategory)}>
-                                                            {item.inferredCategory}
-                                                        </Badge>
-                                                    </td>
-                                                    <td className="p-3 text-right font-mono">{formatCurrency(item.amount)}</td>
-                                                    <td className="p-3 text-right text-muted-foreground">
-                                                        {item.confidence ? `${(item.confidence * 100).toFixed(0)}%` : '-'}
-                                                    </td>
-                                                </tr>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-bold text-lg">V2 Line Items (Granular)</h3>
+                                    {isLargeDataset && (
+                                        <span className="text-sm text-muted-foreground">
+                                            Showing {displayedItems.length} of {totalItems} items
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Category Summary for Large Datasets */}
+                                {isLargeDataset && (
+                                    <div className="mb-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border">
+                                        <h4 className="text-sm font-semibold mb-2 text-muted-foreground">Category Summary</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {Object.entries(categorySummary).map(([cat, data]) => (
+                                                <div key={cat} className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-white dark:bg-slate-800">
+                                                    <Badge variant="secondary" className={getCategoryColor(cat)}>
+                                                        {cat}
+                                                    </Badge>
+                                                    <span className="text-xs font-mono">
+                                                        {data.count} items • {formatCurrency(data.total)}
+                                                    </span>
+                                                </div>
                                             ))}
-                                            {result.lineItems.length === 0 && (
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="border rounded-lg overflow-hidden">
+                                    <div className="max-h-[500px] overflow-auto">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0">
                                                 <tr>
-                                                    <td colSpan={4} className="p-6 text-center text-muted-foreground">
-                                                        No line items extracted
-                                                    </td>
+                                                    <th className="text-left p-3">Description</th>
+                                                    <th className="text-left p-3">Category</th>
+                                                    <th className="text-right p-3">Amount</th>
+                                                    <th className="text-right p-3">Confidence</th>
                                                 </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {displayedItems.map((item, idx) => (
+                                                    <tr key={idx} className="border-t hover:bg-slate-50 dark:hover:bg-slate-900">
+                                                        <td className="p-3 font-medium max-w-[300px] truncate" title={item.description}>
+                                                            {item.description}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <Badge variant="secondary" className={getCategoryColor(item.inferredCategory)}>
+                                                                {item.inferredCategory}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="p-3 text-right font-mono">{formatCurrency(item.amount)}</td>
+                                                        <td className="p-3 text-right text-muted-foreground">
+                                                            {item.confidence ? `${(item.confidence * 100).toFixed(0)}%` : '-'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {displayedItems.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={4} className="p-6 text-center text-muted-foreground">
+                                                            No line items extracted
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination Controls */}
+                                    {hasMore && (
+                                        <div className="p-3 border-t bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">
+                                                {totalItems - displayLimit} more items not shown
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <Button variant="outline" size="sm" onClick={handleLoadMore}>
+                                                    Load {Math.min(LOAD_MORE_INCREMENT, totalItems - displayLimit)} More
+                                                </Button>
+                                                <Button variant="ghost" size="sm" onClick={handleShowAll}>
+                                                    Show All ({totalItems})
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
