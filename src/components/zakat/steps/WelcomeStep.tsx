@@ -64,7 +64,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
     },
   };
 
-  // Logged-in user experience
+  // Logged-in user experience - Priority-based dashboard
   if (user) {
     return (
       <div className="min-h-[85vh] flex flex-col">
@@ -82,113 +82,95 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center px-4 py-6">
-          <div className="w-full max-w-5xl grid md:grid-cols-2 gap-6 md:gap-12 items-start">
-            {/* Left Side - Personalized Dashboard */}
-            <div className="order-2 md:order-1 space-y-6">
+        <div className="flex-1 px-4 py-8 overflow-y-auto">
+          <div className="w-full max-w-4xl mx-auto space-y-8">
+            {/* Welcome + Primary CTA */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+                <p className="text-muted-foreground mt-1">Ready to calculate your Zakat?</p>
+              </div>
+              <Button onClick={onNext} size="lg" className="gap-2 shadow-lg shadow-primary/20">
+                + New Calculation
+                <ArrowRight className="w-4 h-4" weight="bold" />
+              </Button>
+            </div>
+
+            {/* P0: Recent Calculations / Resume */}
+            <section>
               <RecentCalculations onLoadCalculation={handleLoadCalculation} limit={3} />
+            </section>
 
+            {/* P1: Assets Preview - NEW */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-medium text-muted-foreground">Your Accounts</h2>
+                <Link to="/assets">
+                  <Button variant="ghost" size="sm" className="text-xs gap-1">
+                    View All <ArrowRight className="w-3 h-3" />
+                  </Button>
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* Quick add card */}
+                <Link to="/assets/add">
+                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer h-full flex flex-col items-center justify-center min-h-[100px]">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mb-2">
+                      <span className="text-lg text-muted-foreground">+</span>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Add Account</p>
+                  </div>
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Connect your accounts to auto-fill your Zakat calculation.
+              </p>
+            </section>
+
+            {/* P3: Referral Widget */}
+            <section>
               <ReferralWidget variant="compact" />
+            </section>
 
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">Quick Actions</h3>
-                <div className="flex flex-wrap gap-2">
-                  <Link to="/calculations">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <FolderOpen className="w-3.5 h-3.5" weight="duotone" />
-                      All Calculations
-                    </Button>
-                  </Link>
-                  <Link to="/methodology">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <BookOpen className="w-3.5 h-3.5" weight="duotone" />
-                      Methodology
-                    </Button>
-                  </Link>
-                  <Link to="/settings#danger-zone">
-                    <Button variant="outline" size="sm" className="gap-2 text-destructive hover:text-destructive">
-                      <Trash className="w-3.5 h-3.5" weight="duotone" />
-                      Delete Data
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {(metricsLoading || (metrics && metrics.allTime.calculations > 0)) && (
-                <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                  {metricsLoading ? (
-                    <Skeleton className="h-4 w-48" />
-                  ) : (
-                    metrics && (
-                      <>
-                        <span className="flex items-center gap-1">
-                          <Calculator className="w-3 h-3 text-primary" weight="fill" />
-                          {formatCount(metrics.allTime.calculations)} total calculations
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-3 h-3 text-primary" weight="fill" />
-                          {formatLargeNumber(metrics.allTime.totalZakat)} Zakat calculated
-                        </span>
-                      </>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Right Side - CTA */}
-            <div className="order-1 md:order-2 flex flex-col">
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-2 tracking-tight">
-                  Start a New Calculation
-                </h1>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Begin a fresh Zakat calculation for this year.
-                </p>
-
-                <Button
-                  onClick={onNext}
-                  size="lg"
-                  className="w-full sm:w-auto gap-2 text-base h-12 mb-3 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
-                >
-                  New Calculation
-                  <ArrowRight className="w-4 h-4" weight="bold" />
-                </Button>
-
-                <p className="text-sm text-muted-foreground">Signed in as {user.email}</p>
-              </motion.div>
-
-              {/* Footer Links */}
-              <div className="mt-6 pt-4 border-t border-border">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                  <Link
-                    to="/methodology"
-                    className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <BookOpen className="w-3 h-3" weight="duotone" />
+            {/* Quick Actions - now less prominent */}
+            <section className="pt-4 border-t border-border">
+              <div className="flex flex-wrap gap-2">
+                <Link to="/calculations">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <FolderOpen className="w-3.5 h-3.5" weight="duotone" />
+                    All Calculations
+                  </Button>
+                </Link>
+                <Link to="/methodology">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <BookOpen className="w-3.5 h-3.5" weight="duotone" />
                     Methodology
-                  </Link>
-                  <span className="text-muted-foreground/50">•</span>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
-                    Privacy
-                  </Link>
-                  <span className="text-muted-foreground/50">•</span>
-                  <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
-                    Terms
-                  </Link>
-                  <span className="text-muted-foreground/50">•</span>
-                  <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-                    About
-                  </Link>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Questions?{" "}
-                  <a href="mailto:naheed@vora.dev" className="text-primary hover:underline">
-                    naheed@vora.dev
-                  </a>
-                </p>
+                  </Button>
+                </Link>
               </div>
-            </div>
+            </section>
+
+            {/* Metrics footer */}
+            {(metricsLoading || (metrics && metrics.allTime.calculations > 0)) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground pt-4">
+                {metricsLoading ? (
+                  <Skeleton className="h-4 w-48" />
+                ) : (
+                  metrics && (
+                    <>
+                      <span className="flex items-center gap-1">
+                        <Calculator className="w-3 h-3 text-primary" weight="fill" />
+                        {formatCount(metrics.allTime.calculations)} total calculations
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3 h-3 text-primary" weight="fill" />
+                        {formatLargeNumber(metrics.allTime.totalZakat)} Zakat calculated
+                      </span>
+                    </>
+                  )
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

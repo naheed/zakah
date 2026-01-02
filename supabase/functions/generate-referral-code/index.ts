@@ -40,7 +40,24 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if this session already has a referral code
+    // PRIORITY 1: Check if this USER already has a referral code (logged-in users)
+    if (userId) {
+      const { data: userAggregate } = await supabase
+        .from("referral_aggregates")
+        .select("referral_code")
+        .eq("referrer_user_id", userId)
+        .maybeSingle();
+
+      if (userAggregate) {
+        console.log("Found existing referral code for user:", userAggregate.referral_code);
+        return new Response(
+          JSON.stringify({ code: userAggregate.referral_code }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // PRIORITY 2: Check if this SESSION already has a referral code (anonymous users)
     const { data: existingAggregate } = await supabase
       .from("referral_aggregates")
       .select("referral_code")
@@ -48,6 +65,14 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingAggregate) {
+      // If user just logged in, associate their userId with existing session code
+      if (userId && !existingAggregate.referrer_user_id) {
+        await supabase
+          .from("referral_aggregates")
+          .update({ referrer_user_id: userId })
+          .eq("referral_code", existingAggregate.referral_code);
+        console.log("Associated userId with existing session code");
+      }
       console.log("Found existing referral code:", existingAggregate.referral_code);
       return new Response(
         JSON.stringify({ code: existingAggregate.referral_code }),

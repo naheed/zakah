@@ -58,6 +58,30 @@
 
 ---
 
+## Phase 3.5: Post-Login Dashboard Polish 🔴 HIGH PRIORITY
+
+> **Goal:** Improve returning user experience with clear information hierarchy.
+
+### Information Hierarchy (Stripe-inspired)
+| Priority | Section | Rationale |
+|----------|---------|-----------|
+| **P0** | Resume Calculation | Unfinished work = highest urgency |
+| **P1** | Assets Preview | Context for calculations (new V2 feature) |
+| **P2** | Past Reports | Reference, not action-oriented |
+| **P3** | Referral Widget | Social proof, lower priority |
+
+### Tasks
+- [ ] Redesign `WelcomeStep.tsx` with priority-based layout
+- [ ] Add Assets preview cards (3 recent + "View All" → `/assets`)
+- [ ] Add "Resume Calculation" card when incomplete calc exists
+- [ ] **BUG FIX:** Referral code regeneration
+  - Root cause: `userId` not checked in `generate-referral-code`
+  - Fix: Check `referrer_user_id` before `sessionHash` in Edge Function
+  - Fix: Cache referral code in localStorage for logged-in users
+- [ ] Add past reports section placeholder
+
+---
+
 ## Phase 4: Migration & Smart Features ⬜ PLANNED
 
 > **Goal:** Transition existing users and enable premium features.

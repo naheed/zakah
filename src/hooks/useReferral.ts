@@ -4,19 +4,20 @@ import { useAuth } from './useAuth';
 import { getInviteUrl as getInviteUrlFromConfig } from '@/lib/domainConfig';
 
 const REFERRAL_CODE_KEY = 'zakat_referred_by';
+const MY_REFERRAL_CODE_KEY = 'zakat_my_referral_code'; // Cached code for logged-in users
 const SESSION_ID_KEY = 'zakat_session_id';
 
 // Get or create session ID (same as in useTrackCalculation)
 function getOrCreateSessionId(): string {
   let sessionId = sessionStorage.getItem(SESSION_ID_KEY);
-  
+
   if (!sessionId) {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     sessionId = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
     sessionStorage.setItem(SESSION_ID_KEY, sessionId);
   }
-  
+
   return sessionId;
 }
 
@@ -42,11 +43,18 @@ export interface ReferralStats {
 
 export function useReferral() {
   const { user } = useAuth();
-  const [referralCode, setReferralCode] = useState<string | null>(null);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  
+
+  // Initialize from localStorage for logged-in users
+  const [referralCode, setReferralCode] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(MY_REFERRAL_CODE_KEY);
+    }
+    return null;
+  });
+
   // Refs to prevent concurrent operations and track state
   const hasGeneratedRef = useRef(false);
   const isFetchingStatsRef = useRef(false);
@@ -66,13 +74,13 @@ export function useReferral() {
   const generateReferralCode = useCallback(async (): Promise<string | null> => {
     // Return existing code if available
     if (referralCode) return referralCode;
-    
+
     // Prevent concurrent generation (but allow retry if previous failed)
     if (isGeneratingRef.current) return null;
-    
+
     isGeneratingRef.current = true;
     setIsGenerating(true);
-    
+
     try {
       const sessionId = getOrCreateSessionId();
       const sessionHash = await hashSessionId(sessionId);
@@ -91,6 +99,8 @@ export function useReferral() {
 
       if (data?.code) {
         setReferralCode(data.code);
+        // Cache in localStorage for persistence across sessions
+        localStorage.setItem(MY_REFERRAL_CODE_KEY, data.code);
         hasGeneratedRef.current = true; // Only set AFTER success
         return data.code;
       }
@@ -109,10 +119,10 @@ export function useReferral() {
   const fetchStats = useCallback(async (code?: string) => {
     // Prevent concurrent fetches
     if (isFetchingStatsRef.current) return;
-    
+
     isFetchingStatsRef.current = true;
     setIsLoading(true);
-    
+
     try {
       const sessionId = getOrCreateSessionId();
       const sessionHash = await hashSessionId(sessionId);
