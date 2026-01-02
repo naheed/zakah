@@ -1,7 +1,7 @@
 project_id = "pcwdpsoheoiiavkeyeyx"
 
 [functions.parse-financial-document]
-verify_jwt = true
+verify_jwt = false
 
 [functions.track-zakat-calculation]
 verify_jwt = false
