@@ -634,16 +634,18 @@ export function ZakatPDFDocumentV2({
                 {/* Footer Cards */}
                 <View style={styles.footerGrid}>
                     {/* Purification */}
-                    <View style={[styles.footerCard, { backgroundColor: COLORS.amberBg, borderColor: COLORS.amber, borderWidth: 0.5 }]} >
-                        <Text style={[styles.footerCardTitle, { color: COLORS.amber }]}>
-                            {/* Sparkle Icon Placeholder */}
-                            • Cleansing Your Portfolio
-                        </Text>
-                        <Text style={[styles.footerCardText, { color: "#78350F" }]}>
-                            Your investments generated <Text style={{ fontWeight: 700 }}>{formatCurrency(totalPurification, data.currency, 0)}</Text> in incidental earnings (interest/dividends). Re-channeling this amount to charity purifies your remaining wealth.
-                        </Text>
-                        <Text style={[styles.footerCardSub, { color: "#92400E" }]}>* Recommended: Give to general relief (Sadaqah)</Text>
-                    </View>
+                    {totalPurification > 0 && (
+                        <View style={[styles.footerCard, { backgroundColor: COLORS.amberBg, borderColor: COLORS.amber, borderWidth: 0.5 }]} >
+                            <Text style={[styles.footerCardTitle, { color: COLORS.amber }]}>
+                                {/* Sparkle Icon Placeholder */}
+                                • Cleansing Your Portfolio
+                            </Text>
+                            <Text style={[styles.footerCardText, { color: "#78350F" }]}>
+                                Your investments generated <Text style={{ fontWeight: 700 }}>{formatCurrency(totalPurification, data.currency, 0)}</Text> in incidental earnings (interest/dividends). Re-channeling this amount to charity purifies your remaining wealth.
+                            </Text>
+                            <Text style={[styles.footerCardSub, { color: "#92400E" }]}>* Recommended: Give to general relief (Sadaqah)</Text>
+                        </View>
+                    )}
 
                     {/* Impact */}
                     <View style={[styles.footerCard, { backgroundColor: COLORS.indigoBg, borderColor: COLORS.indigo, borderWidth: 0.5 }]} >
