@@ -356,49 +356,7 @@ export function ResultsStep({
         />
       </div>
 
-      {/* 3. Below Report Actions (Share, History, Restart) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Share Box */}
-        <div className="bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Heart weight="fill" className="text-primary w-6 h-6" />
-            <div>
-              <h3 className="font-semibold text-foreground">Multiply Your Barakah</h3>
-              <p className="text-xs text-muted-foreground">Share this tool to help others purify their wealth.</p>
-            </div>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="bg-white dark:bg-card gap-2" onClick={() => {
-              const url = "https://zakatflow.org"; // Use invite link if available
-              navigator.clipboard.writeText(url);
-              toast({ title: "Link Copied!" });
-            }}>
-              <Copy className="w-4 h-4" /> Copy Link
-            </Button>
-            {/* Could replace with CelebrationShareSection logic or components */}
-            <Button variant="outline" size="sm" className="bg-white dark:bg-card gap-2 ml-auto" onClick={handleReset}>
-              <ArrowCounterClockwise className="w-4 h-4" /> Start New
-            </Button>
-          </div>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="bg-muted/30 border border-border rounded-2xl p-6 flex flex-col justify-center">
-          <div className="flex items-start gap-3">
-            <WarningCircle className="w-6 h-6 text-muted-foreground shrink-0 mt-0.5" />
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                <strong>Note:</strong> This tool does not cover farming assets, livestock, or specialized complex assets.
-                Calculations are based on selected scholarly opinions (Standard/Madhab/Bradford).
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Always consult with a local scholar for specific personal situations.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
 
     </div>
   );
