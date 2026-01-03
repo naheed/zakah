@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { CheckCircle, Share, ArrowRight, Copy, Check, TrendingUp, Users } from 'lucide-react';
+import { CheckCircle, Share, ArrowRight, Copy, Check } from 'lucide-react';
 import { WhatsappLogo, XLogo } from '@phosphor-icons/react';
 import { Logo } from '@/components/zakat/Logo';
+import { PersonalMetrics } from '@/components/zakat/PersonalMetrics';
 import { Button } from '@/components/ui/button';
 import { useUsageMetrics } from '@/hooks/useUsageMetrics';
-import { formatCount } from '@/lib/formatters';
 import { DOMAIN_CONFIG } from '@/lib/domainConfig';
 import { cn } from '@/lib/utils';
 
@@ -82,45 +82,19 @@ export default function LogoutSuccess() {
                         </p>
                     </motion.div>
 
-                    {/* Community Trends - Subtle and informative */}
+                    {/* Community Trends - Using PersonalMetrics component */}
                     {!isLoading && canShowMetrics && (
                         <motion.div
-                            className="p-5 rounded-xl bg-muted/30 border border-border"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                         >
-                            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-4">
-                                Community Trend
-                            </p>
-
-                            <div className="flex items-center justify-center gap-6">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                        <Users className="w-4 h-4 text-primary" />
-                                    </div>
-                                    <div className="text-left">
-                                        <p className="text-lg font-mono font-semibold text-foreground">
-                                            {formatCount(metrics.allTime.calculations)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">calculations</p>
-                                    </div>
-                                </div>
-
-                                <div className="w-px h-10 bg-border" />
-
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-tertiary/10 flex items-center justify-center">
-                                        <TrendingUp className="w-4 h-4 text-tertiary" />
-                                    </div>
-                                    <div className="text-left">
-                                        <p className="text-lg font-mono font-semibold text-foreground">
-                                            {formatCount(metrics.currentYear.calculations)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">this year</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <PersonalMetrics
+                                totalReferrals={metrics.allTime.calculations}
+                                totalZakatCalculated={null}
+                                totalAssetsCalculated={null}
+                                variant="full"
+                            />
                         </motion.div>
                     )}
 

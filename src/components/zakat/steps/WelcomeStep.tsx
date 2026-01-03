@@ -298,6 +298,9 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
             )}
           </div>
         </div>
+
+        {/* Footer - matching landing page */}
+        <Footer className="mt-auto" />
       </div>
     );
   }
