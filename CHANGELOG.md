@@ -23,6 +23,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add referral metrics (privacy-safe)
 
 ---
+## [0.7.0] - 2026-01-03
+
+### Added
+- **Sankey Chart Overhaul**
+  - **Granular Flows**: Implemented "Split Net Node" strategy for perfect horizontal alignment of asset flows.
+  - **Waterfall Liability Deduction**: Liabilities are now deducted preferentially from Liquid Assets (Cash first -> Investments next) to reduce chart clutter.
+  - **Safe ID System**: Internal node IDs are sanitized (e.g., `Cash_Savings`) to prevent crashes with special characters like `&`.
+  - **Readability**: Increased default chart height (600px) and sorting by liquidity priority.
+- **Report & Export Features**
+  - **CSV Export**: Added "Export CSV" button to Results page for detailed offline analysis.
+  - **Unified Report UI**: New "Hero" report component consolidating Web, PDF, and CSV data models.
+  - **PDF Export Fixes**: Resolved react-pdf rendering issues and font loading bugs.
+
+### Changed
+- Refactored `ZakatSankeyChart.tsx` to use Nivo's `ResponsiveSankey` with custom layout engine removed.
+- `ResultsStep.tsx` now uses modular Report components (`ReportHero`, `ReportAssetTable`, `ReportFooter`) instead of monolithic file.
+
+---
+
 
 ## [0.6.0] - 2026-01-03
 

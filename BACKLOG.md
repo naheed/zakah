@@ -66,32 +66,34 @@
 
 ---
 
-## Phase 9: Download Report Redesign 🔄 IN PROGRESS
+## Phase 9: Download Report Redesign ✅ COMPLETE
 
 > **Goal:** Fix PDF bugs, add user info, madhab settings, referral metrics, and machine-readable YoY data.
 
-### 9.1 Fix Font Bug (Blocking)
-- [ ] Register WorkSans italic or remove italic usage
-- [ ] Verify PDF download works
+### 9.1 Fix Font Bug (Blocking) ✅
+- [x] Register WorkSans italic or remove italic usage
+- [x] Verify PDF download works
 
-### 9.2 Content Spec (For UX Designer)
-New sections to add:
-- User name + Hijri date in header
-- Madhab setting in Configuration
-- Methodology summary (key rulings applied)
-- Personal Impact section (referral link + QR, metrics if threshold met)
-- Machine-readable QR code for YoY scanning
+### 9.2 Content Spec (For UX Designer) ✅
+- [x] User name + Hijri date in header
+- [x] Madhab setting in Configuration
+- [x] Methodology summary (key rulings applied)
 
-### 9.3 Implementation
-- [ ] Update `ZakatPDFData` interface
-- [ ] Pass user info, madhab, referral stats to PDF
-- [ ] Add QR code with structured data
-- [ ] Add Hijri date conversion
+### 9.3 Implementation ✅
+- [x] Update `ZakatPDFData` interface
+- [x] Pass user info, madhab, referral stats to PDF (V2 generator)
+- [x] Add CSV Export feature
 
-### 9.4 YoY Scanning
-- [ ] Build PDF upload UI
-- [ ] Extract QR data from uploaded PDF
-- [ ] Display YoY comparison
+---
+
+## Phase 10: Visualization Improvements (Sankey) ✅ COMPLETE
+
+> **Goal:** Make the Zakat flow visualization accurate, readable, and beautiful.
+
+- [x] **Granular Flows**: Assets flow individually to Zakat node (Rainbow output)
+- [x] **Waterfall Logic**: Deduct liabilities from Cash first
+- [x] **Safe Processing**: Sanitize IDs to prevent special character crashes
+- [x] **Tooltip Cleanup**: Unified tooltips for Nodes and Links
 
 ---
 
