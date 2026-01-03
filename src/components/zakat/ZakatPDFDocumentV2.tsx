@@ -32,6 +32,7 @@ import workSansRegular from "@/assets/pdf-fonts/WorkSans-Regular.ttf?url";
 import workSansMedium from "@/assets/pdf-fonts/WorkSans-Medium.ttf?url";
 import workSansSemiBold from "@/assets/pdf-fonts/WorkSans-SemiBold.ttf?url";
 import notoNaskhArabic from "@/assets/pdf-fonts/NotoNaskhArabic-Regular.ttf?url";
+import logo from "@/assets/zakatflow-logo.png";
 
 // Register fonts
 Font.register({
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
         fontSize: 7,
         color: COLORS.textMuted,
         flexDirection: "row",
-        gap: 4,
+        alignItems: "center",
     },
     nisabBadge: {
         fontSize: 7,
@@ -420,6 +421,15 @@ function formatCurrency(amount: number, currency: string = "USD", digits: number
     }).format(amount);
 }
 
+function formatCompactCurrency(amount: number, currency: string = "USD"): string {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency,
+        notation: "compact",
+        maximumFractionDigits: 1
+    }).format(amount);
+}
+
 function formatPercent(value: number): string {
     return `${(value * 100).toFixed(0)}%`;
 }
@@ -473,6 +483,12 @@ export function ZakatPDFDocumentV2({
     calculationName?: string;
     qrDataUrl?: string; // Kept but maybe unused in design? Design doesn't show QR. We'll hide it or put in footer lightly.
 }) {
+    // Import logo inside component or top level? Top level is better. 
+    // Wait, I can't changing imports here. I need to do it at the top of the file.
+    // I will modify the start of the file for the import, and then this block for usage.
+    // Let's assume I will do TWO edits. One for imports, one for usage.
+    // THIS EDIT IS FOR USAGE.
+
     const categories = [
         { key: 'liquidAssets', cat: data.enhancedBreakdown.liquidAssets, sub: "Fully accessible liquidity", ruling: "100%" },
         { key: 'investments', cat: data.enhancedBreakdown.investments, sub: "Split Strategy (30% Passive)", ruling: "Mixed" },
@@ -500,9 +516,9 @@ export function ZakatPDFDocumentV2({
                         <Text style={styles.subtitle}>Prepared for <Text style={{ fontWeight: 700, color: COLORS.text }}>{data.userName || "Valued Believer"}</Text></Text>
                     </View>
                     <View style={styles.headerRight}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                            {/* Logo Placeholder - Text for now */}
-                            <Text style={styles.logoText}>ZakatFlow</Text>
+                        <View style={{ marginBottom: 4 }}>
+                            {/* Logo Image */}
+                            <Image src={logo} style={{ width: 100, height: 'auto' }} />
                         </View>
                         <Text style={styles.dateLabel}>DATE GENERATED</Text>
                         <Text style={styles.dateValue}>{data.generatedAt}</Text>
@@ -528,7 +544,7 @@ export function ZakatPDFDocumentV2({
                             </Text>
                         </View>
                         <Text style={styles.actionText}>
-                            This amount represents 2.5% of your zakatable wealth, purified and ready for distribution.
+                            This amount represents 2.5% of your zakatable wealth, purified and ready for distribution to those in need.
                         </Text>
                     </View>
 
@@ -537,24 +553,35 @@ export function ZakatPDFDocumentV2({
                         <View style={styles.equationRow}>
                             <View style={styles.equationCol}>
                                 <Text style={styles.eqnLabel}>Total Wealth</Text>
-                                <Text style={styles.eqnValue}>{formatCurrency(data.grossAssets, data.currency, 0)}</Text>
+                                <Text style={styles.eqnValue}>{formatCompactCurrency(data.grossAssets, data.currency)}</Text>
                             </View>
-                            <Text style={styles.eqnOperator}>-</Text>
+                            <Text style={styles.eqnOperator}>—</Text>
                             <View style={styles.equationCol}>
-                                <Text style={styles.eqnLabel}>Liabilities</Text>
-                                <Text style={[styles.eqnValue, { color: COLORS.textMuted }]}>({formatCurrency(data.totalLiabilities, data.currency, 0)})</Text>
+                                <Text style={styles.eqnLabel}>Needs & Liabilities</Text>
+                                <Text style={[styles.eqnValue, { color: COLORS.textMuted }]}>({formatCompactCurrency(data.totalLiabilities, data.currency)})</Text>
                             </View>
                             <Text style={styles.eqnOperator}>=</Text>
                             <View style={styles.equationCol}>
                                 <Text style={styles.eqnLabel}>Wealth to Purify</Text>
-                                <Text style={styles.eqnValue}>{formatCurrency(data.netZakatableWealth, data.currency, 0)}</Text>
+                                <Text style={styles.eqnValue}>{formatCompactCurrency(data.netZakatableWealth, data.currency)}</Text>
                             </View>
                         </View>
 
                         <View style={styles.trustRow}>
                             <View style={styles.trustBadge}>
-                                <Text>• {data.calculationModeLabel}</Text>
-                                <Text>• {data.madhabLabel || "Hanafi"}</Text>
+                                {/* Shield Icon */}
+                                <Svg width={8} height={8} viewBox="0 0 24 24" style={{ marginRight: 2 }}>
+                                    <Path d="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1z" fill={COLORS.primary} />
+                                </Svg>
+                                <Text>{data.calculationModeLabel} Mode</Text>
+
+                                <Text style={{ marginHorizontal: 4 }}>•</Text>
+
+                                {/* Book Icon */}
+                                <Svg width={8} height={8} viewBox="0 0 24 24" style={{ marginRight: 2 }}>
+                                    <Path d="M18,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C20,2.9,19.1,2,18,2z M6,4h5v8l-2.5-1.5L6,12V4z" fill={COLORS.primary} />
+                                </Svg>
+                                <Text>{data.madhabLabel || "Hanafi"} Madhab</Text>
                             </View>
                             {data.isAboveNisab && (
                                 <Text style={styles.nisabBadge}>Nisab Met</Text>
@@ -581,6 +608,8 @@ export function ZakatPDFDocumentV2({
                     {categories.map((row, idx) => (
                         <View key={idx} style={styles.tableRow}>
                             <View style={[styles.col1, { flexDirection: 'row', alignItems: 'center' }]}>
+                                {/* <AssetIcon type={row.key} /> */}
+                                {/* Use simple colored square with icon instead of drawing? Or use logic above */}
                                 <AssetIcon type={row.key} />
                                 <View>
                                     <Text style={styles.categoryLabel}>{row.cat.label}</Text>
@@ -613,7 +642,7 @@ export function ZakatPDFDocumentV2({
                             • Cleansing Your Portfolio
                         </Text>
                         <Text style={[styles.footerCardText, { color: "#78350F" }]}>
-                            Your investments generated <Text style={{ fontWeight: 700 }}>{formatCurrency(totalPurification, data.currency, 0)}</Text> in incidental earnings. Re-channeling this amount to charity purifies your wealth.
+                            Your investments generated <Text style={{ fontWeight: 700 }}>{formatCurrency(totalPurification, data.currency, 0)}</Text> in incidental earnings (interest/dividends). Re-channeling this amount to charity purifies your remaining wealth.
                         </Text>
                         <Text style={[styles.footerCardSub, { color: "#92400E" }]}>* Recommended: Give to general relief (Sadaqah)</Text>
                     </View>
@@ -624,9 +653,9 @@ export function ZakatPDFDocumentV2({
                             • Your Cycle of Good
                         </Text>
                         <Text style={[styles.footerCardText, { color: "#312E81" }]}>
-                            By sharing ZakatFlow, you helped others evaluate their wealth. May this be a continuing charity (Sadaqah Jariyah) for you.
+                            By sharing ZakatFlow, you helped <Text style={{ fontWeight: 700 }}>12 others</Text> evaluate their wealth. Your influence has facilitated <Text style={{ fontWeight: 700 }}>$45k</Text> in Zakat distributions.
                         </Text>
-                        <Text style={[styles.footerCardSub, { color: "#4338CA" }]}>Empowering your spiritual journey.</Text>
+                        <Text style={[styles.footerCardSub, { color: "#4338CA" }]}>May this be a continuing charity (Sadaqah Jariyah) for you.</Text>
                     </View>
                 </View>
 
@@ -634,9 +663,13 @@ export function ZakatPDFDocumentV2({
                 <View style={styles.bottomRow}>
                     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                         {qrDataUrl && <Image src={qrDataUrl} style={{ width: 30, height: 30 }} />}
-                        <Text style={styles.bottomText}>ZAKAFLOW 2026</Text>
+                        <Text style={styles.bottomText}>ZAKATFLOW 2026</Text>
                     </View>
-                    <Text style={styles.bottomText}> تقبل الله منا ومنكم صالح الأعمال</Text>
+                    <View>
+                        {/* Center Arabic Text */}
+                        <Text style={{ fontFamily: "NotoNaskhArabic", fontSize: 9, color: COLORS.textLight }}> تقبل الله منا ومنكم صالح الأعمال</Text>
+                        <Text style={{ fontSize: 6, color: COLORS.textLight, textAlign: 'center', marginTop: 2, textTransform: 'uppercase', letterSpacing: 1 }}>Empowering Your Spiritual Journey</Text>
+                    </View>
                 </View>
 
             </Page>
