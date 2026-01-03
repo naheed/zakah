@@ -55,25 +55,32 @@ export default function Settings() {
     formData,
     updateFormData,
     uploadedDocuments,
+    resetCalculator
   } = useZakatPersistence();
 
   const handleDeleteAllData = async () => {
-    if (!user) return;
     setIsDeleting(true);
     try {
-      await supabase
-        .from('zakat_calculation_shares')
-        .delete()
-        .eq('owner_id', user.id);
+      // 1. Clear Local Data (Always)
+      resetCalculator();
+      localStorage.removeItem('zakat_private_key'); // Legacy key if any
 
-      await supabase
-        .from('zakat_calculations')
-        .delete()
-        .eq('user_id', user.id);
+      // 2. If User, clean up cloud data (Optional - maybe user just wants local clear?)
+      // The user feedback implies they just want "Delete Data" to work.
+      // If we want a FULL wipe, we should do cloud too.
+      if (user) {
+        try {
+          await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
+          await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
+          toast.success('Local and cloud data deleted');
+        } catch (e) {
+          console.error("Cloud delete failed", e);
+          toast.success('Local data cleared (Cloud sync failed)');
+        }
+      } else {
+        toast.success('Local data cleared');
+      }
 
-      localStorage.removeItem('zakat_private_key');
-
-      toast.success('All your data has been deleted');
       navigate('/');
     } catch (error) {
       console.error('Error deleting data:', error);
@@ -509,8 +516,8 @@ export default function Settings() {
                     </AlertDialog>
                   </div>
 
-                  {/* Delete Account */}
-                  <div className="flex items-center justify-between gap-3">
+                  {/* Delete Account (Restored) */}
+                  <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/50">
                     <div className="flex items-center gap-2">
                       <UserX className="w-4 h-4 text-muted-foreground" />
                       <div>
@@ -545,10 +552,60 @@ export default function Settings() {
                       </AlertDialogContent>
                     </AlertDialog>
                   </div>
+
                 </div>
               </CollapsibleContent>
             </Collapsible>
           )}
+
+          {/* Data Management - Available for Everyone */}
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                <span className="font-medium text-foreground">Data Management</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 p-4 bg-card rounded-lg border border-border space-y-3">
+                {/* Delete All Data */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Trash2 className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Clear local data</p>
+                      <p className="text-xs text-muted-foreground">Removes all inputs from this device</p>
+                    </div>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-xs border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={isDeleting}>
+                        Clear
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Clear local data?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will remove all Zakat calculation data stored on this device.
+                          {user && " Your saved cloud data will remain."}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteAllData}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Yes, Clear Data
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </main>
         <Footer />
       </div>

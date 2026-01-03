@@ -20,6 +20,13 @@ export default function DevTools() {
 
     const tools = [
         {
+            title: "Sankey Chart Test",
+            description: "Test 10-category Sankey with mode toggle",
+            icon: <Database className="h-6 w-6" weight="duotone" />,
+            path: "/sankey-test",
+            color: "text-emerald-500",
+        },
+        {
             title: "Extraction Test",
             description: "Test AI document extraction with V2 line-item parsing",
             icon: <FileCode className="h-6 w-6" weight="duotone" />,

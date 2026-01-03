@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/runtimeClient';
 function getOrCreateSessionId(): string {
   const key = 'zakat_session_id';
   let sessionId = sessionStorage.getItem(key);
-  
+
   if (!sessionId) {
     // Generate a random session ID
     const array = new Uint8Array(32);
@@ -13,7 +13,7 @@ function getOrCreateSessionId(): string {
     sessionId = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
     sessionStorage.setItem(key, sessionId);
   }
-  
+
   return sessionId;
 }
 
@@ -52,7 +52,7 @@ export function useTrackCalculation() {
     try {
       const sessionId = getOrCreateSessionId();
       const sessionHash = await hashSessionId(sessionId);
-      
+
       // Check if user came from a referral link
       const referredBy = sessionStorage.getItem(REFERRAL_CODE_KEY);
 
@@ -66,8 +66,11 @@ export function useTrackCalculation() {
         },
       }).then(({ error }) => {
         if (error) {
-          console.error('Failed to track calculation:', error);
+          console.warn('Failed to track calculation (likely CORS in dev):', error);
         }
+      }).catch(err => {
+        // Swallow network errors (CORS) to prevent console noise
+        console.debug('Tracking swallowed error:', err);
       });
     } catch (error) {
       // Silently fail - tracking should never block the user

@@ -135,6 +135,10 @@ export function useReferral() {
       });
 
       if (error) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.warn('Supabase referral stats unreachable locally (CORS). Using fallback.');
+          return;
+        }
         console.error('Error fetching referral stats:', error);
         return;
       }

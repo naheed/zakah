@@ -24,6 +24,7 @@ import AddAccount from "./pages/AddAccount";
 import AccountDetail from "./pages/AccountDetail";
 import LogoutSuccess from "./pages/LogoutSuccess";
 import DevTools from "./pages/DevTools";
+import SankeyTest from "./pages/SankeyTest";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/assets/:accountId" element={<AccountDetail />} />
                 <Route path="/logout" element={<LogoutSuccess />} />
                 <Route path="/dev" element={<DevTools />} />
+                <Route path="/sankey-test" element={<SankeyTest />} />
                 <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
                 <Route path="/extraction-test" element={<ExtractionTest />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

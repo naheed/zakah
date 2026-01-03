@@ -116,6 +116,52 @@ export interface ZakatFormData {
   lateTaxPayments: number;
 }
 
+export interface AssetBreakdown {
+  liquidAssets: number;
+  investments: number;
+  retirement: number;
+  realEstate: number;
+  business: number;
+  otherAssets: number;
+  exemptAssets: number;
+}
+
+export interface ZakatCalculationResult {
+  totalAssets: number;
+  totalLiabilities: number;
+  netZakatableWealth: number;
+  nisab: number;
+  isAboveNisab: boolean;
+  zakatDue: number;
+  zakatRate: number;
+  interestToPurify: number;
+  dividendsToPurify: number;
+  assetBreakdown: AssetBreakdown;
+  enhancedBreakdown: EnhancedAssetBreakdown;
+}
+
+export interface ZakatReport {
+  meta: {
+    timestamp: string;
+    reportId: string;
+    version: string;
+  };
+  input: ZakatFormData;
+  output: ZakatCalculationResult;
+}
+
+export function createZakatReport(data: ZakatFormData, calculations: ZakatCalculationResult): ZakatReport {
+  return {
+    meta: {
+      timestamp: new Date().toISOString(),
+      reportId: `REF-${Math.floor(Math.random() * 10000)}`,
+      version: "2.0"
+    },
+    input: data,
+    output: calculations
+  };
+}
+
 export const defaultFormData: ZakatFormData = {
   currency: 'USD',
   calendarType: 'lunar',
@@ -378,6 +424,7 @@ export function calculateZakat(
   interestToPurify: number;
   dividendsToPurify: number;
   assetBreakdown: AssetBreakdown;
+  enhancedBreakdown: EnhancedAssetBreakdown;
 } {
   const totalAssets = calculateTotalAssets(data);
   const totalLiabilities = calculateTotalLiabilities(data);
@@ -395,6 +442,9 @@ export function calculateZakat(
   // Calculate breakdown for visualization
   const assetBreakdown = calculateAssetBreakdown(data);
 
+  // Enhanced breakdown for PDF v2 (with percentages and granular categories)
+  const enhancedBreakdown = calculateEnhancedAssetBreakdown(data, netZakatableWealth);
+
   return {
     totalAssets,
     totalLiabilities,
@@ -406,6 +456,7 @@ export function calculateZakat(
     interestToPurify,
     dividendsToPurify,
     assetBreakdown,
+    enhancedBreakdown,
   };
 }
 
@@ -417,6 +468,329 @@ export interface AssetBreakdown {
   business: number;
   otherAssets: number;
   exemptAssets: number;
+}
+
+// Enhanced Asset Breakdown for PDF Report v2
+export interface AssetItem {
+  name: string;
+  value: number;
+  zakatablePercent?: number;
+  zakatableAmount?: number;
+}
+
+export interface AssetCategory {
+  label: string;
+  color: string;
+  total: number;
+  zakatableAmount: number;
+  zakatablePercent: number;
+  percentOfNetZakatable: number;
+  items: AssetItem[];
+}
+
+export interface LiabilityItem {
+  name: string;
+  value: number;
+}
+
+export interface EnhancedAssetBreakdown {
+  liquidAssets: AssetCategory;
+  preciousMetals: AssetCategory;
+  crypto: AssetCategory;
+  investments: AssetCategory;
+  retirement: AssetCategory;
+  trusts: AssetCategory;
+  realEstate: AssetCategory;
+  business: AssetCategory;
+  debtOwedToYou: AssetCategory;
+  illiquidAssets: AssetCategory;
+  liabilities: {
+    label: string;
+    color: string;
+    total: number;
+    items: LiabilityItem[];
+  };
+  exempt: {
+    label: string;
+    color: string;
+    total: number;
+    items: AssetItem[];
+  };
+}
+
+// Asset category colors (consistent with web UI)
+const ASSET_COLORS = {
+  liquid: '#22C55E',
+  metals: '#EAB308',
+  crypto: '#8B5CF6',
+  investments: '#3B82F6',
+  retirement: '#EC4899',
+  trusts: '#14B8A6',
+  realEstate: '#F97316',
+  business: '#06B6D4',
+  debtOwed: '#64748B',
+  illiquid: '#A855F7',
+  liabilities: '#DC2626',
+  exempt: '#9CA3AF',
+};
+
+export function calculateEnhancedAssetBreakdown(
+  data: ZakatFormData,
+  netZakatableWealth: number
+): EnhancedAssetBreakdown {
+  // Helper to compute percent of net zakatable
+  const pctOfNet = (amount: number) =>
+    netZakatableWealth > 0 ? amount / netZakatableWealth : 0;
+
+  // Liquid Assets (cash only)
+  const liquidItems: AssetItem[] = [];
+  if (data.checkingAccounts > 0) liquidItems.push({ name: 'Checking Accounts', value: data.checkingAccounts });
+  if (data.savingsAccounts > 0) liquidItems.push({ name: 'Savings Accounts', value: data.savingsAccounts });
+  if (data.cashOnHand > 0) liquidItems.push({ name: 'Cash on Hand', value: data.cashOnHand });
+  if (data.digitalWallets > 0) liquidItems.push({ name: 'Digital Wallets', value: data.digitalWallets });
+  if (data.foreignCurrency > 0) liquidItems.push({ name: 'Foreign Currency', value: data.foreignCurrency });
+  const liquidTotal = liquidItems.reduce((s, i) => s + i.value, 0);
+
+  // Precious Metals
+  const metalsItems: AssetItem[] = [];
+  if (data.hasPreciousMetals) {
+    if (data.goldValue > 0) metalsItems.push({ name: 'Gold', value: data.goldValue });
+    if (data.silverValue > 0) metalsItems.push({ name: 'Silver', value: data.silverValue });
+  }
+  const metalsTotal = metalsItems.reduce((s, i) => s + i.value, 0);
+
+  // Crypto
+  const cryptoItems: AssetItem[] = [];
+  if (data.hasCrypto) {
+    if (data.cryptoCurrency > 0) cryptoItems.push({ name: 'Bitcoin/Ethereum', value: data.cryptoCurrency });
+    if (data.cryptoTrading > 0) cryptoItems.push({ name: 'Trading Altcoins', value: data.cryptoTrading });
+    if (data.stakedAssets > 0) cryptoItems.push({ name: 'Staked Assets', value: data.stakedAssets });
+    if (data.stakedRewardsVested > 0) cryptoItems.push({ name: 'Staking Rewards', value: data.stakedRewardsVested });
+    if (data.liquidityPoolValue > 0) cryptoItems.push({ name: 'Liquidity Pools', value: data.liquidityPoolValue });
+  }
+  const cryptoTotal = cryptoItems.reduce((s, i) => s + i.value, 0);
+
+  // Investments
+  const investmentItems: AssetItem[] = [];
+  const passiveZakatablePercent = data.calculationMode === 'conservative' ? 1.0 : 0.30;
+  const passiveZakatableAmount = data.passiveInvestmentsValue * passiveZakatablePercent;
+  if (data.activeInvestments > 0) investmentItems.push({ name: 'Active Investments', value: data.activeInvestments, zakatablePercent: 1.0 });
+  if (data.passiveInvestmentsValue > 0) investmentItems.push({
+    name: 'Passive Investments',
+    value: data.passiveInvestmentsValue,
+    zakatablePercent: passiveZakatablePercent,
+    zakatableAmount: passiveZakatableAmount
+  });
+  const purifiedDividends = data.dividends - (data.dividends * data.dividendPurificationPercent / 100);
+  if (data.dividends > 0) investmentItems.push({ name: 'Dividends', value: purifiedDividends });
+  const investmentGross = data.activeInvestments + data.passiveInvestmentsValue + data.dividends;
+  const investmentZakatable = data.activeInvestments + passiveZakatableAmount + purifiedDividends;
+
+  // Retirement
+  const retirementItems: AssetItem[] = [];
+  if (data.rothIRAContributions > 0) retirementItems.push({ name: 'Roth IRA Contributions', value: data.rothIRAContributions, zakatablePercent: 1.0 });
+
+  const rothEarningsZakatable = data.isOver59Half ? data.rothIRAEarnings :
+    (data.calculationMode === 'bradford' ? 0 : calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, data.calculationMode));
+  if (data.rothIRAEarnings > 0) retirementItems.push({
+    name: 'Roth IRA Earnings',
+    value: data.rothIRAEarnings,
+    zakatableAmount: rothEarningsZakatable,
+    zakatablePercent: data.rothIRAEarnings > 0 ? rothEarningsZakatable / data.rothIRAEarnings : 0
+  });
+
+  const fourOhOneKZakatable = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode);
+  if (data.fourOhOneKVestedBalance > 0) retirementItems.push({
+    name: '401(k) Vested',
+    value: data.fourOhOneKVestedBalance,
+    zakatableAmount: fourOhOneKZakatable,
+    zakatablePercent: data.fourOhOneKVestedBalance > 0 ? fourOhOneKZakatable / data.fourOhOneKVestedBalance : 0
+  });
+
+  const iraZakatable = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.calculationMode);
+  if (data.traditionalIRABalance > 0) retirementItems.push({
+    name: 'Traditional IRA',
+    value: data.traditionalIRABalance,
+    zakatableAmount: iraZakatable,
+    zakatablePercent: data.traditionalIRABalance > 0 ? iraZakatable / data.traditionalIRABalance : 0
+  });
+
+  if (data.iraWithdrawals > 0) retirementItems.push({ name: 'IRA Withdrawals', value: data.iraWithdrawals, zakatablePercent: 1.0 });
+  if (data.esaWithdrawals > 0) retirementItems.push({ name: 'ESA Withdrawals', value: data.esaWithdrawals, zakatablePercent: 1.0 });
+  if (data.fiveTwentyNineWithdrawals > 0) retirementItems.push({ name: '529 Withdrawals', value: data.fiveTwentyNineWithdrawals, zakatablePercent: 1.0 });
+  if (data.hsaBalance > 0) retirementItems.push({ name: 'HSA Balance', value: data.hsaBalance, zakatablePercent: 1.0 });
+
+  const retirementGross = retirementItems.reduce((s, i) => s + i.value, 0);
+  const retirementZakatable = data.rothIRAContributions + rothEarningsZakatable + fourOhOneKZakatable + iraZakatable +
+    data.iraWithdrawals + data.esaWithdrawals + data.fiveTwentyNineWithdrawals + data.hsaBalance;
+
+  // Trusts
+  const trustItems: AssetItem[] = [];
+  if (data.hasTrusts) {
+    if (data.revocableTrustValue > 0) trustItems.push({ name: 'Revocable Trust', value: data.revocableTrustValue, zakatablePercent: 1.0 });
+    if (data.irrevocableTrustAccessible && data.irrevocableTrustValue > 0) {
+      trustItems.push({ name: 'Irrevocable Trust (Accessible)', value: data.irrevocableTrustValue, zakatablePercent: 1.0 });
+    }
+  }
+  const trustsTotal = trustItems.reduce((s, i) => s + i.value, 0);
+
+  // Real Estate
+  const realEstateItems: AssetItem[] = [];
+  if (data.hasRealEstate) {
+    if (data.realEstateForSale > 0) realEstateItems.push({ name: 'Property for Sale', value: data.realEstateForSale });
+    if (data.rentalPropertyIncome > 0) realEstateItems.push({ name: 'Rental Income', value: data.rentalPropertyIncome });
+  }
+  const realEstateTotal = realEstateItems.reduce((s, i) => s + i.value, 0);
+
+  // Business
+  const businessItems: AssetItem[] = [];
+  if (data.hasBusiness) {
+    if (data.businessCashAndReceivables > 0) businessItems.push({ name: 'Cash & Receivables', value: data.businessCashAndReceivables });
+    if (data.businessInventory > 0) businessItems.push({ name: 'Inventory', value: data.businessInventory });
+  }
+  const businessTotal = businessItems.reduce((s, i) => s + i.value, 0);
+
+  // Debt Owed To You
+  const debtOwedItems: AssetItem[] = [];
+  if (data.hasDebtOwedToYou) {
+    if (data.goodDebtOwedToYou > 0) debtOwedItems.push({ name: 'Collectible Loans', value: data.goodDebtOwedToYou });
+    if (data.badDebtRecovered > 0) debtOwedItems.push({ name: 'Recovered Bad Debt', value: data.badDebtRecovered });
+  }
+  const debtOwedTotal = debtOwedItems.reduce((s, i) => s + i.value, 0);
+
+  // Illiquid Assets
+  const illiquidItems: AssetItem[] = [];
+  if (data.hasIlliquidAssets) {
+    if (data.illiquidAssetsValue > 0) illiquidItems.push({ name: 'Illiquid Assets', value: data.illiquidAssetsValue });
+    if (data.livestockValue > 0) illiquidItems.push({ name: 'Livestock', value: data.livestockValue });
+  }
+  const illiquidTotal = illiquidItems.reduce((s, i) => s + i.value, 0);
+
+  // Liabilities
+  const liabilityItems: LiabilityItem[] = [];
+  if (data.monthlyLivingExpenses > 0) liabilityItems.push({ name: 'Living Expenses', value: data.monthlyLivingExpenses });
+  if (data.insuranceExpenses > 0) liabilityItems.push({ name: 'Insurance', value: data.insuranceExpenses });
+  if (data.creditCardBalance > 0) liabilityItems.push({ name: 'Credit Card', value: data.creditCardBalance });
+  if (data.unpaidBills > 0) liabilityItems.push({ name: 'Unpaid Bills', value: data.unpaidBills });
+  if (data.monthlyMortgage > 0) liabilityItems.push({ name: 'Mortgage (12mo)', value: data.monthlyMortgage * 12 });
+  if (data.studentLoansDue > 0) liabilityItems.push({ name: 'Student Loans', value: data.studentLoansDue });
+  if (data.hasTaxPayments && data.propertyTax > 0) liabilityItems.push({ name: 'Property Tax', value: data.propertyTax });
+  if (data.hasTaxPayments && data.lateTaxPayments > 0) liabilityItems.push({ name: 'Late Taxes', value: data.lateTaxPayments });
+  const liabilitiesTotal = liabilityItems.reduce((s, i) => s + i.value, 0);
+
+  // Exempt Assets
+  const exemptItems: AssetItem[] = [];
+  if (data.fourOhOneKUnvestedMatch > 0) exemptItems.push({ name: '401(k) Unvested', value: data.fourOhOneKUnvestedMatch });
+  if (data.clatValue > 0) exemptItems.push({ name: 'CLAT', value: data.clatValue });
+  if (data.hasTrusts && !data.irrevocableTrustAccessible && data.irrevocableTrustValue > 0) {
+    exemptItems.push({ name: 'Irrevocable Trust', value: data.irrevocableTrustValue });
+  }
+  const exemptTotal = exemptItems.reduce((s, i) => s + i.value, 0);
+
+  return {
+    liquidAssets: {
+      label: 'Cash & Savings',
+      color: ASSET_COLORS.liquid,
+      total: liquidTotal,
+      zakatableAmount: liquidTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(liquidTotal),
+      items: liquidItems,
+    },
+    preciousMetals: {
+      label: 'Precious Metals',
+      color: ASSET_COLORS.metals,
+      total: metalsTotal,
+      zakatableAmount: metalsTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(metalsTotal),
+      items: metalsItems,
+    },
+    crypto: {
+      label: 'Crypto & Digital',
+      color: ASSET_COLORS.crypto,
+      total: cryptoTotal,
+      zakatableAmount: cryptoTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(cryptoTotal),
+      items: cryptoItems,
+    },
+    investments: {
+      label: 'Investments',
+      color: ASSET_COLORS.investments,
+      total: investmentGross,
+      zakatableAmount: investmentZakatable,
+      zakatablePercent: investmentGross > 0 ? investmentZakatable / investmentGross : 1.0,
+      percentOfNetZakatable: pctOfNet(investmentZakatable),
+      items: investmentItems,
+    },
+    retirement: {
+      label: 'Retirement',
+      color: ASSET_COLORS.retirement,
+      total: retirementGross,
+      zakatableAmount: retirementZakatable,
+      zakatablePercent: retirementGross > 0 ? retirementZakatable / retirementGross : 0,
+      percentOfNetZakatable: pctOfNet(retirementZakatable),
+      items: retirementItems,
+    },
+    trusts: {
+      label: 'Trusts',
+      color: ASSET_COLORS.trusts,
+      total: trustsTotal,
+      zakatableAmount: trustsTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(trustsTotal),
+      items: trustItems,
+    },
+    realEstate: {
+      label: 'Real Estate',
+      color: ASSET_COLORS.realEstate,
+      total: realEstateTotal,
+      zakatableAmount: realEstateTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(realEstateTotal),
+      items: realEstateItems,
+    },
+    business: {
+      label: 'Business',
+      color: ASSET_COLORS.business,
+      total: businessTotal,
+      zakatableAmount: businessTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(businessTotal),
+      items: businessItems,
+    },
+    debtOwedToYou: {
+      label: 'Debt Owed to You',
+      color: ASSET_COLORS.debtOwed,
+      total: debtOwedTotal,
+      zakatableAmount: debtOwedTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(debtOwedTotal),
+      items: debtOwedItems,
+    },
+    illiquidAssets: {
+      label: 'Illiquid Assets',
+      color: ASSET_COLORS.illiquid,
+      total: illiquidTotal,
+      zakatableAmount: illiquidTotal,
+      zakatablePercent: 1.0,
+      percentOfNetZakatable: pctOfNet(illiquidTotal),
+      items: illiquidItems,
+    },
+    liabilities: {
+      label: 'Deductions',
+      color: ASSET_COLORS.liabilities,
+      total: liabilitiesTotal,
+      items: liabilityItems,
+    },
+    exempt: {
+      label: 'Exempt Assets',
+      color: ASSET_COLORS.exempt,
+      total: exemptTotal,
+      items: exemptItems,
+    },
+  };
 }
 
 function calculateAssetBreakdown(data: ZakatFormData): AssetBreakdown {
@@ -470,13 +844,33 @@ function calculateAssetBreakdown(data: ZakatFormData): AssetBreakdown {
   };
 }
 
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+export function formatCurrency(amount: number, currency: string = 'USD', fractionDigits: number = 2): string {
+  // Use a fallback for tests environment if Intl is not available (common in some Jest configs)
+  // But for browser it should be fine.
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(amount);
+  } catch (e) {
+    return `${currency} ${amount.toFixed(fractionDigits)}`;
+  }
+}
+
+export function formatCompactCurrency(amount: number, currency: string = 'USD'): string {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(amount);
+  } catch (e) {
+    // Fallback for older environments
+    return formatCurrency(amount, currency, 0);
+  }
 }
 
 export function formatPercent(rate: number): string {
