@@ -12,10 +12,12 @@ dist
 dist-ssr
 *.local
 
-# Environment files (SECURITY: Never commit secrets)
-.env
-.env.*
-!.env.example
+# Environment files
+# NOTE: .env is tracked for Lovable Cloud deployment
+# Do NOT commit sensitive secrets - use Supabase dashboard for service role keys
+!.env
+.env.local
+.env.*.local
 
 # Secrets and keys
 *.pem
