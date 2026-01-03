@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 import { ZakatFormData, defaultFormData } from '@/lib/zakatCalculations';
 import { AssetAccount, AssetSnapshot, AssetLineItem, ZakatCategory } from '@/types/assets';
 

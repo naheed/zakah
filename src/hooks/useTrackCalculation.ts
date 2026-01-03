@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 
 // Generate a stable session ID stored in sessionStorage
 function getOrCreateSessionId(): string {

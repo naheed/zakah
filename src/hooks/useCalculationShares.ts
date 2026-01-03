@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 import { useAuth } from './useAuth';
 import { useEncryptionKeys } from './useEncryptionKeys';
 import { ZakatFormData } from '@/lib/zakatCalculations';

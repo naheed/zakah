@@ -402,8 +402,16 @@ export function ResultsStep({
                       size="sm" 
                       onClick={() => {
                         // Cycle through all three modes
-                        const modes: Array<'conservative' | 'optimized' | 'bradford'> = ['conservative', 'optimized', 'bradford'];
-                        const currentIndex = modes.indexOf(data.calculationMode);
+                        const modes: Array<'conservative' | 'optimized' | 'bradford'> = [
+                          'conservative',
+                          'optimized',
+                          'bradford',
+                        ];
+                        const currentMode =
+                          (data.calculationMode === 'pure'
+                            ? 'bradford'
+                            : data.calculationMode) as 'conservative' | 'optimized' | 'bradford';
+                        const currentIndex = modes.indexOf(currentMode);
                         const nextIndex = (currentIndex + 1) % modes.length;
                         updateData({ calculationMode: modes[nextIndex] });
                       }}
