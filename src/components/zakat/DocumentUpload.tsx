@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { UploadSimple, FileDoc, Image, SpinnerGap, CheckCircle, WarningCircle, Sparkle } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/runtimeClient";
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
 import { motion, AnimatePresence } from "framer-motion";

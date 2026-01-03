@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { LearnMore } from "@/components/zakat/LearnMore";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/runtimeClient";
 import { toast } from "sonner";
 import {
   Collapsible,

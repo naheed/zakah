@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 import { useAuth } from '@/hooks/useAuth';
 import {
     AssetPortfolio,
