@@ -113,7 +113,7 @@ export function ResultsStep({
     enhancedBreakdown,
   } = calculations;
   // useReferral hook for stats
-  const { stats, fetchStats } = useReferral();
+  const { stats, fetchStats, referralCode } = useReferral();
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
@@ -143,7 +143,7 @@ export function ResultsStep({
     setIsGeneratingPDF(true);
     try {
       // Create unified report object using imported factory
-      const report = createZakatReport(data, calculations);
+      const report = createZakatReport(data, calculations, referralCode || undefined);
 
       // Use V2 PDF generator with unified object
       await generateZakatPDFV2(report, calculationName, user?.email?.split('@')[0]);
@@ -172,7 +172,7 @@ export function ResultsStep({
 
   const handleDownloadCSV = () => {
     // Create unified report object using imported factory
-    const report = createZakatReport(data, calculations);
+    const report = createZakatReport(data, calculations, referralCode || undefined);
 
     generateCSV(report, `zakat-report-${new Date().toISOString().split('T')[0]}.csv`);
     toast({
@@ -352,6 +352,7 @@ export function ResultsStep({
           dividendsToPurify={dividendsToPurify}
           currency={currency}
           referralStats={stats || undefined} // Pass stats from useReferral
+          referralCode={referralCode || undefined}
         />
       </div>
 

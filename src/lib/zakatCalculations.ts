@@ -145,17 +145,19 @@ export interface ZakatReport {
     timestamp: string;
     reportId: string;
     version: string;
+    referralCode?: string;
   };
   input: ZakatFormData;
   output: ZakatCalculationResult;
 }
 
-export function createZakatReport(data: ZakatFormData, calculations: ZakatCalculationResult): ZakatReport {
+export function createZakatReport(data: ZakatFormData, calculations: ZakatCalculationResult, referralCode?: string): ZakatReport {
   return {
     meta: {
       timestamp: new Date().toISOString(),
       reportId: `REF-${Math.floor(Math.random() * 10000)}`,
-      version: "2.0"
+      version: "2.0",
+      referralCode
     },
     input: data,
     output: calculations

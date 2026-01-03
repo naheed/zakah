@@ -409,6 +409,7 @@ export interface ZakatPDFDataV2 {
     generatedAt: string;
     generatedAtHijri: string;
     reportId: string;
+    referralCode?: string;
 }
 
 // Helpers
