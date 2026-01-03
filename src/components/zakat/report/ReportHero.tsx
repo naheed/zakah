@@ -1,5 +1,6 @@
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { SealCheck, Minus, Equals, ShieldCheck, BookOpen } from "@phosphor-icons/react";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { cn } from "@/lib/utils";
 
 interface ReportHeroProps {
@@ -50,8 +51,16 @@ export function ReportHero({
                             </span>
                         </div>
                         <div className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight break-words">
-                            {formatCurrency(wholeZakat, currency).replace(/\.00$/, '')}
-                            <span className="text-2xl text-muted-foreground/60 font-medium ml-1">{decimalZakat}</span>
+                            <AnimatedNumber
+                                value={wholeZakat}
+                                format={(v) => formatCurrency(v, currency).replace(/\.00$/, '')}
+                            />
+                            <span className="text-2xl text-muted-foreground/60 font-medium ml-1">
+                                <AnimatedNumber
+                                    value={Number(decimalZakat)}
+                                    format={(v) => `.${Math.round(v).toString().padStart(2, '0')}`}
+                                />
+                            </span>
                         </div>
                     </div>
 

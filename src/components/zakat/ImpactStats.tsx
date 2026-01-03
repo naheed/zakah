@@ -4,6 +4,7 @@ import { formatCurrency } from '@/lib/zakatCalculations';
 import { formatCount, formatLargeNumber } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 
 const PRIVACY_THRESHOLD = 5;
 
@@ -66,7 +67,7 @@ export function ImpactStats({
             <div className="flex flex-col items-center">
                 <div className="flex items-baseline justify-center gap-1">
                     <span className="text-6xl font-black tracking-tight text-amber-900 dark:text-amber-100 font-work-sans">
-                        {totalReferrals}
+                        <AnimatedNumber value={totalReferrals} />
                     </span>
                 </div>
                 <p className="text-sm font-medium text-amber-800/60 dark:text-amber-400">
@@ -83,7 +84,10 @@ export function ImpactStats({
                             <Wallet className="w-3.5 h-3.5" />
                         </div>
                         <p className="text-lg font-bold text-amber-900 dark:text-amber-100">
-                            {formatLargeNumber(totalAssetsCalculated || 0)}
+                            <AnimatedNumber
+                                value={totalAssetsCalculated || 0}
+                                format={formatLargeNumber}
+                            />
                         </p>
                         <p className="text-[10px] uppercase font-bold tracking-wider text-amber-800/40 dark:text-amber-500/50">
                             Assets

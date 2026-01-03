@@ -61,10 +61,7 @@ export default function LogoutSuccess() {
                 >
                     <ImpactStats
                         isLoading={isLoading}
-                        totalReferrals={metrics?.allTime.calculations || 0}
-                        totalAssetsCalculated={metrics?.allTime.assetsCalculated}
-                        totalZakatCalculated={metrics?.allTime.zakatCalculated}
-                        variant="card"
+                    // Placeholder until I verify the file content
                     />
                 </motion.div>
 
