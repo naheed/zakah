@@ -540,8 +540,7 @@ export function ZakatPDFDocumentV2({
                                 <Text style={styles.actionLabel}>Fulfilling the Third Pillar</Text>
                             </View>
                             <Text style={styles.actionAmount}>
-                                {formatCurrency(Math.floor(data.zakatDue), data.currency)}
-                                <Text style={{ fontSize: 18, color: COLORS.textLight }}>.{(data.zakatDue % 1).toFixed(2).substring(1)}</Text>
+                                {formatCurrency(Math.round(data.zakatDue), data.currency, 0)}
                             </Text>
                         </View>
                         <Text style={styles.actionText}>
@@ -609,9 +608,7 @@ export function ZakatPDFDocumentV2({
                     {categories.map((row, idx) => (
                         <View key={idx} style={styles.tableRow}>
                             <View style={[styles.col1, { flexDirection: 'row', alignItems: 'center' }]}>
-                                {/* <AssetIcon type={row.key} /> */}
-                                {/* Use simple colored square with icon instead of drawing? Or use logic above */}
-                                <AssetIcon type={row.key} />
+                                {/* Icons removed for polish */}
                                 <View>
                                     <Text style={styles.categoryLabel}>{row.cat.label}</Text>
                                     <Text style={styles.categorySub}>{row.sub}</Text>
