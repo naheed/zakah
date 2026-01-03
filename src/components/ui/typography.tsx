@@ -1,0 +1,71 @@
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { ScrollReveal } from '@/components/ui/scroll-reveal';
+
+interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
+    children: React.ReactNode;
+    className?: string;
+    variant?: 'default' | 'muted' | 'small' | 'lead';
+}
+
+export const Text: React.FC<TextProps> = ({ children, className, variant = 'default', ...props }) => {
+    const variants = {
+        default: "text-base text-muted-foreground leading-relaxed",
+        muted: "text-sm text-muted-foreground",
+        small: "text-xs text-muted-foreground",
+        lead: "text-lg text-muted-foreground mb-6"
+    };
+
+    return (
+        <ScrollReveal>
+            <p className={cn(variants[variant], className)} {...props}>
+                {children}
+            </p>
+        </ScrollReveal>
+    );
+};
+
+interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
+    children: React.ReactNode;
+    className?: string;
+    level?: 1 | 2 | 3 | 4;
+}
+
+export const Heading: React.FC<HeadingProps> = ({ children, className, level = 2, ...props }) => {
+    const styles = {
+        1: "text-3xl md:text-4xl font-bold text-foreground mb-4 font-serif",
+        2: "text-2xl font-bold text-foreground mt-8 mb-4 font-serif",
+        3: "text-lg font-medium text-foreground mt-6 mb-2",
+        4: "font-medium text-foreground mt-4 mb-2"
+    };
+
+    const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
+
+    return (
+        <ScrollReveal>
+            <Tag className={cn(styles[level], className)} {...(props as React.HTMLAttributes<HTMLHeadingElement>)}>
+                {children}
+            </Tag>
+        </ScrollReveal>
+    );
+};
+
+interface ListProps extends React.HTMLAttributes<HTMLUListElement> {
+    children: React.ReactNode;
+    className?: string;
+    ordered?: boolean;
+}
+
+export const List: React.FC<ListProps> = ({ children, className, ordered = false, ...props }) => {
+    const Tag = ordered ? 'ol' : 'ul';
+    return (
+        <Tag className={cn("pl-6 space-y-2 text-muted-foreground", ordered ? "list-decimal" : "list-disc", className)} {...props}>
+            {children}
+        </Tag>
+    );
+};
+
+export const ListItem: React.FC<React.LiHTMLAttributes<HTMLLIElement>> = ({ children, className, ...props }) => (
+    <li className={cn("pl-2", className)} {...props}>{children}</li>
+);

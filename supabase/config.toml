@@ -1,0 +1,19 @@
+project_id = "pcwdpsoheoiiavkeyeyx"
+
+[functions.parse-financial-document]
+verify_jwt = false
+
+[functions.track-zakat-calculation]
+verify_jwt = false
+
+[functions.get-usage-metrics]
+verify_jwt = false
+
+[functions.generate-referral-code]
+verify_jwt = false
+
+[functions.get-referral-stats]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
