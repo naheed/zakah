@@ -55,6 +55,31 @@
 
 ---
 
+## Phase 3.6: Footer & Personal Metrics 🔄 IN PROGRESS
+
+> **Goal:** Consistent footer and motivational personal referral metrics.
+
+### 3.6.1 Footer Consistency
+- [ ] Match WelcomeStep footer to Landing page (Terms, Privacy, Methodology links)
+- [ ] Ensure responsive design across mobile/desktop
+
+### 3.6.2 Personal Referral Metrics
+- [ ] Create `PersonalMetrics` component showing:
+  - **Direct Referrals**: Users who signed up via your link
+  - **Cascade Impact**: Total users from your referral tree (recursive)
+  - **Zakat Calculated**: Sum of Zakat from your referral tree
+  - **Assets Evaluated**: Sum of assets from your referral tree
+- [ ] Position above footer on WelcomeStep
+- [ ] Privacy-safe aggregation (no PII exposed)
+
+### 3.6.3 Design Considerations
+- Use motivational framing: "Your Impact" or "Your Network"
+- Show count badges with icons
+- Subtle animation on number updates
+- Link to share/invite flow
+
+---
+
 ## Phase 4: Account Connections (Plaid API) ⬜ PLANNED
 
 > **Goal:** Enable automatic bank/brokerage sync via Plaid.
@@ -129,29 +154,30 @@
 
 ---
 
-## Phase 8: Madhab Support 🔄 IN PROGRESS
+## Phase 8: Madhab Support ✅ COMPLETE
 
 > **Goal:** Support pure madhab calculations and hybrid modes with scholarly difference indicators.
 
-### 8.1 Data Layer
-- [ ] Add `Madhab` type: `hanafi | maliki | shafii | hanbali | balanced`
-- [ ] Add `madhab` field to `ZakatFormData`
-- [ ] Add `'pure'` mode to `CalculationMode`
+### 8.1 Data Layer ✅
+- [x] Add `Madhab` type: `hanafi | maliki | shafii | hanbali | balanced`
+- [x] Add `madhab` field to `ZakatFormData`
+- [x] Add `'pure'` mode to `CalculationMode`
+- [x] Create `madhahRules.ts` with `MADHAB_RULES`, `MODE_RULES`
 
-### 8.2 Scholarly Differences Detection
-- [ ] Create `getScholarlyDifferences(madhab, mode)` function
-- [ ] Map differences to methodology sections
-- [ ] Include supporting scholars and basis
+### 8.2 Scholarly Differences Detection ✅
+- [x] Create `getScholarlyDifferences(madhab, mode)` function
+- [x] Map differences to methodology sections
+- [x] Include supporting scholars and basis
 
-### 8.3 UI Integration
-- [ ] Add madhab selector to Settings page
-- [ ] Add optional madhab selector to Wizard Q1
-- [ ] Display "Alternate Opinions Applied" in report
+### 8.3 UI Integration ✅
+- [x] Add madhab selector to Settings page
+- [ ] **Deferred:** Add optional madhab selector to Wizard Q1
+- [ ] **Deferred:** Display "Alternate Opinions Applied" in report
 
-### 8.4 Report Updates
-- [ ] Add `userSettings` to report data model
-- [ ] Add `scholarlyDifferences` array to report
-- [ ] Display in UI report and PDF
+### 8.4 Methodology Update ✅
+- [x] Added "Schools of Thought" section with jewelry/debt rulings
+- [x] Hadith evidence for each school's position
+- [x] References to Fiqh al-Zakah, Al-Mughni, AMJA fatwas
 
 ---
 
@@ -184,9 +210,8 @@ User → Portfolio → Account → Snapshot → LineItem
 
 | # | Phase | Status | Next Action |
 |---|-------|--------|-------------|
-| 1 | Phase 8: Madhab Support | 🔄 In Progress | Add `Madhab` type |
-| 2 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
-| 3 | Phase 5: Charity Program | ⬜ Planned | Design `/charities` page |
-| 4 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
+| 1 | Phase 3.6: Footer & Metrics | 🔄 In Progress | Create PersonalMetrics component |
+| 2 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
+| 3 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
+| 4 | Phase 5: Charity Program | ⬜ Planned | Design `/charities` page |
 | 5 | Phase 7: Migration | ⬜ Future | Design consent flow |
-

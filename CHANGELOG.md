@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- Footer consistency across Welcome and Landing pages
+- Personal referral metrics (cascade aggregation)
+
+---
+
+## [0.6.0] - 2026-01-03
+
 ### Added
 - **Phase 8: Madhab Support** 
   - `Madhab` type: `hanafi | maliki | shafii | hanbali | balanced`
@@ -21,9 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hadith evidence for each school's position
   - References to Fiqh al-Zakah, Al-Mughni, AMJA fatwas
 
+### Changed
+- Migrated all Supabase imports to `runtimeClient` for Lovable Cloud compatibility
+- Restored `.env` to git for Lovable Cloud deployment
+
+### Fixed
+- Git repository corruption (force-pushed fresh history)
+
 ### Security
-- Added `.env` to `.gitignore` (was previously tracked - CRITICAL FIX)
-- Created `.env.example` with placeholder values for safe distribution
+- Created `.env.example` with placeholder values
 - Removed debug `console.log` statements from `usePresence.ts`
 - Ran `npm audit fix` to address `esbuild` vulnerability
 
