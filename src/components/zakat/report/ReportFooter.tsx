@@ -14,7 +14,6 @@ export function ReportFooter({ interestToPurify, dividendsToPurify, currency, re
     const totalPurification = interestToPurify + dividendsToPurify;
 
     return (
-    return (
         <footer className="mt-12 space-y-8">
 
             {/* Purification (Gentle) */}
