@@ -52,15 +52,9 @@ export function ReportHero({
                         </div>
                         <div className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight break-words">
                             <AnimatedNumber
-                                value={wholeZakat}
-                                format={(v) => formatCurrency(v, currency).replace(/\.00$/, '')}
+                                value={zakatDue}
+                                format={(v) => formatCurrency(v, currency, 0)}
                             />
-                            <span className="text-2xl text-muted-foreground/60 font-medium ml-1">
-                                <AnimatedNumber
-                                    value={Number(decimalZakat)}
-                                    format={(v) => `.${Math.round(v).toString().padStart(2, '0')}`}
-                                />
-                            </span>
                         </div>
                     </div>
 
