@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Phase 3.6: Footer & Personal Metrics**
+  - `PersonalMetrics.tsx` component with privacy threshold (≥5 users)
+  - Footer added to WelcomeStep dashboard view
+  - PersonalMetrics integrated into LogoutSuccess page
+
 ### Planned
-- Footer consistency across Welcome and Landing pages
-- Personal referral metrics (cascade aggregation)
+- **Phase 9: Download Report Redesign**
+  - Fix WorkSans italic font bug
+  - Add user name, Hijri date, madhab settings to PDF
+  - Add machine-readable QR for YoY scanning
+  - Add referral metrics (privacy-safe)
 
 ---
 

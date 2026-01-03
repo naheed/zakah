@@ -55,28 +55,43 @@
 
 ---
 
-## Phase 3.6: Footer & Personal Metrics 🔄 IN PROGRESS
+## Phase 3.6: Footer & Personal Metrics ✅ COMPLETE
 
 > **Goal:** Consistent footer and motivational personal referral metrics.
 
-### 3.6.1 Footer Consistency
-- [ ] Match WelcomeStep footer to Landing page (Terms, Privacy, Methodology links)
-- [ ] Ensure responsive design across mobile/desktop
+- [x] Create `PersonalMetrics.tsx` with privacy threshold (>5 users)
+- [x] Add Footer to WelcomeStep dashboard view
+- [x] Integrate PersonalMetrics into LogoutSuccess
+- [ ] **Deferred:** Wire up referral stats to PersonalMetrics on WelcomeStep
 
-### 3.6.2 Personal Referral Metrics
-- [ ] Create `PersonalMetrics` component showing:
-  - **Direct Referrals**: Users who signed up via your link
-  - **Cascade Impact**: Total users from your referral tree (recursive)
-  - **Zakat Calculated**: Sum of Zakat from your referral tree
-  - **Assets Evaluated**: Sum of assets from your referral tree
-- [ ] Position above footer on WelcomeStep
-- [ ] Privacy-safe aggregation (no PII exposed)
+---
 
-### 3.6.3 Design Considerations
-- Use motivational framing: "Your Impact" or "Your Network"
-- Show count badges with icons
-- Subtle animation on number updates
-- Link to share/invite flow
+## Phase 9: Download Report Redesign 🔄 IN PROGRESS
+
+> **Goal:** Fix PDF bugs, add user info, madhab settings, referral metrics, and machine-readable YoY data.
+
+### 9.1 Fix Font Bug (Blocking)
+- [ ] Register WorkSans italic or remove italic usage
+- [ ] Verify PDF download works
+
+### 9.2 Content Spec (For UX Designer)
+New sections to add:
+- User name + Hijri date in header
+- Madhab setting in Configuration
+- Methodology summary (key rulings applied)
+- Personal Impact section (referral link + QR, metrics if threshold met)
+- Machine-readable QR code for YoY scanning
+
+### 9.3 Implementation
+- [ ] Update `ZakatPDFData` interface
+- [ ] Pass user info, madhab, referral stats to PDF
+- [ ] Add QR code with structured data
+- [ ] Add Hijri date conversion
+
+### 9.4 YoY Scanning
+- [ ] Build PDF upload UI
+- [ ] Extract QR data from uploaded PDF
+- [ ] Display YoY comparison
 
 ---
 
@@ -210,7 +225,7 @@ User → Portfolio → Account → Snapshot → LineItem
 
 | # | Phase | Status | Next Action |
 |---|-------|--------|-------------|
-| 1 | Phase 3.6: Footer & Metrics | 🔄 In Progress | Create PersonalMetrics component |
+| 1 | Phase 9: Download Report | 🔄 In Progress | Fix font bug, create content spec |
 | 2 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
 | 3 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
 | 4 | Phase 5: Charity Program | ⬜ Planned | Design `/charities` page |
