@@ -1,5 +1,6 @@
 import { ResponsiveSankey } from "@nivo/sankey";
 import { useMemo } from "react";
+import { useTheme } from "next-themes";
 import { formatCurrency, formatCompactCurrency, formatPercent } from "@/lib/zakatCalculations";
 import { ASSET_COLORS } from "./sankey/constants";
 import { SankeyChartData, EnhancedSankeyChartData } from "./sankey/types";
@@ -26,6 +27,10 @@ export function ZakatSankeyChart({
   currency,
   height = 500, // Increased height for better granularity
 }: ZakatSankeyChartProps) {
+
+  // Theme detection for dark mode support - Top Level Call
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const formattedData = useMemo(() => {
     // 1. Build initial Asset List
@@ -58,7 +63,7 @@ export function ZakatSankeyChart({
     if (totalZakatable === 0) return { nodes: [], links: [] };
 
     const totalLiabilities = enhancedData?.totalLiabilities ?? data.totalLiabilities;
-    const netWealth = enhancedData?.netZakatableWealth ?? data.netZakatableWealth;
+    // const netWealth = enhancedData?.netZakatableWealth ?? data.netZakatableWealth; // Unused
     const zakatDue = enhancedData?.zakatDue ?? data.zakatDue;
 
     // 2. Define Nodes
@@ -137,8 +142,26 @@ export function ZakatSankeyChart({
       }
     });
 
-    return { nodes, links };
-  }, [data, enhancedData]);
+    const chartTheme = {
+      text: {
+        fill: isDark ? "#e2e8f0" : "#334155", // Slate 200 (light) vs Slate 700 (dark)
+        fontSize: 11,
+        fontWeight: 600,
+      },
+      tooltip: {
+        container: {
+          background: isDark ? "#1e293b" : "#ffffff",
+          color: isDark ? "#f8fafc" : "#0f172a",
+          fontSize: "12px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+          border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+        },
+      },
+    };
+
+    return { nodes, links, chartTheme };
+  }, [data, enhancedData, isDark]);
 
 
   if (formattedData.nodes.length === 0) {
@@ -149,6 +172,7 @@ export function ZakatSankeyChart({
     <div style={{ height }} className="w-full">
       <ResponsiveSankey
         data={formattedData}
+        theme={formattedData.chartTheme}
         margin={{ top: 20, right: 200, bottom: 20, left: 200 }} // Increased margins for labels
         align="justify"
         colors={(node: any) => node.nodeColor || "#999"}
@@ -165,7 +189,7 @@ export function ZakatSankeyChart({
         labelPosition="outside"
         labelOrientation="horizontal"
         labelPadding={24} // More padding
-        labelTextColor={{ from: 'color', modifiers: [['darker', 1]] }}
+        labelTextColor={{ from: 'theme', theme: 'text.fill' }}
         // Custom Tooltips
         nodeTooltip={({ node }: any) => {
           const isRuleApplied = node.zakatablePercent !== undefined && node.zakatablePercent < 1;
