@@ -34,29 +34,31 @@ import { useState, useEffect } from "react";
 import { AssetAccount } from "@/types/assets";
 import { ImpactStats } from "../ImpactStats";
 import { useSavedCalculations } from "@/hooks/useSavedCalculations";
-import { formatCurrency } from "@/lib/zakatCalculations";
+import { formatCurrency, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from "@/lib/zakatCalculations";
 import { useReferral } from "@/hooks/useReferral";
 import { MiniReportWidget } from "../dashboard/MiniReportWidget";
 
 interface WelcomeStepProps {
   onNext: () => void;
   onLoadCalculation?: (calculation: SavedCalculation) => void;
+  onViewResults?: () => void;
 }
 
 // Asset coverage badges
 const assetTypes = ["401(k) / IRA", "Crypto & NFTs", "Real Estate", "Stocks & RSUs"];
 
-export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
+export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
   const { data: metrics, isLoading: metricsLoading } = useUsageMetrics();
   const { stats: userStats, fetchStats: fetchUserStats } = useReferral();
   const { fetchAccounts } = useAssetPersistence();
-  const { stepIndex, uploadedDocuments, lastUpdated, startFresh, reportReady } = useZakatPersistence();
+  const { stepIndex, uploadedDocuments, lastUpdated, startFresh, reportReady, formData } = useZakatPersistence();
   const [accounts, setAccounts] = useState<AssetAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(false);
 
   // Determine if anonymous user has an existing session
   const hasLocalSession = stepIndex > 0 || uploadedDocuments.length > 0;
+
 
   // Fetch accounts for logged-in user
   useEffect(() => {
@@ -102,6 +104,14 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
     }
   };
 
+  const handleViewLocalReport = () => {
+    if (onViewResults) {
+      onViewResults();
+    } else {
+      onNext();
+    }
+  };
+
   // Format relative time for last updated
   const getRelativeTime = () => {
     if (!lastUpdated) return '';
@@ -142,8 +152,22 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   const { calculations: savedCalculations, loading: savedLoading } = useSavedCalculations();
   const latestCalculation = savedCalculations[0];
 
-  // UNIFIED DASHBOARD - shown to logged-in users OR anonymous users with session
-  if (user || hasLocalSession) {
+  // Calculate local results if report is ready (for Guest users)
+  const localResult = reportReady ? calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE) : null;
+  const displayZakatDue = latestCalculation ? latestCalculation.zakat_due : (localResult ? localResult.zakatDue : 0);
+
+  console.debug('[WelcomeStep] Render State:', {
+    hasLocalSession,
+    reportReady,
+    stepIndex,
+    isUser: !!user,
+    hasLatestCalc: !!latestCalculation,
+    displayZakatDue
+  });
+
+  // UNIFIED DASHBOARD - shown to logged-in users OR anonymous users with session OR if report is ready OR if they have history
+  // Also show if loading history to prevent flash of landing page
+  if (user || hasLocalSession || reportReady || latestCalculation || savedLoading) {
     return (
       <div className="min-h-[85vh] flex flex-col font-work-sans">
         {/* Header - Minimal */}
@@ -174,28 +198,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                   Welcome back{firstName ? `, ${firstName}` : ''}
                 </h1>
 
-                {/* Impact Stats - Community or Personal */}
-                {(metrics || metricsLoading || userStats) && (
-                  <div className="flex flex-col items-center gap-8 mt-8">
-                    <ImpactStats
-                      variant="flat"
-                      isLoading={metricsLoading && !userStats}
-                      totalReferrals={impactData.referrals}
-                      totalAssetsCalculated={impactData.assets}
-                      totalZakatCalculated={impactData.zakat}
-                      title={impactData.title}
-                      className="scale-90 md:scale-100 origin-top"
-                    />
-
-                    {/* Join the Movement / Share Widget */}
-                    <div className="w-full max-w-md">
-                      <ReferralWidget
-                        variant="full"
-                        title={showUserImpact ? undefined : "Join the movement"}
-                      />
-                    </div>
-                  </div>
-                )}
+                {/* Impact Stats moved below Report Card */}
               </motion.div>
             </div>
 
@@ -231,14 +234,14 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                       </CardContent>
                     </Card>
                     <div className="text-center mt-3">
-                      <Button variant="link" size="sm" onClick={startFresh} className="text-muted-foreground hover:text-destructive text-xs">
+                      <Button variant="link" size="sm" onClick={() => { startFresh(); onNext(); }} className="text-muted-foreground hover:text-destructive text-xs">
                         Discard and start over
                       </Button>
                     </div>
                   </div>
 
                   {/* If user also has a past report, show it as a secondary widget */}
-                  {user && latestCalculation && !savedLoading && (
+                  {latestCalculation && !savedLoading && (
                     <div className="pt-2 border-t border-dashed border-border/50">
                       <div className="flex items-center justify-between mb-3 px-1 mt-4">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Past Reports</h2>
@@ -251,7 +254,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               )}
 
               {/* 2. Latest Report Hero (if NO active session or if Report Ready) */}
-              {((user && latestCalculation && !savedLoading) || reportReady) && (!hasLocalSession || reportReady) && (
+              {((latestCalculation && !savedLoading) || reportReady || savedLoading) && (!hasLocalSession || reportReady) && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -264,40 +267,78 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                     </Link>
                   </div>
 
-                  <Card
-                    className="border-0 ring-1 ring-border/50 bg-gradient-to-br from-card to-muted/20 hover:to-muted/40 transition-all cursor-pointer group relative overflow-hidden shadow-xl shadow-primary/5"
-                    onClick={() => handleLoadCalculation(latestCalculation)}
-                  >
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Calculator size={120} weight="fill" />
-                    </div>
-
-                    <CardContent className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center justify-between relative z-10">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2 text-primary/80 font-medium text-sm">
-                          <CheckCircle weight="fill" />
-                          <span>Calculated {getRelativeTime() || 'recently'}</span>
-                        </div>
-                        <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-1">
-                          {formatCurrency(latestCalculation.zakat_due || 0)}
-                        </h3>
-                        <p className="text-muted-foreground font-medium">Zakat Due</p>
+                  {savedLoading ? (
+                    <Skeleton className="h-[200px] w-full rounded-xl" />
+                  ) : (
+                    <Card
+                      className="border-0 ring-1 ring-border/50 bg-gradient-to-br from-card to-muted/20 hover:to-muted/40 transition-all cursor-pointer group relative overflow-hidden shadow-xl shadow-primary/5"
+                      onClick={() => latestCalculation ? handleLoadCalculation(latestCalculation) : handleViewLocalReport()}
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Calculator size={120} weight="fill" />
                       </div>
 
-                      <Button size="lg" className="shrink-0 gap-2 rounded-full px-6 h-12 shadow-lg shadow-primary/20">
-                        View Full Report
-                        <ArrowRight weight="bold" />
-                      </Button>
-                    </CardContent>
-                  </Card>
+                      <CardContent className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center justify-between relative z-10">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2 text-primary/80 font-medium text-sm">
+                            <CheckCircle weight="fill" />
+                            <span>Calculated {getRelativeTime() || 'recently'}</span>
+                          </div>
+                          <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-1">
+                            {formatCurrency(displayZakatDue || 0)}
+                          </h3>
+                          <p className="text-muted-foreground font-medium">Zakat Due</p>
+                        </div>
+
+                        <Button size="lg" className="shrink-0 gap-2 rounded-full px-6 h-12 shadow-lg shadow-primary/20">
+                          View Full Report
+                          <ArrowRight weight="bold" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {/* Start New Button below Report */}
-                  <div className="flex justify-center pt-6">
-                    <Button variant="outline" onClick={onNext} className="gap-2 text-muted-foreground hover:text-foreground">
+                  <div className="flex justify-center pt-6 pb-8">
+                    <Button variant="outline" onClick={() => { startFresh(); onNext(); }} className="gap-2 text-muted-foreground hover:text-foreground">
                       <Calculator className="w-4 h-4" />
                       Start a new calculation
                     </Button>
                   </div>
+
+                  {/* Impact Stats - Community or Personal (Moved Here) */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex flex-col items-center gap-8 border-t border-border/50 pt-8"
+                  >
+                    {(metrics || metricsLoading || userStats) ? (
+                      <>
+                        <ImpactStats
+                          variant="flat"
+                          isLoading={metricsLoading && !userStats}
+                          totalReferrals={impactData.referrals}
+                          totalAssetsCalculated={impactData.assets}
+                          totalZakatCalculated={impactData.zakat}
+                          title={impactData.title}
+                          className="scale-90 md:scale-100 origin-top"
+                        />
+                        <div className="w-full max-w-md">
+                          <ReferralWidget
+                            variant="full"
+                            title={showUserImpact ? undefined : "Join the movement"}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      // Skeleton loader to prevent layout shift ("glitchy load")
+                      <div className="w-full max-w-md space-y-4">
+                        <Skeleton className="h-24 w-full rounded-xl" />
+                        <Skeleton className="h-32 w-full rounded-xl" />
+                      </div>
+                    )}
+                  </motion.div>
                 </motion.div>
               )}
 

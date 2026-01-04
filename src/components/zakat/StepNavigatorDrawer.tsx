@@ -138,15 +138,6 @@ export function StepNavigatorDrawer({
             );
           })}
 
-          {/* Settings Link at the bottom */}
-          <div className="mt-6 pt-4 border-t border-border">
-            <Link to="/settings" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start gap-3">
-                <Gear className="w-5 h-5 text-muted-foreground" />
-                <span className="text-muted-foreground">Settings</span>
-              </Button>
-            </Link>
-          </div>
         </div>
       </DrawerContent>
     </Drawer>

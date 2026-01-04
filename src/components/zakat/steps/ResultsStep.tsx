@@ -4,7 +4,7 @@ import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, WarningCircle, DownloadSimple, ArrowCounterClockwise, GearSix, FloppyDisk, SignIn, ShareNetwork, CaretDown, CaretUp, PencilSimple, EnvelopeSimple, WhatsappLogo, XLogo, FacebookLogo, Copy, Check, Heart, Sparkle, Users, Warning } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CharityRecommendations } from "../CharityRecommendations";
 import { YearOverYearChart } from "../YearOverYearChart";
 import { useAuth } from "@/hooks/useAuth";
@@ -136,12 +136,48 @@ export function ResultsStep({
     }
   }, [user, refreshCalculations]);
 
-  const { markReportReady } = useZakatPersistence();
+  const { markReportReady, savedCalculationId: contextSavedCalculationId, setSavedCalculationId } = useZakatPersistence();
+  const { saveCalculation, updateCalculation } = useSavedCalculations();
+  const saveAttempted = useRef(false);
 
-  // Mark report as ready for the dashboard when viewing results
+  // Use prop if available (legacy/prop-drilling), otherwise context
+  const activeSavedId = savedCalculationId || contextSavedCalculationId;
+
+  // Mark report as ready and Auto-Save when viewing results
   useEffect(() => {
+    // 1. Mark ready (UI state)
     markReportReady();
-  }, [markReportReady]);
+
+    // 2. Auto-Save Logic (Unified for Guest & User)
+    const performAutoSave = async () => {
+      if (saveAttempted.current) return;
+      saveAttempted.current = true;
+
+      const yearValue = new Date().getFullYear();
+      const yearType = 'gregorian';
+      const defaultName = `Calculation ${new Date().toLocaleDateString()}`;
+
+      try {
+        if (activeSavedId) {
+          // Update existing
+          console.debug('[AutoSave] Updating existing calculation:', activeSavedId);
+          await updateCalculation(activeSavedId, data, calculationName);
+        } else {
+          // Create new
+          console.debug('[AutoSave] Creating new calculation');
+          const result = await saveCalculation(calculationName || defaultName, yearType, yearValue, data);
+          if (result?.id) {
+            setSavedCalculationId(result.id);
+          }
+        }
+      } catch (e) {
+        console.error('[AutoSave] Failed:', e);
+      }
+    };
+
+    performAutoSave();
+
+  }, [markReportReady, activeSavedId, setSavedCalculationId, saveCalculation, updateCalculation, data, calculationName]);
 
   const handleSignIn = () => {
     navigate('/auth');

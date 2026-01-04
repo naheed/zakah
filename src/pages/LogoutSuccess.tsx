@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { CheckCircleIcon, ArrowRightIcon } from '@phosphor-icons/react';
+import { CheckCircle, ArrowRight } from '@phosphor-icons/react';
 import { Logo } from '@/components/zakat/Logo';
 import { ReferralWidget } from '@/components/zakat/ReferralWidget';
 import { ImpactStats } from '@/components/zakat/ImpactStats';

@@ -11,6 +11,7 @@
 
 const SESSION_KEY_STORAGE = 'zakat-session-key';
 const ENCRYPTION_PREFIX = 'v2:'; // Identifies encrypted data
+// Force HMR update
 
 /**
  * Get or create a session-specific encryption key.
@@ -18,8 +19,9 @@ const ENCRYPTION_PREFIX = 'v2:'; // Identifies encrypted data
  */
 async function getOrCreateSessionKey(): Promise<CryptoKey> {
   const storedKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
-  
+
   if (storedKey) {
+    console.debug('[Encryption] Found existing session key in storage');
     try {
       // Import existing key
       const keyData = Uint8Array.from(atob(storedKey), c => c.charCodeAt(0));
@@ -35,19 +37,20 @@ async function getOrCreateSessionKey(): Promise<CryptoKey> {
       // Fall through to generate new key
     }
   }
-  
+
   // Generate new key
   const key = await crypto.subtle.generateKey(
     { name: 'AES-GCM', length: 256 },
     true,
     ['encrypt', 'decrypt']
   );
-  
+  console.debug('[Encryption] Generated NEW session key');
+
   // Export and store in sessionStorage
   const exportedKey = await crypto.subtle.exportKey('raw', key);
   const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
   sessionStorage.setItem(SESSION_KEY_STORAGE, keyBase64);
-  
+
   return key;
 }
 
@@ -58,27 +61,27 @@ async function getOrCreateSessionKey(): Promise<CryptoKey> {
 export async function encryptSession(data: unknown): Promise<string> {
   try {
     const key = await getOrCreateSessionKey();
-    
+
     // Generate random IV
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    
+
     // Encode data as JSON and then as bytes
     const jsonString = JSON.stringify(data);
     const encoder = new TextEncoder();
     const dataBytes = encoder.encode(jsonString);
-    
+
     // Encrypt
     const encryptedBytes = await crypto.subtle.encrypt(
       { name: 'AES-GCM', iv },
       key,
       dataBytes
     );
-    
+
     // Combine IV + encrypted data
     const combined = new Uint8Array(iv.length + encryptedBytes.byteLength);
     combined.set(iv, 0);
     combined.set(new Uint8Array(encryptedBytes), iv.length);
-    
+
     // Encode as base64 with prefix
     return ENCRYPTION_PREFIX + btoa(String.fromCharCode(...combined));
   } catch (e) {
@@ -96,31 +99,33 @@ export async function decryptSession<T = unknown>(encryptedData: string): Promis
   if (!encryptedData.startsWith(ENCRYPTION_PREFIX)) {
     return null;
   }
-  
+
   try {
     const key = await getOrCreateSessionKey();
-    
+    console.debug('[Encryption] Attempting decryption of data length:', encryptedData.length);
+
     // Remove prefix and decode base64
     const base64Data = encryptedData.slice(ENCRYPTION_PREFIX.length);
     const combined = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-    
+
     // Extract IV and encrypted data
     const iv = combined.slice(0, 12);
     const encryptedBytes = combined.slice(12);
-    
+
     // Decrypt
     const decryptedBytes = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
       key,
       encryptedBytes
     );
-    
+
     // Decode JSON
     const decoder = new TextDecoder();
     const jsonString = decoder.decode(decryptedBytes);
+    console.debug('[Encryption] Decryption successful');
     return JSON.parse(jsonString) as T;
   } catch (e) {
-    console.error('Session decryption failed:', e);
+    console.error('[Encryption] Session decryption failed details:', e);
     return null;
   }
 }

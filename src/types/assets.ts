@@ -37,6 +37,7 @@ export interface AssetAccount {
     mask: string; // "...1918"
     type: AccountType;
     metadata?: Record<string, any>;
+    balance?: number; // Computed from latest snapshot
     created_at: string;
     updated_at: string;
 }

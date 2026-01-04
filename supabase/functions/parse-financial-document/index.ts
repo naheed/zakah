@@ -93,7 +93,7 @@ function aggregateLegacyData(lineItems: ExtractionLineItem[]): LegacyExtractedDa
   return legacyData;
 }
 
-serve(async (req) => {
+serve(async (req: any) => {
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
 
@@ -118,6 +118,7 @@ serve(async (req) => {
       );
     }
 
+    // @ts-ignore
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) {
       console.error("GEMINI_API_KEY not configured");

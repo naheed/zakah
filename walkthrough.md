@@ -26,6 +26,22 @@ A new reusable component `MiniReportWidget` was created to display a compact sum
 - **State:** Added `reportReady` boolean state to `useZakatPersistence` (persisted in local storage).
 - **Trigger:** Updated `ResultsStep.tsx` to call `markReportReady()` when the results page is viewed. This signals that the current session is "complete" and should be shown as a Report Hero on next visit, rather than an "In Progress" draft.
 
+### 4. Navigation Improvements ("Unified Command Center")
+**Refactored Files:** `UserMenu.tsx`, `ZakatWizard.tsx`, `StepNavigatorDrawer.tsx`
+
+We consolidated entry points to reduce cognitive load and visual clutter:
+
+1.  **Unified Command Center (Right Menu):**
+    -   **Guest:** Dropdown now contains "Theme Toggle", "Home", "Settings", and "Sign In".
+    -   **User:** Dropdown now contains "Profile", "Theme Toggle", "Home", "Saved Calculations", "Settings", and "Sign Out".
+2.  **Clean Sticky Header:**
+    -   Removed redundant Settings and Theme icons from the top bar.
+    -   Removed the Progress Bar from the sticky header to reduce vertical height.
+3.  **Content-Aware Progress:**
+    -   Moved the Progress Bar into the scrollable content area (just above the form). This aligns with Material 3 best practices, detaching "Status" from "Navigation Context".
+4.  **Contextual Drawer:**
+    -   The Left Drawer is now strictly a "Table of Contents" for the wizard steps. Global links (Home/Settings) were removed from it to prevent "Entry Point Inflation".
+
 ## Verification
 
 ### Automated Checks

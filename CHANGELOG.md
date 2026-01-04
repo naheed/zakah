@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
 
+## [0.9.0] - 2026-01-03
+
+### Added
+- **Unified Guest History**
+  - **Local Persistence**: Guest calculations are now securely stored in `localStorage` using session-based encryption.
+  - **History Access**: Guests can now view their past reports on the Dashboard and History page, just like signed-in users.
+  - **Auto-Save**: Progress is automatically saved locally for guests.
+- **Enhanced Guest Dashboard**
+  - Guests with history now see the full Dashboard (Hero + Past Reports) instead of the generic landing page.
+  - Added "Start New Calculation" implementation that correctly preserves history while resetting active session.
+
+### Fixed
+- **History Page Bug**: Resolved issue where "Saved Calculations" page would show empty state despite data existing (restored missing auto-fetch logic).
+- **Navigation Logic**: Fixed "Start New" button to correctly advance to the wizard instead of getting stuck on the dashboard.
+- **Race Condition**: Added loading states to Dashboard to prevent "Landing Page Flash" while local history is loading.
+
 ---
 ## [0.8.0] - 2026-01-03
 

@@ -142,7 +142,7 @@ export function ZakatWizard() {
     }
   }, [searchParams, setSearchParams, currentStepIndex, setCurrentStepIndex, isLoaded]);
 
-  // Theme toggle
+  // Theme toggle moved to UserMenu
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const [calculationName, setCalculationName] = useState<string | undefined>();
@@ -280,6 +280,15 @@ export function ZakatWizard() {
     }
   };
 
+  const handleViewResults = () => {
+    // Navigate to results step
+    const resultsIndex = activeSteps.findIndex(s => s.id === 'results');
+    if (resultsIndex >= 0) {
+      setCurrentStepIndex(resultsIndex);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const renderStep = () => {
     // Common props for asset steps
     const assetStepProps = {
@@ -293,13 +302,19 @@ export function ZakatWizard() {
 
     switch (currentStep.id) {
       case 'welcome':
-        return <WelcomeStep onNext={goToNext} onLoadCalculation={handleLoadCalculation} />;
+        return <WelcomeStep onNext={goToNext} onLoadCalculation={handleLoadCalculation} onViewResults={handleViewResults} />;
       case 'categories':
         return (
           <div className="space-y-6">
             <SimpleModeToggle
               isSimpleMode={formData.isSimpleMode}
-              onToggle={(value) => updateFormData({ isSimpleMode: value })}
+              onToggle={(value) => {
+                updateFormData({ isSimpleMode: value });
+                // Auto-advance if enabling simple mode (UX improvement)
+                if (value) {
+                  goToNext();
+                }
+              }}
             />
             {!formData.isSimpleMode && (
               <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />
@@ -370,51 +385,40 @@ export function ZakatWizard() {
                 </Button>
               </StepNavigatorDrawer>
 
-              {/* Progress Bar */}
-              <div className="flex-1">
-                <ProgressBar
-                  currentStep={progressStepIndex}
-                  totalSteps={progressSteps.length}
-                  section={currentStep.section}
-                />
+              <div className="flex-1 flex justify-center">
+                {/* Progress Bar moved to Content Area, this is just a spacer or title now */}
+                <span className="text-sm font-semibold text-muted-foreground mr-4">
+                  {/* Optional: Add Title here if needed, or leave blank */}
+                </span>
               </div>
 
-              {/* Theme Toggle Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 min-h-12 min-w-12"
-                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              >
-                {resolvedTheme === 'dark' ? (
-                  <Sun className="h-5 w-5" weight="bold" />
-                ) : (
-                  <Moon className="h-5 w-5" weight="bold" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-
-              {/* Settings Button */}
-              <Link to="/settings">
-                <Button variant="ghost" size="icon" className="shrink-0 min-h-12 min-w-12">
-                  <GearSix className="h-5 w-5" weight="bold" />
-                  <span className="sr-only">Settings</span>
-                </Button>
-              </Link>
+              {/* Presence Indicator - shows other users editing */}
 
               {/* Presence Indicator - shows other users editing */}
               {presentUsers.length > 0 && (
                 <PresenceIndicator users={presentUsers} />
               )}
 
-              {/* User Menu */}
-              <UserMenu />
+              {/* Header Actions */}
+              <UserMenu onHome={() => setCurrentStepIndex(0)} />
             </div>
           </div>
         </div>
       )}
 
-      <main className={`max-w-4xl mx-auto px-4 ${isWelcomePage ? 'py-4' : 'py-8 pb-32'}`}>
+      <main className={`max-w-4xl mx-auto px-4 ${isWelcomePage ? 'py-4' : 'py-6 pb-32'}`}>
+
+        {/* Progress Bar - In Content Flow (User Feedback) */}
+        {!isWelcomePage && (
+          <div className="mb-6 pt-2">
+            <ProgressBar
+              currentStep={progressStepIndex}
+              totalSteps={progressSteps.length}
+              section={currentStep.section}
+            />
+          </div>
+        )}
+
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentStep.id}

@@ -50,33 +50,6 @@ export default function SavedCalculations() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <Helmet>
-          <title>Saved Calculations - ZakatFlow</title>
-          <link rel="canonical" href={getPrimaryUrl('/saved')} />
-          <meta property="og:url" content={getPrimaryUrl('/saved')} />
-        </Helmet>
-        <div className="max-w-2xl mx-auto pt-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
-          <p className="text-muted-foreground mb-6">
-            Please sign in to view and manage your saved Zakat calculations.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button variant="outline" onClick={() => navigate('/')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Calculator
-            </Button>
-            <Button onClick={() => navigate('/auth')}>
-              Sign In
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -131,11 +104,20 @@ export default function SavedCalculations() {
                   <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                   <h2 className="text-xl font-semibold mb-2">No Saved Calculations</h2>
                   <p className="text-muted-foreground mb-6">
-                    Start a new Zakat calculation and save it to view it here.
+                    {user
+                      ? "Start a new Zakat calculation and save it to view it here."
+                      : "Completed guest calculations will appear here. Sign in to save them to the cloud."}
                   </p>
-                  <Button onClick={() => navigate('/')}>
-                    Start New Calculation
-                  </Button>
+                  <div className="flex flex-col gap-3 items-center">
+                    <Button onClick={() => navigate('/')}>
+                      Start New Calculation
+                    </Button>
+                    {!user && (
+                      <Button variant="link" onClick={() => navigate('/auth')}>
+                        Sign In to Sync
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ) : (
@@ -155,7 +137,20 @@ export default function SavedCalculations() {
           </TabsContent>
 
           <TabsContent value="shared-with-me">
-            {sharedLoading ? (
+            {!user ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Please sign in to view calculations shared with you.
+                  </p>
+                  <Button onClick={() => navigate('/auth')}>
+                    Sign In
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : sharedLoading ? (
               <div className="flex items-center justify-center py-20">
                 <Spinner className="w-8 h-8 animate-spin text-primary" />
               </div>
@@ -188,7 +183,7 @@ export default function SavedCalculations() {
         </Tabs>
       </main>
       <Footer />
-    </div>
+    </div >
   );
 }
 
