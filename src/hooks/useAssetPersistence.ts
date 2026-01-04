@@ -309,19 +309,19 @@ export function useAssetPersistence() {
 
             // 3. Check for duplicate snapshot
             const date = statementDate || new Date().toISOString().split('T')[0];
-            const isDuplicate = await isDuplicateSnapshot(accountId, date);
+            const isDuplicate = await isDuplicateSnapshot(dbAccountId, date);
 
             if (isDuplicate) {
                 setLoading(false);
                 return {
                     success: true,
-                    accountId,
+                    accountId: dbAccountId,
                     skipped: true
                 };
             }
 
             // 4. Create snapshot with line items
-            const snapshotId = await createSnapshot(accountId, date, lineItems);
+            const snapshotId = await createSnapshot(dbAccountId, date, lineItems);
             if (!snapshotId) {
                 throw new Error('Failed to create snapshot');
             }
@@ -329,7 +329,7 @@ export function useAssetPersistence() {
             setLoading(false);
             return {
                 success: true,
-                accountId,
+                accountId: dbAccountId,
                 snapshotId,
                 skipped: false,
             };
