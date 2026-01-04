@@ -14,6 +14,7 @@ import { AssetAccount, AssetSnapshot, AssetLineItem, AccountType } from '@/types
 import { accountTypeLabels, accountTypeIcons } from '@/components/assets/AccountCard';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { getCategoryLabel, getCategoryColor } from '@/lib/assetCategories';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -270,8 +271,8 @@ export default function AccountDetail() {
                                                             {item.description}
                                                         </td>
                                                         <td className="py-2">
-                                                            <Badge variant="secondary" className="text-xs">
-                                                                {item.zakat_category}
+                                                            <Badge variant="secondary" className={cn("text-xs", getCategoryColor(item.zakat_category))}>
+                                                                {getCategoryLabel(item.zakat_category)}
                                                             </Badge>
                                                         </td>
                                                         <td className="py-2 text-right font-medium">

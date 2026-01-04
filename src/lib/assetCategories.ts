@@ -165,6 +165,51 @@ export const ASSET_CATEGORIES: AssetCategory[] = [
         icon: 'DotsThree',
         group: 'other',
     },
+
+    // === Zakat Calculation Categories (internal use) ===
+    // These are assigned by the Zakat methodology logic, not user-selectable
+    {
+        id: 'LIQUID',
+        label: 'Liquid Assets',
+        description: 'Fully zakatable cash and equivalents',
+        icon: 'Drop',
+        group: 'cash',
+    },
+    {
+        id: 'PROXY_30',
+        label: 'Stocks & Funds',
+        description: 'Equity investments (30% zakatable proxy)',
+        icon: 'TrendUp',
+        group: 'investments',
+    },
+    {
+        id: 'EXEMPT',
+        label: 'Exempt',
+        description: 'Not subject to Zakat',
+        icon: 'ShieldCheck',
+        group: 'other',
+    },
+    {
+        id: 'DEDUCTIBLE',
+        label: 'Deductible',
+        description: 'Reduces Zakat base (debts, liabilities)',
+        icon: 'MinusCircle',
+        group: 'liabilities',
+    },
+    {
+        id: 'GOLD_FULL',
+        label: 'Gold',
+        description: 'Fully zakatable gold holdings',
+        icon: 'Medal',
+        group: 'commodities',
+    },
+    {
+        id: 'SILVER_FULL',
+        label: 'Silver',
+        description: 'Fully zakatable silver holdings',
+        icon: 'Medal',
+        group: 'commodities',
+    },
 ];
 
 /**
