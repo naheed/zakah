@@ -1,0 +1,5 @@
+{
+    "imports": {
+        "plaid": "npm:plaid@26.0.0"
+    }
+}
