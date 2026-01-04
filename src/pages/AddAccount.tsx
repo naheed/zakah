@@ -11,8 +11,8 @@ import {
     Spinner
 } from '@phosphor-icons/react';
 import { useAuth } from '@/hooks/useAuth';
-import { useDocumentParsingV2 } from '@/hooks/useDocumentParsingV2';
-import { useAssetPersistence, inferAccountTypeFromStep } from '@/hooks/useAssetPersistence';
+import { useExtractionFlow } from '@/hooks/useExtractionFlow';
+import { useAssetPersistence } from '@/hooks/useAssetPersistence';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Footer } from '@/components/zakat/Footer';
+import { ExtractionReview } from '@/components/zakat/ExtractionReview';
 import { getPrimaryUrl } from '@/lib/domainConfig';
 import { AccountType } from '@/types/assets';
 import { accountTypeLabels } from '@/components/assets/AccountCard';
@@ -30,8 +31,12 @@ export default function AddAccount() {
     const navigate = useNavigate();
     const { user, loading: authLoading } = useAuth();
     const { toast } = useToast();
-    const { parseDocument, status: parseStatus, result: parseResult, reset: resetParse } = useDocumentParsingV2();
     const { persistExtraction } = useAssetPersistence();
+
+    // Use the centralized extraction flow hook for uploads
+    const extractionFlow = useExtractionFlow({
+        onSuccess: () => navigate('/assets'),
+    });
 
     const [method, setMethod] = useState<AddMethod>('select');
     const [saving, setSaving] = useState(false);
@@ -42,46 +47,10 @@ export default function AddAccount() {
     const [accountType, setAccountType] = useState<AccountType>('CHECKING');
     const [balance, setBalance] = useState('');
 
-    // File upload state
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setSelectedFile(file);
-        await parseDocument(file);
-    };
-
-    const handleSaveUpload = async () => {
-        if (!parseResult || !user) return;
-
-        setSaving(true);
-        try {
-            const result = await persistExtraction(
-                parseResult.institutionName || selectedFile?.name || 'Unknown',
-                parseResult.documentDate,
-                parseResult.lineItems || [],
-                undefined // No stepId for direct add
-            );
-
-            if (result.success) {
-                toast({
-                    title: 'Account added',
-                    description: `${parseResult.institutionName || 'Account'} saved successfully`,
-                });
-                navigate('/assets');
-            } else {
-                throw new Error(result.error);
-            }
-        } catch (err) {
-            toast({
-                title: 'Error saving',
-                description: err instanceof Error ? err.message : 'Failed to save account',
-                variant: 'destructive',
-            });
-        } finally {
-            setSaving(false);
-        }
+        await extractionFlow.startUpload(file);
     };
 
     const handleSaveManual = async () => {
@@ -100,7 +69,8 @@ export default function AddAccount() {
                 institutionName,
                 new Date().toISOString().split('T')[0],
                 lineItems,
-                undefined
+                undefined,
+                accountName
             );
 
             if (result.success) {
@@ -191,7 +161,8 @@ export default function AddAccount() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {!parseResult ? (
+                            {/* Show different UI based on extraction flow status */}
+                            {extractionFlow.isIdle && (
                                 <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
                                     <input
                                         type="file"
@@ -201,41 +172,55 @@ export default function AddAccount() {
                                         id="file-upload"
                                     />
                                     <label htmlFor="file-upload" className="cursor-pointer">
-                                        {parseStatus === 'processing' || parseStatus === 'uploading' ? (
-                                            <div className="space-y-2">
-                                                <Spinner className="w-8 h-8 mx-auto animate-spin text-primary" />
-                                                <p className="text-sm text-muted-foreground">Analyzing document...</p>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                <FileText className="w-8 h-8 mx-auto text-muted-foreground" />
-                                                <p className="font-medium">Click to upload</p>
-                                                <p className="text-sm text-muted-foreground">PDF, PNG, JPG, WebP up to 10MB</p>
-                                            </div>
-                                        )}
+                                        <div className="space-y-2">
+                                            <FileText className="w-8 h-8 mx-auto text-muted-foreground" />
+                                            <p className="font-medium">Click to upload</p>
+                                            <p className="text-sm text-muted-foreground">PDF, PNG, JPG, WebP up to 10MB</p>
+                                        </div>
                                     </label>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                        <p className="font-medium text-green-800 dark:text-green-200">
-                                            ✓ Found {parseResult.lineItems?.length || 0} items from {parseResult.institutionName || 'document'}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <Button variant="outline" onClick={() => { resetParse(); setSelectedFile(null); }}>
-                                            Try Another
-                                        </Button>
-                                        <Button onClick={handleSaveUpload} disabled={saving}>
-                                            {saving ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                            Save Account
-                                        </Button>
-                                    </div>
                                 </div>
                             )}
 
-                            <Button variant="ghost" onClick={() => setMethod('select')} className="w-full">
+                            {extractionFlow.isLoading && (
+                                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                                    <Spinner className="w-8 h-8 mx-auto animate-spin text-primary" />
+                                    <p className="text-sm text-muted-foreground mt-2">Analyzing document...</p>
+                                </div>
+                            )}
+
+                            {extractionFlow.isReviewing && extractionFlow.reviewData && (
+                                <ExtractionReview
+                                    initialData={{
+                                        institutionName: extractionFlow.reviewData.institutionName,
+                                        accountName: extractionFlow.reviewData.accountName,
+                                        lineItems: extractionFlow.reviewData.lineItems
+                                    }}
+                                    onConfirm={extractionFlow.confirmReview}
+                                    onCancel={extractionFlow.reset}
+                                    isSaving={extractionFlow.isSaving}
+                                />
+                            )}
+
+                            {extractionFlow.isSuccess && (
+                                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center">
+                                    <p className="font-medium text-green-800 dark:text-green-200">
+                                        ✓ Account saved successfully!
+                                    </p>
+                                </div>
+                            )}
+
+                            {extractionFlow.isError && (
+                                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                    <p className="font-medium text-red-800 dark:text-red-200">
+                                        Error: {extractionFlow.error}
+                                    </p>
+                                    <Button variant="outline" size="sm" className="mt-2" onClick={extractionFlow.reset}>
+                                        Try Again
+                                    </Button>
+                                </div>
+                            )}
+
+                            <Button variant="ghost" onClick={() => { setMethod('select'); extractionFlow.reset(); }} className="w-full">
                                 ← Back to options
                             </Button>
                         </CardContent>

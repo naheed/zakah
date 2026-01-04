@@ -17,7 +17,7 @@ interface DocumentUploadProps {
   description?: string;
 }
 
-type UploadStatus = "idle" | "uploading" | "processing" | "success" | "error";
+type UploadStatus = "idle" | "uploading" | "processing" | "reviewing" | "success" | "error";
 
 interface ExtractedResult {
   success: boolean;
@@ -25,11 +25,17 @@ interface ExtractedResult {
   summary: string;
   documentDate?: string;
   institutionName?: string;
-  accountName?: string;  // NEW: Account name for deduplication
+  accountName?: string;
   accountId?: string;
   notes?: string;
   error?: string;
-  lineItems?: ExtractionLineItem[]; // Assuming lineItems might come from the API response
+  lineItems?: ExtractionLineItem[];
+}
+
+interface ReviewData {
+  result: ExtractedResult;
+  lineItems: ExtractionLineItem[];
+  file: File;
 }
 
 export function DocumentUpload({
@@ -40,17 +46,12 @@ export function DocumentUpload({
   description = "Upload a bank statement, brokerage statement, or retirement account statement",
 }: DocumentUploadProps) {
   const [status, setStatus] = useState<UploadStatus>("idle");
-  const [lastResult, setLastResult] = useState<ExtractedResult | null>(null);
+  const [reviewData, setReviewData] = useState<ReviewData | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  // ... existing state
-  const [reviewData, setReviewData] = useState<{
-    data: ExtractedResult;
-    lineItems: ExtractionLineItem[];
-    file: File;
-  } | null>(null);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -103,20 +104,16 @@ export function DocumentUpload({
     }
 
     setStatus("uploading");
-    setLastResult(null);
+    setReviewData(null);
+    setLastError(null);
     setShowCelebration(false);
-    setReviewData(null); // Clear previous
 
     try {
-      // Convert file to base64
       const base64 = await fileToBase64(file);
-
       setStatus("processing");
 
-      // Determine document type from filename
       const documentType = getDocumentType(file.name);
 
-      // Call edge function
       const { data, error } = await supabase.functions.invoke("parse-financial-document", {
         body: {
           documentBase64: base64,
@@ -125,38 +122,25 @@ export function DocumentUpload({
         },
       });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw new Error(error.message);
+      if (data.error) throw new Error(data.error);
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      console.log("[DocumentUpload] Edge Function Response:", data);
 
-      console.log("[DocumentUpload] Edge Function Response Raw Data:", data);
-
-      // Don't finish yet! Show Review UI.
-      // We need to map the raw response to lineItems if they aren't already in V2 format
-      // Or if data.lineItems exists (it should from V2 API)
-
+      // Prepare review data
       const lineItems = data.lineItems || [];
 
       setReviewData({
-        data: data,
+        result: data,
         lineItems: lineItems,
         file: file
       });
-      setStatus("success"); // But we show review UI instead of success check
+      setStatus("reviewing");
 
     } catch (error) {
       console.error("Document upload error:", error);
       setStatus("error");
-      setLastResult({
-        success: false,
-        extractedData: {},
-        summary: "",
-        error: error instanceof Error ? error.message : "Failed to process document",
-      });
+      setLastError(error instanceof Error ? error.message : "Failed to process document");
 
       toast({
         title: "Processing failed",
@@ -165,10 +149,78 @@ export function DocumentUpload({
       });
     }
 
-    // Reset file input for next upload
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleConfirmReview = (confirmed: { institutionName: string; accountName: string; lineItems: ExtractionLineItem[] }) => {
+    if (!reviewData) return;
+
+    const { result, file } = reviewData;
+
+    // Build legacy extractedData from confirmed line items for form compatibility
+    const extractedFields: Partial<ZakatFormData> = {};
+    confirmed.lineItems.forEach(item => {
+      // Map categories to legacy form fields
+      const mapping: Record<string, keyof ZakatFormData> = {
+        'CASH_CHECKING': 'checkingAccounts',
+        'CASH_SAVINGS': 'savingsAccounts',
+        'CASH_ON_HAND': 'cashOnHand',
+        'INVESTMENT_EQUITY': 'passiveInvestmentsValue',
+        'INVESTMENT_MUTUAL_FUND': 'passiveInvestmentsValue',
+        'INVESTMENT_BOND': 'passiveInvestmentsValue',
+        'INCOME_DIVIDEND': 'dividends',
+        'RETIREMENT_401K': 'fourOhOneKVestedBalance',
+        'RETIREMENT_ROTH': 'rothIRAContributions',
+        'RETIREMENT_IRA': 'traditionalIRABalance',
+        'RETIREMENT_HSA': 'hsaBalance',
+        'CRYPTO': 'cryptoCurrency',
+        'CRYPTO_STAKED': 'stakedAssets',
+        'COMMODITY_GOLD': 'goldValue',
+        'COMMODITY_SILVER': 'silverValue',
+      };
+
+      const field = mapping[item.inferredCategory];
+      if (field) {
+        const current = (extractedFields as any)[field] || 0;
+        (extractedFields as any)[field] = current + item.amount;
+      }
+    });
+
+    // Update wizard form values
+    onDataExtracted(extractedFields);
+
+    // Notify parent for persistence (includes lineItems for V2 storage)
+    if (onDocumentAdded) {
+      onDocumentAdded({
+        fileName: file.name,
+        institutionName: confirmed.institutionName,
+        accountName: confirmed.accountName,
+        accountId: result.accountId,
+        documentDate: result.documentDate,
+        summary: result.summary || "Financial data extracted",
+        notes: result.notes,
+        extractedData: extractedFields,
+        lineItems: confirmed.lineItems, // Pass confirmed line items for V2 persistence
+        mimeType: file.type,
+      });
+    }
+
+    // Show success state
+    setStatus("success");
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 2000);
+
+    toast({
+      title: "Document processed",
+      description: `Data extracted from ${confirmed.institutionName}`,
+    });
+  };
+
+  const handleCancelReview = () => {
+    setStatus("idle");
+    setReviewData(null);
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +232,23 @@ export function DocumentUpload({
   const handleClick = () => {
     fileInputRef.current?.click();
   };
+
+  // Show review UI when we have data to review
+  if (status === "reviewing" && reviewData) {
+    return (
+      <div className="space-y-3">
+        <ExtractionReview
+          initialData={{
+            institutionName: reviewData.result.institutionName || reviewData.file.name.replace(/\.[^/.]+$/, ''),
+            accountName: reviewData.result.accountName || reviewData.file.name.replace(/\.[^/.]+$/, ''),
+            lineItems: reviewData.lineItems,
+          }}
+          onConfirm={handleConfirmReview}
+          onCancel={handleCancelReview}
+        />
+      </div>
+    );
+  }
 
   const getStatusIcon = () => {
     switch (status) {
@@ -264,14 +333,12 @@ export function DocumentUpload({
               exit={{ opacity: 0 }}
               className="absolute inset-0 pointer-events-none"
             >
-              {/* Glow effect */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1.5, opacity: 0 }}
                 transition={{ duration: 0.8 }}
                 className="absolute inset-0 bg-tertiary/20 rounded-xl"
               />
-              {/* Sparkle particles */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div
                   initial={{ scale: 0 }}
@@ -321,7 +388,6 @@ export function DocumentUpload({
             <span>PNG, JPG, WebP</span>
           </div>
 
-          {/* AI Processing Notice */}
           <p className="text-xs text-muted-foreground/70 mt-3 max-w-xs mx-auto">
             Documents are processed by AI to extract values. Only numeric values are saved;
             document names and summaries are cleared when you close your browser.
@@ -329,32 +395,9 @@ export function DocumentUpload({
         </div>
       </motion.div>
 
-      {/* Show last upload result with animation */}
-      <AnimatePresence mode="wait">
-        {lastResult && lastResult.success && status === "success" && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="bg-success/10 border border-success/30 rounded-lg p-3"
-          >
-            <div className="flex items-center gap-2">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
-              >
-                <CheckCircle className="w-4 h-4 text-success shrink-0" weight="fill" />
-              </motion.div>
-              <p className="text-sm text-foreground">
-                <span className="font-medium">{lastResult.institutionName}</span> added successfully
-              </p>
-            </div>
-          </motion.div>
-        )}
-
-        {lastResult && !lastResult.success && lastResult.error && (
+      {/* Error message */}
+      <AnimatePresence>
+        {status === "error" && lastError && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -363,7 +406,7 @@ export function DocumentUpload({
           >
             <div className="flex items-start gap-2">
               <WarningCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" weight="fill" />
-              <p className="text-sm text-destructive">{lastResult.error}</p>
+              <p className="text-sm text-destructive">{lastError}</p>
             </div>
           </motion.div>
         )}
@@ -378,7 +421,6 @@ function fileToBase64(file: File): Promise<string> {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      // Remove the data URL prefix (e.g., "data:image/png;base64,")
       const base64 = result.split(",")[1];
       resolve(base64);
     };

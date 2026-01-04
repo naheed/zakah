@@ -5,7 +5,7 @@ export interface ExtractionLineItem {
   description: string;
   amount: number;
   inferredCategory: string;
-  confidence: number;
+  confidence?: number; // Optional - AI may not always provide this
 }
 
 // Represents a single uploaded and processed document
