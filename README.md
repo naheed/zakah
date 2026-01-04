@@ -1,109 +1,301 @@
 # ZakatFlow
 
-**"TurboTax for Zakat"**
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Status: Early Access](https://img.shields.io/badge/Status-Early%20Access-orange.svg)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
-ZakatFlow is a comprehensive web application designed to simplify the Zakat calculation process for Muslims. Just like TurboTax guides you through your taxes, ZakatFlow offers a guided, step-by-step approach to calculating Zakat with accuracy and ease.
+**Zakat calculation made simple.** A guided, step-by-step application for accurate Islamic wealth purification.
 
-## Features
+[Live Demo](https://zakatflow.org) · [Methodology](https://zakatflow.org/methodology) · [Report an Issue](https://github.com/your-username/zakatflow/issues)
 
-- **Guided Calculation Wizard**: 
-    - **Simple Mode**: For users who want a quick estimate based on standard assets.
-    - **Detailed Mode**: A granular walkthrough covering all asset classes (Gold, Silver, Stocks, Business Assets, etc.) ensuring no deductible is missed.
-- **Authentication**: Secure login via Google (powered by Supabase) to save and manage your calculations.
-- **Methodology**: Extensive documentation explaining the ruling for each asset class, backed by scholarly sources.
-- **Sharing**: Generate personalized referral links to invite friends and family to calculate their Zakat.
-- **History**: View and manage your past Zakat calculations.
-- **Privacy First**: Secure handling of financial data.
+---
 
-## Web CUJs (Critical User Journeys)
+## Overview
 
-This project supports the following critical user journeys:
+ZakatFlow helps Muslims calculate their annual Zakat obligation with precision and confidence. Like TurboTax for taxes, it walks you through each asset class—cash, investments, retirement accounts, precious metals, cryptocurrency, and more—ensuring nothing is missed.
 
-1.  **First time user on direct landing page**: Users land on the attractive home page, see the value proposition ("Simple, Accurate Zakat Calculation"), and can start immediately.
-2.  **First time user coming via referral link**: A personalized welcome experience acknowledging the referrer, encouraging the user to start their own flow.
-3.  **Returning user with login**: Seamless access to saved calculations and settings upon authentication.
-4.  **Returning user without login**: Ability to start a new anonymous calculation or log in to retrieve past data.
-5.  **User login and creating new calculation**: Authenticated workflow to start a fresh calculation session.
-6.  **Doing simple calculation**: A streamlined path for users with straightforward finances (Cash + Gold/Silver).
-7.  **Doing detailed calculation**: The full "TurboTax" style questionnaire covering debts, investments, 401k/Superannuation, business inventory, and more.
-8.  **Viewing calculation report page**: A clean breakdown of Zakatable assets, showing exactly how the final figure was derived.
-9.  **Downloading report pdf**: Export the calculation report as a formatted PDF for records or offline sharing.
-10. **Sharing tool using personalized referral link**: Dashboard allowing users to copy their unique invite link to spread the benefit.
-11. **Review terms of service**: Access to legal terms governing the usage of the platform.
-12. **Review privacy policy**: Transparency about how user data is collected and used.
-13. **Review about page**: Information about the project's mission, team, and adherence to Islamic financial principles.
+### Key Capabilities
+
+| Feature | Description |
+|---------|-------------|
+| **Guided Wizard** | Simple mode for quick estimates, detailed mode for comprehensive analysis |
+| **AI Document Parsing** | Upload bank/brokerage statements; AI extracts line items automatically |
+| **Multi-Source Asset Tracking** | Manual entry, PDF upload, or bank connection (Plaid—coming soon) |
+| **Scholarly Methodology** | Based on AMJA, AAOIFI guidelines, and Sheikh Joe Bradford's rulings |
+| **Madhab Support** | Configure calculations per Hanafi, Maliki, Shafi'i, Hanbali, or balanced approach |
+| **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
+| **Export Options** | PDF report, CSV breakdown, or print-friendly web view |
+| **Privacy-First** | Local-first for guests; secure cloud storage for authenticated users |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Frontend (React)                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │   Wizard    │  │   Assets    │  │   Report    │              │
+│  │   Pages     │  │   Dashboard │  │   Export    │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+│         │                │                │                      │
+│         └────────────────┼────────────────┘                      │
+│                          ▼                                       │
+│              ┌─────────────────────┐                             │
+│              │   Zakat Calculation │                             │
+│              │      Engine         │                             │
+│              └─────────────────────┘                             │
+└─────────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Backend (Supabase)                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │   Auth      │  │   Database  │  │   Edge      │              │
+│  │   (Google)  │  │   (Postgres)│  │   Functions │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+│                          │                │                      │
+│                          │         ┌──────┴──────┐               │
+│                          │         │  AI Parser  │               │
+│                          │         │  (Gemini)   │               │
+│                          │         └─────────────┘               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Tech Stack
 
-This project is built with a modern, type-safe stack:
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18, TypeScript 5, Vite |
+| **Styling** | Tailwind CSS, Shadcn UI (Radix primitives) |
+| **State** | TanStack Query, React Context |
+| **Backend** | Supabase (Postgres, Auth, Edge Functions) |
+| **AI** | Google Gemini 2.0 Flash (document parsing) |
+| **Visualization** | Nivo (Sankey charts), Recharts |
+| **PDF** | @react-pdf/renderer |
+| **Icons** | Phosphor Icons |
 
--   **Frontend**: [React](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
--   **Build Tool**: [Vite](https://vitejs.dev/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix UI + Tailwind)
--   **State Management**: [TanStack Query](https://tanstack.com/query/latest) (React Query)
--   **Backend / Auth**: [Supabase](https://supabase.com/)
--   **Icons**: [Phosphor Icons](https://phosphoricons.com/) & [Lucide React](https://lucide.dev/)
+---
 
 ## Getting Started
 
-Follow these steps to run the project locally.
-
 ### Prerequisites
 
--   Node.js & npm installed (Recommended: Use `nvm`)
+- **Node.js** 18+ (recommend using [nvm](https://github.com/nvm-sh/nvm))
+- **Supabase CLI** for local development
+- **Supabase Project** with Google OAuth configured
 
 ### Installation
 
-1.  **Clone the repository**:
-    ```sh
-    git clone <YOUR_GIT_URL>
-    cd zakah
-    ```
+```bash
+# Clone the repository
+git clone https://github.com/your-username/zakatflow.git
+cd zakatflow
 
-2.  **Install dependencies**:
-    ```sh
-    npm install
-    ```
+# Install dependencies
+npm install
 
-3.  **Setup Environment Variables**:
-    Create a `.env` file in the root directory and add your Supabase credentials. You need a project set up on [Supabase](https://supabase.com/).
+# Copy environment template
+cp .env.example .env
+```
 
-    ```env
-    VITE_SUPABASE_PROJECT_ID="your-project-id"
-    VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-key"
-    VITE_SUPABASE_URL="https://your-project-id.supabase.co"
-    ```
+### Environment Configuration
 
-4.  **Configure Google Authentication**:
-    -   **Google Cloud Console**:
-        -   Create a new project (or use existing).
-        -   Go to **APIs & Services > Credentials**.
-        -   Create **OAuth Client ID** (Web Application).
-        -   Add `http://localhost:8080` to **Authorized JavaScript origins**.
-        -   Add `https://<your-project-id>.supabase.co/auth/v1/callback` to **Authorized redirect URIs**.
-    -   **Supabase Dashboard**:
-        -   Go to **Authentication > Providers > Google**.
-        -   Enable Google provider and paste the **Client ID** and **Client Secret** from Google Cloud.
-        -   Go to **Authentication > URL Configuration**.
-        -   Set **Site URL** to `http://localhost:8080`.
-        -   Add `http://localhost:8080/*` to **Redirect URLs**.
+Create a `.env` file with your Supabase credentials:
 
-5.  **Run the development server**:
-    ```sh
-    npm run dev
-    ```
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_PROJECT_ID=your-project-id
+```
 
-    The app should now be running at `http://localhost:8080` (or similar).
+### Database Setup
+
+```bash
+# Start Supabase locally (optional)
+supabase start
+
+# Push migrations to your Supabase project
+supabase db push
+```
+
+### Development Server
+
+```bash
+npm run dev
+```
+
+The app runs at `http://localhost:8080`.
+
+---
 
 ## Project Structure
 
--   `src/pages`: Contains the main route components (Index, Assets, Auth, Methodology, Settings, etc.).
--   `src/components`: Reusable UI components (buttons, inputs, dialogs via Shadcn UI) and custom domain-specific components.
--   `src/integrations/supabase`: Supabase client configuration and types.
--   `src/hooks`: Custom React hooks (e.g., `useAuth`, `useAssetPersistence`, `useDocumentParsingV2`).
--   `src/lib`: Utility functions and helper classes.
+```
+src/
+├── components/
+│   ├── ui/                # Shadcn UI primitives
+│   ├── zakat/             # Domain-specific components
+│   │   ├── steps/         # Wizard step components
+│   │   └── report/        # Report generation components
+│   └── assets/            # Asset management components
+├── hooks/
+│   ├── useAuth.ts         # Authentication state
+│   ├── useAssetPersistence.ts  # Asset CRUD operations
+│   ├── useDocumentParsingV2.ts # AI document extraction
+│   └── usePlaidLink.ts    # Bank connection (future)
+├── lib/
+│   ├── zakatCalculations.ts    # Core calculation engine
+│   ├── madhahRules.ts          # School of thought rules
+│   ├── assetCategories.ts      # Category definitions
+│   └── generatePDFV2.ts        # PDF report generation
+├── pages/                 # Route components
+├── types/                 # TypeScript interfaces
+└── integrations/
+    └── supabase/          # Database client & types
+
+supabase/
+├── functions/             # Edge Functions
+│   ├── parse-financial-document/  # AI document parser
+│   ├── plaid-link-token/          # Plaid integration
+│   └── delete-account/            # Account deletion
+└── migrations/            # Database schema
+```
+
+---
+
+## Data Model
+
+### Core Entities
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Portfolio     │────▶│   Account       │────▶│   Snapshot      │
+│                 │     │                 │     │                 │
+│ user_id         │     │ institution     │     │ statement_date  │
+│ currency        │     │ type            │     │ total_value     │
+└─────────────────┘     │ mask            │     │ method          │
+                        └─────────────────┘     └────────┬────────┘
+                                                         │
+                                                         ▼
+                                                ┌─────────────────┐
+                                                │   Line Item     │
+                                                │                 │
+                                                │ description     │
+                                                │ amount          │
+                                                │ zakat_category  │
+                                                └─────────────────┘
+```
+
+### Zakat Categories
+
+| Category | Description | Zakat Rate |
+|----------|-------------|------------|
+| `LIQUID` | Cash, checking, savings | 100% |
+| `PROXY_30` | Passive investments (stocks, ETFs) | 30% proxy |
+| `PROXY_100` | Active trading, cryptocurrency | 100% |
+| `EXEMPT` | Personal use, unvested, liabilities | 0% |
+
+---
+
+## Calculation Methodology
+
+ZakatFlow supports multiple calculation modes:
+
+| Mode | Description |
+|------|-------------|
+| **Bradford** | Sheikh Joe Bradford's methodology (default) |
+| **Conservative** | Maximum Zakat interpretation |
+| **Optimized** | Minimum legitimate Zakat |
+| **Pure** | Strict madhab adherence |
+
+### Supported Asset Classes
+
+- Cash & Bank Accounts
+- Stocks, ETFs, Mutual Funds
+- Retirement Accounts (401k, IRA, Roth)
+- Cryptocurrency
+- Gold & Silver
+- Business Inventory
+- Real Estate (for sale)
+- Trusts
+
+For detailed methodology, see [Methodology Documentation](https://zakatflow.org/methodology).
+
+---
 
 ## Deployment
 
-This project is ready to be deployed on platforms like Vercel, Netlify, or directly via Lovable if applicable. Ensure your build settings are configured for a Vite project (`npm run build` as build command, `dist` as output directory).
+### Vercel (Recommended)
+
+```bash
+npm run build
+# Output: dist/
+```
+
+Configure in Vercel:
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**: Add your Supabase credentials
+
+### Edge Functions
+
+Deploy Supabase Edge Functions:
+
+```bash
+supabase functions deploy parse-financial-document
+supabase functions deploy delete-account
+```
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`npm run test`)
+5. Submit a pull request
+
+---
+
+## Roadmap
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Core Calculator | ✅ Complete | Guided wizard with all asset classes |
+| AI Document Parsing | ✅ Complete | Extract line items from PDFs/images |
+| Asset Dashboard | ✅ Complete | Manage accounts and statements |
+| Export (PDF/CSV) | ✅ Complete | Download reports |
+| Sankey Visualization | ✅ Complete | Visual asset flow chart |
+| Plaid Integration | 🔄 In Progress | Bank account connection |
+| Classification System | 📋 Planned | ML-powered asset categorization |
+| Mobile App | 📋 Planned | React Native implementation |
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgments
+
+- **Sheikh Joe Bradford** — Primary methodology source
+- **AMJA** — Assembly of Muslim Jurists of America
+- **AAOIFI** — Accounting standards for Islamic finance
+- **Supabase** — Backend infrastructure
+- **Shadcn** — UI component system
+
+---
+
+<p align="center">
+  <strong>May Allah accept your Zakat and purify your wealth. 🤲</strong>
+</p>
