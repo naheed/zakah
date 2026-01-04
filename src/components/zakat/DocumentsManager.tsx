@@ -1,4 +1,4 @@
-import { FileText, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { FileText, CaretDown, CaretUp, ArrowSquareOut } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { UploadedDocument, getDocumentsForStep } from "@/lib/documentTypes";
@@ -42,7 +42,7 @@ export function DocumentsManager({
         <div className="mt-4">
           <Link to="/documents">
             <Button variant="outline" size="sm" className="w-full gap-2">
-              <ExternalLink className="w-4 h-4" />
+              <ArrowSquareOut className="w-4 h-4 ml-1" />
               View All Documents
             </Button>
           </Link>
@@ -74,7 +74,7 @@ export function StepDocumentsDisplay({
   onRemoveDocument,
 }: StepDocumentsDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  
+
   const relevantDocs = getDocumentsForStep(documents, stepId);
 
   if (relevantDocs.length === 0) return null;
@@ -92,9 +92,9 @@ export function StepDocumentsDisplay({
           </span>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+          <CaretUp className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          <CaretDown className="w-4 h-4 text-muted-foreground" />
         )}
       </button>
 

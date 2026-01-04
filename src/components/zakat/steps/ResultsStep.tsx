@@ -44,7 +44,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
 
 interface ResultsStepProps {
@@ -226,7 +226,7 @@ export function ResultsStep({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="w-10 px-0">
-                  <ChevronDown className="h-4 w-4" />
+                  <CaretDown className="h-4 w-4" />
                   <span className="sr-only">More options</span>
                 </Button>
               </DropdownMenuTrigger>

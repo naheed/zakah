@@ -77,20 +77,11 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
     referrals: userStats.totalReferrals,
     assets: userStats.totalAssetsCalculated,
     zakat: userStats.totalZakatCalculated,
-    footer: null
   } : {
     title: "Community Impact",
     referrals: metrics?.allTime.uniqueSessions || 0,
     assets: metrics?.allTime.totalAssets,
     zakat: metrics?.allTime.totalZakat,
-    footer: (
-      <div className="pt-4 text-xs text-muted-foreground">
-        <p className="font-medium text-amber-900/80 dark:text-amber-100/80 mb-1">Join the movement</p>
-        <p className="text-muted-foreground/70">
-          Help 5 people calculate their Zakat to unlock your personal impact dashboard.
-        </p>
-      </div>
-    )
   };
 
   // Get user's first name
@@ -154,9 +145,9 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   if (user || hasLocalSession) {
     return (
       <div className="min-h-[85vh] flex flex-col font-work-sans">
-        {/* Header - Minimal, no sign-in button here (moved to center card for anon) */}
+        {/* Header - Minimal */}
         <div className="flex items-center justify-between px-6 py-4">
-          <Logo size="sm" />
+          <Logo size="md" />
           <div className="flex items-center gap-2">
             <Link to="/settings">
               <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
@@ -182,10 +173,9 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                   Welcome back{firstName ? `, ${firstName}` : ''}
                 </h1>
 
-                {/* Impact Widget - Top Motivation */}
-                {/* Impact Widget - Top Motivation */}
+                {/* Impact Stats - Community or Personal */}
                 {(metrics || metricsLoading || userStats) && (
-                  <div className="flex justify-center mt-6">
+                  <div className="flex flex-col items-center gap-8 mt-8">
                     <ImpactStats
                       variant="flat"
                       isLoading={metricsLoading && !userStats}
@@ -193,9 +183,16 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                       totalAssetsCalculated={impactData.assets}
                       totalZakatCalculated={impactData.zakat}
                       title={impactData.title}
-                      footer={impactData.footer}
                       className="scale-90 md:scale-100 origin-top"
                     />
+
+                    {/* Join the Movement / Share Widget */}
+                    <div className="w-full max-w-md">
+                      <ReferralWidget
+                        variant="full"
+                        title={showUserImpact ? undefined : "Join the movement"}
+                      />
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -333,11 +330,11 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
               </div>
             )}
 
-            {/* 4. Secondary Features (Assets & Referrals) */}
+            {/* 4. Secondary Features (Assets) - Removed redundant ReferralWidget since we moved it up */}
             {user && (
               <div className="grid md:grid-cols-2 gap-6 pt-8 border-t border-border/50">
                 {/* Assets Mini-Dashboard */}
-                <div className="space-y-4">
+                <div className="space-y-4 md:col-span-2">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-muted-foreground flex items-center gap-2">
                       <FolderOpen className="w-4 h-4" />
@@ -346,43 +343,38 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                     <Link to="/assets" className="text-xs text-primary hover:underline">Manage All</Link>
                   </div>
 
-                  {/* Quick Add Button */}
-                  <Link to="/assets/add">
-                    <Button variant="outline" className="w-full h-auto py-4 justify-start gap-4 hover:border-primary hover:bg-primary/5 group">
-                      <div className="w-8 h-8 rounded-full bg-muted group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                        <span className="text-xl leading-none mb-0.5 text-muted-foreground group-hover:text-primary">+</span>
-                      </div>
-                      <div className="text-left">
-                        <div className="font-bold text-foreground">Connect Account</div>
-                        <div className="text-xs text-muted-foreground">Link bank, crypto, or manual entry</div>
-                      </div>
-                    </Button>
-                  </Link>
-
-                  {/* Account List Summary */}
-                  <div className="space-y-2">
-                    {accountsLoading ? (
-                      <div className="h-10 bg-muted/20 rounded animate-pulse" />
-                    ) : accounts.length > 0 ? (
-                      accounts.slice(0, 2).map(acc => (
-                        <div key={acc.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50 transition-colors">
-                          <span className="font-medium truncate max-w-[120px]">{acc.institution_name}</span>
-                          <span className="text-muted-foreground">{formatCurrency(acc.balance || 0)}</span>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Quick Add Button */}
+                    <Link to="/assets/add">
+                      <Button variant="outline" className="w-full h-auto py-4 justify-start gap-4 hover:border-primary hover:bg-primary/5 group">
+                        <div className="w-8 h-8 rounded-full bg-muted group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                          <span className="text-xl leading-none mb-0.5 text-muted-foreground group-hover:text-primary">+</span>
                         </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic pl-1">No accounts connected yet.</p>
-                    )}
-                  </div>
-                </div>
+                        <div className="text-left">
+                          <div className="font-bold text-foreground">Connect Account</div>
+                          <div className="text-xs text-muted-foreground">Link bank, crypto, or manual entry</div>
+                        </div>
+                      </Button>
+                    </Link>
 
-                {/* Referral Widget */}
-                <div className="space-y-4">
-                  <h3 className="font-bold text-muted-foreground flex items-center gap-2">
-                    <Heart className="w-4 h-4" />
-                    Impact
-                  </h3>
-                  <ReferralWidget variant="compact" />
+                    {/* Account List Summary */}
+                    <div className="space-y-2">
+                      {accountsLoading ? (
+                        <div className="h-10 bg-muted/20 rounded animate-pulse" />
+                      ) : accounts.length > 0 ? (
+                        accounts.slice(0, 2).map(acc => (
+                          <div key={acc.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50 transition-colors bg-muted/20">
+                            <span className="font-medium truncate max-w-[120px]">{acc.institution_name}</span>
+                            <span className="text-muted-foreground">{formatCurrency(acc.balance || 0)}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-xs text-muted-foreground italic border border-dashed rounded opacity-50">
+                          No accounts connected
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -390,12 +382,8 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
           </div>
         </div>
 
-        {/* Simple Footer Text */}
-        <div className="py-6 text-center text-xs text-muted-foreground/60">
-          <Link to="/methodology" className="hover:text-foreground transition-colors mr-4">Methodology</Link>
-          <Link to="/privacy" className="hover:text-foreground transition-colors mr-4">Privacy</Link>
-          <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-        </div>
+        {/* Standard Footer */}
+        <Footer />
 
       </div>
     );

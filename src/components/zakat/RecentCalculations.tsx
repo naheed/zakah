@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { Calculator, ChevronRight, Clock, Sparkles } from 'lucide-react';
+import { Calculator, CaretRight, Clock, Sparkle } from '@phosphor-icons/react';
 import { useSavedCalculations, SavedCalculation } from '@/hooks/useSavedCalculations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/zakatCalculations';
@@ -13,10 +13,10 @@ interface RecentCalculationsProps {
   limit?: number;
 }
 
-export function RecentCalculations({ 
-  onLoadCalculation, 
+export function RecentCalculations({
+  onLoadCalculation,
   currency = 'USD',
-  limit = 3 
+  limit = 3
 }: RecentCalculationsProps) {
   const { calculations, loading, refreshCalculations } = useSavedCalculations();
   const initRef = useRef(false);
@@ -60,20 +60,20 @@ export function RecentCalculations({
           Recent Calculations
         </h3>
         {calculations.length > limit && (
-          <Link 
-            to="/calculations" 
+          <Link
+            to="/calculations"
             className="text-xs text-primary hover:underline flex items-center gap-0.5"
           >
             View all
-            <ChevronRight className="w-3 h-3" />
+            <CaretRight className="w-3 h-3" />
           </Link>
         )}
       </div>
 
       <div className="space-y-2">
         {recentCalcs.map((calc) => (
-          <Card 
-            key={calc.id} 
+          <Card
+            key={calc.id}
             className="bg-card/50 hover:bg-card/80 transition-colors cursor-pointer group"
             onClick={() => onLoadCalculation(calc)}
           >
@@ -92,7 +92,7 @@ export function RecentCalculations({
                       <>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-primary">
-                          <Sparkles className="w-3 h-3" />
+                          <Sparkle className="w-3 h-3" />
                           {formatCurrency(calc.zakat_due, currency)}
                         </span>
                       </>
@@ -100,7 +100,7 @@ export function RecentCalculations({
                   </div>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+              <CaretRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
             </CardContent>
           </Card>
         ))}

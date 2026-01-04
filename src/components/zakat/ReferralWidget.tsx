@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles, Share2, RefreshCw, Linkedin } from 'lucide-react';
+import { Envelope, ChatCircleDots, TwitterLogo, FacebookLogo, Copy, Check, Users, Heart, Sparkle, ShareNetwork, ArrowsClockwise, LinkedinLogo } from '@phosphor-icons/react';
 import { useToast } from '@/hooks/use-toast';
 import { useReferral, getInviteUrl } from '@/hooks/useReferral';
 import { formatCurrency } from '@/lib/zakatCalculations';
@@ -13,6 +13,7 @@ import { MetricsDisplay } from './MetricsDisplay';
 interface ReferralWidgetProps {
   currency?: string;
   variant?: 'compact' | 'full';
+  title?: string;
 }
 
 // Platform-specific share messages
@@ -37,7 +38,7 @@ function getShareMessages(inviteUrl: string) {
   };
 }
 
-export function ReferralWidget({ currency = 'USD', variant = 'compact' }: ReferralWidgetProps) {
+export function ReferralWidget({ currency = 'USD', variant = 'compact', title }: ReferralWidgetProps) {
   const { toast } = useToast();
   const {
     referralCode,
@@ -133,7 +134,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Share2 className="w-4 h-4 text-primary" />
+            <ShareNetwork className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium">Share & earn hasanat</span>
           </div>
 
@@ -204,7 +205,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                 onClick={handleRetry}
                 className="flex-1 gap-2"
               >
-                <RefreshCw className="w-4 h-4" />
+                <ArrowsClockwise className="w-4 h-4" />
                 Retry
               </Button>
             ) : (
@@ -236,27 +237,27 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
           <div className="flex gap-1.5">
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
               <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" />
+                <ChatCircleDots className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
               <a href={shareLinks.email} target="_blank" rel="noopener noreferrer">
-                <Mail className="w-4 h-4" />
+                <Envelope className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
               <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer">
-                <Twitter className="w-4 h-4" />
+                <TwitterLogo className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
               <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer">
-                <Facebook className="w-4 h-4" />
+                <FacebookLogo className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
               <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer">
-                <Linkedin className="w-4 h-4" />
+                <LinkedinLogo className="w-4 h-4" />
               </a>
             </Button>
           </div>
@@ -271,7 +272,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center justify-center gap-2">
           <Heart className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold">Share & Earn Hasanat</h3>
+          <h3 className="text-lg font-semibold">{title || "Share & Earn Hasanat"}</h3>
         </div>
 
         {/* Hadith Quote with Arabic */}
@@ -295,31 +296,31 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
         <div className="flex flex-wrap gap-2 justify-center">
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.email} target="_blank" rel="noopener noreferrer">
-              <Mail className="w-4 h-4" />
+              <Envelope className="w-4 h-4" />
               Email
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
+              <ChatCircleDots className="w-4 h-4" />
               WhatsApp
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer">
-              <Twitter className="w-4 h-4" />
+              <TwitterLogo className="w-4 h-4" />
               Twitter
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer">
-              <Facebook className="w-4 h-4" />
+              <FacebookLogo className="w-4 h-4" />
               Facebook
             </a>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" asChild>
             <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer">
-              <Linkedin className="w-4 h-4" />
+              <LinkedinLogo className="w-4 h-4" />
               LinkedIn
             </a>
           </Button>
@@ -337,7 +338,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                 onClick={handleRetry}
                 className="flex-1 gap-2"
               >
-                <RefreshCw className="w-4 h-4" />
+                <ArrowsClockwise className="w-4 h-4" />
                 Retry generating link
               </Button>
             ) : (
@@ -380,7 +381,7 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact' }: Referr
                 } : undefined}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
               >
-                <Sparkles className="w-4 h-4 text-primary" />
+                <Sparkle className="w-4 h-4 text-primary" />
                 <p className="text-sm font-medium text-foreground">
                   Through your shares
                 </p>

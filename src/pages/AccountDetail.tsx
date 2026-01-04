@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Plus, Calendar, Loader2, ChevronRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, CalendarBlank, Spinner, CaretRight, Trash } from '@phosphor-icons/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAssetPersistence } from '@/hooks/useAssetPersistence';
 import { Button } from '@/components/ui/button';
@@ -97,7 +97,7 @@ export default function AccountDetail() {
     if (authLoading || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <Spinner className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -151,7 +151,7 @@ export default function AccountDetail() {
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" disabled={isDeleting}>
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash className="w-4 h-4" />
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -208,7 +208,7 @@ export default function AccountDetail() {
                                             >
                                                 <div>
                                                     <div className="flex items-center gap-2">
-                                                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        <CalendarBlank className="w-3.5 h-3.5 text-muted-foreground" />
                                                         <span className="text-sm font-medium">
                                                             {new Date(snapshot.statement_date).toLocaleDateString()}
                                                         </span>
@@ -217,7 +217,7 @@ export default function AccountDetail() {
                                                         {formatCurrency(snapshot.total_value, 'USD')}
                                                     </p>
                                                 </div>
-                                                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                                <CaretRight className="w-4 h-4 text-muted-foreground" />
                                             </button>
                                         ))}
                                     </div>
@@ -247,7 +247,7 @@ export default function AccountDetail() {
                             <CardContent>
                                 {loadingLineItems ? (
                                     <div className="flex items-center justify-center py-12">
-                                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                        <Spinner className="w-6 h-6 animate-spin text-primary" />
                                     </div>
                                 ) : lineItems.length === 0 ? (
                                     <div className="text-center py-12 text-muted-foreground">

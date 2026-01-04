@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Save, Loader2 } from 'lucide-react';
+import { FloppyDisk, Spinner } from '@phosphor-icons/react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SaveCalculationDialogProps {
@@ -36,7 +36,7 @@ export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalcul
   const { user } = useAuth();
   const { saveCalculation } = useSavedCalculations();
   const { toast } = useToast();
-  
+
   const [open, setOpen] = useState(false);
   const [yearType, setYearType] = useState<'lunar' | 'gregorian'>(
     formData.calendarType === 'lunar' ? 'lunar' : 'gregorian'
@@ -74,7 +74,7 @@ export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalcul
     setIsSaving(true);
     const result = await saveCalculation(displayName, yearType, yearValue, formData);
     setIsSaving(false);
-    
+
     if (result) {
       onSaved?.(result.id);
       setOpen(false);
@@ -85,7 +85,7 @@ export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalcul
   // Generate year options
   const currentGregorianYear = getCurrentGregorianYear();
   const currentLunarYear = getCurrentLunarYear();
-  
+
   const yearOptions = yearType === 'gregorian'
     ? [currentGregorianYear - 1, currentGregorianYear, currentGregorianYear + 1]
     : [currentLunarYear - 1, currentLunarYear, currentLunarYear + 1];
@@ -95,7 +95,7 @@ export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalcul
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
-            <Save className="w-4 h-4" />
+            <FloppyDisk className="w-4 h-4" />
             Save Calculation
           </Button>
         )}
@@ -107,7 +107,7 @@ export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalcul
             Save this Zakat calculation for future reference. You can name it by year.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>Year Type</Label>
@@ -157,7 +157,7 @@ export function SaveCalculationDialog({ formData, trigger, onSaved }: SaveCalcul
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            {isSaving ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : null}
             Save
           </Button>
         </DialogFooter>

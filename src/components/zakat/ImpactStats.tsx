@@ -1,4 +1,4 @@
-import { Users, TrendingUp, Sparkles, Wallet } from 'lucide-react';
+import { Users, TrendUp, Sparkle, Wallet } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { formatCount, formatLargeNumber } from '@/lib/formatters';
@@ -103,7 +103,7 @@ export function ImpactStats({
                     {/* Zakat */}
                     <div className="space-y-1">
                         <div className="flex items-center justify-center gap-1.5 text-green-700/70 dark:text-green-500/70 mb-1">
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <Sparkle className="w-3.5 h-3.5" />
                         </div>
                         <p className="text-lg font-bold text-amber-900 dark:text-amber-100">
                             {formatLargeNumber(totalZakatCalculated || 0)}

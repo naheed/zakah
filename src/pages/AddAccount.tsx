@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
     ArrowLeft,
-    Upload,
-    Edit3,
-    Link2,
-    ChevronRight,
+    UploadSimple,
+    PencilSimple,
+    Link,
+    CaretRight,
     FileText,
-    Loader2
-} from 'lucide-react';
+    Spinner
+} from '@phosphor-icons/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDocumentParsingV2 } from '@/hooks/useDocumentParsingV2';
 import { useAssetPersistence, inferAccountTypeFromStep } from '@/hooks/useAssetPersistence';
@@ -126,7 +126,7 @@ export default function AddAccount() {
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <Spinner className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -161,19 +161,19 @@ export default function AddAccount() {
                 {method === 'select' && (
                     <div className="space-y-4">
                         <MethodCard
-                            icon={<Upload className="w-6 h-6" />}
+                            icon={<UploadSimple className="w-6 h-6" />}
                             title="Upload Statement"
                             description="Import data from a PDF or image of your financial statement"
                             onClick={() => setMethod('upload')}
                         />
                         <MethodCard
-                            icon={<Edit3 className="w-6 h-6" />}
+                            icon={<PencilSimple className="w-6 h-6" />}
                             title="Manual Entry"
                             description="Add an account by entering the details yourself"
                             onClick={() => setMethod('manual')}
                         />
                         <MethodCard
-                            icon={<Link2 className="w-6 h-6" />}
+                            icon={<Link className="w-6 h-6" />}
                             title="Connect Bank"
                             description="Automatically sync with your bank (coming soon)"
                             disabled
@@ -203,7 +203,7 @@ export default function AddAccount() {
                                     <label htmlFor="file-upload" className="cursor-pointer">
                                         {parseStatus === 'processing' || parseStatus === 'uploading' ? (
                                             <div className="space-y-2">
-                                                <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
+                                                <Spinner className="w-8 h-8 mx-auto animate-spin text-primary" />
                                                 <p className="text-sm text-muted-foreground">Analyzing document...</p>
                                             </div>
                                         ) : (
@@ -228,7 +228,7 @@ export default function AddAccount() {
                                             Try Another
                                         </Button>
                                         <Button onClick={handleSaveUpload} disabled={saving}>
-                                            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                            {saving ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : null}
                                             Save Account
                                         </Button>
                                     </div>
@@ -305,7 +305,7 @@ export default function AddAccount() {
                                     disabled={saving || !institutionName || !balance}
                                     className="flex-1"
                                 >
-                                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                    {saving ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : null}
                                     Save Account
                                 </Button>
                             </div>
@@ -341,7 +341,7 @@ function MethodCard({ icon, title, description, onClick, disabled }: MethodCardP
                     <h3 className="font-semibold text-foreground">{title}</h3>
                     <p className="text-sm text-muted-foreground">{description}</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                <CaretRight className="w-5 h-5 text-muted-foreground" />
             </CardContent>
         </Card>
     );

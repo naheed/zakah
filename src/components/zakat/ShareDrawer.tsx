@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Mail, Trash2, LogIn, CheckCircle, Clock, AlertCircle, Loader2, Shield, Lock } from "lucide-react";
+import { Users, Envelope, Trash, SignIn, CheckCircle, Clock, WarningCircle, Spinner, Shield, Lock } from "@phosphor-icons/react";
 import {
   Drawer,
   DrawerContent,
@@ -119,7 +119,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
           <div className="px-4 pb-8 space-y-6">
             <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
+                <WarningCircle className="w-5 h-5 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Account Required</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -128,7 +128,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <h4 className="font-medium text-sm">How secure sharing works:</h4>
               <ul className="text-sm text-muted-foreground space-y-2">
@@ -146,9 +146,9 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                 </li>
               </ul>
             </div>
-            
+
             <Button onClick={handleSignIn} className="w-full gap-2">
-              <LogIn className="w-4 h-4" />
+              <SignIn className="w-4 h-4" />
               Sign In with Google to Share
             </Button>
           </div>
@@ -176,9 +176,9 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
           </DrawerHeader>
           <div className="px-4 pb-8">
             <div className="bg-muted/50 border border-border rounded-xl p-4 text-center">
-              <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <WarningCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                You need to save your calculation before you can share it with your spouse. 
+                You need to save your calculation before you can share it with your spouse.
                 Complete the calculation and use the "Save" button on the results page.
               </p>
             </div>
@@ -210,8 +210,8 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
               <p className="text-sm font-medium text-foreground">Shared with:</p>
               <div className="space-y-2">
                 {shares.map((share) => (
-                  <div 
-                    key={share.id} 
+                  <div
+                    key={share.id}
                     className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                   >
                     <div className="flex items-center gap-2">
@@ -223,9 +223,9 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                       <div>
                         <p className="text-sm font-medium">{share.shared_with_email}</p>
                         <p className="text-xs text-muted-foreground">
-                          {share.accepted_at 
-                            ? share.encrypted_form_data 
-                              ? "Encrypted access granted" 
+                          {share.accepted_at
+                            ? share.encrypted_form_data
+                              ? "Encrypted access granted"
                               : "Access granted (pending encryption)"
                             : "Pending sign-in"}
                         </p>
@@ -236,7 +236,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                       size="sm"
                       onClick={() => handleRemoveShare(share.id, share.shared_with_email)}
                     >
-                      <Trash2 className="w-4 h-4 text-destructive" />
+                      <Trash className="w-4 h-4 text-destructive" />
                     </Button>
                   </div>
                 ))}
@@ -267,10 +267,10 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                 disabled={!email || !!emailError || isSharing}
               >
                 {isSharing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    <Mail className="w-4 h-4 mr-2" />
+                    <Envelope className="w-4 h-4 mr-2" />
                     Invite
                   </>
                 )}
@@ -282,12 +282,12 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
             <div className="flex items-start gap-2">
               <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                <strong>End-to-End Encrypted:</strong> Your data is encrypted in your browser 
+                <strong>End-to-End Encrypted:</strong> Your data is encrypted in your browser
                 and re-encrypted specifically for your spouse. No one else can read it.
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              <strong>How it works:</strong> Your spouse signs in with Google using the email 
+              <strong>How it works:</strong> Your spouse signs in with Google using the email
               you specify. Their unique encryption keys will be used to secure the shared data.
             </p>
           </div>

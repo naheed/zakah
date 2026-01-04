@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LogOut, History, LogIn } from 'lucide-react';
+import { User, SignOut, ClockCounterClockwise, SignIn, House } from '@phosphor-icons/react';
 
 export function UserMenu() {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export function UserMenu() {
   if (!user) {
     return (
       <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
-        <LogIn className="h-4 w-4 mr-2" />
+        <SignIn className="h-4 w-4 mr-2" />
         Sign In
       </Button>
     );
@@ -68,8 +68,12 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/')}>
+          <House className="mr-2 h-4 w-4" />
+          Home
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/calculations')}>
-          <History className="mr-2 h-4 w-4" />
+          <ClockCounterClockwise className="mr-2 h-4 w-4" />
           Saved Calculations
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -77,7 +81,7 @@ export function UserMenu() {
           await signOut();
           navigate('/logout');
         }}>
-          <LogOut className="mr-2 h-4 w-4" />
+          <SignOut className="mr-2 h-4 w-4" />
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>

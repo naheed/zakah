@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Shield, Lock, Eye } from 'lucide-react';
+import { Spinner, Shield, Lock, Eye } from '@phosphor-icons/react';
 import { Logo } from '@/components/zakat/Logo';
 import { getPrimaryUrl } from '@/lib/domainConfig';
 
@@ -35,7 +35,7 @@ export default function Auth() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Spinner className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -90,9 +90,9 @@ export default function Auth() {
           </div>
 
           {/* Google Login */}
-          <Button 
-            variant="default" 
-            className="w-full gap-2 h-12 text-base" 
+          <Button
+            variant="default"
+            className="w-full gap-2 h-12 text-base"
             onClick={handleGoogleLogin}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@ export default function Auth() {
           </p>
 
           <p className="text-center text-xs text-muted-foreground">
-            By signing in, you agree to our privacy-first approach. 
+            By signing in, you agree to our privacy-first approach.
             Your data remains encrypted and under your control.
           </p>
         </CardContent>

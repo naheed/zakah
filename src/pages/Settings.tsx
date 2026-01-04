@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, FileText, Trash2, UserX, ChevronDown, User, Users, Check, Sun, Moon, Monitor } from "lucide-react";
+import { ArrowLeft, FileText, Trash, UserMinus, CaretDown, User, Users, Check, Sun, Moon, Monitor } from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -166,7 +166,7 @@ export default function Settings() {
             <CollapsibleTrigger asChild>
               <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
                 <span className="font-medium text-foreground">Appearance</span>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", appearanceOpen && "rotate-180")} />
+                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", appearanceOpen && "rotate-180")} />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -236,7 +236,7 @@ export default function Settings() {
             <CollapsibleTrigger asChild>
               <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
                 <span className="font-medium text-foreground">Calculation Settings</span>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", calculationOpen && "rotate-180")} />
+                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", calculationOpen && "rotate-180")} />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -439,7 +439,7 @@ export default function Settings() {
                     <Badge variant="secondary" className="text-xs">{uploadedDocuments.length}</Badge>
                   )}
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", documentsOpen && "rotate-180")} />
+                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", documentsOpen && "rotate-180")} />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -472,7 +472,7 @@ export default function Settings() {
               <CollapsibleTrigger asChild>
                 <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
                   <span className="font-medium text-foreground">Account</span>
-                  <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", accountOpen && "rotate-180")} />
+                  <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", accountOpen && "rotate-180")} />
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -482,7 +482,7 @@ export default function Settings() {
                   {/* Delete All Data */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <Trash2 className="w-4 h-4 text-muted-foreground" />
+                      <Trash className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium text-foreground">Delete all data</p>
                         <p className="text-xs text-muted-foreground">Calculations & shares</p>
@@ -519,7 +519,7 @@ export default function Settings() {
                   {/* Delete Account (Restored) */}
                   <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/50">
                     <div className="flex items-center gap-2">
-                      <UserX className="w-4 h-4 text-muted-foreground" />
+                      <UserMinus className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium text-foreground">Delete account</p>
                         <p className="text-xs text-muted-foreground">Account & all data</p>
@@ -563,7 +563,7 @@ export default function Settings() {
             <CollapsibleTrigger asChild>
               <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
                 <span className="font-medium text-foreground">Data Management</span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <CaretDown className="h-4 w-4 text-muted-foreground" />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -571,7 +571,7 @@ export default function Settings() {
                 {/* Delete All Data */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <Trash2 className="w-4 h-4 text-muted-foreground" />
+                    <Trash className="w-4 h-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium text-foreground">Clear local data</p>
                       <p className="text-xs text-muted-foreground">Removes all inputs from this device</p>

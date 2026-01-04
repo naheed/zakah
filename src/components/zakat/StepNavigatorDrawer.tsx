@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, Settings } from "lucide-react";
+import { Check, Gear } from "@phosphor-icons/react";
 import {
   Drawer,
   DrawerContent,
@@ -142,7 +142,7 @@ export function StepNavigatorDrawer({
           <div className="mt-6 pt-4 border-t border-border">
             <Link to="/settings" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full justify-start gap-3">
-                <Settings className="w-5 h-5 text-muted-foreground" />
+                <Gear className="w-5 h-5 text-muted-foreground" />
                 <span className="text-muted-foreground">Settings</span>
               </Button>
             </Link>

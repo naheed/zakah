@@ -7,7 +7,7 @@ import { useSharedCalculations } from '@/hooks/useCalculationShares';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/zakatCalculations';
-import { ArrowLeft, Plus, Trash2, Calendar, CheckCircle, XCircle, Loader2, Users } from 'lucide-react';
+import { ArrowLeft, Plus, Trash, Calendar, CheckCircle, XCircle, Spinner, Users } from '@phosphor-icons/react';
 import { Footer } from '@/components/zakat/Footer';
 import { getPrimaryUrl } from '@/lib/domainConfig';
 import {
@@ -45,7 +45,7 @@ export default function SavedCalculations() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Spinner className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function SavedCalculations() {
           <TabsContent value="my-calculations">
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <Spinner className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : calculations.length === 0 ? (
               <Card className="text-center py-12">
@@ -141,7 +141,7 @@ export default function SavedCalculations() {
             ) : (
               <div className="grid gap-4">
                 {calculations.map((calc) => (
-                  <CalculationCard 
+                  <CalculationCard
                     key={calc.id}
                     calc={calc}
                     onLoad={handleLoadCalculation}
@@ -157,7 +157,7 @@ export default function SavedCalculations() {
           <TabsContent value="shared-with-me">
             {sharedLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <Spinner className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : sharedCalculations.length === 0 ? (
               <Card className="text-center py-12">
@@ -172,11 +172,11 @@ export default function SavedCalculations() {
             ) : (
               <div className="grid gap-4">
                 {sharedCalculations.map((calc) => (
-                  <CalculationCard 
+                  <CalculationCard
                     key={calc.id}
                     calc={calc}
                     onLoad={handleLoadCalculation}
-                    onDelete={() => {}}
+                    onDelete={() => { }}
                     deletingId={null}
                     isOwner={false}
                     isShared={true}
@@ -203,7 +203,7 @@ interface CalculationCardProps {
 
 function CalculationCard({ calc, onLoad, onDelete, deletingId, isOwner, isShared }: CalculationCardProps) {
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => onLoad(calc)}
     >
@@ -235,16 +235,16 @@ function CalculationCard({ calc, onLoad, onDelete, deletingId, isOwner, isShared
           {isOwner && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="text-muted-foreground hover:text-destructive"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {deletingId === calc.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Spinner className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Trash2 className="w-4 h-4" />
+                    <Trash className="w-4 h-4" />
                   )}
                 </Button>
               </AlertDialogTrigger>
@@ -257,7 +257,7 @@ function CalculationCard({ calc, onLoad, onDelete, deletingId, isOwner, isShared
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
+                  <AlertDialogAction
                     onClick={() => onDelete(calc.id)}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
@@ -275,8 +275,8 @@ function CalculationCard({ calc, onLoad, onDelete, deletingId, isOwner, isShared
             {calc.is_above_nisab ? 'Zakat Due' : 'Below Nisab'}
           </div>
           <div className={`text-xl font-bold ${calc.is_above_nisab ? 'text-primary' : 'text-muted-foreground'}`}>
-            {calc.is_above_nisab 
-              ? formatCurrency(calc.zakat_due, calc.form_data.currency) 
+            {calc.is_above_nisab
+              ? formatCurrency(calc.zakat_due, calc.form_data.currency)
               : 'No Zakat Due'}
           </div>
         </div>

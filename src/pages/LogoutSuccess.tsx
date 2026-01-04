@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { CheckCircleIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import { Logo } from '@/components/zakat/Logo';
 import { ReferralWidget } from '@/components/zakat/ReferralWidget';
 import { ImpactStats } from '@/components/zakat/ImpactStats';
@@ -61,7 +61,9 @@ export default function LogoutSuccess() {
                 >
                     <ImpactStats
                         isLoading={isLoading}
-                    // Placeholder until I verify the file content
+                        totalReferrals={metrics?.allTime.calculations || 0}
+                        totalZakatCalculated={metrics?.allTime.totalZakat || 0}
+                        title="Community Impact"
                     />
                 </motion.div>
 

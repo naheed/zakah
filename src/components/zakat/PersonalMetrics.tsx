@@ -1,4 +1,4 @@
-import { Users, TrendingUp, Heart, Share2 } from 'lucide-react';
+import { Users, TrendUp, Heart, ShareNetwork } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '@/lib/zakatCalculations';
 import { formatCount } from '@/lib/formatters';
@@ -74,7 +74,7 @@ export function PersonalMetrics({
                             >
                                 {totalZakatCalculated != null && (
                                     <div className="flex items-center gap-1.5">
-                                        <TrendingUp className="w-3.5 h-3.5 text-success" />
+                                        <TrendUp className="w-3.5 h-3.5 text-success" />
                                         <span className="font-semibold">{formatCurrency(totalZakatCalculated, currency)}</span>
                                         <span className="text-muted-foreground">Zakat</span>
                                     </div>
@@ -101,7 +101,7 @@ export function PersonalMetrics({
                                 onClick={onShareClick}
                                 className="flex items-center gap-1.5 text-primary hover:underline text-xs"
                             >
-                                <Share2 className="w-3 h-3" />
+                                <ShareNetwork className="w-3 h-3" />
                                 Share your link
                             </button>
                         )}
@@ -146,7 +146,7 @@ export function PersonalMetrics({
                             {totalZakatCalculated != null && (
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                                        <TrendingUp className="w-4 h-4 text-success" />
+                                        <TrendUp className="w-4 h-4 text-success" />
                                     </div>
                                     <div className="text-left">
                                         <p className="text-lg font-mono font-semibold text-foreground">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FileText, Check, Loader2, Play, RotateCcw, Landmark, Wallet } from "lucide-react";
+import { FileText, Check, Spinner, Play, ArrowCounterClockwise, Bank, Wallet } from "@phosphor-icons/react";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NumberTicker } from "@/components/ui/number-ticker";
 
 // Animation phases - including retirement/401(k) upload step
-type AnimationPhase = 
+type AnimationPhase =
   | "idle"
   | "typing-cash"
   | "typed-cash"
@@ -71,13 +71,13 @@ function useTypingAnimation(
   speed: number = 80
 ): string {
   const [displayText, setDisplayText] = useState("");
-  
+
   useEffect(() => {
     if (!isActive) {
       setDisplayText("");
       return;
     }
-    
+
     let index = 0;
     const interval = setInterval(() => {
       if (index <= text.length) {
@@ -87,10 +87,10 @@ function useTypingAnimation(
         clearInterval(interval);
       }
     }, speed);
-    
+
     return () => clearInterval(interval);
   }, [text, isActive, speed]);
-  
+
   return displayText;
 }
 
@@ -108,9 +108,9 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 12, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
+  visible: {
+    opacity: 1,
+    y: 0,
     scale: 1,
     transition: {
       duration: 0.4,
@@ -128,12 +128,12 @@ export function InteractiveDemo() {
   const [scanProgress, setScanProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  
+
   // Typed values
   const typedCash = useTypingAnimation("$24,500", phase === "typing-cash", 100);
   const typedFilename = useTypingAnimation("Chase_Statement.pdf", phase === "upload-typing", 50);
   const typedRetirementFilename = useTypingAnimation("Fidelity_401k.pdf", phase === "retirement-upload-typing", 50);
-  
+
   // Scan progress animation
   useEffect(() => {
     if (phase === "retirement-scanning") {
@@ -150,13 +150,13 @@ export function InteractiveDemo() {
       return () => clearInterval(interval);
     }
   }, [phase]);
-  
+
   // Animation sequence controller - only runs when user triggers it
   useEffect(() => {
     if (phase === "idle" || phase === "complete") return;
-    
+
     const timers: NodeJS.Timeout[] = [];
-    
+
     // Phase 1: Start typing cash value
     if (phase === "typing-cash") {
       timers.push(setTimeout(() => setPhase("typed-cash"), 1500));
@@ -206,10 +206,10 @@ export function InteractiveDemo() {
         setTimeout(() => setShowReplayButton(true), 2000);
       }, 3000));
     }
-    
+
     return () => timers.forEach(clearTimeout);
   }, [phase, animationKey]);
-  
+
   // Start the animation sequence
   const handleWatchAnimation = useCallback(() => {
     setShowReplayButton(false);
@@ -226,7 +226,7 @@ export function InteractiveDemo() {
   const handleToggleMode = useCallback(() => {
     setSelectedMode(prev => prev === "conservative" ? "optimized" : "conservative");
   }, []);
-  
+
   const isAnimating = !["complete", "idle"].includes(phase);
   const showCashInput = phase !== "idle";
   const showUpload = ["upload-start", "upload-typing", "upload-processing", "upload-complete", "retirement-upload-start", "retirement-upload-typing", "retirement-scanning", "retirement-upload-complete", "aggregating", "sankey-reveal", "zakat-reveal", "celebrating", "complete"].includes(phase);
@@ -238,20 +238,20 @@ export function InteractiveDemo() {
   const isRetirementScanning = phase === "retirement-scanning";
   const isRetirementComplete = ["retirement-upload-complete", "aggregating", "sankey-reveal", "zakat-reveal", "celebrating", "complete"].includes(phase);
   const showCompletedCashValue = !["idle", "typing-cash"].includes(phase);
-  
+
   const currentZakat = selectedMode === "conservative" ? DEMO_DATA.conservativeZakat : DEMO_DATA.optimizedZakat;
   const otherZakat = selectedMode === "conservative" ? DEMO_DATA.optimizedZakat : DEMO_DATA.conservativeZakat;
   const otherModeLabel = selectedMode === "conservative" ? "Optimized" : "Conservative";
   const currentNetZakatable = selectedMode === "conservative" ? DEMO_DATA.netZakatableConservative : DEMO_DATA.netZakatable;
-  
+
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full max-w-md mx-auto"
     >
       {/* Glassmorphic card effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl blur-xl" />
-      
+
       <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-3 sm:p-4 shadow-lg overflow-hidden">
         {/* Floating Replay Button - Non-obscuring */}
         <AnimatePresence>
@@ -263,13 +263,13 @@ export function InteractiveDemo() {
               transition={{ duration: 0.3, ease: M3_EASING.emphasizedDecelerate }}
               className="absolute top-2.5 right-2.5 z-10"
             >
-              <Button 
-                variant="secondary" 
-                size="sm" 
+              <Button
+                variant="secondary"
+                size="sm"
                 className="gap-1.5 shadow-md text-xs px-2 py-0.5 h-6"
                 onClick={handleWatchAnimation}
               >
-                <RotateCcw className="w-3 h-3" />
+                <ArrowCounterClockwise className="w-3 h-3" />
                 Replay
               </Button>
             </motion.div>
@@ -279,16 +279,16 @@ export function InteractiveDemo() {
         {/* Initial Play Overlay - Only shown on first load before any animation */}
         <AnimatePresence>
           {phase === "complete" && !showReplayButton && animationKey === 0 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center cursor-pointer"
               onClick={handleWatchAnimation}
             >
-              <Button 
-                variant="secondary" 
-                size="sm" 
+              <Button
+                variant="secondary"
+                size="sm"
                 className="gap-2 shadow-lg"
                 onClick={handleWatchAnimation}
               >
@@ -298,7 +298,7 @@ export function InteractiveDemo() {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Header with Zakat Value */}
         <div className="text-center mb-2">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Your Zakat Due</p>
@@ -308,12 +308,12 @@ export function InteractiveDemo() {
                 <motion.div
                   key="zakat-value"
                   initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ 
-                    opacity: 1, 
+                  animate={{
+                    opacity: 1,
                     scale: isCelebrating ? [1, 1.08, 1] : 1,
                     y: 0,
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 0.5,
                     ease: M3_EASING.emphasizedDecelerate,
                     scale: isCelebrating ? {
@@ -325,7 +325,7 @@ export function InteractiveDemo() {
                   className="flex flex-col items-center"
                 >
                   {/* Main Zakat Value with celebration glow */}
-                  <motion.div 
+                  <motion.div
                     className={`relative ${isCelebrating ? 'zakat-glow' : ''}`}
                     animate={isCelebrating ? {
                       filter: [
@@ -338,8 +338,8 @@ export function InteractiveDemo() {
                   >
                     <div className="text-xl sm:text-2xl font-bold text-primary">
                       {phase === "zakat-reveal" ? (
-                        <NumberTicker 
-                          value={currentZakat} 
+                        <NumberTicker
+                          value={currentZakat}
                           formatFn={(v) => formatCurrency(v, "USD")}
                           duration={1.2}
                         />
@@ -348,7 +348,7 @@ export function InteractiveDemo() {
                       )}
                     </div>
                   </motion.div>
-                  
+
                   {/* Toggle Button */}
                   <motion.button
                     onClick={handleToggleMode}
@@ -362,7 +362,7 @@ export function InteractiveDemo() {
                   </motion.button>
                 </motion.div>
               ) : showSankey ? (
-                <motion.p 
+                <motion.p
                   key="calculating"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -372,7 +372,7 @@ export function InteractiveDemo() {
                   Calculating...
                 </motion.p>
               ) : (
-                <motion.p 
+                <motion.p
                   key="placeholder"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -385,29 +385,26 @@ export function InteractiveDemo() {
             </AnimatePresence>
           </div>
         </div>
-        
+
         {/* Animation Stages Container with staggered choreography */}
-        <motion.div 
+        <motion.div
           className="space-y-1.5 min-h-[180px]"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Stage 1: Manual Input - Reduced size */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
-            className={`transition-all duration-500 ${
-              showCashInput ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
+            className={`transition-all duration-500 ${showCashInput ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
           >
-            <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${
-              showCompletedCashValue ? "border-primary/20" : "border-border"
-            }`}>
+            <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${showCompletedCashValue ? "border-primary/20" : "border-border"
+              }`}>
               <div className="flex items-center gap-2">
-                <motion.div 
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
-                    showCompletedCashValue ? "bg-primary/20" : "bg-[hsl(var(--surface-container-high))]"
-                  }`}
+                <motion.div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${showCompletedCashValue ? "bg-primary/20" : "bg-[hsl(var(--surface-container-high))]"
+                    }`}
                   animate={phase === "typed-cash" ? { scale: [1, 1.1, 1] } : {}}
                   transition={{ duration: 0.3 }}
                 >
@@ -421,37 +418,34 @@ export function InteractiveDemo() {
                   <label className="text-[9px] text-muted-foreground mb-0.5 block">Cash & Savings</label>
                   <span className="text-sm font-semibold text-foreground">
                     {showCompletedCashValue ? "$24,500" : typedCash}
-                    <span className={`inline-block w-0.5 h-3.5 bg-primary ml-0.5 ${
-                      phase === "typing-cash" ? "animate-pulse" : "opacity-0"
-                    }`} />
+                    <span className={`inline-block w-0.5 h-3.5 bg-primary ml-0.5 ${phase === "typing-cash" ? "animate-pulse" : "opacity-0"
+                      }`} />
                   </span>
                 </div>
               </div>
             </div>
           </motion.div>
-          
+
           {/* Stage 2: Bank Statement Upload - Reduced size */}
           <AnimatePresence>
             {showUpload && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 12, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.4, ease: M3_EASING.emphasizedDecelerate }}
               >
-                <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${
-                  showRetirementUpload ? "border-primary/20" : "border-border"
-                }`}>
+                <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${showRetirementUpload ? "border-primary/20" : "border-border"
+                  }`}>
                   <div className="flex items-center gap-2">
-                    <motion.div 
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
-                        phase === "upload-complete" || showRetirementUpload ? "bg-primary/20" : "bg-muted"
-                      }`}
+                    <motion.div
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${phase === "upload-complete" || showRetirementUpload ? "bg-primary/20" : "bg-muted"
+                        }`}
                       animate={phase === "upload-complete" ? { scale: [1, 1.1, 1] } : {}}
                       transition={{ duration: 0.3 }}
                     >
                       {phase === "upload-processing" ? (
-                        <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                        <Spinner className="w-3.5 h-3.5 text-primary animate-spin" />
                       ) : showRetirementUpload ? (
                         <Check className="w-3.5 h-3.5 text-primary" />
                       ) : (
@@ -461,15 +455,13 @@ export function InteractiveDemo() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-foreground truncate">
                         {phase === "complete" || phase === "celebrating" || showRetirementUpload ? "Chase_Statement.pdf" : typedFilename}
-                        <span className={`inline-block w-0.5 h-2.5 bg-primary ml-0.5 ${
-                          phase === "upload-typing" ? "animate-pulse" : "opacity-0"
-                        }`} />
+                        <span className={`inline-block w-0.5 h-2.5 bg-primary ml-0.5 ${phase === "upload-typing" ? "animate-pulse" : "opacity-0"
+                          }`} />
                       </p>
-                      <p className={`text-[9px] transition-colors ${
-                        showRetirementUpload ? "text-primary" : "text-muted-foreground"
-                      }`}>
-                        {phase === "upload-processing" 
-                          ? "Extracting..." 
+                      <p className={`text-[9px] transition-colors ${showRetirementUpload ? "text-primary" : "text-muted-foreground"
+                        }`}>
+                        {phase === "upload-processing"
+                          ? "Extracting..."
                           : showRetirementUpload
                             ? `✓ ${formatCurrency(DEMO_DATA.investmentsExtracted, "USD")} investments`
                             : "Bank statement"
@@ -481,53 +473,50 @@ export function InteractiveDemo() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {/* Stage 3: 401(k) Statement Upload with Scan Animation */}
           <AnimatePresence>
             {showRetirementUpload && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 12, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.4, ease: M3_EASING.emphasizedDecelerate }}
               >
-                <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${
-                  isRetirementComplete ? "border-primary/20" : "border-border"
-                }`}>
+                <div className={`bg-[hsl(var(--surface-container-low))] rounded-lg p-2 border ${isRetirementComplete ? "border-primary/20" : "border-border"
+                  }`}>
                   <div className="flex items-center gap-2">
                     {/* Icon with scan animation */}
-                    <motion.div 
-                      className={`relative w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden transition-colors ${
-                        isRetirementComplete ? "bg-primary/20" : "bg-muted"
-                      }`}
+                    <motion.div
+                      className={`relative w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden transition-colors ${isRetirementComplete ? "bg-primary/20" : "bg-muted"
+                        }`}
                       animate={phase === "retirement-upload-complete" ? { scale: [1, 1.1, 1] } : {}}
                       transition={{ duration: 0.3 }}
                     >
                       {isRetirementComplete ? (
                         <Check className="w-3.5 h-3.5 text-primary" />
                       ) : (
-                        <Landmark className="w-3.5 h-3.5 text-muted-foreground" />
+                        <Bank className="w-3.5 h-3.5 text-muted-foreground" />
                       )}
                       {/* Scan line animation */}
                       {isRetirementScanning && (
-                        <motion.div 
+                        <motion.div
                           className="absolute left-0 right-0 h-0.5 bg-primary"
                           animate={{ y: [-14, 14, -14] }}
                           transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
                         />
                       )}
                     </motion.div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-foreground truncate">
                         {isRetirementComplete || phase === "retirement-scanning" ? "Fidelity_401k.pdf" : typedRetirementFilename}
-                        <span className={`inline-block w-0.5 h-2.5 bg-primary ml-0.5 ${
-                          phase === "retirement-upload-typing" ? "animate-pulse" : "opacity-0"
-                        }`} />
+                        <span className={`inline-block w-0.5 h-2.5 bg-primary ml-0.5 ${phase === "retirement-upload-typing" ? "animate-pulse" : "opacity-0"
+                          }`} />
                       </p>
                       <AnimatePresence mode="wait">
                         {isRetirementScanning ? (
-                          <motion.p 
+                          <motion.p
                             key="scanning"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -537,7 +526,7 @@ export function InteractiveDemo() {
                             Analyzing retirement account...
                           </motion.p>
                         ) : isRetirementComplete ? (
-                          <motion.p 
+                          <motion.p
                             key="complete"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -547,7 +536,7 @@ export function InteractiveDemo() {
                             ✓ {formatCurrency(DEMO_DATA.retirement401k, "USD")} → {DEMO_DATA.retirement401kZakatablePercent}% = {formatCurrency(DEMO_DATA.retirement401kZakatable, "USD")}
                           </motion.p>
                         ) : (
-                          <motion.p 
+                          <motion.p
                             key="pending"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -560,15 +549,15 @@ export function InteractiveDemo() {
                       </AnimatePresence>
                     </div>
                   </div>
-                  
+
                   {/* Scan progress bar */}
                   {isRetirementScanning && (
-                    <motion.div 
+                    <motion.div
                       className="mt-1.5 h-0.5 bg-muted rounded-full overflow-hidden"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      <motion.div 
+                      <motion.div
                         className="h-full bg-primary rounded-full"
                         style={{ width: `${scanProgress}%` }}
                         transition={{ duration: 0.05 }}
@@ -579,7 +568,7 @@ export function InteractiveDemo() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {/* Stage 4: Asset Aggregation Animation / Sankey Chart - Enlarged */}
           <AnimatePresence mode="wait">
             {(showAggregation || phase === "complete") && (
@@ -591,7 +580,7 @@ export function InteractiveDemo() {
                 transition={{ duration: 0.5, ease: M3_EASING.emphasizedDecelerate }}
               >
                 {showSankey ? (
-                  <AnimatedSankeyChart 
+                  <AnimatedSankeyChart
                     showZakatValue={showZakatValue}
                     isAnimating={isAnimating && !["celebrating", "complete"].includes(phase)}
                     isCelebrating={isCelebrating}
@@ -611,7 +600,7 @@ export function InteractiveDemo() {
                           key={i}
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: asset.color }}
-                          animate={{ 
+                          animate={{
                             scale: [1, 1.3, 1],
                             opacity: [0.6, 1, 0.6]
                           }}
@@ -630,12 +619,11 @@ export function InteractiveDemo() {
             )}
           </AnimatePresence>
         </motion.div>
-        
+
         {/* Summary row */}
-        <motion.div 
-          className={`pt-2 border-t border-border flex justify-between items-center text-xs transition-opacity duration-500 ${
-            showSankey ? "opacity-100" : "opacity-50"
-          }`}
+        <motion.div
+          className={`pt-2 border-t border-border flex justify-between items-center text-xs transition-opacity duration-500 ${showSankey ? "opacity-100" : "opacity-50"
+            }`}
           initial={{ opacity: 0 }}
           animate={{ opacity: showSankey ? 1 : 0.5 }}
         >
@@ -652,13 +640,13 @@ export function InteractiveDemo() {
 }
 
 // Proper Sankey chart with top-edge alignment and multi-colored Zakat flows
-function AnimatedSankeyChart({ 
-  showZakatValue, 
+function AnimatedSankeyChart({
+  showZakatValue,
   isAnimating,
   isCelebrating,
   isMobile = false,
   selectedMode
-}: { 
+}: {
   showZakatValue: boolean;
   isAnimating: boolean;
   isCelebrating: boolean;
@@ -671,76 +659,76 @@ function AnimatedSankeyChart({
   const nodeWidth = isMobile ? 6 : 8;
   const leftPadding = isMobile ? 4 : 6;
   const rightPadding = isMobile ? 4 : 6;
-  
+
   // Assets with both raw value (for bar height) and zakatable value (for flow thickness)
   // In optimized mode, 401(k) zakatable = 65% of vested value
   const assets = [
-    { 
-      name: "Cash", 
-      rawValue: DEMO_DATA.cashValue, 
+    {
+      name: "Cash",
+      rawValue: DEMO_DATA.cashValue,
       zakatableValue: DEMO_DATA.cashValue, // 100% zakatable
-      color: ASSET_COLORS.cash 
+      color: ASSET_COLORS.cash
     },
-    { 
-      name: "Investments", 
-      rawValue: DEMO_DATA.investmentsExtracted, 
+    {
+      name: "Investments",
+      rawValue: DEMO_DATA.investmentsExtracted,
       zakatableValue: DEMO_DATA.investmentsExtracted, // 100% zakatable
-      color: ASSET_COLORS.investments 
+      color: ASSET_COLORS.investments
     },
-    { 
-      name: "401(k)", 
+    {
+      name: "401(k)",
       rawValue: DEMO_DATA.retirement401k, // Always show full vested value for bar
-      zakatableValue: selectedMode === "conservative" 
+      zakatableValue: selectedMode === "conservative"
         ? DEMO_DATA.retirement401k // 100% in conservative
         : DEMO_DATA.retirement401kZakatable, // 65% in optimized
-      color: ASSET_COLORS.retirement 
+      color: ASSET_COLORS.retirement
     },
-    { 
-      name: "Other", 
-      rawValue: DEMO_DATA.otherAssets, 
+    {
+      name: "Other",
+      rawValue: DEMO_DATA.otherAssets,
       zakatableValue: DEMO_DATA.otherAssets, // 100% zakatable
-      color: ASSET_COLORS.other 
+      color: ASSET_COLORS.other
     },
   ];
-  
+
   // Total raw value for bar sizing, total zakatable for flow sizing
   const totalRawValue = assets.reduce((sum, a) => sum + a.rawValue, 0);
   const totalZakatableValue = assets.reduce((sum, a) => sum + a.zakatableValue, 0);
-  const currentZakat = selectedMode === "conservative" 
-    ? DEMO_DATA.conservativeZakat 
+  const currentZakat = selectedMode === "conservative"
+    ? DEMO_DATA.conservativeZakat
     : DEMO_DATA.optimizedZakat;
-  
+
   // Available height for the chart content
   const topMargin = 8;
   const bottomMargin = 16; // Space for label
   const availableHeight = height - topMargin - bottomMargin;
-  
+
   // Left side: Asset nodes - proportional heights based on RAW value (full bar)
   const assetSpacing = 3;
   const totalSpacing = assetSpacing * (assets.length - 1);
   const leftNodeAreaHeight = availableHeight;
-  
+
   let leftY = topMargin;
   const assetNodes = assets.map((asset) => {
     const rawProportion = asset.rawValue / totalRawValue;
     const zakatableProportion = asset.zakatableValue / totalZakatableValue;
     const nodeHeight = Math.max(10, rawProportion * (leftNodeAreaHeight - totalSpacing));
-    const node = { 
-      ...asset, 
-      y: leftY, 
-      height: nodeHeight, 
+    const node = {
+      ...asset,
+      y: leftY,
+      height: nodeHeight,
       rawProportion,
       zakatableProportion,
     };
     leftY += nodeHeight + assetSpacing;
     return node;
   });
-  
+
   // Center node (Net Zakatable) - spans the full height of incoming flows
   const centerX = width * 0.48;
   const centerY = topMargin;
   const centerHeight = availableHeight;
-  
+
   // Calculate flow positions on center node
   // Flow thickness is based on ZAKATABLE proportion (not raw)
   // 401(k) flow should be smaller than its bar in optimized mode
@@ -750,7 +738,7 @@ function AnimatedSankeyChart({
     const proportionalHeight = asset.zakatableProportion * centerHeight;
     // Cap flow at asset bar height (can't be larger than source bar)
     const flowThickness = Math.min(proportionalHeight, asset.height);
-    
+
     const position = {
       asset,
       sourceY: asset.y + asset.height / 2,
@@ -762,22 +750,22 @@ function AnimatedSankeyChart({
     centerFlowY += proportionalHeight;
     return position;
   });
-  
+
   // Zakat node - height proportional to zakat rate (2.5%)
   const zakatX = width - rightPadding - nodeWidth;
   const zakatProportion = currentZakat / totalZakatableValue;
   const zakatHeight = Math.max(30, zakatProportion * centerHeight * 4); // Scale up for visibility
   const zakatY = centerY; // Top-aligned
-  
+
   // Calculate each asset's contribution to Zakat (proportional to zakatable share)
   // Right flows start from TOP edge of where left flow enters center (top-aligned)
   let zakatFlowY = zakatY;
   const zakatFlowPositions = flowPositions.map((flow) => {
     const zakatContribution = flow.asset.zakatableProportion * zakatHeight;
-    
+
     // Right flow starts from TOP of where left flow enters center node
     const rightFlowSourceY = flow.topY + zakatContribution / 2;
-    
+
     const position = {
       ...flow,
       rightSourceY: rightFlowSourceY,
@@ -788,12 +776,12 @@ function AnimatedSankeyChart({
     zakatFlowY += zakatContribution;
     return position;
   });
-  
+
   // Generate curved path for Sankey flows
   const generatePath = (
-    startX: number, 
-    startY: number, 
-    endX: number, 
+    startX: number,
+    startY: number,
+    endX: number,
     endY: number,
     thickness: number
   ) => {
@@ -806,21 +794,21 @@ function AnimatedSankeyChart({
       Z
     `;
   };
-  
+
   return (
     <div className="flex justify-center py-0.5">
       <svg width={width} height={height} className="overflow-visible">
         <defs>
           {/* Glow filter for celebration */}
           <filter id="zakatGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
-        
+
         {/* Asset nodes (left) and flows to center - staggered animation */}
         {flowPositions.map((flow, i) => (
           <g key={flow.asset.name}>
@@ -834,14 +822,14 @@ function AnimatedSankeyChart({
               fill={flow.asset.color}
               initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
               animate={{ scaleY: 1, opacity: 1 }}
-              transition={{ 
-                duration: 0.4, 
+              transition={{
+                duration: 0.4,
                 delay: i * 0.08,
-                ease: M3_EASING.emphasizedDecelerate 
+                ease: M3_EASING.emphasizedDecelerate
               }}
-              style={{ transformOrigin: `${leftPadding + nodeWidth/2}px ${flow.asset.y + flow.asset.height/2}px` }}
+              style={{ transformOrigin: `${leftPadding + nodeWidth / 2}px ${flow.asset.y + flow.asset.height / 2}px` }}
             />
-            
+
             {/* Flow from asset to center - maintaining asset color, stacked on center */}
             <motion.path
               d={generatePath(
@@ -857,7 +845,7 @@ function AnimatedSankeyChart({
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
             />
-            
+
             {/* Asset label */}
             <motion.text
               x={leftPadding + nodeWidth + 4}
@@ -871,7 +859,7 @@ function AnimatedSankeyChart({
             </motion.text>
           </g>
         ))}
-        
+
         {/* Center node (Net Zakatable) - spans full height */}
         <motion.rect
           x={centerX}
@@ -883,9 +871,9 @@ function AnimatedSankeyChart({
           initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
           animate={{ scaleY: 1, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.35, ease: M3_EASING.emphasizedDecelerate }}
-          style={{ transformOrigin: `${centerX + nodeWidth/2}px ${centerY + centerHeight/2}px` }}
+          style={{ transformOrigin: `${centerX + nodeWidth / 2}px ${centerY + centerHeight / 2}px` }}
         />
-        
+
         {/* Multi-colored Zakat flows - each asset's color continues to Zakat node */}
         {/* Right flows start from TOP edge of where left flow enters (top-aligned) */}
         {zakatFlowPositions.map((flow, i) => (
@@ -905,7 +893,7 @@ function AnimatedSankeyChart({
             transition={{ duration: 0.5, delay: 0.5 + i * 0.06 }}
           />
         ))}
-        
+
         {/* Zakat node with celebration animation - proportional height */}
         <motion.rect
           x={zakatX}
@@ -916,20 +904,20 @@ function AnimatedSankeyChart({
           fill={ASSET_COLORS.zakat}
           filter={isCelebrating ? "url(#zakatGlow)" : undefined}
           initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
-          animate={{ 
-            scaleY: 1, 
+          animate={{
+            scaleY: 1,
             opacity: showZakatValue ? 1 : 0,
             scale: isCelebrating ? [1, 1.1, 1] : 1,
           }}
-          transition={{ 
-            duration: 0.5, 
+          transition={{
+            duration: 0.5,
             delay: 0.6,
             ease: M3_EASING.emphasizedDecelerate,
             scale: isCelebrating ? { duration: 1, repeat: Infinity, repeatType: "reverse" } : undefined
           }}
-          style={{ transformOrigin: `${zakatX + nodeWidth/2}px ${zakatY + zakatHeight/2}px` }}
+          style={{ transformOrigin: `${zakatX + nodeWidth / 2}px ${zakatY + zakatHeight / 2}px` }}
         />
-        
+
         {/* Zakat label with mode indicator */}
         {showZakatValue && (
           <motion.g
@@ -955,7 +943,7 @@ function AnimatedSankeyChart({
             </text>
           </motion.g>
         )}
-        
+
         {/* Center node label */}
         <motion.text
           x={centerX + nodeWidth / 2}

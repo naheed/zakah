@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Plus, ArrowLeft, Wallet, Loader2 } from 'lucide-react';
+import { Plus, ArrowLeft, Wallet, Spinner } from '@phosphor-icons/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAssetPersistence } from '@/hooks/useAssetPersistence';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ export default function Assets() {
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <Spinner className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -108,7 +108,7 @@ export default function Assets() {
             <main className="max-w-4xl mx-auto px-4 py-8">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <Spinner className="w-8 h-8 animate-spin text-primary" />
                     </div>
                 ) : accounts.length === 0 ? (
                     /* Empty State */

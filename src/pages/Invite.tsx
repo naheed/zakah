@@ -4,7 +4,7 @@ import { useReferral } from '@/hooks/useReferral';
 import { useUsageMetrics } from '@/hooks/useUsageMetrics';
 import { formatLargeNumber, formatCount } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Lock, Calculator, Heart } from 'lucide-react';
+import { ArrowRight, Lock, Calculator, Heart } from '@phosphor-icons/react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { InteractiveDemo } from '@/components/zakat/landing/InteractiveDemo';
