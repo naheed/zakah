@@ -1,4 +1,5 @@
-import zakatflowLogo from "@/assets/zakatflow-logo.png";
+// Using wordmark from public folder for better caching
+const zakatflowLogo = "/ZF_WordMark_2848_1500.png";
 import { Link } from "react-router-dom";
 
 interface LogoProps {
