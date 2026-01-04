@@ -75,8 +75,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   // ...
 
 
-  // Get user's first name
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0];
+
 
   const handleLoadCalculation = (calc: SavedCalculation) => {
     if (onLoadCalculation) {

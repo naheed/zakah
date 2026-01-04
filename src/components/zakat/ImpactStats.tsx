@@ -35,27 +35,11 @@ export function ImpactStats({
     totalAssetsCalculated,
     currency = 'USD',
     isLoading = false,
-    /** Custom title override (default: "Your Impact") */
-    title?: string;
-    /** Custom footer message */
-    footer?: React.ReactNode;
-}
-
-    /**
-     * ImpactStats - Universal component for displaying user impact
-     * Design: Material 3 Expressive (Clean, Big Numbers, Soulful)
-     */
-    export function ImpactStats({
-        totalReferrals,
-        totalZakatCalculated,
-        totalAssetsCalculated,
-        currency = 'USD',
-        isLoading = false,
-        className,
-        variant = 'card',
-        title = "Your Impact",
-        footer
-    }: ImpactStatsProps) {
+    className,
+    variant = 'card',
+    title = "Your Impact",
+    footer
+}: ImpactStatsProps) {
 
     if (isLoading) {
         return <ImpactStatsSkeleton variant={variant} className={className} />;
