@@ -1,4 +1,3 @@
-```typescript
 import { useState, useRef, useCallback } from "react";
 import { UploadSimple, FileDoc, Image, SpinnerGap, CheckCircle, WarningCircle, Sparkle } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +6,6 @@ import { ZakatFormData } from "@/lib/zakatCalculations";
 import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-// Add import
 import { ExtractionReview } from "./ExtractionReview";
 import { ExtractionLineItem } from "@/hooks/useDocumentParsingV2";
 
@@ -49,9 +47,9 @@ export function DocumentUpload({
   const { toast } = useToast();
   // ... existing state
   const [reviewData, setReviewData] = useState<{
-     data: ExtractedResult;
-     lineItems: ExtractionLineItem[];
-     file: File;
+    data: ExtractedResult;
+    lineItems: ExtractionLineItem[];
+    file: File;
   } | null>(null);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -140,13 +138,13 @@ export function DocumentUpload({
       // Don't finish yet! Show Review UI.
       // We need to map the raw response to lineItems if they aren't already in V2 format
       // Or if data.lineItems exists (it should from V2 API)
-      
-      const lineItems = data.lineItems || []; 
-      
+
+      const lineItems = data.lineItems || [];
+
       setReviewData({
-         data: data,
-         lineItems: lineItems,
-         file: file
+        data: data,
+        lineItems: lineItems,
+        file: file
       });
       setStatus("success"); // But we show review UI instead of success check
 

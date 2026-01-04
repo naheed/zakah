@@ -59,47 +59,46 @@ export function AssetStepWrapper({
     // If user is logged in, persist to V2 tables
     if (user && doc.institutionName) {
       try {
-        try {
-          // Use granular line items if available (from Review UI), otherwise fallback to legacy conversion
-          let lineItems: { description: string; amount: number; inferredCategory: string; confidence: number }[] = [];
+        // Use granular line items if available (from Review UI), otherwise fallback to legacy conversion
+        let lineItems: { description: string; amount: number; inferredCategory: string; confidence: number }[] = [];
 
-          if (doc.lineItems && doc.lineItems.length > 0) {
-            lineItems = doc.lineItems;
-          } else {
-            // Legacy fallback
-            lineItems = Object.entries(doc.extractedData)
-              .filter(([_, value]) => typeof value === 'number' && value > 0)
-              .map(([field, value]) => ({
-                description: field,
-                amount: value as number,
-                inferredCategory: mapLegacyFieldToCategory(field),
-                confidence: 0.9,
-              }));
-          }
-
-          if (lineItems.length > 0) {
-            const result = await persistExtraction(
-              doc.institutionName,
-              doc.documentDate,
-              lineItems,
-              stepId,
-              doc.accountName,
-              doc.accountId
-            );
-
-            if (result.success && !result.skipped) {
-              toast({
-                title: "Saved to your accounts",
-                description: `${doc.institutionName} data saved`,
-              });
-            }
-            // If skipped, no toast - duplicate was silently ignored
-          }
-        } catch (err) {
-          console.error('Error persisting to V2:', err);
-          // Don't show error to user - V2 persistence is silent enhancement
+        if (doc.lineItems && doc.lineItems.length > 0) {
+          lineItems = doc.lineItems;
+        } else {
+          // Legacy fallback
+          lineItems = Object.entries(doc.extractedData)
+            .filter(([_, value]) => typeof value === 'number' && value > 0)
+            .map(([field, value]) => ({
+              description: field,
+              amount: value as number,
+              inferredCategory: mapLegacyFieldToCategory(field),
+              confidence: 0.9,
+            }));
         }
+
+        if (lineItems.length > 0) {
+          const result = await persistExtraction(
+            doc.institutionName,
+            doc.documentDate,
+            lineItems,
+            stepId,
+            doc.accountName,
+            doc.accountId
+          );
+
+          if (result.success && !result.skipped) {
+            toast({
+              title: "Saved to your accounts",
+              description: `${doc.institutionName} data saved`,
+            });
+          }
+          // If skipped, no toast - duplicate was silently ignored
+        }
+      } catch (err) {
+        console.error('Error persisting to V2:', err);
+        // Don't show error to user - V2 persistence is silent enhancement
       }
+    }
   }, [onDocumentAdded, user, persistExtraction, stepId, toast]);
 
   return (
