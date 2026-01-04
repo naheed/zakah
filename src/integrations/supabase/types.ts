@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           institution_name: string
+          logo_url: string | null
           mask: string | null
           metadata: Json | null
           name: string
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           id?: string
           institution_name: string
+          logo_url?: string | null
           mask?: string | null
           metadata?: Json | null
           name: string
@@ -41,6 +43,7 @@ export type Database = {
           created_at?: string
           id?: string
           institution_name?: string
+          logo_url?: string | null
           mask?: string | null
           metadata?: Json | null
           name?: string
