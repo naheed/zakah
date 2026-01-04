@@ -178,24 +178,28 @@ export function useAssetPersistence() {
 
         // 3. Strict Fallback
         if (mask) {
-            console.log(`[findAccount] NO MATCH: Mask was provided and not found. Treating as NEW account.`);
+            console.log(`[findAccount] NO MATCH: Mask was provided but not found. Treating as NEW account.`);
             return null;
         }
 
+        // CRITICAL: Disable loose fallback. 
+        // If we have no Mask and no Name, do NOT assumes it matches the single existing account.
+        // This causes merging of different accounts (Start -> Schwab 1, Upload -> Schwab 2 (merges)).
+        // Safe behavior: Create new account.
         if (candidates.length === 1) {
             const candidate = candidates[0];
-            console.log(`[findAccount] MATCH: Fallback to single candidate: ${candidate.id}`);
-            return {
-                ...candidate,
-                type: candidate.type as AccountType,
-                mask: candidate.mask || '',
-            } as AssetAccount;
+            // Only use fallback if we have *something* to match on, or if we want to be very aggressive.
+            // Given the bug report, we must be conservative.
+            // If accountName is present, we checked it above. If we are here, Name didn't match or wasn't provided.
+
+            // DEBUG LOG keeping trace of what would have happened
+            console.log(`[findAccount] Single candidate found (${candidate.name}) but no Name/ID match provided. SKIPPING fallback to prevent merge.`);
+
+            // return candidate; // DISABLED
         }
 
-        console.log(`[findAccount] NO MATCH: Multiple candidates and no specific match criteria.`);
-        return null; // Ambiguous - create new? Or ask user? For now create new to be safe?
-        // Actually if multiple candidates exist and we can't match, creating a new one might just add to the mess?
-        // But safer than merging into wrong one.
+        console.log(`[findAccount] NO MATCH: Multiple candidates or no specific match criteria. Creating NEW.`);
+        return null;
     }, []);
 
     // Create a new account

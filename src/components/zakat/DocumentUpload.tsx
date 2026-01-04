@@ -158,6 +158,8 @@ export function DocumentUpload({
         accountName = file.name.replace(/\.(pdf|png|jpg|jpeg|webp)$/i, "").trim();
       }
 
+      console.log(`[DocumentUpload] Finalizing upload. Filename="${file.name}", AI_Name="${data.accountName}", Final_Name="${accountName}"`);
+
       // Call the extraction callback (updates form values)
       onDataExtracted(extractedFields);
 
