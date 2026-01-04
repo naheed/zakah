@@ -36,6 +36,7 @@ import { ImpactStats } from "../ImpactStats";
 import { useSavedCalculations } from "@/hooks/useSavedCalculations";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { useReferral } from "@/hooks/useReferral";
+import { MiniReportWidget } from "../dashboard/MiniReportWidget";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -50,7 +51,7 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   const { data: metrics, isLoading: metricsLoading } = useUsageMetrics();
   const { stats: userStats, fetchStats: fetchUserStats } = useReferral();
   const { fetchAccounts } = useAssetPersistence();
-  const { stepIndex, uploadedDocuments, lastUpdated, startFresh } = useZakatPersistence();
+  const { stepIndex, uploadedDocuments, lastUpdated, startFresh, reportReady } = useZakatPersistence();
   const [accounts, setAccounts] = useState<AssetAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(false);
 
@@ -201,8 +202,56 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
             {/* 2. Primary Action Area */}
             <div className="space-y-6">
 
-              {/* Scenario A: User has a saved calculation (Hero Summary) */}
-              {user && latestCalculation && !savedLoading && (
+              {/* DASHBOARD LOGIC */}
+
+              {/* 1. Continue In Progress (Priority: High) */}
+              {hasLocalSession && !reportReady && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4 px-1">
+                      <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">In Progress</h2>
+                    </div>
+                    <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group shadow-lg shadow-primary/5" onClick={onNext}>
+                      <CardContent className="p-6 md:p-8 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+                            <Play weight="fill" className="w-6 h-6 ml-0.5" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">Continue where you left off</p>
+                            <p className="text-muted-foreground">Step {stepIndex + 1} • Saved {getRelativeTime()}</p>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </CardContent>
+                    </Card>
+                    <div className="text-center mt-3">
+                      <Button variant="link" size="sm" onClick={startFresh} className="text-muted-foreground hover:text-destructive text-xs">
+                        Discard and start over
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* If user also has a past report, show it as a secondary widget */}
+                  {user && latestCalculation && !savedLoading && (
+                    <div className="pt-2 border-t border-dashed border-border/50">
+                      <div className="flex items-center justify-between mb-3 px-1 mt-4">
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Past Reports</h2>
+                        <Link to="/calculations" className="text-xs text-primary hover:underline">View All</Link>
+                      </div>
+                      <MiniReportWidget calculation={latestCalculation} onLoad={handleLoadCalculation} />
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* 2. Latest Report Hero (if NO active session or if Report Ready) */}
+              {((user && latestCalculation && !savedLoading) || reportReady) && (!hasLocalSession || reportReady) && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -241,43 +290,19 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                       </Button>
                     </CardContent>
                   </Card>
-                </motion.div>
-              )}
 
-              {/* Scenario B: Anonymous Session (Continue) */}
-              {!user && hasLocalSession && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="flex items-center justify-between mb-4 px-1">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">In Progress</h2>
-                  </div>
-                  <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group" onClick={onNext}>
-                    <CardContent className="p-6 md:p-8 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center">
-                          <Play weight="fill" className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">Continue where you left off</p>
-                          <p className="text-muted-foreground">Step {stepIndex + 1} • Saved {getRelativeTime()}</p>
-                        </div>
-                      </div>
-                      <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </CardContent>
-                  </Card>
-                  <div className="text-center mt-4">
-                    <Button variant="link" size="sm" onClick={startFresh} className="text-muted-foreground hover:text-destructive">
-                      Start over completely
+                  {/* Start New Button below Report */}
+                  <div className="flex justify-center pt-6">
+                    <Button variant="outline" onClick={onNext} className="gap-2 text-muted-foreground hover:text-foreground">
+                      <Calculator className="w-4 h-4" />
+                      Start a new calculation
                     </Button>
                   </div>
                 </motion.div>
               )}
 
-              {/* Scenario C: No Data (Start New) - Only show if NO latest calculation used as hero */}
-              {(!latestCalculation || !user) && !hasLocalSession && (
+              {/* 3. Empty State (Start New) - Only if NOTHING else matches */}
+              {(!latestCalculation || !user) && !hasLocalSession && !reportReady && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -295,16 +320,6 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                     </div>
                   </Button>
                 </motion.div>
-              )}
-
-              {/* Always show "Start New" as a secondary option if Hero is present */}
-              {user && latestCalculation && (
-                <div className="flex justify-center pt-4">
-                  <Button variant="outline" onClick={onNext} className="gap-2 text-muted-foreground hover:text-foreground">
-                    <Calculator className="w-4 h-4" />
-                    Start a new calculation
-                  </Button>
-                </div>
               )}
 
             </div>

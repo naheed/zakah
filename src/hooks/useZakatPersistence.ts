@@ -10,12 +10,14 @@ interface PersistedData {
   stepIndex: number;
   lastUpdated: string;
   uploadedDocuments: UploadedDocument[];
+  reportReady?: boolean;
 }
 
 export function useZakatPersistence() {
   const [formData, setFormData] = useState<ZakatFormData>(defaultFormData);
   const [stepIndex, setStepIndex] = useState(0);
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+  const [reportReady, setReportReady] = useState(false);
   const [hasExistingSession, setHasExistingSession] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -52,6 +54,7 @@ export function useZakatPersistence() {
           setFormData(parsed.formData);
           setStepIndex(parsed.stepIndex);
           setUploadedDocuments(parsed.uploadedDocuments || []);
+          setReportReady(parsed.reportReady || false);
         } else {
           // Data couldn't be decrypted (likely session key was cleared)
           // Start fresh - this is a privacy feature
@@ -81,6 +84,7 @@ export function useZakatPersistence() {
         stepIndex,
         lastUpdated: new Date().toISOString(),
         uploadedDocuments: sanitizedDocuments,
+        reportReady,
       };
 
       try {
@@ -92,7 +96,7 @@ export function useZakatPersistence() {
     }
 
     saveData();
-  }, [formData, stepIndex, uploadedDocuments, isLoaded]);
+  }, [formData, stepIndex, uploadedDocuments, isLoaded, reportReady]);
 
   const updateFormData = useCallback((updates: Partial<ZakatFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -137,12 +141,16 @@ export function useZakatPersistence() {
   // Only show dialog on initial load, not when navigating within active session
   const showSessionDialog = hasExistingSession && !sessionDismissed;
 
+  const markReportReady = useCallback(() => {
+    setReportReady(true);
+  }, []);
+
   return {
     formData,
     setFormData,
     stepIndex,
-    setStepIndex,
     updateFormData,
+    setStepIndex, // Keep setStepIndex as it's a direct setter for stepIndex
     uploadedDocuments,
     addDocument,
     removeDocument,
@@ -152,5 +160,7 @@ export function useZakatPersistence() {
     startFresh,
     resetCalculator,
     isLoaded,
+    reportReady,
+    markReportReady,
   };
 }

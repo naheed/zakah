@@ -16,6 +16,7 @@ import { useTrackCalculation } from "@/hooks/useTrackCalculation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useReferral } from "@/hooks/useReferral";
 import { useSavedCalculations } from "@/hooks/useSavedCalculations";
+import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Confetti, useConfetti } from "@/components/ui/confetti";
@@ -134,6 +135,13 @@ export function ResultsStep({
       refreshCalculations();
     }
   }, [user, refreshCalculations]);
+
+  const { markReportReady } = useZakatPersistence();
+
+  // Mark report as ready for the dashboard when viewing results
+  useEffect(() => {
+    markReportReady();
+  }, [markReportReady]);
 
   const handleSignIn = () => {
     navigate('/auth');
