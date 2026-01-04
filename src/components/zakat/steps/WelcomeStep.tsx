@@ -174,12 +174,14 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
         <div className="flex items-center justify-between px-6 py-4">
           <Logo size="md" />
           <div className="flex items-center gap-2">
-            <Link to="/settings">
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
-                <GearSix className="h-5 w-5" weight="bold" />
-                <span className="sr-only">Settings</span>
-              </Button>
-            </Link>
+            {!user && (
+              <Link to="/settings">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
+                  <GearSix className="h-5 w-5" weight="bold" />
+                  <span className="sr-only">Settings</span>
+                </Button>
+              </Link>
+            )}
             {user && <UserMenu />}
           </div>
         </div>
