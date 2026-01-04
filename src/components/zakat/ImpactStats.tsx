@@ -35,9 +35,27 @@ export function ImpactStats({
     totalAssetsCalculated,
     currency = 'USD',
     isLoading = false,
-    className,
-    variant = 'card'
-}: ImpactStatsProps) {
+    /** Custom title override (default: "Your Impact") */
+    title?: string;
+    /** Custom footer message */
+    footer?: React.ReactNode;
+}
+
+    /**
+     * ImpactStats - Universal component for displaying user impact
+     * Design: Material 3 Expressive (Clean, Big Numbers, Soulful)
+     */
+    export function ImpactStats({
+        totalReferrals,
+        totalZakatCalculated,
+        totalAssetsCalculated,
+        currency = 'USD',
+        isLoading = false,
+        className,
+        variant = 'card',
+        title = "Your Impact",
+        footer
+    }: ImpactStatsProps) {
 
     if (isLoading) {
         return <ImpactStatsSkeleton variant={variant} className={className} />;
@@ -59,7 +77,7 @@ export function ImpactStats({
         >
             <div className="space-y-1">
                 <h3 className="text-xs font-bold tracking-widest text-amber-700/70 dark:text-amber-500/70 uppercase">
-                    Your Impact
+                    {title}
                 </h3>
             </div>
 
@@ -109,7 +127,11 @@ export function ImpactStats({
                 </div>
             )}
 
-            {!meetsThreshold && totalReferrals > 0 && (
+            {footer ? (
+                <div className="pt-2">
+                    {footer}
+                </div>
+            ) : !meetsThreshold && totalReferrals > 0 && (
                 <div className="pt-2">
                     <p className="text-xs text-amber-800/50 dark:text-amber-500/50 italic">
                         Help {5 - totalReferrals} more people to see aggregated community impact

@@ -1,4 +1,5 @@
 import zakatflowLogo from "@/assets/zakatflow-logo.png";
+import { Link } from "react-router-dom";
 
 interface LogoProps {
   className?: string;
@@ -13,10 +14,12 @@ const sizeClasses = {
 
 export function Logo({ className = "", size = "md" }: LogoProps) {
   return (
-    <img
-      src={zakatflowLogo}
-      alt="ZakatFlow"
-      className={`${sizeClasses[size]} w-auto object-contain object-left dark:brightness-0 dark:invert dark:opacity-[0.87] ${className}`}
-    />
+    <Link to="/" className={`block hover:opacity-80 transition-opacity ${className}`}>
+      <img
+        src={zakatflowLogo}
+        alt="ZakatFlow"
+        className={`${sizeClasses[size]} w-auto object-contain object-left dark:brightness-0 dark:invert dark:opacity-[0.87]`}
+      />
+    </Link>
   );
 }

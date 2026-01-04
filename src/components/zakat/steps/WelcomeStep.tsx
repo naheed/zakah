@@ -14,39 +14,14 @@ import {
 } from "@phosphor-icons/react";
 import { Logo } from "../Logo";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { useUsageMetrics } from "@/hooks/useUsageMetrics";
-import { useAssetPersistence } from "@/hooks/useAssetPersistence";
-import { useZakatPersistence } from "@/hooks/useZakatPersistence";
-import { formatLargeNumber, formatCount } from "@/lib/formatters";
-import { Skeleton } from "@/components/ui/skeleton";
-import { MetricsDisplay } from "../MetricsDisplay";
-import { ReferralWidget } from "../ReferralWidget";
-import { RecentCalculations } from "../RecentCalculations";
-import { UserMenu } from "../UserMenu";
-import { SavedCalculation } from "@/hooks/useSavedCalculations";
-import { InteractiveDemo } from "../landing/InteractiveDemo";
-import { Footer } from "../Footer";
-import { AccountCard } from "@/components/assets/AccountCard";
-import { Card, CardContent } from "@/components/ui/card";
-import { motion, Variants } from "framer-motion";
-import { useState, useEffect } from "react";
-import { AssetAccount } from "@/types/assets";
-import { ImpactStats } from "../ImpactStats";
-import { useSavedCalculations } from "@/hooks/useSavedCalculations";
-import { formatCurrency } from "@/lib/zakatCalculations";
+import { useReferral } from "@/hooks/useReferral";
 
-interface WelcomeStepProps {
-  onNext: () => void;
-  onLoadCalculation?: (calculation: SavedCalculation) => void;
-}
-
-// Asset coverage badges
-const assetTypes = ["401(k) / IRA", "Crypto & NFTs", "Real Estate", "Stocks & RSUs"];
+// ... existing imports ...
 
 export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
   const { data: metrics, isLoading: metricsLoading } = useUsageMetrics();
+  const { stats: userStats, fetchStats: fetchUserStats } = useReferral();
   const { fetchAccounts } = useAssetPersistence();
   const { stepIndex, uploadedDocuments, lastUpdated, startFresh } = useZakatPersistence();
   const [accounts, setAccounts] = useState<AssetAccount[]>([]);
@@ -63,8 +38,42 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
         setAccounts(data);
         setAccountsLoading(false);
       });
+      // Fetch user referral stats
+      fetchUserStats();
     }
-  }, [user, fetchAccounts]);
+  }, [user, fetchAccounts, fetchUserStats]);
+
+  // Determine which stats to show
+  const showUserImpact = userStats && userStats.totalReferrals > 5;
+  const impactData = showUserImpact ? {
+    title: "Your Impact",
+    referrals: userStats.totalReferrals,
+    assets: userStats.totalAssetsCalculated,
+    zakat: userStats.totalZakatCalculated,
+    footer: null
+  } : {
+    title: "Community Impact",
+    referrals: metrics?.allTime.uniqueSessions || 0,
+    assets: metrics?.allTime.totalAssets,
+    zakat: metrics?.allTime.totalZakat,
+    footer: (
+      <div className="pt-4 text-xs text-muted-foreground">
+        <p className="font-medium text-amber-900/80 dark:text-amber-100/80 mb-1">Join the movement</p>
+        <p className="text-muted-foreground/70">
+          Help 5 people calculate their Zakat to unlock your personal impact dashboard.
+        </p>
+      </div>
+    )
+  };
+
+  // Get user's first name
+  const firstName = user?.user_metadata?.full_name?.split(' ')[0];
+
+  // ... rest of component ...
+
+  // Replace lines 150-162 (ImpactStats render)
+  // ...
+
 
   // Get user's first name
   const firstName = user?.user_metadata?.full_name?.split(' ')[0];
@@ -148,14 +157,17 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
                 </h1>
 
                 {/* Impact Widget - Top Motivation */}
-                {(metrics || metricsLoading) && (
+                {/* Impact Widget - Top Motivation */}
+                {(metrics || metricsLoading || userStats) && (
                   <div className="flex justify-center mt-6">
                     <ImpactStats
                       variant="flat"
-                      isLoading={metricsLoading}
-                      totalReferrals={metrics?.allTime.uniqueSessions || 0}
-                      totalAssetsCalculated={metrics?.allTime.totalAssets}
-                      totalZakatCalculated={metrics?.allTime.totalZakat}
+                      isLoading={metricsLoading && !userStats}
+                      totalReferrals={impactData.referrals}
+                      totalAssetsCalculated={impactData.assets}
+                      totalZakatCalculated={impactData.zakat}
+                      title={impactData.title}
+                      footer={impactData.footer}
                       className="scale-90 md:scale-100 origin-top"
                     />
                   </div>
