@@ -9,18 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Phase 3.6: Footer & Personal Metrics**
-  - `PersonalMetrics.tsx` component with privacy threshold (≥5 users)
-  - Footer added to WelcomeStep dashboard view
-  - PersonalMetrics integrated into LogoutSuccess page
-
 ### Planned
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug
   - Add user name, Hijri date, madhab settings to PDF
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
+
+---
+## [0.8.0] - 2026-01-03
+
+### Added
+- **UI/UX Overhaul: Signout Experience**
+  - **Redesigned Logout Page**: Material 3 Expressive layout with centered branding and "soulful" aesthetics.
+  - **Universal Impact Widget**: New `ImpactStats` component unifying referral/impact metrics across the app.
+  - **Delightful Animations**: Framer Motion spring animations for all key metrics (People, Assets, Zakat).
+  - **Privacy Logic**: Smart thresholding (hides aggregates until 5+ referrals) to protect user privacy.
+- **Results Page Polish**
+  - **Animated Zakat Hero**: Final Zakat amount now counts up smoothly on load.
+  - **Mobile Optimization**: Removed decimal animations for cleaner mobile display and layout stability.
+- **Assets**
+  - Updated OG Image to new logo for better social sharing previews.
+
+### Changed
+- **Visual Language**: Shifted towards "Material 3 Expressive" with softer ambers, rounded corners, and large typography.
+- **Component Standardization**: Deprecated ad-hoc `PersonalMetrics` usages in favor of `ImpactStats`.
 
 ---
 ## [0.7.0] - 2026-01-03

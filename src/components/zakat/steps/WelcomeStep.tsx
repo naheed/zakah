@@ -32,6 +32,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion, Variants } from "framer-motion";
 import { useState, useEffect } from "react";
 import { AssetAccount } from "@/types/assets";
+import { ImpactStats } from "../ImpactStats";
+import { useSavedCalculations } from "@/hooks/useSavedCalculations";
+import { formatCurrency } from "@/lib/zakatCalculations";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -108,199 +111,254 @@ export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
     },
   };
 
+  // Fetch saved calculations for the Summary Card
+  const { calculations: savedCalculations, loading: savedLoading } = useSavedCalculations();
+  const latestCalculation = savedCalculations[0];
+
   // UNIFIED DASHBOARD - shown to logged-in users OR anonymous users with session
   if (user || hasLocalSession) {
     return (
-      <div className="min-h-[85vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50">
+      <div className="min-h-[85vh] flex flex-col font-work-sans">
+        {/* Header - Minimal, no sign-in button here (moved to center card for anon) */}
+        <div className="flex items-center justify-between px-6 py-4">
           <Logo size="sm" />
           <div className="flex items-center gap-2">
             <Link to="/settings">
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <GearSix className="h-4 w-4" weight="bold" />
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
+                <GearSix className="h-5 w-5" weight="bold" />
                 <span className="sr-only">Settings</span>
               </Button>
             </Link>
-            {user ? (
-              <UserMenu />
-            ) : (
-              <Button variant="outline" size="sm" onClick={signInWithGoogle} className="gap-2">
-                <SignIn className="h-4 w-4" weight="bold" />
-                Sign in
-              </Button>
-            )}
+            {user && <UserMenu />}
           </div>
         </div>
 
-        <div className="flex-1 px-4 py-8 overflow-y-auto">
-          <div className="w-full max-w-4xl mx-auto space-y-8">
-            {/* Welcome + Primary CTA */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
+        <div className="flex-1 px-4 md:px-6 py-8 md:py-12 overflow-y-auto">
+          <div className="w-full max-w-3xl mx-auto space-y-12">
+
+            {/* 1. Hero Section: Greeting & Impact */}
+            <div className="space-y-8 text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground mb-4">
+                  Welcome back{firstName ? `, ${firstName}` : ''}
                 </h1>
-                <p className="text-muted-foreground mt-1">Ready to calculate your Zakat?</p>
-              </div>
-              <Button onClick={onNext} size="lg" className="gap-2 shadow-lg shadow-primary/20">
-                + New Calculation
-                <ArrowRight className="w-4 h-4" weight="bold" />
-              </Button>
+
+                {/* Impact Widget - Top Motivation */}
+                {(metrics || metricsLoading) && (
+                  <div className="flex justify-center mt-6">
+                    <ImpactStats
+                      variant="flat"
+                      isLoading={metricsLoading}
+                      totalReferrals={metrics?.allTime.uniqueSessions || 0}
+                      totalAssetsCalculated={metrics?.allTime.totalAssets}
+                      totalZakatCalculated={metrics?.allTime.totalZakat}
+                      className="scale-90 md:scale-100 origin-top"
+                    />
+                  </div>
+                )}
+              </motion.div>
             </div>
 
-            {/* Anonymous user: Continue Session Banner */}
-            {!user && hasLocalSession && (
-              <Card className="border-primary/30 bg-primary/5">
-                <CardContent className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Play className="w-5 h-5 text-primary" weight="fill" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">Continue where you left off</p>
-                      <p className="text-sm text-muted-foreground">
-                        Step {stepIndex + 1} • Last saved {getRelativeTime()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={startFresh}>
-                      Start fresh
-                    </Button>
-                    <Button onClick={onNext} size="sm" className="gap-1">
-                      Continue <ArrowRight className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* 2. Primary Action Area */}
+            <div className="space-y-6">
 
-            {/* Anonymous user: Sign in prompt */}
-            {!user && (
-              <Card className="border-dashed">
-                <CardContent className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-3">
-                    <Lock className="w-5 h-5 text-muted-foreground" weight="duotone" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Sign in to save your progress</p>
-                      <p className="text-xs text-muted-foreground">Sync across devices and access past calculations</p>
-                    </div>
+              {/* Scenario A: User has a saved calculation (Hero Summary) */}
+              {user && latestCalculation && !savedLoading && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <div className="flex items-center justify-between mb-4 px-1">
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Latest Report</h2>
+                    <Link to="/calculations" className="text-xs font-medium text-primary hover:underline">
+                      View all history →
+                    </Link>
                   </div>
-                  <Button variant="outline" size="sm" onClick={signInWithGoogle} className="gap-2">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                    </svg>
-                    Sign in with Google
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* P0: Recent Calculations - only for logged-in users */}
-            {user && (
-              <section>
-                <RecentCalculations onLoadCalculation={handleLoadCalculation} limit={3} />
-              </section>
-            )}
+                  <Card
+                    className="border-0 ring-1 ring-border/50 bg-gradient-to-br from-card to-muted/20 hover:to-muted/40 transition-all cursor-pointer group relative overflow-hidden shadow-xl shadow-primary/5"
+                    onClick={() => handleLoadCalculation(latestCalculation)}
+                  >
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <Calculator size={120} weight="fill" />
+                    </div>
 
-            {/* P1: Assets Preview - only for logged-in users */}
-            {user && (
-              <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-medium text-muted-foreground">Your Accounts</h2>
-                  <Link to="/assets">
-                    <Button variant="ghost" size="sm" className="text-xs gap-1">
-                      View All <ArrowRight className="w-3 h-3" />
-                    </Button>
-                  </Link>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {/* Quick add card - always first */}
-                  <Link to="/assets/add">
-                    <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer h-full flex flex-col items-center justify-center min-h-[100px]">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mb-2">
-                        <span className="text-lg text-muted-foreground">+</span>
+                    <CardContent className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center justify-between relative z-10">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 text-primary/80 font-medium text-sm">
+                          <CheckCircle weight="fill" />
+                          <span>Calculated {getRelativeTime() || 'recently'}</span>
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-1">
+                          {formatCurrency(latestCalculation.zakat_due || 0)}
+                        </h3>
+                        <p className="text-muted-foreground font-medium">Zakat Due</p>
                       </div>
-                      <p className="text-sm font-medium text-muted-foreground">Add Account</p>
+
+                      <Button size="lg" className="shrink-0 gap-2 rounded-full px-6 h-12 shadow-lg shadow-primary/20">
+                        View Full Report
+                        <ArrowRight weight="bold" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Scenario B: Anonymous Session (Continue) */}
+              {!user && hasLocalSession && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <div className="flex items-center justify-between mb-4 px-1">
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">In Progress</h2>
+                  </div>
+                  <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group" onClick={onNext}>
+                    <CardContent className="p-6 md:p-8 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center">
+                          <Play weight="fill" className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">Continue where you left off</p>
+                          <p className="text-muted-foreground">Step {stepIndex + 1} • Saved {getRelativeTime()}</p>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </CardContent>
+                  </Card>
+                  <div className="text-center mt-4">
+                    <Button variant="link" size="sm" onClick={startFresh} className="text-muted-foreground hover:text-destructive">
+                      Start over completely
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Scenario C: No Data (Start New) - Only show if NO latest calculation used as hero */}
+              {(!latestCalculation || !user) && !hasLocalSession && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex justify-center"
+                >
+                  <Button
+                    onClick={onNext}
+                    size="lg"
+                    className="h-16 px-10 text-lg rounded-full shadow-2xl shadow-primary/20 hover:scale-105 transition-transform"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Calculator weight="fill" className="w-6 h-6" />
+                      <span>Start New Calculation</span>
                     </div>
-                  </Link>
-                  {/* Show up to 3 account cards */}
-                  {accountsLoading ? (
-                    <>
-                      <Skeleton className="h-[100px] rounded-lg" />
-                      <Skeleton className="h-[100px] rounded-lg" />
-                    </>
-                  ) : (
-                    accounts.slice(0, 3).map(account => (
-                      <AccountCard key={account.id} account={account} compact />
-                    ))
-                  )}
+                  </Button>
+                </motion.div>
+              )}
+
+              {/* Always show "Start New" as a secondary option if Hero is present */}
+              {user && latestCalculation && (
+                <div className="flex justify-center pt-4">
+                  <Button variant="outline" onClick={onNext} className="gap-2 text-muted-foreground hover:text-foreground">
+                    <Calculator className="w-4 h-4" />
+                    Start a new calculation
+                  </Button>
                 </div>
-                {accounts.length === 0 && !accountsLoading && (
-                  <p className="text-xs text-muted-foreground">
-                    Upload statements to auto-fill your Zakat calculation.
-                  </p>
-                )}
-              </section>
+              )}
+
+            </div>
+
+            {/* 3. Auth Prompt (Anonymous Only) */}
+            {!user && (
+              <div className="max-w-md mx-auto">
+                <Card className="border-dashed border-2 bg-muted/30">
+                  <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                    <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm">
+                      <Lock className="w-5 h-5 text-muted-foreground" weight="duotone" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground">Sign in to save your progress</p>
+                      <p className="text-sm text-muted-foreground mt-1">Sync across devices and verify your history.</p>
+                    </div>
+                    <Button variant="default" onClick={signInWithGoogle} className="w-full gap-2">
+                      <SignIn className="w-4 h-4" />
+                      Sign in with Google
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             )}
 
-            {/* P3: Referral Widget - only for logged-in users */}
+            {/* 4. Secondary Features (Assets & Referrals) */}
             {user && (
-              <section>
-                <ReferralWidget variant="compact" />
-              </section>
-            )}
+              <div className="grid md:grid-cols-2 gap-6 pt-8 border-t border-border/50">
+                {/* Assets Mini-Dashboard */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-muted-foreground flex items-center gap-2">
+                      <FolderOpen className="w-4 h-4" />
+                      Assets
+                    </h3>
+                    <Link to="/assets" className="text-xs text-primary hover:underline">Manage All</Link>
+                  </div>
 
-            {/* Quick Actions */}
-            <section className="pt-4 border-t border-border">
-              <div className="flex flex-wrap gap-2">
-                {user && (
-                  <Link to="/calculations">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <FolderOpen className="w-3.5 h-3.5" weight="duotone" />
-                      All Calculations
+                  {/* Quick Add Button */}
+                  <Link to="/assets/add">
+                    <Button variant="outline" className="w-full h-auto py-4 justify-start gap-4 hover:border-primary hover:bg-primary/5 group">
+                      <div className="w-8 h-8 rounded-full bg-muted group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                        <span className="text-xl leading-none mb-0.5 text-muted-foreground group-hover:text-primary">+</span>
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-foreground">Connect Account</div>
+                        <div className="text-xs text-muted-foreground">Link bank, crypto, or manual entry</div>
+                      </div>
                     </Button>
                   </Link>
-                )}
-                <Link to="/methodology">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <BookOpen className="w-3.5 h-3.5" weight="duotone" />
-                    Methodology
-                  </Button>
-                </Link>
-              </div>
-            </section>
 
-            {/* Metrics footer */}
-            {(metricsLoading || (metrics && metrics.allTime.calculations > 0)) && (
-              <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground pt-4">
-                {metricsLoading ? (
-                  <Skeleton className="h-4 w-48" />
-                ) : (
-                  metrics && (
-                    <>
-                      <span className="flex items-center gap-1">
-                        <Calculator className="w-3 h-3 text-primary" weight="fill" />
-                        {formatCount(metrics.allTime.calculations)} total calculations
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3 text-primary" weight="fill" />
-                        {formatLargeNumber(metrics.allTime.totalZakat)} Zakat calculated
-                      </span>
-                    </>
-                  )
-                )}
+                  {/* Account List Summary */}
+                  <div className="space-y-2">
+                    {accountsLoading ? (
+                      <div className="h-10 bg-muted/20 rounded animate-pulse" />
+                    ) : accounts.length > 0 ? (
+                      accounts.slice(0, 2).map(acc => (
+                        <div key={acc.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50 transition-colors">
+                          <span className="font-medium truncate max-w-[120px]">{acc.institution_name}</span>
+                          <span className="text-muted-foreground">{formatCurrency(acc.balance || 0)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic pl-1">No accounts connected yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Referral Widget */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-muted-foreground flex items-center gap-2">
+                    <Heart className="w-4 h-4" />
+                    Impact
+                  </h3>
+                  <ReferralWidget variant="compact" />
+                </div>
               </div>
             )}
+
           </div>
         </div>
 
-        {/* Footer - matching landing page */}
-        <Footer className="mt-auto" />
+        {/* Simple Footer Text */}
+        <div className="py-6 text-center text-xs text-muted-foreground/60">
+          <Link to="/methodology" className="hover:text-foreground transition-colors mr-4">Methodology</Link>
+          <Link to="/privacy" className="hover:text-foreground transition-colors mr-4">Privacy</Link>
+          <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+        </div>
+
       </div>
     );
   }

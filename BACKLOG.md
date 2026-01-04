@@ -223,12 +223,52 @@ User → Portfolio → Account → Snapshot → LineItem
 
 ---
 
-## Priority Order (Recommended)
+---
+
+## Phase 12: Knowledge & Trust (FAQ) ⬜ PLANNED
+
+> **Goal:** Address common user questions directly on the landing page to build trust and reduce hesitation.
+
+- [ ] Create `FAQ.tsx` component (Accordion style)
+- [ ] Add "Frequently Asked Questions" section to Landing Page (below Hero/About)
+- [ ] Content curation:
+    - "Is my data private?"
+    - "Which scholar approved this?" (Link to Methodology)
+    - "How is Zakat calculated on 401k?"
+    - "Can I save my progress?"
+
+---
+
+## Phase 13: Distribution Strategy (Donations) ⬜ PLANNED
+
+> **Goal:** Rethink Zakat distribution. Empower users to investigate 8 different categories of recipients and explore aligned charities.
+
+- [ ] Create `/distribute` (or `/donate`) visual exploration page
+- [ ] **Educational Layer**: Interactive guide to the 8 categories of Zakat recipients (Masakeen, Fuqara, etc.)
+- [ ] **Discovery Layer**: "Browse by Impact" - connect categories to vetted charities
+- [ ] **Mission**: Move beyond "donate and forget" to "strategic spiritual impact"
+
+---
+
+## Phase 14: Community Feedback ⬜ PLANNED
+
+> **Goal:** Engage users in the product roadmap via a feedback/upvote system.
+
+- [ ] Create `/feedback` page
+- [ ] Simple internal implementation vs. Canny/Upvoty integration? 
+    - *Decision*: Build simple internal version first (Submission Form + Upvote List)
+- [ ] Features: "Submit Idea", "Report Bug", "Upvote Feature"
+
+---
+
+## Priority Order (Revised)
 
 | # | Phase | Status | Next Action |
 |---|-------|--------|-------------|
-| 1 | Phase 9: Download Report | 🔄 In Progress | Fix font bug, create content spec |
-| 2 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
-| 3 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
-| 4 | Phase 5: Charity Program | ⬜ Planned | Design `/charities` page |
-| 5 | Phase 7: Migration | ⬜ Future | Design consent flow |
+| 1 | Phase 12: Knowledge (FAQ) | ⬜ Planned | Create FAQ Component |
+| 2 | Phase 13: Distribution | ⬜ Planned | Design Categories Diagram |
+| 3 | Phase 14: Feedback | ⬜ Planned | Evaluate tools vs build |
+| 4 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
+| 5 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
+| 6 | Phase 5: Charity Program | ⬜ Planned | Re-evaluate after Phase 13 |
+| 7 | Phase 7: Migration | ⬜ Future | Design consent flow |
