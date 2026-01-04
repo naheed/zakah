@@ -380,14 +380,15 @@ export function useAssetPersistence() {
         }
     }, [user, getOrCreatePortfolio, findAccount, createAccount, isDuplicateSnapshot, createSnapshot]);
 
-    // Fetch all accounts for current user
+    // Fetch all accounts for current user with computed balances
     const fetchAccounts = useCallback(async (): Promise<AssetAccount[]> => {
         if (!user) return [];
 
         const portfolioId = await getOrCreatePortfolio();
         if (!portfolioId) return [];
 
-        const { data, error } = await supabase
+        // Fetch accounts with latest snapshot's total_value as balance
+        const { data: accounts, error } = await supabase
             .from('asset_accounts')
             .select('*')
             .eq('portfolio_id', portfolioId)
@@ -398,12 +399,27 @@ export function useAssetPersistence() {
             return [];
         }
 
-        // Cast database strings to typed enums
-        return (data || []).map(account => ({
-            ...account,
-            type: account.type as AccountType,
-            mask: account.mask || '',
-        })) as AssetAccount[];
+        // For each account, fetch the latest snapshot to get balance
+        const accountsWithBalances = await Promise.all(
+            (accounts || []).map(async (account) => {
+                const { data: latestSnapshot } = await supabase
+                    .from('asset_snapshots')
+                    .select('total_value')
+                    .eq('account_id', account.id)
+                    .order('statement_date', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                return {
+                    ...account,
+                    type: account.type as AccountType,
+                    mask: account.mask || '',
+                    balance: latestSnapshot?.total_value || 0,
+                } as AssetAccount;
+            })
+        );
+
+        return accountsWithBalances;
     }, [user, getOrCreatePortfolio]);
 
     // Fetch snapshots for an account

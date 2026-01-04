@@ -388,52 +388,82 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               </div>
             )}
 
-            {/* 4. Secondary Features (Assets) - Removed redundant ReferralWidget since we moved it up */}
+            {/* 4. Assets Section - Option A: Minimal List */}
             {user && (
-              <div className="grid md:grid-cols-2 gap-6 pt-8 border-t border-border/50">
-                {/* Assets Mini-Dashboard */}
-                <div className="space-y-4 md:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-muted-foreground flex items-center gap-2">
-                      <FolderOpen className="w-4 h-4" />
-                      Assets
-                    </h3>
-                    <Link to="/assets" className="text-xs text-primary hover:underline">Manage All</Link>
+              <div className="pt-8 border-t border-border/50">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-muted-foreground flex items-center gap-2">
+                    <FolderOpen className="w-4 h-4" />
+                    Assets
+                  </h3>
+                  <Link to="/assets" className="text-xs text-primary hover:underline">Manage All</Link>
+                </div>
+
+                {accountsLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
                   </div>
+                ) : accounts.length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Total Value Header */}
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Value</p>
+                      <p className="text-2xl font-bold text-foreground">
+                        {formatCurrency(accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0))}
+                      </p>
+                    </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Quick Add Button */}
-                    <Link to="/assets/add">
-                      <Button variant="outline" className="w-full h-auto py-4 justify-start gap-4 hover:border-primary hover:bg-primary/5 group">
-                        <div className="w-8 h-8 rounded-full bg-muted group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                          <span className="text-xl leading-none mb-0.5 text-muted-foreground group-hover:text-primary">+</span>
-                        </div>
-                        <div className="text-left">
-                          <div className="font-bold text-foreground">Connect Account</div>
-                          <div className="text-xs text-muted-foreground">Link bank, crypto, or manual entry</div>
-                        </div>
-                      </Button>
-                    </Link>
-
-                    {/* Account List Summary */}
+                    {/* Account List */}
                     <div className="space-y-2">
-                      {accountsLoading ? (
-                        <div className="h-10 bg-muted/20 rounded animate-pulse" />
-                      ) : accounts.length > 0 ? (
-                        accounts.slice(0, 2).map(acc => (
-                          <div key={acc.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50 transition-colors bg-muted/20">
-                            <span className="font-medium truncate max-w-[120px]">{acc.institution_name}</span>
-                            <span className="text-muted-foreground">{formatCurrency(acc.balance || 0)}</span>
+                      {accounts.slice(0, 4).map(acc => (
+                        <Link
+                          key={acc.id}
+                          to={`/assets/${acc.id}`}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors border border-border/50 group"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                              {acc.name || 'Unnamed Account'}
+                            </p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-2">
+                              <span>{acc.institution_name}</span>
+                              <span className="text-muted-foreground/50">•</span>
+                              <span>Added {new Date(acc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            </p>
                           </div>
-                        ))
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-xs text-muted-foreground italic border border-dashed rounded opacity-50">
-                          No accounts connected
-                        </div>
+                          <p className="font-semibold text-foreground ml-4">
+                            {formatCurrency(acc.balance || 0)}
+                          </p>
+                        </Link>
+                      ))}
+                      {accounts.length > 4 && (
+                        <p className="text-xs text-muted-foreground text-center py-2">
+                          +{accounts.length - 4} more accounts
+                        </p>
                       )}
                     </div>
+
+                    {/* Add Account Button */}
+                    <Link to="/assets/add">
+                      <Button variant="outline" className="w-full">
+                        + Add Account
+                      </Button>
+                    </Link>
                   </div>
-                </div>
+                ) : (
+                  /* Empty State */
+                  <div className="text-center py-8 border border-dashed border-border rounded-lg">
+                    <FolderOpen className="w-8 h-8 mx-auto text-muted-foreground/50 mb-3" />
+                    <p className="text-sm text-muted-foreground mb-4">No accounts added yet</p>
+                    <Link to="/assets/add">
+                      <Button variant="outline" size="sm">
+                        + Add Account
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
