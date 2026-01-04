@@ -121,6 +121,7 @@ export function useAssetPersistence() {
         accountName?: string,
         mask?: string
     ): Promise<AssetAccount | null> => {
+        console.log(`[findAccount] Search: Inst="${institutionName}", Name="${accountName}", Mask="${mask}"`);
         const normalizedInstitution = institutionName.toLowerCase().trim();
 
         const { data, error } = await supabase
@@ -128,7 +129,10 @@ export function useAssetPersistence() {
             .select('*')
             .eq('portfolio_id', portfolioId);
 
-        if (error || !data) return null;
+        if (error || !data) {
+            console.log('[findAccount] DB Error or no data', error);
+            return null;
+        }
 
         // Filter by Institution first
         const candidates = data.filter(account => {
@@ -139,18 +143,22 @@ export function useAssetPersistence() {
                 existingInstitution === normalizedInstitution;
         });
 
+        console.log(`[findAccount] Candidates for "${institutionName}": ${candidates.length}`, candidates.map(c => ({ id: c.id, name: c.name, mask: c.mask })));
+
         if (candidates.length === 0) return null;
 
         // 1. Exact Mask Match (Highest Priority)
-        // If we have a mask, and an account matches it, that's the one.
         if (mask) {
             const maskMatch = candidates.find(a => a.mask === mask);
             if (maskMatch) {
+                console.log(`[findAccount] MATCH: Exact mask match found: ${maskMatch.id}`);
                 return {
                     ...maskMatch,
                     type: maskMatch.type as AccountType,
                     mask: maskMatch.mask || '',
                 } as AssetAccount;
+            } else {
+                console.log(`[findAccount] Mask provided ("${mask}") but no candidate matched it.`);
             }
         }
 
@@ -159,6 +167,7 @@ export function useAssetPersistence() {
             const normalizedAccountName = accountName.toLowerCase().trim();
             const nameMatch = candidates.find(a => (a.name || '').toLowerCase().trim() === normalizedAccountName);
             if (nameMatch) {
+                console.log(`[findAccount] MATCH: Exact name match found: ${nameMatch.id}`);
                 return {
                     ...nameMatch,
                     type: nameMatch.type as AccountType,
@@ -168,14 +177,14 @@ export function useAssetPersistence() {
         }
 
         // 3. Strict Fallback
-        // ONLY if we have NO mask to distinguish, AND only one candidate exists.
-        // If a mask IS provided but didn't match above, it means it's a NEW account (different ID).
-        if (mask) return null;
+        if (mask) {
+            console.log(`[findAccount] NO MATCH: Mask was provided and not found. Treating as NEW account.`);
+            return null;
+        }
 
-        // If no mask provided, but we have a single candidate for this institution, 
-        // we might assume it's the same one (legacy behavior).
         if (candidates.length === 1) {
             const candidate = candidates[0];
+            console.log(`[findAccount] MATCH: Fallback to single candidate: ${candidate.id}`);
             return {
                 ...candidate,
                 type: candidate.type as AccountType,
@@ -183,7 +192,10 @@ export function useAssetPersistence() {
             } as AssetAccount;
         }
 
-        return null;
+        console.log(`[findAccount] NO MATCH: Multiple candidates and no specific match criteria.`);
+        return null; // Ambiguous - create new? Or ask user? For now create new to be safe?
+        // Actually if multiple candidates exist and we can't match, creating a new one might just add to the mess?
+        // But safer than merging into wrong one.
     }, []);
 
     // Create a new account
@@ -194,6 +206,7 @@ export function useAssetPersistence() {
         name?: string,
         mask?: string
     ): Promise<string | null> => {
+        console.log(`[createAccount] Creating new account: "${name}" (${mask || 'no-mask'})`);
         const { data, error } = await supabase
             .from('asset_accounts')
             .insert({
@@ -211,6 +224,7 @@ export function useAssetPersistence() {
             return null;
         }
 
+        console.log(`[createAccount] Created successfully: ${data?.id}`);
         return data?.id || null;
     }, []);
 
@@ -219,6 +233,7 @@ export function useAssetPersistence() {
         accountId: string,
         statementDate: string
     ): Promise<boolean> => {
+        console.log(`[isDuplicateSnapshot] Checking for existing snapshot. Account="${accountId}", Date="${statementDate}"`);
         const { data, error } = await supabase
             .from('asset_snapshots')
             .select('id')
@@ -226,7 +241,9 @@ export function useAssetPersistence() {
             .eq('statement_date', statementDate)
             .single();
 
-        return !!data && !error;
+        const exists = !!data && !error;
+        console.log(`[isDuplicateSnapshot] Result: ${exists ? 'Duplicate found' : 'No duplicate'}`);
+        return exists;
     }, []);
 
     // Create snapshot with line items
@@ -236,6 +253,8 @@ export function useAssetPersistence() {
         lineItems: ExtractionLineItem[],
         method: 'MANUAL' | 'PDF_PARSE' | 'PLAID_API' = 'PDF_PARSE'
     ): Promise<string | null> => {
+        console.log(`[createSnapshot] Creating snapshot. Account="${accountId}", Items=${lineItems.length}`);
+
         // Calculate total value from line items
         const totalValue = lineItems.reduce((sum, item) => sum + item.amount, 0);
 
@@ -256,6 +275,8 @@ export function useAssetPersistence() {
             console.error('Error creating snapshot:', snapshotError);
             return null;
         }
+
+        console.log(`[createSnapshot] Snapshot created: ${snapshot.id}. Inserting ${lineItems.length} line items.`);
 
         // Create line items
         const lineItemsToInsert = lineItems.map(item => ({
@@ -288,9 +309,11 @@ export function useAssetPersistence() {
         accountName?: string,  // Account name
         accountId?: string     // Account ID / Mask
     ): Promise<PersistResult> => {
+        console.log(`[persistExtraction] Called with: Inst="${institutionName}", Name="${accountName}", ID="${accountId}"`);
         if (!user) {
             return { success: false, error: 'User not authenticated' };
         }
+        // ...
 
         setLoading(true);
         setError(null);

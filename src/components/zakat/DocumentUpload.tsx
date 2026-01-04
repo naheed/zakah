@@ -123,6 +123,8 @@ export function DocumentUpload({
         throw new Error(data.error);
       }
 
+      console.log("[DocumentUpload] Edge Function Response Raw Data:", data);
+
       setStatus("success");
       setLastResult(data);
       setShowCelebration(true);
@@ -148,6 +150,14 @@ export function DocumentUpload({
         }
       }
 
+      // ...
+      // Determine account name (prioritize AI extraction, fallback to filename)
+      let accountName = data.accountName;
+      if (!accountName && file.name) {
+        // Fallback: Use filename without extension
+        accountName = file.name.replace(/\.(pdf|png|jpg|jpeg|webp)$/i, "").trim();
+      }
+
       // Call the extraction callback (updates form values)
       onDataExtracted(extractedFields);
 
@@ -156,7 +166,7 @@ export function DocumentUpload({
         onDocumentAdded({
           fileName: file.name,
           institutionName: data.institutionName || file.name,
-          accountName: data.accountName,
+          accountName: accountName,
           accountId: data.accountId,
           documentDate: data.documentDate,
           summary: data.summary || "Financial data extracted",
