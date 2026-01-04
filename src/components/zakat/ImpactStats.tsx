@@ -23,6 +23,10 @@ interface ImpactStatsProps {
     className?: string;
     /** Variant: 'card' (default) or 'flat' */
     variant?: 'card' | 'flat';
+    /** Custom title override (default: "Your Impact") */
+    title?: string;
+    /** Custom footer message */
+    footer?: React.ReactNode;
 }
 
 /**

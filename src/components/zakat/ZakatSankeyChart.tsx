@@ -182,7 +182,8 @@ export function ZakatSankeyChart({
         nodeSpacing={0} // Tight spacing for split nodes
         nodeBorderWidth={0}
         nodeBorderColor={{ from: 'color', modifiers: [['darker', 0.8]] }}
-        linkOpacity={0.6}
+        linkOpacity={isDark ? 0.8 : 0.6}
+        linkBlendMode="normal"
         linkHoverOthersOpacity={0.1}
         linkContract={0} // No gap between links
         enableLinkGradient={true}
