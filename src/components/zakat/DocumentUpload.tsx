@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { UploadSimple, FileDoc, Image, SpinnerGap, CheckCircle, WarningCircle, Sparkle } from "@phosphor-icons/react";
+import { UploadSimple, FileDoc, Image, SpinnerGap, CheckCircle, WarningCircle, Sparkle, FolderOpen } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/runtimeClient";
 import { ZakatFormData } from "@/lib/zakatCalculations";
@@ -8,10 +8,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ExtractionReview } from "./ExtractionReview";
 import { ExtractionLineItem } from "@/hooks/useDocumentParsingV2";
+import { AccountChip } from "./AccountChip";
+import { AssetAccount, AssetLineItem } from "@/types/assets";
+import { getAffectedQuestionLabels } from "@/lib/accountImportMapper";
+import { Button } from "@/components/ui/button";
+
+/** Account with line items for selection */
+export interface AccountWithLineItems extends AssetAccount {
+  lineItems?: AssetLineItem[];
+}
 
 interface DocumentUploadProps {
   onDataExtracted: (data: Partial<ZakatFormData>) => void;
   onDocumentAdded?: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
+  /** Existing accounts to show for selection (filtered by context) */
+  existingAccounts?: AccountWithLineItems[];
+  /** Called when user selects an existing account */
+  onAccountSelected?: (account: AccountWithLineItems) => void;
   acceptedTypes?: string;
   label?: string;
   description?: string;
@@ -41,15 +54,18 @@ interface ReviewData {
 export function DocumentUpload({
   onDataExtracted,
   onDocumentAdded,
+  existingAccounts = [],
+  onAccountSelected,
   acceptedTypes = ".pdf,.png,.jpg,.jpeg,.webp",
   label = "Upload Statement",
-  description = "Upload a bank statement, brokerage statement, or retirement account statement",
+  description = "AI extracts line items from your statement",
 }: DocumentUploadProps) {
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [reviewData, setReviewData] = useState<ReviewData | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -288,7 +304,7 @@ export function DocumentUpload({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <input
         ref={fileInputRef}
         type="file"
@@ -296,6 +312,65 @@ export function DocumentUpload({
         onChange={handleFileSelect}
         className="hidden"
       />
+
+      {/* Existing Accounts Selection (Option A: Inline Expansion) */}
+      {existingAccounts.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-muted-foreground">Use an existing account:</p>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+            {existingAccounts.map(account => (
+              <AccountChip
+                key={account.id}
+                name={account.name || 'Unnamed Account'}
+                institutionName={account.institution_name}
+                balance={account.balance || 0}
+                updatedAt={account.updated_at || account.created_at}
+                selected={selectedAccountId === account.id}
+                onClick={() => {
+                  setSelectedAccountId(selectedAccountId === account.id ? null : account.id);
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Use Selected Button */}
+          {selectedAccountId && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Button
+                onClick={() => {
+                  const account = existingAccounts.find(a => a.id === selectedAccountId);
+                  if (account && onAccountSelected) {
+                    onAccountSelected(account);
+                    toast({
+                      title: 'Account imported',
+                      description: `Values from ${account.name} added to calculation`,
+                    });
+                    setSelectedAccountId(null);
+                    setStatus('success');
+                    setShowCelebration(true);
+                    setTimeout(() => setShowCelebration(false), 2000);
+                  }
+                }}
+                className="w-full"
+              >
+                <FolderOpen className="w-4 h-4 mr-2" />
+                Use {existingAccounts.find(a => a.id === selectedAccountId)?.name}
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex-1 border-t border-dashed border-border" />
+            <span>or upload new</span>
+            <div className="flex-1 border-t border-dashed border-border" />
+          </div>
+        </div>
+      )}
 
       <motion.div
         onClick={handleClick}
@@ -389,8 +464,7 @@ export function DocumentUpload({
           </div>
 
           <p className="text-xs text-muted-foreground/70 mt-3 max-w-xs mx-auto">
-            Documents are processed by AI to extract values. Only numeric values are saved;
-            document names and summaries are cleared when you close your browser.
+            You'll review extracted values before adding to your calculation.
           </p>
         </div>
       </motion.div>

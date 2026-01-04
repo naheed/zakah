@@ -1,8 +1,8 @@
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useState, useEffect } from "react";
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { StepContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "./QuestionLayout";
-import { DocumentUpload } from "./DocumentUpload";
+import { DocumentUpload, AccountWithLineItems } from "./DocumentUpload";
 import { StepDocumentsDisplay } from "./DocumentsManager";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { useDocumentExtraction } from "@/hooks/useDocumentExtraction";
@@ -10,6 +10,8 @@ import { useAssetPersistence, inferAccountTypeFromStep } from "@/hooks/useAssetP
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ProTip } from "./ProTip";
+import { QuestionContext, filterRelevantAccounts, mergeAccountIntoFormData } from "@/lib/accountImportMapper";
+import { supabase } from "@/integrations/supabase/runtimeClient";
 
 interface AssetStepWrapperProps {
   content: StepContent;
@@ -44,10 +46,99 @@ export function AssetStepWrapper({
   children,
 }: AssetStepWrapperProps) {
   const { handleDataExtracted } = useDocumentExtraction(stepId, data, updateData);
-  const { persistExtraction } = useAssetPersistence();
+  const { persistExtraction, fetchAccounts } = useAssetPersistence();
   const { user } = useAuth();
   const { toast } = useToast();
   const isHousehold = data.isHousehold;
+
+  // State for existing accounts
+  const [existingAccounts, setExistingAccounts] = useState<AccountWithLineItems[]>([]);
+
+  // Map stepId to question context for filtering
+  const getContextForStep = (stepId: string): QuestionContext => {
+    const mapping: Record<string, QuestionContext> = {
+      'liquid-assets': 'liquid-assets',
+      'investments': 'investments',
+      'retirement': 'retirement',
+      'crypto': 'crypto',
+      'precious-metals': 'precious-metals',
+      'real-estate': 'real-estate',
+      'business': 'business',
+      'trusts': 'trusts',
+      'liabilities': 'debts',
+    };
+    return mapping[stepId] || 'liquid-assets';
+  };
+
+  // Fetch and filter accounts for this step
+  useEffect(() => {
+    if (!user) {
+      setExistingAccounts([]);
+      return;
+    }
+
+    const loadAccounts = async () => {
+      try {
+        const accounts = await fetchAccounts();
+
+        // For each account, fetch line items
+        const accountsWithItems = await Promise.all(
+          accounts.map(async (account) => {
+            const { data: lineItems } = await supabase
+              .from('asset_line_items')
+              .select('*')
+              .eq('snapshot_id', (
+                // Get latest snapshot ID
+                await supabase
+                  .from('asset_snapshots')
+                  .select('id')
+                  .eq('account_id', account.id)
+                  .order('statement_date', { ascending: false })
+                  .limit(1)
+                  .single()
+              ).data?.id || '')
+              .limit(50);
+
+            return {
+              ...account,
+              lineItems: lineItems || [],
+            } as AccountWithLineItems;
+          })
+        );
+
+        // Filter by context and recency (6 months)
+        const context = getContextForStep(stepId);
+        const filtered = filterRelevantAccounts(accountsWithItems, context, 6);
+        setExistingAccounts(filtered);
+      } catch (err) {
+        console.error('Error loading accounts for step:', err);
+        setExistingAccounts([]);
+      }
+    };
+
+    loadAccounts();
+  }, [user, stepId, fetchAccounts]);
+
+  // Handle account selection - merge line items into form data
+  const handleAccountSelected = useCallback((account: AccountWithLineItems) => {
+    if (!account.lineItems || account.lineItems.length === 0) {
+      toast({
+        title: 'No data to import',
+        description: 'This account has no line items to import',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Merge line items into form data (cross-question mapping)
+    const updatedData = mergeAccountIntoFormData(data, account.lineItems);
+    updateData(updatedData);
+
+    toast({
+      title: 'Account imported',
+      description: `Values from ${account.name} added across all relevant fields`,
+    });
+  }, [data, updateData, toast]);
 
   // Wrap onDocumentAdded to also persist to V2 tables
   const handleDocumentAddedWithPersistence = useCallback(async (
@@ -124,11 +215,13 @@ export function AssetStepWrapper({
         onRemoveDocument={onRemoveDocument}
       />
 
-      {/* Document upload */}
+      {/* Document upload with existing accounts selection */}
       {showUpload && (
         <DocumentUpload
           onDataExtracted={handleDataExtracted}
           onDocumentAdded={handleDocumentAddedWithPersistence}
+          existingAccounts={existingAccounts}
+          onAccountSelected={handleAccountSelected}
           label={uploadLabel}
           description={uploadDescription}
         />
