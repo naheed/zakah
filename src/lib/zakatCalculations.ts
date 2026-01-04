@@ -546,29 +546,29 @@ export function calculateEnhancedAssetBreakdown(
 
   // Liquid Assets (cash only)
   const liquidItems: AssetItem[] = [];
-  if (data.checkingAccounts > 0) liquidItems.push({ name: 'Checking Accounts', value: data.checkingAccounts });
-  if (data.savingsAccounts > 0) liquidItems.push({ name: 'Savings Accounts', value: data.savingsAccounts });
-  if (data.cashOnHand > 0) liquidItems.push({ name: 'Cash on Hand', value: data.cashOnHand });
-  if (data.digitalWallets > 0) liquidItems.push({ name: 'Digital Wallets', value: data.digitalWallets });
-  if (data.foreignCurrency > 0) liquidItems.push({ name: 'Foreign Currency', value: data.foreignCurrency });
+  if (data.checkingAccounts > 0) liquidItems.push({ name: 'Checking Accounts', value: data.checkingAccounts, zakatablePercent: 1.0, zakatableAmount: data.checkingAccounts });
+  if (data.savingsAccounts > 0) liquidItems.push({ name: 'Savings Accounts', value: data.savingsAccounts, zakatablePercent: 1.0, zakatableAmount: data.savingsAccounts });
+  if (data.cashOnHand > 0) liquidItems.push({ name: 'Cash on Hand', value: data.cashOnHand, zakatablePercent: 1.0, zakatableAmount: data.cashOnHand });
+  if (data.digitalWallets > 0) liquidItems.push({ name: 'Digital Wallets', value: data.digitalWallets, zakatablePercent: 1.0, zakatableAmount: data.digitalWallets });
+  if (data.foreignCurrency > 0) liquidItems.push({ name: 'Foreign Currency', value: data.foreignCurrency, zakatablePercent: 1.0, zakatableAmount: data.foreignCurrency });
   const liquidTotal = liquidItems.reduce((s, i) => s + i.value, 0);
 
   // Precious Metals
   const metalsItems: AssetItem[] = [];
   if (data.hasPreciousMetals) {
-    if (data.goldValue > 0) metalsItems.push({ name: 'Gold', value: data.goldValue });
-    if (data.silverValue > 0) metalsItems.push({ name: 'Silver', value: data.silverValue });
+    if (data.goldValue > 0) metalsItems.push({ name: 'Gold', value: data.goldValue, zakatablePercent: 1.0, zakatableAmount: data.goldValue });
+    if (data.silverValue > 0) metalsItems.push({ name: 'Silver', value: data.silverValue, zakatablePercent: 1.0, zakatableAmount: data.silverValue });
   }
   const metalsTotal = metalsItems.reduce((s, i) => s + i.value, 0);
 
   // Crypto
   const cryptoItems: AssetItem[] = [];
   if (data.hasCrypto) {
-    if (data.cryptoCurrency > 0) cryptoItems.push({ name: 'Bitcoin/Ethereum', value: data.cryptoCurrency });
-    if (data.cryptoTrading > 0) cryptoItems.push({ name: 'Trading Altcoins', value: data.cryptoTrading });
-    if (data.stakedAssets > 0) cryptoItems.push({ name: 'Staked Assets', value: data.stakedAssets });
-    if (data.stakedRewardsVested > 0) cryptoItems.push({ name: 'Staking Rewards', value: data.stakedRewardsVested });
-    if (data.liquidityPoolValue > 0) cryptoItems.push({ name: 'Liquidity Pools', value: data.liquidityPoolValue });
+    if (data.cryptoCurrency > 0) cryptoItems.push({ name: 'Bitcoin/Ethereum', value: data.cryptoCurrency, zakatablePercent: 1.0, zakatableAmount: data.cryptoCurrency });
+    if (data.cryptoTrading > 0) cryptoItems.push({ name: 'Trading Altcoins', value: data.cryptoTrading, zakatablePercent: 1.0, zakatableAmount: data.cryptoTrading });
+    if (data.stakedAssets > 0) cryptoItems.push({ name: 'Staked Assets', value: data.stakedAssets, zakatablePercent: 1.0, zakatableAmount: data.stakedAssets });
+    if (data.stakedRewardsVested > 0) cryptoItems.push({ name: 'Staking Rewards', value: data.stakedRewardsVested, zakatablePercent: 1.0, zakatableAmount: data.stakedRewardsVested });
+    if (data.liquidityPoolValue > 0) cryptoItems.push({ name: 'Liquidity Pools', value: data.liquidityPoolValue, zakatablePercent: 1.0, zakatableAmount: data.liquidityPoolValue });
   }
   const cryptoTotal = cryptoItems.reduce((s, i) => s + i.value, 0);
 
@@ -576,7 +576,7 @@ export function calculateEnhancedAssetBreakdown(
   const investmentItems: AssetItem[] = [];
   const passiveZakatablePercent = data.calculationMode === 'conservative' ? 1.0 : 0.30;
   const passiveZakatableAmount = data.passiveInvestmentsValue * passiveZakatablePercent;
-  if (data.activeInvestments > 0) investmentItems.push({ name: 'Active Investments', value: data.activeInvestments, zakatablePercent: 1.0 });
+  if (data.activeInvestments > 0) investmentItems.push({ name: 'Active Investments', value: data.activeInvestments, zakatablePercent: 1.0, zakatableAmount: data.activeInvestments });
   if (data.passiveInvestmentsValue > 0) investmentItems.push({
     name: 'Passive Investments',
     value: data.passiveInvestmentsValue,
@@ -584,13 +584,18 @@ export function calculateEnhancedAssetBreakdown(
     zakatableAmount: passiveZakatableAmount
   });
   const purifiedDividends = data.dividends - (data.dividends * data.dividendPurificationPercent / 100);
-  if (data.dividends > 0) investmentItems.push({ name: 'Dividends', value: purifiedDividends });
+  if (data.dividends > 0) investmentItems.push({
+    name: 'Dividends',
+    value: data.dividends, // Gross amount
+    zakatableAmount: purifiedDividends,
+    zakatablePercent: Math.max(0, (100 - data.dividendPurificationPercent) / 100)
+  });
   const investmentGross = data.activeInvestments + data.passiveInvestmentsValue + data.dividends;
   const investmentZakatable = data.activeInvestments + passiveZakatableAmount + purifiedDividends;
 
   // Retirement
   const retirementItems: AssetItem[] = [];
-  if (data.rothIRAContributions > 0) retirementItems.push({ name: 'Roth IRA Contributions', value: data.rothIRAContributions, zakatablePercent: 1.0 });
+  if (data.rothIRAContributions > 0) retirementItems.push({ name: 'Roth IRA Contributions', value: data.rothIRAContributions, zakatablePercent: 1.0, zakatableAmount: data.rothIRAContributions });
 
   const rothEarningsZakatable = data.isOver59Half ? data.rothIRAEarnings :
     (data.calculationMode === 'bradford' ? 0 : calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, data.calculationMode));
@@ -617,10 +622,10 @@ export function calculateEnhancedAssetBreakdown(
     zakatablePercent: data.traditionalIRABalance > 0 ? iraZakatable / data.traditionalIRABalance : 0
   });
 
-  if (data.iraWithdrawals > 0) retirementItems.push({ name: 'IRA Withdrawals', value: data.iraWithdrawals, zakatablePercent: 1.0 });
-  if (data.esaWithdrawals > 0) retirementItems.push({ name: 'ESA Withdrawals', value: data.esaWithdrawals, zakatablePercent: 1.0 });
-  if (data.fiveTwentyNineWithdrawals > 0) retirementItems.push({ name: '529 Withdrawals', value: data.fiveTwentyNineWithdrawals, zakatablePercent: 1.0 });
-  if (data.hsaBalance > 0) retirementItems.push({ name: 'HSA Balance', value: data.hsaBalance, zakatablePercent: 1.0 });
+  if (data.iraWithdrawals > 0) retirementItems.push({ name: 'IRA Withdrawals', value: data.iraWithdrawals, zakatablePercent: 1.0, zakatableAmount: data.iraWithdrawals });
+  if (data.esaWithdrawals > 0) retirementItems.push({ name: 'ESA Withdrawals', value: data.esaWithdrawals, zakatablePercent: 1.0, zakatableAmount: data.esaWithdrawals });
+  if (data.fiveTwentyNineWithdrawals > 0) retirementItems.push({ name: '529 Withdrawals', value: data.fiveTwentyNineWithdrawals, zakatablePercent: 1.0, zakatableAmount: data.fiveTwentyNineWithdrawals });
+  if (data.hsaBalance > 0) retirementItems.push({ name: 'HSA Balance', value: data.hsaBalance, zakatablePercent: 1.0, zakatableAmount: data.hsaBalance });
 
   const retirementGross = retirementItems.reduce((s, i) => s + i.value, 0);
   const retirementZakatable = data.rothIRAContributions + rothEarningsZakatable + fourOhOneKZakatable + iraZakatable +
@@ -629,9 +634,9 @@ export function calculateEnhancedAssetBreakdown(
   // Trusts
   const trustItems: AssetItem[] = [];
   if (data.hasTrusts) {
-    if (data.revocableTrustValue > 0) trustItems.push({ name: 'Revocable Trust', value: data.revocableTrustValue, zakatablePercent: 1.0 });
+    if (data.revocableTrustValue > 0) trustItems.push({ name: 'Revocable Trust', value: data.revocableTrustValue, zakatablePercent: 1.0, zakatableAmount: data.revocableTrustValue });
     if (data.irrevocableTrustAccessible && data.irrevocableTrustValue > 0) {
-      trustItems.push({ name: 'Irrevocable Trust (Accessible)', value: data.irrevocableTrustValue, zakatablePercent: 1.0 });
+      trustItems.push({ name: 'Irrevocable Trust (Accessible)', value: data.irrevocableTrustValue, zakatablePercent: 1.0, zakatableAmount: data.irrevocableTrustValue });
     }
   }
   const trustsTotal = trustItems.reduce((s, i) => s + i.value, 0);
@@ -639,32 +644,32 @@ export function calculateEnhancedAssetBreakdown(
   // Real Estate
   const realEstateItems: AssetItem[] = [];
   if (data.hasRealEstate) {
-    if (data.realEstateForSale > 0) realEstateItems.push({ name: 'Property for Sale', value: data.realEstateForSale });
-    if (data.rentalPropertyIncome > 0) realEstateItems.push({ name: 'Rental Income', value: data.rentalPropertyIncome });
+    if (data.realEstateForSale > 0) realEstateItems.push({ name: 'Property for Sale', value: data.realEstateForSale, zakatablePercent: 1.0, zakatableAmount: data.realEstateForSale });
+    if (data.rentalPropertyIncome > 0) realEstateItems.push({ name: 'Rental Income', value: data.rentalPropertyIncome, zakatablePercent: 1.0, zakatableAmount: data.rentalPropertyIncome });
   }
   const realEstateTotal = realEstateItems.reduce((s, i) => s + i.value, 0);
 
   // Business
   const businessItems: AssetItem[] = [];
   if (data.hasBusiness) {
-    if (data.businessCashAndReceivables > 0) businessItems.push({ name: 'Cash & Receivables', value: data.businessCashAndReceivables });
-    if (data.businessInventory > 0) businessItems.push({ name: 'Inventory', value: data.businessInventory });
+    if (data.businessCashAndReceivables > 0) businessItems.push({ name: 'Cash & Receivables', value: data.businessCashAndReceivables, zakatablePercent: 1.0, zakatableAmount: data.businessCashAndReceivables });
+    if (data.businessInventory > 0) businessItems.push({ name: 'Inventory', value: data.businessInventory, zakatablePercent: 1.0, zakatableAmount: data.businessInventory });
   }
   const businessTotal = businessItems.reduce((s, i) => s + i.value, 0);
 
   // Debt Owed To You
   const debtOwedItems: AssetItem[] = [];
   if (data.hasDebtOwedToYou) {
-    if (data.goodDebtOwedToYou > 0) debtOwedItems.push({ name: 'Collectible Loans', value: data.goodDebtOwedToYou });
-    if (data.badDebtRecovered > 0) debtOwedItems.push({ name: 'Recovered Bad Debt', value: data.badDebtRecovered });
+    if (data.goodDebtOwedToYou > 0) debtOwedItems.push({ name: 'Collectible Loans', value: data.goodDebtOwedToYou, zakatablePercent: 1.0, zakatableAmount: data.goodDebtOwedToYou });
+    if (data.badDebtRecovered > 0) debtOwedItems.push({ name: 'Recovered Bad Debt', value: data.badDebtRecovered, zakatablePercent: 1.0, zakatableAmount: data.badDebtRecovered });
   }
   const debtOwedTotal = debtOwedItems.reduce((s, i) => s + i.value, 0);
 
   // Illiquid Assets
   const illiquidItems: AssetItem[] = [];
   if (data.hasIlliquidAssets) {
-    if (data.illiquidAssetsValue > 0) illiquidItems.push({ name: 'Illiquid Assets', value: data.illiquidAssetsValue });
-    if (data.livestockValue > 0) illiquidItems.push({ name: 'Livestock', value: data.livestockValue });
+    if (data.illiquidAssetsValue > 0) illiquidItems.push({ name: 'Illiquid Assets', value: data.illiquidAssetsValue, zakatablePercent: 1.0, zakatableAmount: data.illiquidAssetsValue });
+    if (data.livestockValue > 0) illiquidItems.push({ name: 'Livestock', value: data.livestockValue, zakatablePercent: 1.0, zakatableAmount: data.livestockValue });
   }
   const illiquidTotal = illiquidItems.reduce((s, i) => s + i.value, 0);
 
