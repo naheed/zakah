@@ -14,9 +14,36 @@ import {
 } from "@phosphor-icons/react";
 import { Logo } from "../Logo";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useUsageMetrics } from "@/hooks/useUsageMetrics";
+import { useAssetPersistence } from "@/hooks/useAssetPersistence";
+import { useZakatPersistence } from "@/hooks/useZakatPersistence";
+import { formatLargeNumber, formatCount } from "@/lib/formatters";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MetricsDisplay } from "../MetricsDisplay";
+import { ReferralWidget } from "../ReferralWidget";
+import { RecentCalculations } from "../RecentCalculations";
+import { UserMenu } from "../UserMenu";
+import { SavedCalculation } from "@/hooks/useSavedCalculations";
+import { InteractiveDemo } from "../landing/InteractiveDemo";
+import { Footer } from "../Footer";
+import { AccountCard } from "@/components/assets/AccountCard";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion, Variants } from "framer-motion";
+import { useState, useEffect } from "react";
+import { AssetAccount } from "@/types/assets";
+import { ImpactStats } from "../ImpactStats";
+import { useSavedCalculations } from "@/hooks/useSavedCalculations";
+import { formatCurrency } from "@/lib/zakatCalculations";
 import { useReferral } from "@/hooks/useReferral";
 
-// ... existing imports ...
+interface WelcomeStepProps {
+  onNext: () => void;
+  onLoadCalculation?: (calculation: SavedCalculation) => void;
+}
+
+// Asset coverage badges
+const assetTypes = ["401(k) / IRA", "Crypto & NFTs", "Real Estate", "Stocks & RSUs"];
 
 export function WelcomeStep({ onNext, onLoadCalculation }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
