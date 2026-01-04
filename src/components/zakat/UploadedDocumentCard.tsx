@@ -47,6 +47,14 @@ export function UploadedDocumentCard({
               <p className="text-sm font-medium text-foreground truncate">
                 {document.institutionName || document.fileName}
               </p>
+              {(document.accountName || document.accountId) && (
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                  {[
+                    document.accountName,
+                    document.accountId ? `(...${document.accountId})` : null
+                  ].filter(Boolean).join(" ")}
+                </p>
+              )}
               {!compact && (
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {document.summary}
@@ -59,7 +67,7 @@ export function UploadedDocumentCard({
               )}
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 shrink-0">
             {compact && (
               <span className="text-sm font-medium text-chart-1">

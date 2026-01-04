@@ -114,11 +114,12 @@ export function useAssetPersistence() {
         return created?.id || null;
     }, [user]);
 
-    // Find account by institution AND account name (exact match for account name)
+    // Find account by institution AND account name/mask
     const findAccount = useCallback(async (
         portfolioId: string,
         institutionName: string,
-        accountName?: string
+        accountName?: string,
+        mask?: string
     ): Promise<AssetAccount | null> => {
         const normalizedInstitution = institutionName.toLowerCase().trim();
 
@@ -129,33 +130,44 @@ export function useAssetPersistence() {
 
         if (error || !data) return null;
 
-        // Match by institution AND account name if provided
+        // Match logic with priority: Mask > Name > Single Inst Fallback
         const match = data.find(account => {
             const existingInstitution = account.institution_name.toLowerCase().trim();
             const institutionMatch = existingInstitution.includes(normalizedInstitution) ||
                 normalizedInstitution.includes(existingInstitution) ||
                 existingInstitution === normalizedInstitution;
 
-            // If account name is provided, also match on that (exact match)
+            if (!institutionMatch) return false;
+
+            // Priority 1: Match by Mask/Account ID if provided
+            if (mask) {
+                // If existing account has mask, they MUST match
+                if (account.mask) return account.mask === mask;
+                // If existing doesn't have mask... maybe we update it? 
+                // For now, treat as non-match to be safe, or if name matches?
+                // Safe bet: If user provides mask, we prefer account with that mask.
+            }
+
+            // Priority 2: Account Name (exact match)
             if (accountName) {
                 const normalizedAccountName = accountName.toLowerCase().trim();
                 const existingAccountName = (account.name || '').toLowerCase().trim();
-                return institutionMatch && existingAccountName === normalizedAccountName;
+                if (existingAccountName === normalizedAccountName) return true;
             }
 
-            // If no account name provided, only match if there's ONE account from this institution
-            // Otherwise create a new one to avoid merging different accounts
+            // Priority 3: Fallback - If neither mask nor name matched strictly above,
+            // check if there is ONLY ONE account for this institution.
+            // But only if we didn't require a mask that failed to match.
             const sameInstitutionAccounts = data.filter(a => {
                 const inst = a.institution_name.toLowerCase().trim();
                 return inst.includes(normalizedInstitution) || normalizedInstitution.includes(inst);
             });
 
-            return institutionMatch && sameInstitutionAccounts.length === 1;
+            return sameInstitutionAccounts.length === 1;
         });
 
         if (!match) return null;
 
-        // Cast database strings to our typed enums
         return {
             ...match,
             type: match.type as AccountType,
@@ -168,7 +180,8 @@ export function useAssetPersistence() {
         portfolioId: string,
         institutionName: string,
         accountType: AccountType,
-        name?: string
+        name?: string,
+        mask?: string
     ): Promise<string | null> => {
         const { data, error } = await supabase
             .from('asset_accounts')
@@ -177,6 +190,7 @@ export function useAssetPersistence() {
                 institution_name: institutionName,
                 type: accountType,
                 name: name || `${institutionName} Account`,
+                mask: mask || null,
             })
             .select('id')
             .single();
@@ -260,7 +274,8 @@ export function useAssetPersistence() {
         statementDate: string | undefined,
         lineItems: ExtractionLineItem[],
         stepId?: string,
-        accountName?: string  // NEW: Optional account name for deduplication
+        accountName?: string,  // Account name
+        accountId?: string     // Account ID / Mask
     ): Promise<PersistResult> => {
         if (!user) {
             return { success: false, error: 'User not authenticated' };
@@ -276,21 +291,20 @@ export function useAssetPersistence() {
                 throw new Error('Failed to get/create portfolio');
             }
 
-            // 2. Find or create account - now uses account name for deduplication
-            let account = await findAccount(portfolioId, institutionName, accountName);
-            let accountId: string;
+            // 2. Find or create account
+            let account = await findAccount(portfolioId, institutionName, accountName, accountId);
+            let dbAccountId: string;
 
             if (account) {
-                accountId = account.id;
+                dbAccountId = account.id;
             } else {
                 const accountType = stepId ? inferAccountTypeFromStep(stepId) : 'OTHER';
-                // Use provided accountName or generate one
                 const displayName = accountName || `${institutionName} Account`;
-                const newAccountId = await createAccount(portfolioId, institutionName, accountType, displayName);
+                const newAccountId = await createAccount(portfolioId, institutionName, accountType, displayName, accountId);
                 if (!newAccountId) {
                     throw new Error('Failed to create account');
                 }
-                accountId = newAccountId;
+                dbAccountId = newAccountId;
             }
 
             // 3. Check for duplicate snapshot

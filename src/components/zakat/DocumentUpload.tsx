@@ -24,6 +24,7 @@ interface ExtractedResult {
   documentDate?: string;
   institutionName?: string;
   accountName?: string;  // NEW: Account name for deduplication
+  accountId?: string;
   notes?: string;
   error?: string;
 }
@@ -155,7 +156,8 @@ export function DocumentUpload({
         onDocumentAdded({
           fileName: file.name,
           institutionName: data.institutionName || file.name,
-          accountName: data.accountName,  // NEW: Pass account name
+          accountName: data.accountName,
+          accountId: data.accountId,
           documentDate: data.documentDate,
           summary: data.summary || "Financial data extracted",
           notes: data.notes,

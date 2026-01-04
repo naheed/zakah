@@ -6,7 +6,8 @@ export interface UploadedDocument {
   fileName: string;
   uploadedAt: string;
   institutionName: string;
-  accountName?: string;  // NEW: Account name for deduplication (e.g., "Brokerage", "IRA")
+  accountName?: string;
+  accountId?: string; // Last 4 digits (e.g. "1234")
   documentDate?: string;
   summary: string;
   notes?: string;

@@ -75,7 +75,8 @@ export function AssetStepWrapper({
             doc.documentDate,
             lineItems,
             stepId,
-            doc.accountName  // NEW: Pass accountName for deduplication
+            doc.accountName,
+            doc.accountId
           );
 
           if (result.success && !result.skipped) {

@@ -21,7 +21,8 @@ export interface DocumentExtractionResult {
     summary: string;
     documentDate?: string;
     institutionName?: string;
-    accountName?: string;  // NEW: Account name/type for deduplication
+    accountName?: string;  // Account type/name
+    accountId?: string;    // Last 4 digits
     notes?: string;
     error?: string;
 }
@@ -93,6 +94,8 @@ export function useDocumentParsingV2() {
                 summary: data.summary || 'Data extracted successfully',
                 documentDate: data.documentDate,
                 institutionName: data.institutionName,
+                accountName: data.accountName,
+                accountId: data.accountId,
                 notes: data.notes,
             };
 

@@ -173,11 +173,13 @@ DATE EXTRACTION (CRITICAL):
 - Financial statements are historical - dates should be in the PAST.
 - If you cannot find a clear date, use today's date or leave empty.
 
-ACCOUNT NAME EXTRACTION (CRITICAL):
-- Look for the specific account type like "Brokerage Account", "Individual Account", "IRA", "401(k)", "Roth IRA", "Joint Account".
-- This is DIFFERENT from the institution name (e.g., "Charles Schwab").
-- The accountName helps distinguish multiple accounts at the same institution.
-- Example: institutionName="Charles Schwab", accountName="Brokerage Account"
+ACCOUNT IDENTIFICATION (CRITICAL):
+- Extract the 'institutionName' (e.g., "Charles Schwab", "Chase").
+- Extract the 'accountName' (e.g., "Brokerage", "Checking", "Roth IRA").
+- **Extract the 'accountId'**: The last 4 digits of the account number.
+  - Look for "Account #", "Account Number", or patterns like "***5678".
+  - Return ONLY the last 4 digits (e.g., "5678").
+  - This is VITAL to distinguish multiple accounts at the same bank.
 `;
 
     const userPrompt = `Analyze this ${documentType} and extract financial data for Zakat calculation.`;
@@ -225,7 +227,8 @@ ACCOUNT NAME EXTRACTION (CRITICAL):
                   summary: { type: "string", description: "Brief summary of the document" },
                   documentDate: { type: "string", description: "Statement date in YYYY-MM-DD format. MUST be a real date from the document, in the past. Example: 2025-11-29" },
                   institutionName: { type: "string", description: "Financial institution name (e.g., Charles Schwab, Fidelity, Vanguard)" },
-                  accountName: { type: "string", description: "Specific account type (e.g., Brokerage Account, IRA, 401k, Roth IRA). This distinguishes accounts at the same institution." },
+                  accountName: { type: "string", description: "Account type/nickname (e.g., Brokerage, Roth IRA)" },
+                  accountId: { type: "string", description: "Last 4 digits of account number (e.g. '1234') for deduplication" },
                   notes: { type: "string", description: "Any important notes" },
                 },
                 required: ["lineItems", "summary", "documentDate", "institutionName", "accountName"]
@@ -330,6 +333,7 @@ ACCOUNT NAME EXTRACTION (CRITICAL):
         documentDate,
         institutionName: (args as any).institutionName,
         accountName: (args as any).accountName,
+        accountId: (args as any).accountId,
         notes: (args as any).notes,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
