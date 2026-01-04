@@ -1,3 +1,4 @@
+```typescript
 import { useState, useRef, useCallback } from "react";
 import { UploadSimple, FileDoc, Image, SpinnerGap, CheckCircle, WarningCircle, Sparkle } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +7,9 @@ import { ZakatFormData } from "@/lib/zakatCalculations";
 import { UploadedDocument, fieldDisplayNames } from "@/lib/documentTypes";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+// Add import
+import { ExtractionReview } from "./ExtractionReview";
+import { ExtractionLineItem } from "@/hooks/useDocumentParsingV2";
 
 interface DocumentUploadProps {
   onDataExtracted: (data: Partial<ZakatFormData>) => void;
@@ -27,6 +31,7 @@ interface ExtractedResult {
   accountId?: string;
   notes?: string;
   error?: string;
+  lineItems?: ExtractionLineItem[]; // Assuming lineItems might come from the API response
 }
 
 export function DocumentUpload({
@@ -42,6 +47,12 @@ export function DocumentUpload({
   const [showCelebration, setShowCelebration] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  // ... existing state
+  const [reviewData, setReviewData] = useState<{
+     data: ExtractedResult;
+     lineItems: ExtractionLineItem[];
+     file: File;
+  } | null>(null);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -96,6 +107,7 @@ export function DocumentUpload({
     setStatus("uploading");
     setLastResult(null);
     setShowCelebration(false);
+    setReviewData(null); // Clear previous
 
     try {
       // Convert file to base64
@@ -125,66 +137,18 @@ export function DocumentUpload({
 
       console.log("[DocumentUpload] Edge Function Response Raw Data:", data);
 
-      setStatus("success");
-      setLastResult(data);
-      setShowCelebration(true);
-
-      // Haptic feedback on mobile
-      if (navigator.vibrate) {
-        navigator.vibrate([10, 50, 10]);
-      }
-
-      // Extract numeric fields from the response
-      const extractedFields: Partial<ZakatFormData> = {};
-      const numericFields = [
-        "checkingAccounts", "savingsAccounts", "cashOnHand", "digitalWallets",
-        "foreignCurrency", "interestEarned", "activeInvestments", "passiveInvestmentsValue",
-        "dividends", "rothIRAContributions", "rothIRAEarnings", "fourOhOneKVestedBalance",
-        "traditionalIRABalance", "hsaBalance", "cryptoCurrency", "cryptoTrading",
-        "goldValue", "silverValue", "stakedAssets", "stakedRewardsVested", "liquidityPoolValue"
-      ];
-
-      for (const field of numericFields) {
-        if (data.extractedData[field] !== undefined && data.extractedData[field] !== null) {
-          (extractedFields as any)[field] = Number(data.extractedData[field]);
-        }
-      }
-
-      // ...
-      // Determine account name (prioritize AI extraction, fallback to filename)
-      let accountName = data.accountName;
-      if (!accountName && file.name) {
-        // Fallback: Use filename without extension
-        accountName = file.name.replace(/\.(pdf|png|jpg|jpeg|webp)$/i, "").trim();
-      }
-
-      console.log(`[DocumentUpload] Finalizing upload. Filename="${file.name}", AI_Name="${data.accountName}", Final_Name="${accountName}"`);
-
-      // Call the extraction callback (updates form values)
-      onDataExtracted(extractedFields);
-
-      // Store the document with all its data
-      if (onDocumentAdded) {
-        onDocumentAdded({
-          fileName: file.name,
-          institutionName: data.institutionName || file.name,
-          accountName: accountName,
-          accountId: data.accountId,
-          documentDate: data.documentDate,
-          summary: data.summary || "Financial data extracted",
-          notes: data.notes,
-          extractedData: extractedFields,
-          mimeType: file.type,
-        });
-      }
-
-      toast({
-        title: "Document processed",
-        description: `Data extracted from ${data.institutionName || file.name}`,
+      // Don't finish yet! Show Review UI.
+      // We need to map the raw response to lineItems if they aren't already in V2 format
+      // Or if data.lineItems exists (it should from V2 API)
+      
+      const lineItems = data.lineItems || []; 
+      
+      setReviewData({
+         data: data,
+         lineItems: lineItems,
+         file: file
       });
-
-      // Reset celebration after animation
-      setTimeout(() => setShowCelebration(false), 2000);
+      setStatus("success"); // But we show review UI instead of success check
 
     } catch (error) {
       console.error("Document upload error:", error);

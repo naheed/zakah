@@ -1,5 +1,13 @@
 import { ZakatFormData } from "./zakatCalculations";
 
+// Minimal definition to avoid circular imports with useDocumentParsingV2
+export interface ExtractionLineItem {
+  description: string;
+  amount: number;
+  inferredCategory: string;
+  confidence: number;
+}
+
 // Represents a single uploaded and processed document
 export interface UploadedDocument {
   id: string;
@@ -12,6 +20,7 @@ export interface UploadedDocument {
   summary: string;
   notes?: string;
   extractedData: Partial<ZakatFormData>;
+  lineItems?: ExtractionLineItem[]; // NEW: Granular line items (V2)
   mimeType: string;
 }
 
