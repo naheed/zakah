@@ -72,10 +72,49 @@ const accountTypeLabels: Record<AccountType, string> = {
     OTHER: "Other",
 };
 
+// Helper to get logo URL
+function getInstitutionLogo(name: string): string | null {
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const n = normalize(name);
+
+    const domainMap: Record<string, string> = {
+        'charlesschwab': 'schwab.com',
+        'schwab': 'schwab.com',
+        'fidelity': 'fidelity.com',
+        'vanguard': 'vanguard.com',
+        'chase': 'chase.com',
+        'jpmorgan': 'jpmorgan.com',
+        'bankofamerica': 'bankofamerica.com',
+        'wellsfargo': 'wellsfargo.com',
+        'citibank': 'citi.com',
+        'citi': 'citi.com',
+        'coinbase': 'coinbase.com',
+        'robinhood': 'robinhood.com',
+        'etrade': 'etrade.com',
+        'morganstanley': 'morganstanley.com',
+        'betterment': 'betterment.com',
+        'wealthfront': 'wealthfront.com',
+        'sofi': 'sofi.com',
+        'ally': 'ally.com',
+        'allybank': 'ally.com',
+        'amex': 'americanexpress.com',
+        'americanexpress': 'americanexpress.com',
+        'discover': 'discover.com',
+        'capitalone': 'capitalone.com',
+    };
+
+    for (const key in domainMap) {
+        if (n.includes(key)) return `https://logo.clearbit.com/${domainMap[key]}`;
+    }
+
+    return null;
+}
+
 export function AccountCard({ account, latestValue, lastUpdated, onClick, compact }: AccountCardProps) {
     const icon = accountTypeIcons[account.type] || accountTypeIcons.OTHER;
     const badgeColor = accountTypeBadgeColors[account.type] || accountTypeBadgeColors.OTHER;
     const typeLabel = accountTypeLabels[account.type] || account.type;
+    const logoUrl = getInstitutionLogo(account.institution_name);
 
     // Calculate days since last update
     const daysSinceUpdate = lastUpdated
@@ -91,12 +130,25 @@ export function AccountCard({ account, latestValue, lastUpdated, onClick, compac
                 <Card className="cursor-pointer hover:shadow-md transition-all group h-full">
                     <CardContent className="p-3">
                         <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                {icon}
+                            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
+                                {logoUrl ? (
+                                    <img
+                                        src={logoUrl}
+                                        alt={account.institution_name}
+                                        className="w-full h-full object-contain p-0.5 bg-white"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            e.currentTarget.parentElement?.querySelector('.fallback-icon-compact')?.classList.remove('hidden');
+                                        }}
+                                    />
+                                ) : null}
+                                <div className={`fallback-icon-compact flex items-center justify-center w-full h-full text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors ${logoUrl ? 'hidden' : ''}`}>
+                                    {icon}
+                                </div>
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h3 className="font-medium text-sm text-foreground truncate">{account.institution_name}</h3>
-                                <p className="text-xs text-muted-foreground truncate">{account.name}</p>
+                                <h3 className="font-medium text-sm text-foreground truncate">{account.name}</h3>
+                                <p className="text-xs text-muted-foreground truncate">{account.institution_name}</p>
                             </div>
                         </div>
                         {latestValue !== undefined && (
@@ -122,12 +174,32 @@ export function AccountCard({ account, latestValue, lastUpdated, onClick, compac
                 <div className="flex items-start justify-between">
                     {/* Icon and Institution */}
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                            {icon}
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
+                            {logoUrl ? (
+                                <img
+                                    src={logoUrl}
+                                    alt={account.institution_name}
+                                    className="w-full h-full object-contain p-1 bg-white"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                                    }}
+                                />
+                            ) : null}
+                            <div className={`fallback-icon flex items-center justify-center w-full h-full text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors ${logoUrl ? 'hidden' : ''}`}>
+                                {icon}
+                            </div>
                         </div>
                         <div>
-                            <h3 className="font-semibold text-foreground">{account.institution_name}</h3>
-                            <p className="text-sm text-muted-foreground">{account.name}</p>
+                            <h3 className="font-semibold text-foreground">{account.name}</h3>
+                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                {account.institution_name}
+                                {account.mask && (
+                                    <span className="text-muted-foreground/70 text-xs bg-muted px-1.5 rounded-sm">
+                                        ...{account.mask}
+                                    </span>
+                                )}
+                            </p>
                         </div>
                     </div>
 

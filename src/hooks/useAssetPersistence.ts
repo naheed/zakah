@@ -130,49 +130,60 @@ export function useAssetPersistence() {
 
         if (error || !data) return null;
 
-        // Match logic with priority: Mask > Name > Single Inst Fallback
-        const match = data.find(account => {
+        // Filter by Institution first
+        const candidates = data.filter(account => {
             const existingInstitution = account.institution_name.toLowerCase().trim();
-            const institutionMatch = existingInstitution.includes(normalizedInstitution) ||
+            // Fuzzy match institution
+            return existingInstitution.includes(normalizedInstitution) ||
                 normalizedInstitution.includes(existingInstitution) ||
                 existingInstitution === normalizedInstitution;
-
-            if (!institutionMatch) return false;
-
-            // Priority 1: Match by Mask/Account ID if provided
-            if (mask) {
-                // If existing account has mask, they MUST match
-                if (account.mask) return account.mask === mask;
-                // If existing doesn't have mask... maybe we update it? 
-                // For now, treat as non-match to be safe, or if name matches?
-                // Safe bet: If user provides mask, we prefer account with that mask.
-            }
-
-            // Priority 2: Account Name (exact match)
-            if (accountName) {
-                const normalizedAccountName = accountName.toLowerCase().trim();
-                const existingAccountName = (account.name || '').toLowerCase().trim();
-                if (existingAccountName === normalizedAccountName) return true;
-            }
-
-            // Priority 3: Fallback - If neither mask nor name matched strictly above,
-            // check if there is ONLY ONE account for this institution.
-            // But only if we didn't require a mask that failed to match.
-            const sameInstitutionAccounts = data.filter(a => {
-                const inst = a.institution_name.toLowerCase().trim();
-                return inst.includes(normalizedInstitution) || normalizedInstitution.includes(inst);
-            });
-
-            return sameInstitutionAccounts.length === 1;
         });
 
-        if (!match) return null;
+        if (candidates.length === 0) return null;
 
-        return {
-            ...match,
-            type: match.type as AccountType,
-            mask: match.mask || '',
-        } as AssetAccount;
+        // 1. Exact Mask Match (Highest Priority)
+        // If we have a mask, and an account matches it, that's the one.
+        if (mask) {
+            const maskMatch = candidates.find(a => a.mask === mask);
+            if (maskMatch) {
+                return {
+                    ...maskMatch,
+                    type: maskMatch.type as AccountType,
+                    mask: maskMatch.mask || '',
+                } as AssetAccount;
+            }
+        }
+
+        // 2. Exact Name Match (High Priority)
+        if (accountName) {
+            const normalizedAccountName = accountName.toLowerCase().trim();
+            const nameMatch = candidates.find(a => (a.name || '').toLowerCase().trim() === normalizedAccountName);
+            if (nameMatch) {
+                return {
+                    ...nameMatch,
+                    type: nameMatch.type as AccountType,
+                    mask: nameMatch.mask || '',
+                } as AssetAccount;
+            }
+        }
+
+        // 3. Strict Fallback
+        // ONLY if we have NO mask to distinguish, AND only one candidate exists.
+        // If a mask IS provided but didn't match above, it means it's a NEW account (different ID).
+        if (mask) return null;
+
+        // If no mask provided, but we have a single candidate for this institution, 
+        // we might assume it's the same one (legacy behavior).
+        if (candidates.length === 1) {
+            const candidate = candidates[0];
+            return {
+                ...candidate,
+                type: candidate.type as AccountType,
+                mask: candidate.mask || '',
+            } as AssetAccount;
+        }
+
+        return null;
     }, []);
 
     // Create a new account
