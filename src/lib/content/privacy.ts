@@ -69,7 +69,7 @@ export const privacySections: SectionContent[] = [
                 title: "2.3 Uploaded Documents",
                 content: "When you upload financial documents (bank statements, brokerage statements, etc.) for automatic data extraction:",
                 listItems: [
-                    "Original files are not stored — they are processed in memory and immediately discarded",
+                    "Original files are processed in memory by our AI provider (see Section 4.1) and immediately discarded — they are never saved to our storage",
                     "Extracted numeric values only are retained (e.g., account balances)",
                     "Document metadata is session-only — filenames, institution names, and AI-generated summaries are shown during your session but are not persisted to storage"
                 ]
@@ -108,7 +108,7 @@ export const privacySections: SectionContent[] = [
                 content: `We collect anonymous, aggregate statistics to display social proof on our landing page (e.g., "1,234 calculations completed"). This data:`,
                 listItems: [
                     "Is fully anonymous — we use a cryptographically hashed session ID that cannot be reversed or linked to you",
-                    "Contains no personal information — only rounded totals (assets rounded to nearest $1,000, Zakat to nearest $100)",
+                    "Is anonymized immediately — we strictly retain only rounded totals (assets rounded to nearest $1,000, Zakat to nearest $100)",
                     "Is not linked to your account — even if you're signed in, this data cannot identify you",
                     "Records only the date — no timestamp, IP address, or browser information",
                     "Is deduplicated per session per day — recalculating doesn't inflate numbers"

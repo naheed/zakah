@@ -56,12 +56,17 @@ export function useTrackCalculation() {
       // Check if user came from a referral link
       const referredBy = sessionStorage.getItem(REFERRAL_CODE_KEY);
 
+      // Round values client-side before sending to ensure exact numbers never leave the device
+      // This strictly aligns with our privacy policy claim regarding data collection
+      const roundedAssets = Math.round(totalAssets / 1000) * 1000;
+      const roundedZakat = Math.round(zakatDue / 100) * 100;
+
       // Fire and forget - don't wait for response
       supabase.functions.invoke('track-zakat-calculation', {
         body: {
           sessionHash,
-          totalAssets,
-          zakatDue,
+          totalAssets: roundedAssets,
+          zakatDue: roundedZakat,
           referredBy: referredBy || undefined,
         },
       }).then(({ error }) => {
