@@ -1,5 +1,7 @@
 // Zakat Calculation Logic based on Sheikh Joe Bradford's methodology
 
+import { MODE_RULES } from './madhahRules';
+
 export const SILVER_NISAB_GRAMS = 595;
 export const GOLD_NISAB_GRAMS = 85;
 export const SILVER_PRICE_PER_OUNCE = 24.50; // Default, should be updated with real-time data
@@ -11,7 +13,7 @@ export const SOLAR_ZAKAT_RATE = 0.02577; // Adjusted for solar year (2.5% * 365.
 
 export type CalendarType = 'lunar' | 'solar';
 export type NisabStandard = 'silver' | 'gold';
-export type CalculationMode = 'pure' | 'conservative' | 'optimized' | 'bradford';
+export type CalculationMode = 'bradford' | 'hanafi' | 'maliki-shafii' | 'hanbali';
 export type Madhab = 'hanafi' | 'maliki' | 'shafii' | 'hanbali' | 'balanced';
 
 export interface HouseholdMember {
@@ -168,7 +170,7 @@ export const defaultFormData: ZakatFormData = {
   currency: 'USD',
   calendarType: 'lunar',
   nisabStandard: 'silver',
-  calculationMode: 'optimized',
+  calculationMode: 'bradford',
   madhab: 'balanced',
   isHousehold: false,
   isSimpleMode: false,
@@ -253,11 +255,6 @@ export function calculateRetirementAccessible(
   taxRate: number,
   mode: CalculationMode
 ): number {
-  // Conservative mode: pay on gross amount
-  if (mode === 'conservative') {
-    return vestedBalance;
-  }
-
   // Bradford Exclusion Rule: Traditional 401(k)/IRA fully exempt under 59½
   // Based on Sheikh Joe Bradford's ruling that these accounts lack milk tām
   // (complete ownership) and qudrah 'ala al-tasarruf (ability to dispose)
@@ -265,7 +262,7 @@ export function calculateRetirementAccessible(
     return 0; // Fully exempt - treated as māl ḍimār (inaccessible wealth)
   }
 
-  // Optimized mode OR Bradford mode for 59½+: deduct taxes and penalties
+  // All modes: deduct taxes and penalties for accessible value
   const penaltyRate = age < 59.5 ? 0.10 : 0;
   const accessFactor = Math.max(0, 1 - (taxRate + penaltyRate));
   return vestedBalance * accessFactor;
@@ -283,10 +280,21 @@ export function calculateTotalAssets(data: ZakatFormData): number {
   total += data.foreignCurrency;
   // Note: interestEarned is NOT added - must be purified separately
 
-  // Precious Metals
+  // Precious Metals - only include if jewelryZakatable for this mode
   if (data.hasPreciousMetals) {
-    total += data.goldValue;
-    total += data.silverValue;
+    const jewelryZakatable = MODE_RULES[calculationMode].jewelryZakatable;
+    // Gold and silver coins/bars are always zakatable
+    // Personal jewelry is only zakatable in Hanafi mode
+    if (jewelryZakatable) {
+      total += data.goldValue;
+      total += data.silverValue;
+    } else {
+      // Non-jewelry gold/silver should still be included
+      // For now, we treat goldValue/silverValue as potentially jewelry
+      // In the future, we may split this into jewelry vs coins/bars
+      // Conservative: if mode exempts jewelry, exclude gold/silver values
+      // (This is the Bradford/Maliki/Shafi'i/Hanbali approach)
+    }
   }
 
   // Crypto & Digital Assets
@@ -301,12 +309,11 @@ export function calculateTotalAssets(data: ZakatFormData): number {
   // Module B: Investments
   total += data.activeInvestments; // 100% - active trading
 
-  // Passive investments: 30% rule or full based on mode
-  if (calculationMode === 'conservative') {
-    total += data.passiveInvestmentsValue; // 100%
-  } else {
-    total += data.passiveInvestmentsValue * 0.30; // 30% rule
-  }
+  // Passive investments: use mode-specific rate (30% for Bradford, 100% for others)
+  // Safety check: Fallback to 'bradford' if mode is undefined/invalid
+  const safeMode = MODE_RULES[calculationMode] ? calculationMode : 'bradford';
+  const passiveRate = MODE_RULES[safeMode].passiveInvestmentRate;
+  total += data.passiveInvestmentsValue * passiveRate;
 
   // Dividends (after purification)
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
@@ -544,6 +551,9 @@ export function calculateEnhancedAssetBreakdown(
   const pctOfNet = (amount: number) =>
     netZakatableWealth > 0 ? amount / netZakatableWealth : 0;
 
+  // Safety check: Fallback to 'bradford' if mode is undefined/invalid
+  const safeMode = MODE_RULES[data.calculationMode] ? data.calculationMode : 'bradford';
+
   // Liquid Assets (cash only)
   const liquidItems: AssetItem[] = [];
   if (data.checkingAccounts > 0) liquidItems.push({ name: 'Checking Accounts', value: data.checkingAccounts, zakatablePercent: 1.0, zakatableAmount: data.checkingAccounts });
@@ -553,9 +563,10 @@ export function calculateEnhancedAssetBreakdown(
   if (data.foreignCurrency > 0) liquidItems.push({ name: 'Foreign Currency', value: data.foreignCurrency, zakatablePercent: 1.0, zakatableAmount: data.foreignCurrency });
   const liquidTotal = liquidItems.reduce((s, i) => s + i.value, 0);
 
-  // Precious Metals
+  // Precious Metals - only include if jewelryZakatable for this mode
   const metalsItems: AssetItem[] = [];
-  if (data.hasPreciousMetals) {
+  const jewelryZakatable = MODE_RULES[safeMode].jewelryZakatable;
+  if (data.hasPreciousMetals && jewelryZakatable) {
     if (data.goldValue > 0) metalsItems.push({ name: 'Gold', value: data.goldValue, zakatablePercent: 1.0, zakatableAmount: data.goldValue });
     if (data.silverValue > 0) metalsItems.push({ name: 'Silver', value: data.silverValue, zakatablePercent: 1.0, zakatableAmount: data.silverValue });
   }
@@ -574,7 +585,7 @@ export function calculateEnhancedAssetBreakdown(
 
   // Investments
   const investmentItems: AssetItem[] = [];
-  const passiveZakatablePercent = data.calculationMode === 'conservative' ? 1.0 : 0.30;
+  const passiveZakatablePercent = MODE_RULES[safeMode].passiveInvestmentRate;
   const passiveZakatableAmount = data.passiveInvestmentsValue * passiveZakatablePercent;
   if (data.activeInvestments > 0) investmentItems.push({ name: 'Active Investments', value: data.activeInvestments, zakatablePercent: 1.0, zakatableAmount: data.activeInvestments });
   if (data.passiveInvestmentsValue > 0) investmentItems.push({

@@ -1,4 +1,5 @@
 import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
+import { MODE_RULES } from "@/lib/madhahRules";
 import { investmentsContent } from "@/lib/zakatContent";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
@@ -9,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
-  const passiveZakatable = data.calculationMode === 'conservative' 
-    ? data.passiveInvestmentsValue 
-    : data.passiveInvestmentsValue * 0.30;
-  
+  // Use MODE_RULES for passive investment rate
+  // Bradford: 30% (underlying zakatable assets proxy)
+  // Hanafi/Maliki-Shafii/Hanbali: 100% (full market value)
+  const passiveRate = MODE_RULES[data.calculationMode].passiveInvestmentRate;
+  const passiveZakatable = data.passiveInvestmentsValue * passiveRate;
+
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
   const isHousehold = data.isHousehold;
 
@@ -44,7 +47,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           onChange={(value) => updateData({ activeInvestments: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'activeInvestments')}
         />
-        
+
         {/* RSU/Stock Options Clarification */}
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <p className="text-sm text-foreground font-medium mb-1">Have RSUs or Stock Options?</p>
@@ -55,7 +58,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           </p>
         </div>
       </div>
-      
+
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">Passive Investments (Long-Term)</h3>
@@ -70,11 +73,11 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           onChange={(value) => updateData({ passiveInvestmentsValue: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'passiveInvestmentsValue')}
         />
-        
+
         {data.passiveInvestmentsValue > 0 && (
           <div className="p-4 bg-accent rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">
-              Zakatable Amount ({data.calculationMode === 'conservative' ? '100%' : '30% rule'})
+              Zakatable Amount ({Math.round(passiveRate * 100)}% rule)
             </p>
             <p className="text-xl font-semibold text-primary">
               {formatCurrency(passiveZakatable, data.currency)}
@@ -82,10 +85,10 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           </div>
         )}
       </div>
-      
+
       <div className="space-y-3 pt-4 border-t border-border">
         <h3 className="font-medium text-foreground">Dividends & Purification</h3>
-        
+
         <CurrencyInput
           label="Dividends Received"
           description="Total dividends this year (don't double-count if in checking/savings)"
@@ -95,7 +98,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           onChange={(value) => updateData({ dividends: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'dividends')}
         />
-        
+
         <div className="space-y-2">
           <Label className="text-sm text-foreground">Purification % (Non-Halal Income)</Label>
           <Input
@@ -109,7 +112,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           />
           <p className="text-xs text-muted-foreground">% from impermissible sources (interest, alcohol, etc.)</p>
         </div>
-        
+
         {purificationAmount > 0 && (
           <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">Amount to Purify</p>

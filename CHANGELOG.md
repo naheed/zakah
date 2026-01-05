@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Methodology Toggle on Report Page**
+  - Chip selector to switch between Bradford, Hanafi, Maliki/Shafi'i, Hanbali
+  - Instant recalculation when methodology changes
+  - Auto-saves preference to user profile
+
+### Changed
+- **Simplified Methodology System**
+  - Reduced from 9 options to 4: Bradford, Hanafi, Maliki/Shafi'i, Hanbali
+  - Removed `optimized` mode (redundant with Bradford)
+  - Removed `conservative` mode (not based on fiqh)
+  - Merged Maliki and Shafi'i (identical rules)
+
+### Documentation
+- **Methodology Page Updates**
+  - Added Ahmed comprehensive example with all asset classes
+  - Updated comparison table with 4 methodologies
+  - Added explanation for why Conservative is not included
+  - Updated radar chart to 4 axes
+
 ### Planned
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug

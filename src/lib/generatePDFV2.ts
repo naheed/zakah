@@ -37,14 +37,15 @@ function generateReportId(): string {
     return result;
 }
 
-// Get calculation mode label
+// Get calculation mode label - 4 fiqh-based modes
+// Modes: bradford, hanafi, maliki-shafii, hanbali
 function getModeLabel(mode: string): string {
     switch (mode) {
-        case "conservative": return "Conservative";
-        case "optimized": return "Optimized";
-        case "bradford": return "Bradford";
-        case "pure": return "Pure Madhab";
-        default: return "Standard";
+        case "bradford": return "Bradford (Balanced)";
+        case "hanafi": return "Hanafi";
+        case "maliki-shafii": return "Maliki/Shafi'i";
+        case "hanbali": return "Hanbali";
+        default: return "Bradford (Balanced)";
     }
 }
 

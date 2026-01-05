@@ -102,19 +102,11 @@ export const fiqhExplanations = {
   },
 
   // ==========================================================================
-  // CALCULATION MODES
+  // CALCULATION MODES - 4 Fiqh-Based Methodologies
   // ==========================================================================
   calculationModes: {
-    title: "Three Approaches to Zakat",
-    explanation: "Conservative: full asset values. Optimized: deducts taxes/penalties. Bradford Exclusion: fully exempts Traditional 401(k)/IRA under 59½ based on lack of milk tām.",
-  },
-  conservativeMode: {
-    title: "Conservative Mode",
-    explanation: "Pay Zakat on the full vested balance of all accounts. The safest approach that ensures no obligation is missed.",
-  },
-  optimizedMode: {
-    title: "Optimized Mode",
-    explanation: "Deduct taxes and 10% early withdrawal penalty from retirement accounts. Pay on what you could actually access today.",
+    title: "Four Methodology Options",
+    explanation: "Bradford: 30% passive, retirement exempt under 59½. Hanafi: 100% all, jewelry included. Maliki/Shafi'i: jewelry exempt, 12-mo debts. Hanbali: jewelry exempt, full deduction.",
   },
   bradfordExclusion: {
     title: "Bradford Exclusion Rule",

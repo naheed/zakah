@@ -1,4 +1,5 @@
-import { formatCurrency } from "@/lib/zakatCalculations";
+import { formatCurrency, CalculationMode } from "@/lib/zakatCalculations";
+import { getModeDisplayName } from "@/lib/madhahRules";
 import { SealCheck, Minus, Equals, ShieldCheck, BookOpen } from "@phosphor-icons/react";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { cn } from "@/lib/utils";
@@ -11,7 +12,7 @@ interface ReportHeroProps {
     currency: string;
     isAboveNisab: boolean;
     madhab: string;
-    calculationMode: string;
+    calculationMode: CalculationMode;
 }
 
 export function ReportHero({
@@ -28,11 +29,9 @@ export function ReportHero({
     const wholeZakat = Math.floor(zakatDue);
     const decimalZakat = (zakatDue % 1).toFixed(2).substring(1); // .00
 
-    // Calculation Mode Label
-    const modeLabel = calculationMode === 'conservative' ? 'Conservative Mode'
-        : calculationMode === 'optimized' ? 'Optimized Mode'
-            : calculationMode === 'bradford' ? 'Bradford Mode'
-                : 'Standard Mode';
+    // Calculation Mode Label - using getModeDisplayName for new 4-mode system
+    // Modes: bradford, hanafi, maliki-shafii, hanbali
+    const modeLabel = getModeDisplayName(calculationMode);
 
     // Madhab Label
     const madhabLabel = madhab ? (madhab.charAt(0).toUpperCase() + madhab.slice(1) + " Madhab") : "Standard Madhab";

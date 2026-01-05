@@ -4,26 +4,22 @@ import { methodologyContent } from "@/lib/content/methodology";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text, Heading } from "@/components/ui/typography";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Warning } from "@phosphor-icons/react";
-import { ZakatModeComparisonChart } from "@/components/zakat/ZakatModeComparisonChart";
+import { MethodologyExplorer } from "@/components/zakat/MethodologyExplorer";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 const tocItems = [
-  { id: "principles", number: 1, label: "Core Legal Principles" },
-  { id: "madhabs", number: 1.5, label: "Schools of Thought (Madhabs)" },
-  { id: "nisab", number: 2, label: "The Niṣāb Threshold" },
-  { id: "hawl", number: 3, label: "The Ḥawl (Zakat Year)" },
-  { id: "liquid", number: 4, label: "Liquid Assets & Cash" },
-  { id: "stocks", number: 5, label: "Stocks & Investments" },
-  { id: "retirement", number: 6, label: "Retirement Accounts" },
-  { id: "crypto", number: 7, label: "Cryptocurrency" },
-  { id: "metals", number: 8, label: "Gold, Silver & Jewelry" },
-  { id: "realestate", number: 9, label: "Real Estate" },
-  { id: "business", number: 10, label: "Business Assets" },
-  { id: "debts", number: 11, label: "Debts & Liabilities" },
-  { id: "trusts", number: 12, label: "Trusts" },
-  { id: "example", number: 13, label: "Example: The Ahmed Family" },
-  { id: "modes", number: 14, label: "Calculation Modes Compared" },
-  { id: "references", number: 15, label: "References & Works Cited" },
+  { id: "explorer", number: 1, label: "Interactive Guide" },
+  { id: "principles", number: 2, label: "Core Legal Principles" },
+  { id: "nisab", number: 3, label: "The Niṣāb Threshold" },
+  { id: "hawl", number: 4, label: "The Ḥawl (Zakat Year)" },
+  { id: "liquid", number: 5, label: "Liquid Assets & Cash" },
+  { id: "crypto", number: 6, label: "Cryptocurrency" },
+  { id: "realestate", number: 7, label: "Real Estate" },
+  { id: "business", number: 8, label: "Business Assets" },
+  { id: "debts", number: 9, label: "Debts & Liabilities" },
+  { id: "trusts", number: 10, label: "Trusts" },
+  { id: "references", number: 11, label: "References" },
 ];
 
 const Methodology = () => {
@@ -32,7 +28,7 @@ const Methodology = () => {
   const headerContent = (
     <div>
       <Text variant="lead">{content.header.intro}</Text>
-      <Card className="bg-muted/50 border-border shadow-none">
+      <Card className="bg-muted/50 border-border shadow-none mt-4">
         <CardContent className="p-4 pt-4">
           <p className="text-sm text-muted-foreground">
             <strong className="text-foreground">Primary Influences:</strong> {content.header.primaryInfluences}
@@ -50,6 +46,18 @@ const Methodology = () => {
       tocItems={tocItems}
       headerContent={headerContent}
     >
+      {/* Interactive Explorer Section */}
+      <section id="explorer" className="scroll-mt-24 mb-16">
+        <div className="mb-8">
+          <Heading level={2} className="mt-0">Explore by Methodology</Heading>
+          <Text>
+            Select a school of thought to see exactly how rules for Jewelry, Retirement, and Investments change.
+            Watch the "Ahmed Family" demo on the right to see the financial impact.
+          </Text>
+        </div>
+        <MethodologyExplorer />
+      </section>
+
       {/* Principles */}
       <section id="principles" className="scroll-mt-24">
         <ScrollReveal>
@@ -62,11 +70,10 @@ const Methodology = () => {
                 <CardTitle>{content.principles.title}</CardTitle>
               </div>
               <CardDescription>
-                <content.principles.icon className="w-5 h-5 text-primary mb-2 hidden" weight="duotone" />
                 <Text className="mt-0">{content.principles.intro}</Text>
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8">
               <div>
                 <Heading level={3} className="mt-0">{content.principles.conditionsTitle}</Heading>
                 <StaggerContainer className="grid gap-4 md:grid-cols-2" staggerDelay={0.08}>
@@ -87,105 +94,22 @@ const Methodology = () => {
                 </StaggerContainer>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              {/* Mal Dimar & Intent */}
+              <div className="grid md:grid-cols-2 gap-8 pt-4 border-t border-border/50">
                 <div>
-                  <Heading level={3} className="mt-0">{content.principles.malDimar.title}</Heading>
-                  <div className="p-4 rounded-lg bg-tertiary/5 border border-tertiary/20 mt-2">
-                    <p className="text-sm"><strong className="text-foreground">Māl Ḍimār</strong> {content.principles.malDimar.description.replace("Māl Ḍimār ", "")}</p>
-                    <p className="text-sm mt-2">{content.principles.malDimar.modern}</p>
-                  </div>
+                  <Heading level={4} className="mt-0">{content.principles.malDimar.title}</Heading>
+                  <Text className="text-sm mb-2">{content.principles.malDimar.description}</Text>
+                  <p className="text-xs text-muted-foreground bg-muted p-2 rounded">{content.principles.malDimar.modern}</p>
                 </div>
                 <div>
-                  <Heading level={3} className="mt-0">{content.principles.intent.title}</Heading>
+                  <Heading level={4} className="mt-0">{content.principles.intent.title}</Heading>
                   <Text className="text-sm mb-2">{content.principles.intent.description}</Text>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.principles.intent.list.map((item, idx) => (
-                      <li key={idx}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                  <ul className="list-disc pl-5 space-y-1 text-xs text-muted-foreground">
+                    {content.principles.intent.list.map((item, i) => (
+                      <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
                     ))}
                   </ul>
                 </div>
-              </div>
-
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </section>
-
-      {/* Schools of Thought (Madhabs) */}
-      <section id="madhabs" className="scroll-mt-24">
-        <ScrollReveal>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  ☪️
-                </div>
-                <CardTitle>{content.madhahSchools.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Text>{content.madhahSchools.intro}</Text>
-
-              {/* Overview */}
-              <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                <Heading level={3} className="mt-0">{content.madhahSchools.overview.title}</Heading>
-                <Text className="text-sm">{content.madhahSchools.overview.text}</Text>
-                <p className="text-sm mt-2 text-primary italic">{content.madhahSchools.overview.note}</p>
-              </div>
-
-              {/* Jewelry Ruling */}
-              <div>
-                <Heading level={3} className="mt-0">{content.madhahSchools.jewelryRuling.title}</Heading>
-                <Text className="text-sm mb-3">{content.madhahSchools.jewelryRuling.intro}</Text>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {content.madhahSchools.jewelryRuling.schools.map((school, idx) => (
-                    <div key={idx} className={`p-4 rounded-lg border ${school.ruling === 'Zakatable' ? 'bg-destructive/5 border-destructive/20' : 'bg-green-500/5 border-green-500/20'}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-foreground">{school.name}</h4>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${school.ruling === 'Zakatable' ? 'bg-destructive/10 text-destructive' : 'bg-green-500/10 text-green-600'}`}>
-                          {school.ruling}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{school.text}</p>
-                      <p className="text-xs mt-2 text-muted-foreground italic">{school.evidence}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm mt-3 p-3 rounded bg-primary/5 border border-primary/20">{content.madhahSchools.jewelryRuling.zakatFlowApproach}</p>
-              </div>
-
-              {/* Debt Ruling */}
-              <div>
-                <Heading level={3} className="mt-0">{content.madhahSchools.debtRuling.title}</Heading>
-                <Text className="text-sm mb-3">{content.madhahSchools.debtRuling.intro}</Text>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {content.madhahSchools.debtRuling.schools.map((school, idx) => (
-                    <div key={idx} className="p-4 rounded-lg bg-muted/30 border border-border">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-foreground">{school.name}</h4>
-                        <span className="text-xs font-medium text-muted-foreground">{school.ruling}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{school.text}</p>
-                      <p className="text-xs mt-2 text-muted-foreground italic">{school.evidence}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm mt-3 p-3 rounded bg-primary/5 border border-primary/20">{content.madhahSchools.debtRuling.zakatFlowApproach}</p>
-              </div>
-
-              {/* Practical Guidance */}
-              <div className="p-4 rounded-lg bg-tertiary/5 border border-tertiary/20">
-                <Heading level={4} className="mt-0">{content.madhahSchools.practicalGuidance.title}</Heading>
-                <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-muted-foreground">
-                  {content.madhahSchools.practicalGuidance.points.map((point, idx) => (
-                    <li key={idx}>{point}</li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* References */}
-              <div className="text-xs text-muted-foreground">
-                <strong className="text-foreground">Sources:</strong> {content.madhahSchools.references.join(' | ')}
               </div>
             </CardContent>
           </Card>
@@ -198,25 +122,28 @@ const Methodology = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.nisab.number}
-                </div>
                 <CardTitle>{content.nisab.title}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <Text>{content.nisab.intro}</Text>
 
-              <div>
-                <Heading level={3} className="mt-0">{content.nisab.historical.title}</Heading>
-                <Text>{content.nisab.historical.intro}</Text>
-                <ul className="list-disc pl-5 space-y-2 mt-2 text-muted-foreground">
-                  {content.nisab.historical.items.map((item, idx) => (
-                    <li key={idx}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
-                  ))}
-                </ul>
-                <Text className="mt-2 text-sm italic">{content.nisab.historical.note}</Text>
-              </div>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="history">
+                  <AccordionTrigger>Historical Foundation & Prophetic Tradition</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="p-4 bg-muted/20 rounded-lg">
+                      <Text className="text-sm mb-3">{content.nisab.historical.intro}</Text>
+                      <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground mb-3">
+                        {content.nisab.historical.items.map((item, i) => (
+                          <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                        ))}
+                      </ul>
+                      <p className="text-xs italic text-muted-foreground">{content.nisab.historical.note}</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="p-5 rounded-xl bg-muted/30 border border-border">
@@ -237,14 +164,9 @@ const Methodology = () => {
                       <li key={idx}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
                     ))}
                   </ul>
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                    <p className="text-sm text-muted-foreground">
-                      <strong className="text-foreground">Practical Guidance:</strong> {content.nisab.guidance.replace("Practical Guidance: ", "")}
-                    </p>
-                  </div>
+                  <p className="text-xs font-medium text-primary mt-2">{content.nisab.consensus.note}</p>
                 </div>
               </div>
-
             </CardContent>
           </Card>
         </ScrollReveal>
@@ -255,31 +177,23 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.hawl.number}
-                </div>
-                <CardTitle>{content.hawl.title}</CardTitle>
-              </div>
+              <CardTitle>{content.hawl.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <Text>{content.hawl.intro}</Text>
 
-              <div>
-                <Heading level={3} className="mt-0">{content.hawl.lunarSolar.title}</Heading>
-                <div className="grid md:grid-cols-2 gap-4 mt-3">
-                  <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                    <h4 className="font-medium text-foreground mb-2">{content.hawl.lunarSolar.lunar.title}</h4>
-                    <ul className="text-sm space-y-1 text-muted-foreground">
-                      {content.hawl.lunarSolar.lunar.points.map((p, i) => <li key={i}>• {p}</li>)}
-                    </ul>
-                  </div>
-                  <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                    <h4 className="font-medium text-foreground mb-2">{content.hawl.lunarSolar.solar.title}</h4>
-                    <ul className="text-sm space-y-1 text-muted-foreground">
-                      {content.hawl.lunarSolar.solar.points.map((p, i) => <li key={i}>• {p}</li>)}
-                    </ul>
-                  </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 bg-muted/20 rounded border border-border/50">
+                  <p className="font-semibold mb-2">{content.hawl.lunarSolar.lunar.title}</p>
+                  <ul className="list-disc pl-4 text-sm text-muted-foreground">
+                    {content.hawl.lunarSolar.lunar.points.map((p, i) => <li key={i}>{p}</li>)}
+                  </ul>
+                </div>
+                <div className="p-4 bg-muted/20 rounded border border-border/50">
+                  <p className="font-semibold mb-2">{content.hawl.lunarSolar.solar.title}</p>
+                  <ul className="list-disc pl-4 text-sm text-muted-foreground">
+                    {content.hawl.lunarSolar.solar.points.map((p, i) => <li key={i}>{p}</li>)}
+                  </ul>
                 </div>
               </div>
 
@@ -287,14 +201,6 @@ const Methodology = () => {
                 <Heading level={4} className="mt-0 text-primary">{content.hawl.rateAdjustment.title}</Heading>
                 <Text className="text-sm mb-2">{content.hawl.rateAdjustment.text}</Text>
                 <code className="px-2 py-1 rounded bg-background border border-primary/20 text-foreground text-sm font-mono block w-fit">{content.hawl.rateAdjustment.formula}</code>
-              </div>
-
-              <div>
-                <Heading level={3} className="mt-0">{content.hawl.dateChoice.title}</Heading>
-                <Text>{content.hawl.dateChoice.intro}</Text>
-                <ul className="list-disc pl-5 space-y-1 mt-2 text-muted-foreground">
-                  {content.hawl.dateChoice.options.map((opt, i) => <li key={i}>{opt}</li>)}
-                </ul>
               </div>
             </CardContent>
           </Card>
@@ -306,16 +212,10 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.liquid.number}
-                </div>
-                <CardTitle>{content.liquid.title}</CardTitle>
-              </div>
+              <CardTitle>{content.liquid.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <Text>{content.liquid.intro}</Text>
-
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
                   <Heading level={3} className="mt-0">{content.liquid.assets.title}</Heading>
@@ -328,137 +228,7 @@ const Methodology = () => {
                 <div className="p-5 rounded-xl bg-destructive/5 border border-destructive/20 h-fit">
                   <Heading level={4} className="mt-0 text-destructive mb-3">{content.liquid.interest.title}</Heading>
                   <p className="text-sm text-muted-foreground mb-3">{content.liquid.interest.text1}</p>
-                  <p className="text-sm text-muted-foreground">{content.liquid.interest.text2}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </section>
-
-      {/* Stocks */}
-      <section id="stocks" className="scroll-mt-24">
-        <ScrollReveal>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.stocks.number}
-                </div>
-                <CardTitle>{content.stocks.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Text>{content.stocks.intro}</Text>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-5 rounded-xl bg-muted/30 border border-border">
-                  <Heading level={4} className="mt-0">{content.stocks.mudir.title}</Heading>
-                  <Text className="text-sm">{content.stocks.mudir.text}</Text>
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Calculation</p>
-                    <p className="text-sm">{content.stocks.mudir.calculation}</p>
-                  </div>
-                </div>
-                <div className="p-5 rounded-xl bg-muted/30 border border-border">
-                  <Heading level={4} className="mt-0">{content.stocks.muhtakir.title}</Heading>
-                  <Text className="text-sm">{content.stocks.muhtakir.text}</Text>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-gradient-to-br from-primary/5 to-transparent border border-primary/20">
-                <Heading level={3} className="mt-0">{content.stocks.rule30.title}</Heading>
-                <p className="text-sm font-medium text-foreground mb-2">{content.stocks.rule30.standard}</p>
-                <p className="text-sm text-muted-foreground mb-3">{content.stocks.rule30.description}</p>
-                <div className="p-3 bg-background/50 rounded border border-primary/10 backdrop-blur-sm">
-                  <p className="text-sm font-mono text-foreground">
-                    {content.stocks.rule30.formula}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
-                  <span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">Note</span>
-                  {content.stocks.rule30.note}
-                </div>
-              </div>
-
-              <div>
-                <Heading level={3} className="mt-0">{content.stocks.exclusions.title}</Heading>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                  {content.stocks.exclusions.list.map((item, i) => <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>)}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </section>
-
-      {/* Retirement */}
-      <section id="retirement" className="scroll-mt-24">
-        <ScrollReveal>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.retirement.number}
-                </div>
-                <CardTitle>{content.retirement.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Text>{content.retirement.intro}</Text>
-                <Heading level={3} className="mt-6">Three Scholarly Approaches</Heading>
-                <Text className="text-sm mb-4">{content.retirement.approachesIntro}</Text>
-
-                <div className="space-y-4">
-                  {content.retirement.approaches.map((app, i) => (
-                    <div key={i} className={`p-5 rounded-xl border ${i === 2 ? 'bg-tertiary/10 border-tertiary/30' : 'bg-muted/30 border-border'}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-foreground">{app.title}</h4>
-                        {app.tag && <span className="text-xs font-bold px-2 py-1 rounded bg-background border border-border shadow-sm">{app.tag}</span>}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">{app.description}</p>
-
-                      {app.steps && (
-                        <div className="pl-4 border-l-2 border-border mb-3">
-                          <ol className="list-decimal pl-4 text-sm text-muted-foreground space-y-1">
-                            {app.steps.map((s, k) => <li key={k}>{s}</li>)}
-                          </ol>
-                        </div>
-                      )}
-
-                      {app.principles && (
-                        <div className="pl-4 border-l-2 border-border mb-3">
-                          <p className="text-xs font-semibold text-foreground mb-1">Key Principles:</p>
-                          <ul className="list-disc pl-4 text-sm text-muted-foreground space-y-1">
-                            {app.principles.map((p, k) => <li key={k}>{p}</li>)}
-                          </ul>
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground italic">Basis: {app.basis}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Heading level={3} className="mt-0">Account-Specific Rules</Heading>
-                <div className="grid md:grid-cols-2 gap-6 mt-4">
-                  <div>
-                    <Heading level={4} className="mt-0">{content.retirement.roth.title}</Heading>
-                    <Text className="text-sm mb-2">{content.retirement.roth.intro}</Text>
-                    <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                      {content.retirement.roth.points.map((p, i) => <li key={i}><strong className="text-foreground">{p.label}:</strong> {p.text}</li>)}
-                    </ul>
-                  </div>
-                  <div>
-                    <Heading level={4} className="mt-0">{content.retirement.hsa.title}</Heading>
-                    <Text className="text-sm">{content.retirement.hsa.text}</Text>
-                    <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                      <p className="text-sm font-medium text-foreground">{content.retirement.loans.title}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{content.retirement.loans.text}</p>
-                    </div>
-                  </div>
+                  <p className="text-xs font-semibold text-destructive">{content.liquid.interest.text2}</p>
                 </div>
               </div>
             </CardContent>
@@ -471,95 +241,41 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.crypto.number}
-                </div>
-                <CardTitle>{content.crypto.title}</CardTitle>
-              </div>
+              <CardTitle>{content.crypto.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <Text>{content.crypto.intro}</Text>
 
-              <div className="p-4 rounded-lg bg-muted/40 border border-border text-center">
-                <p className="text-sm font-medium text-foreground">{content.crypto.principle.title}</p>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border mb-6">
+                <p className="text-sm font-medium text-foreground mb-1">{content.crypto.principle.title}</p>
                 <p className="text-sm text-muted-foreground">{content.crypto.principle.text}</p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-3 gap-6">
                 <div>
-                  <Heading level={3} className="mt-0 text-base">{content.crypto.catA.title}</Heading>
-                  <Text className="text-sm mb-2">{content.crypto.catA.intro}</Text>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.crypto.catA.list.map((item, i) => <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>)}
+                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.catA.title}</Heading>
+                  <ul className="space-y-2 text-sm">
+                    {content.crypto.catA.list.map((item, i) => (
+                      <li key={i} className="text-muted-foreground"><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                    ))}
                   </ul>
                 </div>
                 <div>
-                  <Heading level={3} className="mt-0 text-base">{content.crypto.catB.title}</Heading>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.crypto.catB.list.map((item, i) => <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>)}
-                  </ul>
-
-                  <Heading level={3} className="mt-4 text-base">{content.crypto.nfts.title}</Heading>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.crypto.nfts.list.map((item, i) => <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>)}
+                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.catB.title}</Heading>
+                  <ul className="space-y-2 text-sm">
+                    {content.crypto.catB.list.map((item, i) => (
+                      <li key={i} className="text-muted-foreground"><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                    ))}
                   </ul>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </section>
-
-      {/* Metals */}
-      <section id="metals" className="scroll-mt-24">
-        <ScrollReveal>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.metals.number}
+                <div>
+                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.nfts.title}</Heading>
+                  <ul className="space-y-2 text-sm">
+                    {content.crypto.nfts.list.map((item, i) => (
+                      <li key={i} className="text-muted-foreground"><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                    ))}
+                  </ul>
                 </div>
-                <CardTitle>{content.metals.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Text>{content.metals.intro}</Text>
-
-              <div>
-                <Heading level={3} className="mt-0">{content.metals.alwaysZakatable.title}</Heading>
-                <ul className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                  {content.metals.alwaysZakatable.list.map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/40 border border-border">
-                      <strong className="text-foreground">{item.label}</strong> {item.text}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <Heading level={3} className="mt-0">{content.metals.jewelry.title}</Heading>
-                <Text className="text-sm mb-3">{content.metals.jewelry.intro}</Text>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {content.metals.jewelry.views.map((v, i) => (
-                    <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border">
-                      <h4 className="font-medium text-foreground mb-1">{v.title}</h4>
-                      <p className="text-sm text-muted-foreground">{v.text}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 p-4 rounded-lg bg-tertiary/5 border border-tertiary/20">
-                  <p className="text-sm font-medium text-foreground mb-1">{content.metals.jewelry.precaution.title}</p>
-                  <p className="text-sm text-muted-foreground">{content.metals.jewelry.precaution.text}</p>
-                </div>
-              </div>
-
-              <div>
-                <Heading level={3} className="mt-0">{content.metals.jewelry.valuation.title}</Heading>
-                <Text className="text-sm mb-2">{content.metals.jewelry.valuation.intro}</Text>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                  {content.metals.jewelry.valuation.points.map((p, i) => <li key={i}>{p}</li>)}
-                </ul>
               </div>
             </CardContent>
           </Card>
@@ -571,31 +287,18 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.realEstate.number}
-                </div>
-                <CardTitle>{content.realEstate.title}</CardTitle>
-              </div>
+              <CardTitle>{content.realEstate.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <Text>{content.realEstate.intro}</Text>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 {content.realEstate.types.map((type, i) => (
                   <div key={i} className="p-5 rounded-xl bg-muted/30 border border-border flex flex-col">
-                    <Heading level={3} className="mt-0 text-base mb-2">{type.title}</Heading>
-
-                    <div className="flex-1">
-                      {type.ruling && <p className="font-medium text-foreground text-sm">{type.ruling}</p>}
-                      {type.text1 && <p className="font-medium text-foreground text-sm">{type.text1}</p>}
-                      {type.desc1 && <p className="text-sm text-muted-foreground mt-1">{type.desc1}</p>}
-
-                      {type.text && <p className="text-sm text-muted-foreground mt-1">{type.text}</p>}
-                      {type.desc && <p className="text-sm text-muted-foreground mt-2">{type.desc}</p>}
-
-                      {type.text2 && <p className="font-medium text-foreground text-sm mt-3">{type.text2}</p>}
-                      {type.desc2 && <p className="text-sm text-muted-foreground mt-1">{type.desc2}</p>}
-                    </div>
+                    <Heading level={4} className="mt-0 text-base mb-2">{type.title}</Heading>
+                    <p className="font-medium text-foreground text-sm">{type.ruling}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{type.text}</p>
+                    {type.text2 && <p className="text-sm font-medium mt-2 border-t pt-2 border-border/50">{type.text2}</p>}
+                    {type.desc2 && <p className="text-xs text-muted-foreground">{type.desc2}</p>}
                   </div>
                 ))}
               </div>
@@ -604,39 +307,35 @@ const Methodology = () => {
         </ScrollReveal>
       </section>
 
-      {/* Business & Business Assets */}
+      {/* Business */}
       <section id="business" className="scroll-mt-24">
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.business.number}
-                </div>
-                <CardTitle>{content.business.title}</CardTitle>
-              </div>
+              <CardTitle>{content.business.title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent>
               <Text>{content.business.intro}</Text>
-
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-8 mt-6">
                 <div>
-                  <Heading level={3} className="mt-0 text-success">{content.business.zakatable.title}</Heading>
+                  <Heading level={4} className="mt-0 text-green-600 mb-2">Include (Zakatable)</Heading>
                   <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.business.zakatable.list.map((item, i) => <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>)}
+                    {content.business.zakatable.list.map((item, i) => (
+                      <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                    ))}
                   </ul>
                 </div>
                 <div>
-                  <Heading level={3} className="mt-0 text-muted-foreground">{content.business.notZakatable.title}</Heading>
+                  <Heading level={4} className="mt-0 text-muted-foreground mb-2">Exclude (Not Zakatable)</Heading>
                   <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.business.notZakatable.list.map((item, i) => <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>)}
+                    {content.business.notZakatable.list.map((item, i) => (
+                      <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
-
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <Heading level={4} className="mt-0 text-primary">{content.business.valuation.title}</Heading>
-                <p className="text-sm text-muted-foreground">{content.business.valuation.text}</p>
+              <div className="mt-6 p-4 bg-muted/30 rounded border border-border">
+                <p className="text-sm"><strong>Valuation:</strong> {content.business.valuation.text}</p>
               </div>
             </CardContent>
           </Card>
@@ -648,62 +347,55 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.debts.number}
-                </div>
-                <CardTitle>{content.debts.title}</CardTitle>
-              </div>
+              <CardTitle>{content.debts.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <Heading level={3} className="mt-0">{content.debts.receivables.title}</Heading>
+                  <Heading level={4}>Receivables (Owed to You)</Heading>
                   <Text className="text-sm mb-3">{content.debts.receivables.intro}</Text>
-
-                  <div className="space-y-3">
-                    <div className="p-3 bg-muted/30 rounded border border-border">
-                      <p className="font-medium text-foreground text-sm">{content.debts.receivables.good.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{content.debts.receivables.good.text}</p>
+                  <div className="space-y-3 mt-2">
+                    <div className="p-3 border border-emerald-500/20 bg-emerald-500/5 rounded">
+                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">{content.debts.receivables.good.title}</p>
+                      <p className="text-xs text-muted-foreground">{content.debts.receivables.good.text}</p>
                     </div>
-                    <div className="p-3 bg-muted/30 rounded border border-border">
-                      <p className="font-medium text-foreground text-sm">{content.debts.receivables.bad.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{content.debts.receivables.bad.text}</p>
+                    <div className="p-3 border border-border bg-muted/20 rounded">
+                      <p className="text-sm font-medium">{content.debts.receivables.bad.title}</p>
+                      <p className="text-xs text-muted-foreground">{content.debts.receivables.bad.text}</p>
                     </div>
                   </div>
                 </div>
-
                 <div>
-                  <Heading level={3} className="mt-0">{content.debts.liabilities.title}</Heading>
-                  <Text className="text-sm mb-3">{content.debts.liabilities.intro}</Text>
+                  <Heading level={4}>Liabilities (Owed by You)</Heading>
+                  <p className="text-sm text-muted-foreground mt-2">{content.debts.liabilities.intro}</p>
 
-                  <div className="p-3 rounded-lg bg-tertiary/5 border border-tertiary/20">
-                    <p className="text-sm font-medium text-foreground mb-2">The Maliki "Middle Path"</p>
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      {content.debts.liabilities.views.map((v, i) => (
-                        <div key={i} className="flex gap-2">
-                          <span className="font-bold text-foreground min-w-[30px]">{i + 1}.</span>
-                          <span>{v.title}</span>
+                  <div className="mt-4 p-3 bg-tertiary/5 rounded border border-tertiary/10 mb-4">
+                    <p className="text-xs">
+                      <strong className="text-primary">ZakatFlow Approach:</strong> {content.debts.liabilities.zakatFlowView}
+                    </p>
+                  </div>
+
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="structure">
+                      <AccordionTrigger className="text-sm">View Deductible vs Non-Deductible</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="grid grid-cols-2 gap-4 mt-2">
+                          <div>
+                            <p className="text-xs font-bold text-green-600 mb-1">Deductible</p>
+                            <ul className="text-xs list-disc pl-4 text-muted-foreground">
+                              {content.debts.deductible.list.map((l, i) => <li key={i}>{l}</li>)}
+                            </ul>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-red-500 mb-1">Not Deductible</p>
+                            <ul className="text-xs list-disc pl-4 text-muted-foreground">
+                              {content.debts.notDeductible.list.map((l, i) => <li key={i}>{l}</li>)}
+                            </ul>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                    <p className="text-xs mt-2 pt-2 border-t border-tertiary/10 font-medium text-foreground">{content.debts.liabilities.zakatFlowView}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8 pt-4 border-t border-border">
-                <div>
-                  <Heading level={4} className="mt-0 text-success">{content.debts.deductible.title}</Heading>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.debts.deductible.list.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                </div>
-                <div>
-                  <Heading level={4} className="mt-0 text-destructive">{content.debts.notDeductible.title}</Heading>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                    {content.debts.notDeductible.list.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </div>
               </div>
             </CardContent>
@@ -716,162 +408,28 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.trusts.number}
-                </div>
-                <CardTitle>{content.trusts.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Text>{content.trusts.intro}</Text>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                  <Heading level={4} className="mt-0 mb-2">{content.trusts.revocable.title}</Heading>
-                  <p className="font-medium text-foreground text-sm">{content.trusts.revocable.ruling}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{content.trusts.revocable.text}</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                  <Heading level={4} className="mt-0 mb-2">{content.trusts.irrevocable.title}</Heading>
-                  <ul className="list-disc pl-4 text-xs text-muted-foreground space-y-1">
-                    {content.trusts.irrevocable.list.map((item, i) => <li key={i}>{item.label}</li>)}
-                  </ul>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                  <Heading level={4} className="mt-0 mb-2">{content.trusts.custodial.title}</Heading>
-                  <p className="text-xs text-muted-foreground">{content.trusts.custodial.text}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </section>
-
-      {/* Example */}
-      <section id="example" className="scroll-mt-24">
-        <ScrollReveal>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.example.number}
-                </div>
-                <CardTitle>{content.example.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                <h4 className="font-medium text-foreground mb-2">{content.example.profile.title}</h4>
-                <ul className="text-sm space-y-1 text-muted-foreground grid md:grid-cols-2 gap-x-4">
-                  {content.example.profile.items.map((item, i) => <li key={i}>• {item}</li>)}
-                </ul>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <Heading level={3} className="mt-0 text-base">{content.example.assets.title}</Heading>
-                  <div className="overflow-x-auto rounded-lg border border-border">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted/50"><tr><th className="text-left p-2 font-medium">Asset</th><th className="text-right p-2 font-medium">Value</th></tr></thead>
-                      <tbody>
-                        {content.example.assets.table.map((row, i) => (
-                          <tr key={i} className={`border-t border-border ${row.isTotal ? 'font-bold bg-muted/20' : ''}`}>
-                            <td className="p-2">{row.label}</td>
-                            <td className="p-2 text-right font-mono text-xs">{row.value}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div>
-                  <Heading level={3} className="mt-0 text-base">{content.example.liabilities.title}</Heading>
-                  <div className="overflow-x-auto rounded-lg border border-border">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted/50"><tr><th className="text-left p-2 font-medium">Liability</th><th className="text-right p-2 font-medium">Amt</th></tr></thead>
-                      <tbody>
-                        {content.example.liabilities.table.map((row, i) => (
-                          <tr key={i} className={`border-t border-border ${row.isTotal ? 'font-bold bg-muted/20' : ''}`}>
-                            <td className="p-2">{row.label}</td>
-                            <td className="p-2 text-right font-mono text-xs">{row.value}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <Heading level={3} className="mt-0 mb-4">{content.example.calculation.title}</Heading>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {content.example.calculation.modes.map((mode, i) => (
-                    <div key={i} className={`p-4 rounded-xl border flex flex-col justify-between ${i === 2 ? 'bg-tertiary/10 border-tertiary/30' : 'bg-muted/30 border-border'}`}>
-                      <div>
-                        <h4 className="font-semibold text-foreground text-sm">{mode.title}</h4>
-                        <div className="mt-2 text-xs space-y-1 text-muted-foreground">
-                          {mode.details.map((d, k) => <p key={k}>{d}</p>)}
-                        </div>
-                      </div>
-                      <p className={`font-bold text-lg mt-3 ${i === 2 ? 'text-tertiary' : 'text-primary'}`}>{mode.result}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <ZakatModeComparisonChart />
-              </div>
-
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
-                <p className="text-sm font-medium text-foreground">{content.example.summary.title}</p>
-                <p className="text-sm text-muted-foreground mt-1">{content.example.summary.text}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </section>
-
-      {/* Modes Table */}
-      <section id="modes" className="scroll-mt-24">
-        <ScrollReveal>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.modes.number}
-                </div>
-                <CardTitle>{content.modes.title}</CardTitle>
-              </div>
+              <CardTitle>{content.trusts.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <Text>{content.modes.intro}</Text>
-              <div className="overflow-x-auto mt-4 rounded-lg border border-border">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-3 font-medium text-foreground">Asset Type</th>
-                      <th className="text-center p-3 font-medium text-foreground">Conservative</th>
-                      <th className="text-center p-3 font-medium text-foreground">Optimized</th>
-                      <th className="text-center p-3 font-medium text-tertiary">Bradford</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {content.modes.comparisonTable.map((row, i) => (
-                      <tr key={i} className={`border-t border-border ${i % 2 === 1 ? 'bg-muted/20' : ''} hover:bg-muted/40 transition-colors`}>
-                        <td className="p-3 font-medium text-foreground text-sm">{row.asset}</td>
-                        <td className="p-3 text-center text-sm text-muted-foreground">{row.conservative}</td>
-                        <td className="p-3 text-center text-sm font-medium text-primary">{row.optimized}</td>
-                        <td className={`p-3 text-center text-sm font-bold ${row.bradford === 'EXEMPT' ? 'text-tertiary' : 'text-primary'}`}>
-                          {row.bradford}
-                        </td>
-                      </tr>
+              <Text>{content.trusts.intro}</Text>
+              <div className="grid md:grid-cols-3 gap-4 mt-4">
+                <div className="p-4 border border-border rounded">
+                  <p className="font-bold text-sm mb-1">{content.trusts.revocable.title}</p>
+                  <Badge variant="outline" className="mb-2 border-emerald-500 text-emerald-600">{content.trusts.revocable.ruling}</Badge>
+                  <p className="text-xs text-muted-foreground">{content.trusts.revocable.text}</p>
+                </div>
+                <div className="p-4 border border-border rounded">
+                  <p className="font-bold text-sm mb-1">{content.trusts.irrevocable.title}</p>
+                  <ul className="text-xs list-disc pl-4 text-muted-foreground mt-2 space-y-1">
+                    {content.trusts.irrevocable.list.map((l, i) => (
+                      <li key={i}><span className="font-medium text-foreground">{l.label}:</span> {l.text}</li>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 p-3 rounded bg-muted/30 text-xs text-muted-foreground">
-                <strong className="text-foreground">{content.modes.notes.title}</strong>: {content.modes.notes.text}
+                  </ul>
+                </div>
+                <div className="p-4 border border-border rounded">
+                  <p className="font-bold text-sm mb-1">{content.trusts.custodial.title}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{content.trusts.custodial.text}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -883,36 +441,46 @@ const Methodology = () => {
         <ScrollReveal>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                  {content.references.number}
-                </div>
-                <CardTitle>{content.references.title}</CardTitle>
-              </div>
+              <CardTitle>{content.references.title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Heading level={3} className="mt-0">{content.references.primary.title}</Heading>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  {content.references.primary.list.map((item, i) => (
-                    <li key={i}>
-                      <strong className="text-foreground">{item.name}</strong>
-                      <span className="mx-1">-</span>
-                      {item.text}
-                      {item.link && <a href={item.link.url} target="_blank" rel="noopener" className="ml-1 text-primary hover:underline font-medium">View</a>}
-                    </li>
-                  ))}
-                </ul>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <Heading level={4} className="mt-0">{content.references.primary.title}</Heading>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    {content.references.primary.list.map((item, i) => (
+                      <li key={i}>
+                        <strong className="text-foreground">{item.name}</strong>
+                        <span className="mx-1">-</span>
+                        {item.text}
+                        {item.link && <a href={item.link.url} target="_blank" rel="noopener" className="ml-1 text-primary hover:underline font-medium">View</a>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <Heading level={4} className="mt-0">{content.references.classical.title}</Heading>
+                  <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                    {content.references.classical.list.map((item, i) => (
+                      <li key={i}><strong className="text-foreground">{item.name}</strong> - {item.text}</li>
+                    ))}
+                  </ul>
+
+                  <Heading level={4} className="mt-0">{content.references.concepts.title}</Heading>
+                  <div className="flex flex-wrap gap-2">
+                    {content.references.concepts.list.map((c, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs font-normal" title={c.text}>{c.name}</Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-muted/50 border border-border flex gap-3 text-muted-foreground">
-                <Warning className="w-5 h-5 shrink-0" />
-                <p className="text-xs">{content.references.disclaimer.text}</p>
-              </div>
+              <p className="text-xs text-muted-foreground mt-6 italic border-t pt-4">{content.references.disclaimer.text}</p>
             </CardContent>
           </Card>
         </ScrollReveal>
       </section>
+
     </ArticleLayout>
   );
 };

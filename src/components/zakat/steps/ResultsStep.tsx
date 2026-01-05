@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
+import { MethodologySelector } from "../MethodologySelector";
+import { getModeDisplayName } from "@/lib/madhahRules";
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -242,10 +244,7 @@ export function ResultsStep({
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Zakat Calculation Results</h2>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground bg-white dark:bg-card border border-border px-2 py-0.5 rounded shadow-sm">
-              {data.calculationMode === 'conservative' ? 'Conservative' : data.calculationMode === 'optimized' ? 'Optimized' : 'Bradford'} Mode
-            </span>
-            <span className="text-xs text-muted-foreground bg-white dark:bg-card border border-border px-2 py-0.5 rounded shadow-sm">
-              {data.madhab ? (data.madhab.charAt(0).toUpperCase() + data.madhab.slice(1)) : 'Standard'} Madhab
+              {getModeDisplayName(data.calculationMode)} Mode
             </span>
           </div>
         </div>
@@ -348,6 +347,21 @@ export function ResultsStep({
           madhab={data.madhab || 'balanced'}
           calculationMode={data.calculationMode}
         />
+
+        {/* Methodology Selector - Toggle to see different calculations */}
+        <div className="my-8 p-4 bg-muted/30 rounded-xl border border-border">
+          <MethodologySelector
+            value={data.calculationMode}
+            onChange={(mode) => updateData({ calculationMode: mode })}
+            onSave={(mode) => {
+              // TODO: Save to user profile when persistence is implemented
+              toast({
+                title: 'Methodology updated',
+                description: `Using ${getModeDisplayName(mode)} methodology`,
+              });
+            }}
+          />
+        </div>
 
         <div className="my-10 flex flex-col items-center">
           <div className="w-full text-center mb-4">

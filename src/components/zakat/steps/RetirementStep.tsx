@@ -57,7 +57,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         </div>
         <Switch checked={data.isOver59Half} onCheckedChange={(checked) => updateData({ isOver59Half: checked })} />
       </div>
-      
+
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">401(k) / 403(b)</h3>
@@ -68,13 +68,13 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
             </Badge>
           )}
         </div>
-        <CurrencyInput 
-          label="Vested Balance" 
+        <CurrencyInput
+          label="Vested Balance"
           description="Exclude unvested employer match"
-          householdDescription="Combined vested 401(k) for all family members" 
+          householdDescription="Combined vested 401(k) for all family members"
           isHousehold={isHousehold}
-          value={data.fourOhOneKVestedBalance} 
-          onChange={(value) => updateData({ fourOhOneKVestedBalance: value })} 
+          value={data.fourOhOneKVestedBalance}
+          onChange={(value) => updateData({ fourOhOneKVestedBalance: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'fourOhOneKVestedBalance')}
         />
         {data.fourOhOneKVestedBalance > 0 && (
@@ -82,15 +82,13 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
             <span className="text-muted-foreground">Zakatable amount: </span>
             {showBradfordExempt ? (
               <span className="font-medium text-tertiary">$0.00 (Exempt)</span>
-            ) : data.calculationMode === 'conservative' ? (
-              <span className="font-medium text-foreground">{formatCurrency(data.fourOhOneKVestedBalance, data.currency)} (Full value)</span>
             ) : (
               <span className="font-medium text-primary">{formatCurrency(accessible401k, data.currency)} (After tax/penalty)</span>
             )}
           </div>
         )}
       </div>
-      
+
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">Traditional IRA</h3>
@@ -100,13 +98,13 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
             </Badge>
           )}
         </div>
-        <CurrencyInput 
-          label="IRA Balance" 
+        <CurrencyInput
+          label="IRA Balance"
           description="Total Traditional IRA balance"
           householdDescription="Combined Traditional IRA for all family members"
           isHousehold={isHousehold}
-          value={data.traditionalIRABalance} 
-          onChange={(value) => updateData({ traditionalIRABalance: value })} 
+          value={data.traditionalIRABalance}
+          onChange={(value) => updateData({ traditionalIRABalance: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'traditionalIRABalance')}
         />
         {data.traditionalIRABalance > 0 && (
@@ -114,36 +112,34 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
             <span className="text-muted-foreground">Zakatable amount: </span>
             {showBradfordExempt ? (
               <span className="font-medium text-tertiary">$0.00 (Exempt)</span>
-            ) : data.calculationMode === 'conservative' ? (
-              <span className="font-medium text-foreground">{formatCurrency(data.traditionalIRABalance, data.currency)} (Full value)</span>
             ) : (
               <span className="font-medium text-primary">{formatCurrency(accessibleIRA, data.currency)} (After tax/penalty)</span>
             )}
           </div>
         )}
       </div>
-      
+
       <div className="space-y-3 pt-4 border-t border-border">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">Roth IRA</h3>
           <WhyTooltip {...fiqhExplanations.rothIRA} />
         </div>
-        <CurrencyInput 
-          label="Contributions (Principal)" 
-          description="Always accessible, fully Zakatable" 
+        <CurrencyInput
+          label="Contributions (Principal)"
+          description="Always accessible, fully Zakatable"
           householdDescription="Combined Roth IRA contributions for all family members"
           isHousehold={isHousehold}
-          value={data.rothIRAContributions} 
-          onChange={(value) => updateData({ rothIRAContributions: value })} 
+          value={data.rothIRAContributions}
+          onChange={(value) => updateData({ rothIRAContributions: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'rothIRAContributions')}
         />
-        <CurrencyInput 
-          label="Earnings (Growth)" 
-          description={showBradfordExempt ? "Exempt under Bradford rule" : "Subject to penalty if under 59½"} 
+        <CurrencyInput
+          label="Earnings (Growth)"
+          description={showBradfordExempt ? "Exempt under Bradford rule" : "Subject to penalty if under 59½"}
           householdDescription="Combined Roth IRA earnings for all family members"
           isHousehold={isHousehold}
-          value={data.rothIRAEarnings} 
-          onChange={(value) => updateData({ rothIRAEarnings: value })} 
+          value={data.rothIRAEarnings}
+          onChange={(value) => updateData({ rothIRAEarnings: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'rothIRAEarnings')}
         />
         {data.rothIRAEarnings > 0 && showBradfordExempt && (
@@ -153,19 +149,19 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           </div>
         )}
       </div>
-      
+
       <div className="space-y-3 pt-4 border-t border-border">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">HSA (Health Savings Account)</h3>
           <WhyTooltip {...fiqhExplanations.hsaAccount} />
         </div>
-        <CurrencyInput 
-          label="HSA Balance" 
-          description="Fully accessible for medical, fully Zakatable" 
+        <CurrencyInput
+          label="HSA Balance"
+          description="Fully accessible for medical, fully Zakatable"
           householdDescription="Combined HSA balances for all family members"
           isHousehold={isHousehold}
-          value={data.hsaBalance} 
-          onChange={(value) => updateData({ hsaBalance: value })} 
+          value={data.hsaBalance}
+          onChange={(value) => updateData({ hsaBalance: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'hsaBalance')}
         />
       </div>

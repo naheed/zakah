@@ -58,25 +58,25 @@ export interface ModeRules {
 }
 
 export const MODE_RULES: Record<CalculationMode, ModeRules> = {
-    pure: {
-        jewelryZakatable: true, // Deferred to madhah
-        retirementMethod: 'net_accessible',
-        passiveInvestmentRate: 1.0,
-    },
-    conservative: {
-        jewelryZakatable: true,
-        retirementMethod: 'gross',
-        passiveInvestmentRate: 1.0,
-    },
-    optimized: {
-        jewelryZakatable: true, // Follows madhab
-        retirementMethod: 'net_accessible',
-        passiveInvestmentRate: 0.30,
-    },
     bradford: {
         jewelryZakatable: false,
         retirementMethod: 'bradford_exempt',
         passiveInvestmentRate: 0.30,
+    },
+    hanafi: {
+        jewelryZakatable: true, // Hanafi includes personal jewelry
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 1.0,
+    },
+    'maliki-shafii': {
+        jewelryZakatable: false, // Personal jewelry exempt
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 1.0,
+    },
+    hanbali: {
+        jewelryZakatable: false, // Personal jewelry exempt
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 1.0,
     },
 };
 
@@ -95,10 +95,6 @@ export function getScholarlyDifferences(
     mode: CalculationMode,
     isOver59Half: boolean = false
 ): ScholarlyDifference[] {
-    if (mode === 'pure') {
-        return []; // Pure mode follows madhab exactly
-    }
-
     const differences: ScholarlyDifference[] = [];
     const madhahRules = MADHAB_RULES[madhab];
     const modeRules = MODE_RULES[mode];
@@ -131,15 +127,15 @@ export function getScholarlyDifferences(
         });
     }
 
-    // Check conservative gross method
-    if (mode === 'conservative' && madhahRules.retirementMethod !== 'gross') {
+    // Check passive investment difference (Bradford uses 30%)
+    if (mode === 'bradford' && modeRules.passiveInvestmentRate < 1.0) {
         differences.push({
-            topic: 'Retirement Valuation',
-            appliedOpinion: 'Gross balance (no tax deduction)',
-            madhahOpinion: 'Net accessible value',
-            supportingScholars: ['Precautionary opinions'],
-            methodologyLink: '/methodology#retirement',
-            basis: 'Pay on full amount to ensure obligation is met',
+            topic: 'Passive Investments (ETFs/Index Funds)',
+            appliedOpinion: '30% of value (underlying assets proxy)',
+            madhahOpinion: '100% of market value',
+            supportingScholars: ['Sheikh Joe Bradford', 'AMJA guidance'],
+            methodologyLink: '/methodology#investments',
+            basis: 'Only zakatable underlying assets count, not fund structure premium',
         });
     }
 
@@ -148,13 +144,32 @@ export function getScholarlyDifferences(
 
 // Get the effective jewelry zakatable status
 export function isJewelryZakatable(madhab: Madhab, mode: CalculationMode): boolean {
-    if (mode === 'pure') {
-        return MADHAB_RULES[madhab].jewelryZakatable;
-    }
     return MODE_RULES[mode].jewelryZakatable;
 }
 
 // Get human-readable madhab name
 export function getMadhahDisplayName(madhab: Madhab): string {
     return MADHAB_RULES[madhab].displayName;
+}
+
+// Get display name for calculation mode
+export function getModeDisplayName(mode: CalculationMode): string {
+    const names: Record<CalculationMode, string> = {
+        bradford: 'Bradford (Balanced)',
+        hanafi: 'Hanafi',
+        'maliki-shafii': 'Maliki/Shafi\'i',
+        hanbali: 'Hanbali',
+    };
+    return names[mode];
+}
+
+// Get description for calculation mode
+export function getModeDescription(mode: CalculationMode): string {
+    const descriptions: Record<CalculationMode, string> = {
+        bradford: '30% passive investments, retirement exempt under 59½',
+        hanafi: '100% all assets, personal jewelry included',
+        'maliki-shafii': '100% all assets, jewelry exempt, 12-month debts',
+        hanbali: '100% all assets, jewelry exempt, full debt deduction',
+    };
+    return descriptions[mode];
 }

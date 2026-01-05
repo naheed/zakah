@@ -179,13 +179,13 @@ export function ZakatSankeyChart({
         nodeOpacity={1}
         nodeHoverOthersOpacity={0.35}
         nodeThickness={18}
-        nodeSpacing={0} // Tight spacing for split nodes
+        nodeSpacing={12} // Standard whitespace between nodes
         nodeBorderWidth={0}
         nodeBorderColor={{ from: 'color', modifiers: [['darker', 0.8]] }}
         linkOpacity={isDark ? 0.8 : 0.6}
         linkBlendMode="normal"
         linkHoverOthersOpacity={0.1}
-        linkContract={0} // No gap between links
+        linkContract={3} // Small gap between links for cleaner separation
         enableLinkGradient={true}
         labelPosition="outside"
         labelOrientation="horizontal"
