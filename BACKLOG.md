@@ -188,13 +188,26 @@
 
 ### 8.3 UI Integration ✅
 - [x] Add madhab selector to Settings page
-- [ ] **Deferred:** Add optional madhab selector to Wizard Q1
-- [ ] **Deferred:** Display "Alternate Opinions Applied" in report
+- [x] **Deferred:** Add optional madhab selector to Wizard Q1
+- [x] **Deferred:** Display "Alternate Opinions Applied" in report
 
 ### 8.4 Methodology Update ✅
 - [x] Added "Schools of Thought" section with jewelry/debt rulings
 - [x] Hadith evidence for each school's position
 - [x] References to Fiqh al-Zakah, Al-Mughni, AMJA fatwas
+- [x] **Audit:** Verified and integrated aligned Qaradawi rulings (Jewelry, Debt, Retirement)
+- [x] **Correction:** Updated Joe Bradford Jewelry ruling to "Zakatable"
+
+---
+
+## Phase 11: Privacy & Legal Audit ✅ COMPLETE
+
+> **Goal:** Ensure 100% alignment between legal docs and engineering implementation.
+
+- [x] **Audit:** Deep-dive review of Privacy Policy vs. Codebase (Encryption, Analytics, AI)
+- [x] **Fix:** Implemented client-side rounding for analytics (zero raw data transmission)
+- [x] **Docs:** Updated Privacy Policy with precise "Retention" vs "Collection" language
+- [x] **Docs:** Clarified AI provider processing transparency
 
 ---
 

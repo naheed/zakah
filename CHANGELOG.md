@@ -9,32 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Methodology Toggle on Report Page**
-  - Chip selector to switch between Bradford, Hanafi, Maliki/Shafi'i, Hanbali
-  - Instant recalculation when methodology changes
-  - Auto-saves preference to user profile
-
-### Changed
-- **Simplified Methodology System**
-  - Reduced from 9 options to 4: Bradford, Hanafi, Maliki/Shafi'i, Hanbali
-  - Removed `optimized` mode (redundant with Bradford)
-  - Removed `conservative` mode (not based on fiqh)
-  - Merged Maliki and Shafi'i (identical rules)
-
-### Documentation
-- **Methodology Page Updates**
-  - Added Ahmed comprehensive example with all asset classes
-  - Updated comparison table with 4 methodologies
-  - Added explanation for why Conservative is not included
-  - Updated radar chart to 4 axes
-
 ### Planned
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug
   - Add user name, Hijri date, madhab settings to PDF
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
+
+## [0.10.0] - 2026-01-04
+
+### Added
+- **Qaradawi Audit & Integration**: Integrated Dr. Yusuf Al-Qaradawi's scholarly opinions into Methodology (Jewelry, Debts, Retirement) where aligned with existing options.
+- **Privacy Audit Compliance**: Full alignment between Privacy Policy and codebase.
+  - **Client-Side Rounding**: Implemented strictly rounded analytics (Assets to nearest $1k, Zakat to nearest $100) *before* transmission.
+  - **AI Transparency**: Explicitly documented AI provider usage in "Information Collection" section.
+
+### Changed
+- **Methodology Page**: 
+  - Fixed "Joe Bradford" Jewelry ruling to "Zakatable" (Precautionary/Ahwat) to match his actual stance.
+  - Added "Evidence" and "Scholarly Basis" fields to Methodology Explorer cards.
+- **Privacy Policy**: Clarified "Retention" vs "Collection" language to be technically precise.
 
 ## [0.9.0] - 2026-01-03
 
