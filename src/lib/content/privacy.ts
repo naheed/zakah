@@ -71,9 +71,9 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
                 title: "2.3 Uploaded Documents (AI Parsing)",
                 content: "When you upload financial documents (bank statements, brokerage statements, etc.) for automatic data extraction:",
                 listItems: [
-                    "Original files are processed in memory by our AI provider (see Section 4.1) and immediately discarded — they are never saved to our storage",
-                    "Extracted numeric values only are retained (e.g., account balances)",
-                    "Document metadata is session-only — filenames, institution names, and AI-generated summaries are shown during your session but are not persisted to storage"
+                    "Processing: Files are processed in memory by our trusted AI partners (currently Google Gemini) and are never saved to our permanent storage.",
+                    "Extraction: We only retain the specific numeric values needed for your calculation (e.g., account balances).",
+                    "Metadata: Filenames and institution names are session-only and cleared when you close your browser."
                 ]
             },
             {
@@ -144,14 +144,12 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
         title: "AI Document Processing",
         subsections: [
             {
-                title: "Important Notice",
-                content: "When you upload a document for data extraction, the document content is sent to Google's Gemini AI service for processing. This enables us to extract financial values from your statements automatically.",
+                title: "Transparency & Trust",
+                content: "We use advanced AI to save you from manual data entry. To do this securely:",
                 listItems: [
-                    "Raw document content is transmitted to Google's AI service",
-                    "Original documents are not stored after processing (typically completes in seconds)",
-                    "Only extracted numeric values are encrypted and stored",
-                    "Document metadata (filename, institution name, summary) is shown during your session but cleared when you close your browser",
-                    "Google's AI service may process data according to their privacy policy"
+                    "We use enterprise-grade partners (currently Google Gemini) with strong privacy commitments.",
+                    "Your raw documents are processed in ephemeral memory—they exist only for the seconds it takes to read them.",
+                    "We never use your personal financial data to train public AI models."
                 ]
             }
         ]
@@ -282,8 +280,8 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
                 note: "Both actions are immediate and irreversible. Local encryption keys stored in your browser are also cleared during deletion."
             },
             {
-                title: "8.2 Plaid Connection Removal",
-                content: "If you unlink a specific bank account but keep your ZakatFlow account active, we immediately delete the Access Token and all cached transaction data associated with that specific bank institution. However, historical Zakat reports and calculation summaries that were generated using this data are retained as part of your permanent Zakat history until you choose to delete them."
+                title: "8.2 Bank Connection Privacy (Plaid)",
+                content: "If you disconnect a bank account (unlink it), we immediately delete the access tokens and raw transaction cache for that institution. However, we retain the *results* of your past Zakat calculations (the final report) as part of your permanent spiritual record, so you always have a history of your obligations."
             }
         ]
     },

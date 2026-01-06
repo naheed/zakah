@@ -36,11 +36,10 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "not-advice",
         number: 3,
-        title: "Not Financial or Religious Advice",
+        title: "Guidance, Not Advice",
         icon: Warning,
-        content: "The Service does not provide financial, tax, legal, or religious advice. The calculations and information provided are for educational and informational purposes only. You should:",
+        content: "We designed this Service to empower you with calculation tools and educational resources. However, Zakat is a deeply personal act of worship, and financial situations are unique. Therefore:",
         disclaimer: {
             strong: "The Service does not provide financial, tax, legal, or religious advice.",
             text: "The Service does not provide financial, tax, legal, or religious advice. The calculations and information provided are for educational and informational purposes only. You should:"
@@ -67,15 +66,14 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "plaid",
         number: 5,
-        title: "Plaid Integration (Where Available)",
+        title: "Secure Bank Connections (Plaid)",
         icon: Lightning,
-        content: "If you use the optional Plaid integration to connect your bank accounts (where supported):",
+        content: "We partner with Plaid Inc. (\"Plaid\") to securely connect your bank accounts. This integration is designed to be safe and transparent:",
         listItems: [
-            "You acknowledge and agree that your use of the Plaid integration is governed by Plaid’s Terms of Service",
-            "We do not store your online banking credentials (username/password) — these are passed directly to Plaid",
-            "You grant us and Plaid the right to access and transmit your financial information for the purpose of the Service"
+            "Your Credentials Stay Safe: We never see or store your bank username or password—these are passed directly to Plaid.",
+            "Your Control: You can unlink your accounts at any time, which revokes our access to new data.",
+            "Plaid's Role: By connecting, you grant Plaid the authority to access and transmit your financial information to us, governed by their Privacy Policy."
         ]
     },
     {
@@ -106,30 +104,27 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "warranties",
         number: 8,
-        title: "Disclaimer of Warranties",
+        title: "Service Sustainability & Warranties",
         icon: Shield,
-        content: "THE SERVICE IS PROVIDED \"AS IS\" AND \"AS AVAILABLE\" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:",
+        content: "To provide this Service sustainably, we must limit our legal warranties. We build with care, but software is complex:",
         listItems: [
-            "Warranties of merchantability or fitness for a particular purpose",
-            "Warranties that the Service will be uninterrupted or error-free",
-            "Warranties regarding the accuracy of calculations or extracted data",
-            "Warranties that the calculations comply with any particular interpretation of Islamic law"
+            "The Service is provided \"AS IS\" and \"AS AVAILABLE\".",
+            "We cannot guarantee that the Service will always be uninterrupted or error-free.",
+            "While verify our methodology, we cannot warrant that it meets every interpretation of Islamic law.",
+            "You are the final reviewer of your own Zakat calculation."
         ]
     },
     {
-        id: "liability",
         number: 9,
-        title: "Limitation of Liability",
+        title: "Liability Limits",
         icon: Scales,
-        content: "TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE SERVICE, ITS CREATOR, OR AFFILIATES BE LIABLE FOR:",
+        content: "We encourage you to verify your results. To the maximum extent permitted by law, the Service and its creator shall not be liable for:",
         listItems: [
-            "Any indirect, incidental, special, consequential, or punitive damages",
-            "Any loss of profits, data, or other intangible losses",
-            "Any damages resulting from reliance on calculated Zakat amounts",
-            "Any damages resulting from loss of encryption keys or encrypted data",
-            "Any damages arising from AI processing errors or inaccuracies"
+            "Indirect, incidental, or consequential damages",
+            "Loss of data or profits",
+            "Errors in Zakat calculation or under/over-payment",
+            "Issues arising from third-party services like Plaid or AI providers"
         ]
     },
     {

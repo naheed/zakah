@@ -4,8 +4,8 @@ import { Gavel, Scales, Calendar, Wallet, TrendUp, ShieldCheck, CurrencyBtc, Coi
 export const methodologyContent = {
     header: {
         title: "Methodology & References",
-        intro: "Rules for Zakat calculation based on the four Sunni schools of jurisprudence (Madhabs) and contemporary scholarly research. ZakatFlow allows you to select the methodology that aligns with your personal conviction, backed by deep scholarly evidence.",
-        primaryInfluences: "Sheikh Joe Bradford, The Assembly of Muslim Jurists of America (AMJA), AAOIFI Shariah Standards, and classical fiqh texts of the Hanafi, Maliki, Shafi'i, and Hanbali schools."
+        intro: "Zakat rules are derived from the four Sunni schools of jurisprudence (Madhabs) and contemporary research. ZakatFlow empowers you to select the methodology that best aligns with your understanding, backed by clear evidence.",
+        primaryInfluences: "Influenced by the works of Sheikh Joe Bradford, The Assembly of Muslim Jurists of America (AMJA), AAOIFI Shariah Standards, and classical texts."
     },
     principles: {
         id: "principles",
@@ -165,8 +165,8 @@ export const methodologyContent = {
             ]
         },
         consensus: {
-            title: "Scholarly Consensus",
-            text: "The majority of contemporary scholars advocate for the silver standard for cash and liquid assets. This is safer (ahwat) and more beneficial for the poor (anfa' li'l-fuqara).",
+            title: "Widely Accepted View",
+            text: "Many contemporary scholars advocate for the silver standard for cash and liquid assets to maximize benefit for the poor (anfa' li'l-fuqara), though the gold standard remains a valid opinion for higher thresholds.",
             principles: [
                 { label: "Anfa' li'l-fuqara", text: "Most beneficial for the poor." },
                 { label: "Ahwat", text: "Precautionary principle." }
