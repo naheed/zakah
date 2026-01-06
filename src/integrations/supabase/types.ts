@@ -152,6 +152,244 @@ export type Database = {
           },
         ]
       }
+      classification_feedback: {
+        Row: {
+          account_type: string | null
+          apply_always: boolean | null
+          corrected_at: string | null
+          corrected_category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          institution_name: string | null
+          line_item_id: string | null
+          predicted_category: string
+          predicted_confidence: number | null
+          signals_used: Json | null
+          source_type: string | null
+          user_id: string
+        }
+        Insert: {
+          account_type?: string | null
+          apply_always?: boolean | null
+          corrected_at?: string | null
+          corrected_category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          institution_name?: string | null
+          line_item_id?: string | null
+          predicted_category: string
+          predicted_confidence?: number | null
+          signals_used?: Json | null
+          source_type?: string | null
+          user_id: string
+        }
+        Update: {
+          account_type?: string | null
+          apply_always?: boolean | null
+          corrected_at?: string | null
+          corrected_category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          institution_name?: string | null
+          line_item_id?: string | null
+          predicted_category?: string
+          predicted_confidence?: number | null
+          signals_used?: Json | null
+          source_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classification_feedback_line_item_id_fkey"
+            columns: ["line_item_id"]
+            isOneToOne: false
+            referencedRelation: "asset_line_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plaid_accounts: {
+        Row: {
+          account_id: string
+          asset_account_id: string | null
+          balance_available: number | null
+          balance_current: number | null
+          balance_iso_currency_code: string | null
+          created_at: string | null
+          id: string
+          is_active_trader: boolean | null
+          last_synced_at: string | null
+          mask: string | null
+          name: string | null
+          official_name: string | null
+          plaid_item_id: string
+          subtype: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          asset_account_id?: string | null
+          balance_available?: number | null
+          balance_current?: number | null
+          balance_iso_currency_code?: string | null
+          created_at?: string | null
+          id?: string
+          is_active_trader?: boolean | null
+          last_synced_at?: string | null
+          mask?: string | null
+          name?: string | null
+          official_name?: string | null
+          plaid_item_id: string
+          subtype?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          asset_account_id?: string | null
+          balance_available?: number | null
+          balance_current?: number | null
+          balance_iso_currency_code?: string | null
+          created_at?: string | null
+          id?: string
+          is_active_trader?: boolean | null
+          last_synced_at?: string | null
+          mask?: string | null
+          name?: string | null
+          official_name?: string | null
+          plaid_item_id?: string
+          subtype?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plaid_accounts_asset_account_id_fkey"
+            columns: ["asset_account_id"]
+            isOneToOne: false
+            referencedRelation: "asset_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plaid_accounts_plaid_item_id_fkey"
+            columns: ["plaid_item_id"]
+            isOneToOne: false
+            referencedRelation: "plaid_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plaid_holdings: {
+        Row: {
+          cost_basis: number | null
+          created_at: string | null
+          id: string
+          institution_price: number | null
+          institution_value: number | null
+          iso_currency_code: string | null
+          name: string | null
+          plaid_account_id: string
+          price_as_of: string | null
+          quantity: number | null
+          security_id: string | null
+          security_type: string | null
+          ticker_symbol: string | null
+          unofficial_currency_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cost_basis?: number | null
+          created_at?: string | null
+          id?: string
+          institution_price?: number | null
+          institution_value?: number | null
+          iso_currency_code?: string | null
+          name?: string | null
+          plaid_account_id: string
+          price_as_of?: string | null
+          quantity?: number | null
+          security_id?: string | null
+          security_type?: string | null
+          ticker_symbol?: string | null
+          unofficial_currency_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cost_basis?: number | null
+          created_at?: string | null
+          id?: string
+          institution_price?: number | null
+          institution_value?: number | null
+          iso_currency_code?: string | null
+          name?: string | null
+          plaid_account_id?: string
+          price_as_of?: string | null
+          quantity?: number | null
+          security_id?: string | null
+          security_type?: string | null
+          ticker_symbol?: string | null
+          unofficial_currency_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plaid_holdings_plaid_account_id_fkey"
+            columns: ["plaid_account_id"]
+            isOneToOne: false
+            referencedRelation: "plaid_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plaid_items: {
+        Row: {
+          access_token: string
+          consent_expiration_time: string | null
+          created_at: string | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          institution_id: string | null
+          institution_name: string | null
+          item_id: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          consent_expiration_time?: string | null
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          institution_id?: string | null
+          institution_name?: string | null
+          item_id: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          consent_expiration_time?: string | null
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          institution_id?: string | null
+          institution_name?: string | null
+          item_id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       portfolios: {
         Row: {
           created_at: string
