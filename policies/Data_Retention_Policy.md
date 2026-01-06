@@ -1,48 +1,52 @@
 # Data Retention and Disposal Policy
 
-**Organization:** vora.dev (operating ZakatFlow)  
-**Contact:** security@vora.dev  
+**Organization:** vora.dev (dba ZakatFlow)  
+**Owner:** Information Security Officer (security@vora.dev)  
 **Effective Date:** January 5, 2026  
-**Version:** 1.1
+**Version:** 2.0 (Enterprise Revision)
 
 ## 1. Policy Statement
 
-ZakatFlow allows users to calculate their Zakat obligations by analyzing financial data. We adhere to the principle of Data Minimization—we only retain personal and financial data for as long as necessary to provide this service or as required by law.
+ZakatFlow adheres to the principle of Data Minimization. We collect only the data strictly necessary to perform Zakat calculations and retain it only as long as required to provide the service or meet legal obligations.
 
-## 2. Data Retention Schedules
+## 2. Retention Schedules
 
-| Data Category | Retention Period | Justification |
-| :--- | :--- | :--- |
-| **Plaid Access Tokens** | Duration of active account | Required to fetch balance/transaction data for ongoing Zakat calculation. |
-| **Financial Transaction Data** | Duration of active account | Required to provide historical Zakat reports and year-over-year tracking. |
-| **User Profile (Name, Email)** | Duration of active account | Essential for account identification and service communication. |
-| **Zakat Calculation Reports** | 7 Years | Retained for user's tax and audit purposes. |
-| **Application Logs** | 90 Days | Used for security auditing, debugging, and performance monitoring. |
+| Data Domain | Specific Data Elements | Retention Period | Rationale |
+| :--- | :--- | :--- | :--- |
+| **User Identity** | Name, Email, OAuth ID | Duration of Account | Required for authentication and service delivery. |
+| **Banking Connectivity** | Plaid Access Tokens, Item IDs | Duration of Account | Tokens allow ongoing fetching of balance data. |
+| **Financial Records** | Transactions, Asset Valuations | Duration of Account | Required for year-over-year Zakat comparison. |
+| **Raw Documents** | Uploaded PDFs/Images | Ephemeral (Max 1 Hour) | Documents are processed by AI and then immediately discarded. We do not use ZakatFlow as a document storage locker. |
+| **Audit Logs** | API Logs, Access Logs | 1 Year | Security auditing and forensic analysis. |
 
-## 3. Data Disposal & Deletion
+## 3. Data Disposal and Deletion Protocols
 
-Data is considered "disposed" when it is permanently deleted from our active databases (Supabase) and cannot be readily recovered.
+### 3.1 Hard Deletion vs. Soft Deletion
 
-### 3.1 User-Initiated Deletion
+*   **Application Data:** When data is deleted, we execute a "Hard Delete" (SQL DELETE) operation. We do not use "Soft Deletion" (marking as hidden) for sensitive financial data.
+*   **Plaid Tokens:** Deletion triggers an immediate API call to `/item/remove` at Plaid, invalidating the token permanently.
 
-Users may request account deletion at any time via the application settings or by emailing support.
+### 3.2 User Right to Erasure
 
-Upon request, ZakatFlow will:
+Users may trigger account deletion via the application settings. This process is automated:
 
-1.  Delete the user's row from the `users` table in Supabase.
-2.  Cascade delete all associated financial records and transaction history.
-3.  Call the Plaid API `/item/remove` endpoint to invalidate and remove the associated Access Tokens.
+1.  **Immediate:** User access is revoked.
+2.  **T+0 to T+24 Hours:** All rows in the `users`, `accounts`, and `transactions` tables associated with the `user_id` are purged.
+3.  **Confirmation:** An email is dispatched confirming the erasure.
 
-This process is completed within 30 days of the request.
+### 3.3 Backup Expiration
 
-### 3.2 Plaid Connection Removal
+*   Production databases are backed up automatically by Supabase for disaster recovery.
+*   Backups are retained for 30 days.
+*   Data deleted from the live application will naturally age out of the backup cycle after 30 days. This is industry standard practice for disaster recovery compliance.
 
-If a user unlinks a specific bank account but keeps their ZakatFlow account active, we immediately delete the Access Token and all cached transaction data associated with that specific bank institution.
+## 4. Exceptions
 
-### 3.3 End of Life
+Data may be retained beyond the standard schedule only in the event of:
 
-If the ZakatFlow service is discontinued, all user data will be securely deleted within 90 days of service termination, and users will be notified prior to deletion to allow for data export.
+1.  A legal hold or subpoena.
+2.  An active security investigation requiring forensic preservation.
 
-## 4. Policy Review
+## 5. Review Cycle
 
-This policy is reviewed annually by the Data Protection Officer (CEO) to ensure compliance with privacy regulations (GDPR/CCPA) and partner requirements (Plaid).
+This policy is reviewed annually or upon significant architecture changes (e.g., changing database providers) to ensure continued compliance with privacy laws (GDPR, CCPA) and partner requirements.

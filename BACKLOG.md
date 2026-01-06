@@ -33,6 +33,9 @@
 
 > **Goal:** User visibility and control over extracted data.
 
+- [x] Delete all data
+- [x] Delete account
+- [ ] **Compliance:** Send confirmation email upon account deletion (Policy 3.2)
 - [x] New route `/assets` showing cards for each connected account
 - [x] AccountCard component with icons, badges, stale indicators
 - [x] `/assets/add` with modular Add flow (Upload/Manual/API stub)
