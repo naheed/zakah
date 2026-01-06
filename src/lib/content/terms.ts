@@ -20,7 +20,7 @@ export const termsSections: TermSection[] = [
         number: 1,
         title: "Acceptance of Terms",
         icon: Scroll,
-        content: "By accessing or using the Zakat Calculator (\"the Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, you may not use the Service."
+        content: "Last Updated: January 5, 2026\n\nBy accessing or using the Zakat Calculator (\"the Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, you may not use the Service."
     },
     {
         id: "description",
@@ -67,8 +67,22 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "plaid",
+        number: 5,
+        title: "Plaid Integration (Where Available)",
+        icon: Lightning,
+        content: "If you use the optional Plaid integration to connect your bank accounts (where supported):",
+        listItems: [
+            "You acknowledge and agree that your use of the Plaid integration is governed by Plaid’s Terms of Service",
+            "We do not store your online banking credentials (username/password) — these are passed directly to Plaid",
+            "You grant us and Plaid the right to access and transmit your financial information for the purpose of the Service"
+        ]
+    },
+    {
         id: "encryption",
         number: 5,
+        id: "encryption",
+        number: 6,
         title: "Encryption and Data Loss",
         icon: LockKey,
         content: "Your saved calculations are encrypted using keys stored locally in your browser. You acknowledge that:",
@@ -82,19 +96,24 @@ export const termsSections: TermSection[] = [
     {
         id: "ai-processing",
         number: 6,
+        id: "ai-processing",
+        number: 7,
         title: "AI Document Processing",
         icon: Lightning,
         content: "When you upload documents for data extraction:",
         listItems: [
             "Documents are processed by third-party AI services (Google Gemini)",
-            "We do not guarantee the accuracy of extracted data",
-            "You are responsible for verifying all extracted values",
-            "Uploaded documents are processed in memory and not permanently stored"
+            "We do not guarantee the accuracy of extracted data — AI systems can make errors",
+            "You are solely responsible for verifying all extracted values before finalizing your Zakat payment",
+            "Uploaded documents are processed in memory and not permanently stored",
+            "We accept no liability for under-payment or over-payment of Zakat resulting from calculation or parsing errors"
         ]
     },
     {
         id: "warranties",
         number: 7,
+        id: "warranties",
+        number: 8,
         title: "Disclaimer of Warranties",
         icon: Shield,
         content: "THE SERVICE IS PROVIDED \"AS IS\" AND \"AS AVAILABLE\" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:",
@@ -108,6 +127,8 @@ export const termsSections: TermSection[] = [
     {
         id: "liability",
         number: 8,
+        id: "liability",
+        number: 9,
         title: "Limitation of Liability",
         icon: Scales,
         content: "TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE SERVICE, ITS CREATOR, OR AFFILIATES BE LIABLE FOR:",
@@ -122,6 +143,8 @@ export const termsSections: TermSection[] = [
     {
         id: "indemnification",
         number: 9,
+        id: "indemnification",
+        number: 10,
         title: "Indemnification",
         icon: Handshake,
         content: "You agree to indemnify and hold harmless the Service and its creator from any claims, damages, or expenses arising from your use of the Service or violation of these Terms."
@@ -129,6 +152,8 @@ export const termsSections: TermSection[] = [
     {
         id: "intellectual",
         number: 10,
+        id: "intellectual",
+        number: 11,
         title: "Intellectual Property",
         icon: Copyright,
         content: "The Service and its original content, features, and functionality are owned by the creator and are protected by applicable intellectual property laws. You may not copy, modify, distribute, or create derivative works without permission."
@@ -136,6 +161,8 @@ export const termsSections: TermSection[] = [
     {
         id: "termination",
         number: 11,
+        id: "termination",
+        number: 12,
         title: "Account Termination",
         icon: Prohibit,
         content: "We reserve the right to suspend or terminate your access to the Service at any time, without notice, for conduct that we believe violates these Terms or is harmful to other users or the Service."
@@ -143,6 +170,8 @@ export const termsSections: TermSection[] = [
     {
         id: "disputes",
         number: 12,
+        id: "disputes",
+        number: 13,
         title: "Dispute Resolution",
         icon: Gavel,
         content: "Any disputes arising from these Terms or your use of the Service shall be resolved through good faith negotiation. If negotiation fails, disputes shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association, conducted in California. You agree to waive any right to participate in a class action lawsuit or class-wide arbitration."
@@ -150,6 +179,8 @@ export const termsSections: TermSection[] = [
     {
         id: "governing",
         number: 13,
+        id: "governing",
+        number: 14,
         title: "Governing Law",
         icon: Buildings,
         content: "These Terms shall be governed by and construed in accordance with the laws of the State of California, United States, without regard to its conflict of law provisions."
@@ -157,6 +188,8 @@ export const termsSections: TermSection[] = [
     {
         id: "force-majeure",
         number: 14,
+        id: "force-majeure",
+        number: 15,
         title: "Force Majeure",
         icon: Lightning,
         content: "We shall not be liable for any failure or delay in performing our obligations where such failure or delay results from circumstances beyond our reasonable control, including but not limited to natural disasters, acts of government, internet or infrastructure failures, or third-party service outages."
@@ -164,6 +197,8 @@ export const termsSections: TermSection[] = [
     {
         id: "assignment",
         number: 15,
+        id: "assignment",
+        number: 16,
         title: "Assignment",
         icon: ArrowsClockwise,
         content: "You may not assign or transfer these Terms or your rights hereunder without our prior written consent. We may assign these Terms without restriction."
@@ -171,6 +206,8 @@ export const termsSections: TermSection[] = [
     {
         id: "changes",
         number: 16,
+        id: "changes",
+        number: 17,
         title: "Changes to Terms",
         icon: Eraser,
         content: "We reserve the right to modify these Terms at any time. We will notify you of material changes by posting the new Terms on this page and updating the \"Last updated\" date. Your continued use of the Service after changes constitutes acceptance of the new Terms."
@@ -178,6 +215,8 @@ export const termsSections: TermSection[] = [
     {
         id: "severability",
         number: 17,
+        id: "severability",
+        number: 18,
         title: "Severability",
         icon: Files,
         content: "If any provision of these Terms is found to be unenforceable, the remaining provisions will continue in full force and effect."
@@ -185,6 +224,8 @@ export const termsSections: TermSection[] = [
     {
         id: "entire",
         number: 18,
+        id: "entire",
+        number: 19,
         title: "Entire Agreement",
         icon: Scroll,
         content: "These Terms, together with our Privacy Policy, constitute the entire agreement between you and us regarding the Service and supersede all prior agreements and understandings."
@@ -192,11 +233,13 @@ export const termsSections: TermSection[] = [
     {
         id: "contact",
         number: 19,
+        id: "contact",
+        number: 20,
         title: "Contact",
         icon: AddressBook,
         content: "For questions about these Terms, please contact:",
         listItems: [
-            "Email: naheed@vora.dev"
+            "Email: security@vora.dev"
         ]
     }
 ];

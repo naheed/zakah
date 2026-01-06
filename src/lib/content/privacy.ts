@@ -46,15 +46,17 @@ export const privacySections: SectionContent[] = [
     {
         id: "introduction",
         title: "Introduction",
-        content: `This Privacy Policy describes how the Zakat Calculator ("we," "our," or "the Service") collects, uses, and protects your information when you use our web application. We are committed to protecting your privacy and ensuring the security of your financial data.`
+        content: `Last Updated: January 5, 2026
+
+This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), provided by vora.dev, collects, uses, and protects your information when you use our website and services. We are committed to protecting your privacy and ensuring the security of your financial data.`
     },
     {
         id: "collection",
         title: "Information We Collect",
         subsections: [
             {
-                title: "2.1 Account Information",
-                content: "When you sign in with Google OAuth, we receive:",
+                title: "2.1 Account Information (Personal Information)",
+                content: "When you sign in with Google OAuth, we collect:",
                 listItems: [
                     "Your email address",
                     "Your display name",
@@ -66,12 +68,21 @@ export const privacySections: SectionContent[] = [
                 content: "When you use the calculator, you provide financial information including asset values, liabilities, and other data needed to calculate Zakat. This data is encrypted before being stored (see Section 5 for details)."
             },
             {
-                title: "2.3 Uploaded Documents",
+                title: "2.3 Uploaded Documents (AI Parsing)",
                 content: "When you upload financial documents (bank statements, brokerage statements, etc.) for automatic data extraction:",
                 listItems: [
                     "Original files are processed in memory by our AI provider (see Section 4.1) and immediately discarded — they are never saved to our storage",
                     "Extracted numeric values only are retained (e.g., account balances)",
                     "Document metadata is session-only — filenames, institution names, and AI-generated summaries are shown during your session but are not persisted to storage"
+                ]
+            },
+            {
+                title: "2.4 Third-Party Integrations (Where Available)",
+                content: "If you choose to use optional third-party integrations (such as Plaid for bank connectivity) where available in your region:",
+                listItems: [
+                    "We use Plaid Inc. (\"Plaid\") to gather data from your financial institutions",
+                    "By connecting your account, you grant Plaid the right, power, and authority to act on your behalf to access and transmit your personal and financial information",
+                    "You agree to your personal and financial information being transferred, stored, and processed by Plaid in accordance with the Plaid Privacy Policy"
                 ]
             },
             {
@@ -199,7 +210,8 @@ export const privacySections: SectionContent[] = [
                 listItems: [
                     "Google Cloud / Gemini AI: Document processing and data extraction",
                     "Supabase: Database and authentication infrastructure",
-                    "Google OAuth: Authentication provider"
+                    "Google OAuth: Authentication provider",
+                    "Plaid: Banking connectivity (if enabled by you)"
                 ]
             },
             {
@@ -268,6 +280,10 @@ export const privacySections: SectionContent[] = [
                     "Delete Account: Permanently deletes your account, profile, and all associated data"
                 ],
                 note: "Both actions are immediate and irreversible. Local encryption keys stored in your browser are also cleared during deletion."
+            },
+            {
+                title: "8.2 Plaid Connection Removal",
+                content: "If you unlink a specific bank account but keep your ZakatFlow account active, we immediately delete the Access Token and all cached transaction data associated with that specific bank institution."
             }
         ]
     },
@@ -295,8 +311,8 @@ export const privacySections: SectionContent[] = [
     },
     {
         id: "contact",
-        title: "Contact Us",
+        title: "9. Contact Us",
         content: "If you have questions about this Privacy Policy or our data practices, please contact:",
-        note: "Email: naheed@vora.dev"
+        note: "Email: security@vora.dev"
     }
 ];

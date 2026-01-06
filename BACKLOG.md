@@ -109,6 +109,7 @@
 - [ ] Store Plaid access tokens securely (encrypted)
 - [ ] Fetch accounts and balances on demand
 - [ ] Map Plaid account types to V2 `AccountType` enum
+- [ ] **Compliance:** Implement `/item/remove` in `delete-account` function (Policy 3.1)
 
 ### 4.2 Recurring Sync
 - [ ] Background job to refresh balances daily/weekly
