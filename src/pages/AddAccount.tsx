@@ -310,32 +310,49 @@ export default function AddAccount() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="text-center py-8">
-                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
-                                    <Link className="w-8 h-8" />
+                            {!user && !authLoading ? (
+                                <div className="text-center py-8">
+                                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                                        <Link className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                                        Please sign in to securely connect your bank accounts.
+                                    </p>
+                                    <Button
+                                        size="lg"
+                                        onClick={() => navigate('/auth', { state: { returnTo: '/assets/add' } })}
+                                    >
+                                        Sign in to Connect
+                                    </Button>
                                 </div>
-                                <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                                    ZakatFlow uses Plaid to securely connect to your financial institution.
-                                    Your login credentials are never stored on our servers.
-                                </p>
-                                <Button
-                                    size="lg"
-                                    onClick={async () => {
-                                        const result = await plaidLink.openPlaidLink();
-                                        if (result.success) {
-                                            navigate('/assets');
-                                        }
-                                    }}
-                                    disabled={plaidLink.isLoading}
-                                >
-                                    {plaidLink.isLoading ? (
-                                        <Spinner className="w-4 h-4 mr-2 animate-spin" />
-                                    ) : null}
-                                    {plaidLink.status === 'loading_token' && 'Preparing...'}
-                                    {plaidLink.status === 'exchanging' && 'Connecting...'}
-                                    {(plaidLink.status === 'idle' || plaidLink.status === 'ready') && 'Connect Your Bank'}
-                                </Button>
-                            </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+                                        <Link className="w-8 h-8" />
+                                    </div>
+                                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                                        ZakatFlow uses Plaid to securely connect to your financial institution.
+                                        Your login credentials are never stored on our servers.
+                                    </p>
+                                    <Button
+                                        size="lg"
+                                        onClick={async () => {
+                                            const result = await plaidLink.openPlaidLink();
+                                            if (result.success) {
+                                                navigate('/assets');
+                                            }
+                                        }}
+                                        disabled={plaidLink.isLoading}
+                                    >
+                                        {plaidLink.isLoading ? (
+                                            <Spinner className="w-4 h-4 mr-2 animate-spin" />
+                                        ) : null}
+                                        {plaidLink.status === 'loading_token' && 'Preparing...'}
+                                        {plaidLink.status === 'exchanging' && 'Connecting...'}
+                                        {(plaidLink.status === 'idle' || plaidLink.status === 'ready') && 'Connect Your Bank'}
+                                    </Button>
+                                </div>
+                            )}
 
                             {plaidLink.error && (
                                 <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
