@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.delete-account]
 verify_jwt = false
+
+[functions.plaid-link-token]
+verify_jwt = false
+
+[functions.plaid-exchange-token]
+verify_jwt = false
