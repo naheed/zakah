@@ -3,16 +3,73 @@
  * 
  * Exchanges a public_token from Plaid Link for an access_token,
  * stores the item in the database, and fetches initial holdings.
+ * Uses direct HTTP calls to Plaid API (no npm SDK needed).
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Configuration, PlaidApi, PlaidEnvironments } from "npm:plaid@26.0.0";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Plaid API base URLs by environment
+const PLAID_URLS: Record<string, string> = {
+    sandbox: "https://sandbox.plaid.com",
+    development: "https://development.plaid.com",
+    production: "https://production.plaid.com",
+};
+
+interface PlaidAccount {
+    account_id: string;
+    name: string;
+    official_name: string | null;
+    type: string;
+    subtype: string | null;
+    mask: string | null;
+    balances: {
+        current: number | null;
+        available: number | null;
+        iso_currency_code: string | null;
+    };
+}
+
+interface PlaidSecurity {
+    security_id: string;
+    name: string | null;
+    ticker_symbol: string | null;
+    type: string | null;
+}
+
+interface PlaidHolding {
+    account_id: string;
+    security_id: string;
+    quantity: number;
+    cost_basis: number | null;
+    institution_price: number;
+    institution_value: number;
+    iso_currency_code: string | null;
+    institution_price_as_of: string | null;
+}
+
+async function plaidRequest(baseUrl: string, endpoint: string, body: Record<string, unknown>) {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error_message || `Plaid API error: ${endpoint}`);
+    }
+
+    return data;
+}
 
 serve(async (req) => {
     if (req.method === "OPTIONS") {
@@ -44,26 +101,30 @@ serve(async (req) => {
             throw new Error("Unauthorized");
         }
 
-        // Initialize Plaid client
+        // Get Plaid credentials
+        const plaidClientId = Deno.env.get("PLAID_CLIENT_ID");
+        const plaidSecret = Deno.env.get("PLAID_SECRET");
         const plaidEnv = Deno.env.get("PLAID_ENV") || "sandbox";
-        const configuration = new Configuration({
-            basePath: PlaidEnvironments[plaidEnv],
-            baseOptions: {
-                headers: {
-                    "PLAID-CLIENT-ID": Deno.env.get("PLAID_CLIENT_ID"),
-                    "PLAID-SECRET": Deno.env.get("PLAID_SECRET"),
-                },
-            },
-        });
-        const plaidClient = new PlaidApi(configuration);
+
+        if (!plaidClientId || !plaidSecret) {
+            throw new Error("Plaid credentials not configured");
+        }
+
+        const plaidBaseUrl = PLAID_URLS[plaidEnv] || PLAID_URLS.sandbox;
+        const plaidAuth = { client_id: plaidClientId, secret: plaidSecret };
+
+        console.log(`Exchanging Plaid token for user ${user.id}`);
 
         // Exchange public token for access token
-        const exchangeResponse = await plaidClient.itemPublicTokenExchange({
+        const exchangeData = await plaidRequest(plaidBaseUrl, "/item/public_token/exchange", {
+            ...plaidAuth,
             public_token,
         });
 
-        const accessToken = exchangeResponse.data.access_token;
-        const itemId = exchangeResponse.data.item_id;
+        const accessToken = exchangeData.access_token;
+        const itemId = exchangeData.item_id;
+
+        console.log(`Got access token for item ${itemId}`);
 
         // Store Plaid item in database
         const { data: plaidItem, error: itemError } = await supabase
@@ -84,12 +145,13 @@ serve(async (req) => {
         }
 
         // Fetch accounts from Plaid
-        const accountsResponse = await plaidClient.accountsGet({
+        const accountsData = await plaidRequest(plaidBaseUrl, "/accounts/get", {
+            ...plaidAuth,
             access_token: accessToken,
         });
 
         // Store accounts
-        const accountInserts = accountsResponse.data.accounts.map((account) => ({
+        const accountInserts = (accountsData.accounts as PlaidAccount[]).map((account) => ({
             plaid_item_id: plaidItem.id,
             account_id: account.account_id,
             name: account.name,
@@ -114,17 +176,18 @@ serve(async (req) => {
 
         // Fetch investment holdings if available
         try {
-            const holdingsResponse = await plaidClient.investmentsHoldingsGet({
+            const holdingsData = await plaidRequest(plaidBaseUrl, "/investments/holdings/get", {
+                ...plaidAuth,
                 access_token: accessToken,
             });
 
             // Build security lookup map
-            const securities = new Map(
-                holdingsResponse.data.securities.map((s) => [s.security_id, s])
+            const securities = new Map<string, PlaidSecurity>(
+                (holdingsData.securities as PlaidSecurity[]).map((s) => [s.security_id, s])
             );
 
             // Map holdings to accounts
-            for (const holding of holdingsResponse.data.holdings) {
+            for (const holding of holdingsData.holdings as PlaidHolding[]) {
                 const plaidAccount = plaidAccounts?.find(
                     (a) => a.account_id === holding.account_id
                 );
@@ -148,7 +211,8 @@ serve(async (req) => {
             }
         } catch (holdingsError) {
             // Investment holdings may not be available for all accounts
-            console.log("No investment holdings available:", holdingsError.message);
+            const errorMsg = holdingsError instanceof Error ? holdingsError.message : "Unknown error";
+            console.log("No investment holdings available:", errorMsg);
         }
 
         return new Response(
@@ -162,9 +226,10 @@ serve(async (req) => {
             }
         );
     } catch (error) {
-        console.error("Error exchanging Plaid token:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error exchanging Plaid token:", errorMessage);
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: errorMessage }),
             {
                 status: 400,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },

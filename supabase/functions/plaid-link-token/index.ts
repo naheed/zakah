@@ -2,6 +2,7 @@
  * Plaid Link Token Edge Function
  * 
  * Creates a Plaid Link token for the frontend to initialize Plaid Link.
+ * Uses direct HTTP calls to Plaid API (no npm SDK needed).
  * 
  * Required environment variables:
  * - PLAID_CLIENT_ID
@@ -11,11 +12,17 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from "npm:plaid@26.0.0";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Plaid API base URLs by environment
+const PLAID_URLS: Record<string, string> = {
+    sandbox: "https://sandbox.plaid.com",
+    development: "https://development.plaid.com",
+    production: "https://production.plaid.com",
 };
 
 serve(async (req) => {
@@ -42,46 +49,61 @@ serve(async (req) => {
             throw new Error("Unauthorized");
         }
 
-        // Initialize Plaid client
+        // Get Plaid credentials
+        const plaidClientId = Deno.env.get("PLAID_CLIENT_ID");
+        const plaidSecret = Deno.env.get("PLAID_SECRET");
         const plaidEnv = Deno.env.get("PLAID_ENV") || "sandbox";
-        const configuration = new Configuration({
-            basePath: PlaidEnvironments[plaidEnv],
-            baseOptions: {
-                headers: {
-                    "PLAID-CLIENT-ID": Deno.env.get("PLAID_CLIENT_ID"),
-                    "PLAID-SECRET": Deno.env.get("PLAID_SECRET"),
+
+        if (!plaidClientId || !plaidSecret) {
+            throw new Error("Plaid credentials not configured");
+        }
+
+        const plaidBaseUrl = PLAID_URLS[plaidEnv] || PLAID_URLS.sandbox;
+
+        console.log(`Creating Plaid Link token for user ${user.id} in ${plaidEnv} environment`);
+
+        // Create Link token via Plaid API
+        const response = await fetch(`${plaidBaseUrl}/link/token/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                client_id: plaidClientId,
+                secret: plaidSecret,
+                user: {
+                    client_user_id: user.id,
                 },
-            },
+                client_name: "ZakatFlow",
+                products: ["investments", "transactions"],
+                country_codes: ["US"],
+                language: "en",
+            }),
         });
 
-        const plaidClient = new PlaidApi(configuration);
+        const data = await response.json();
 
-        // Create Link token
-        const response = await plaidClient.linkTokenCreate({
-            user: {
-                client_user_id: user.id,
-            },
-            client_name: "ZakatFlow",
-            products: [Products.Investments, Products.Transactions],
-            country_codes: [CountryCode.Us],
-            language: "en",
-            // Optional: specify webhook for updates
-            // webhook: `${supabaseUrl}/functions/v1/plaid-webhook`,
-        });
+        if (!response.ok) {
+            console.error("Plaid API error:", data);
+            throw new Error(data.error_message || "Failed to create Link token");
+        }
+
+        console.log("Link token created successfully");
 
         return new Response(
             JSON.stringify({
-                link_token: response.data.link_token,
-                expiration: response.data.expiration,
+                link_token: data.link_token,
+                expiration: data.expiration,
             }),
             {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             }
         );
     } catch (error) {
-        console.error("Error creating Plaid Link token:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error creating Plaid Link token:", errorMessage);
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: errorMessage }),
             {
                 status: 400,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
