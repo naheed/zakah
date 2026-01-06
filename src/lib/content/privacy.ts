@@ -283,7 +283,7 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
             },
             {
                 title: "8.2 Plaid Connection Removal",
-                content: "If you unlink a specific bank account but keep your ZakatFlow account active, we immediately delete the Access Token and all cached transaction data associated with that specific bank institution."
+                content: "If you unlink a specific bank account but keep your ZakatFlow account active, we immediately delete the Access Token and all cached transaction data associated with that specific bank institution. However, historical Zakat reports and calculation summaries that were generated using this data are retained as part of your permanent Zakat history until you choose to delete them."
             }
         ]
     },

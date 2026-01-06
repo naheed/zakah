@@ -80,8 +80,6 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "encryption",
-        number: 5,
-        id: "encryption",
         number: 6,
         title: "Encryption and Data Loss",
         icon: LockKey,
@@ -94,8 +92,6 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "ai-processing",
-        number: 6,
         id: "ai-processing",
         number: 7,
         title: "AI Document Processing",
@@ -111,8 +107,6 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "warranties",
-        number: 7,
-        id: "warranties",
         number: 8,
         title: "Disclaimer of Warranties",
         icon: Shield,
@@ -125,8 +119,6 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "liability",
-        number: 8,
         id: "liability",
         number: 9,
         title: "Limitation of Liability",
@@ -142,16 +134,12 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "indemnification",
-        number: 9,
-        id: "indemnification",
         number: 10,
         title: "Indemnification",
         icon: Handshake,
         content: "You agree to indemnify and hold harmless the Service and its creator from any claims, damages, or expenses arising from your use of the Service or violation of these Terms."
     },
     {
-        id: "intellectual",
-        number: 10,
         id: "intellectual",
         number: 11,
         title: "Intellectual Property",
@@ -160,16 +148,12 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "termination",
-        number: 11,
-        id: "termination",
         number: 12,
         title: "Account Termination",
         icon: Prohibit,
         content: "We reserve the right to suspend or terminate your access to the Service at any time, without notice, for conduct that we believe violates these Terms or is harmful to other users or the Service."
     },
     {
-        id: "disputes",
-        number: 12,
         id: "disputes",
         number: 13,
         title: "Dispute Resolution",
@@ -178,16 +162,12 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "governing",
-        number: 13,
-        id: "governing",
         number: 14,
         title: "Governing Law",
         icon: Buildings,
         content: "These Terms shall be governed by and construed in accordance with the laws of the State of California, United States, without regard to its conflict of law provisions."
     },
     {
-        id: "force-majeure",
-        number: 14,
         id: "force-majeure",
         number: 15,
         title: "Force Majeure",
@@ -196,16 +176,12 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "assignment",
-        number: 15,
-        id: "assignment",
         number: 16,
         title: "Assignment",
         icon: ArrowsClockwise,
         content: "You may not assign or transfer these Terms or your rights hereunder without our prior written consent. We may assign these Terms without restriction."
     },
     {
-        id: "changes",
-        number: 16,
         id: "changes",
         number: 17,
         title: "Changes to Terms",
@@ -214,8 +190,6 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "severability",
-        number: 17,
-        id: "severability",
         number: 18,
         title: "Severability",
         icon: Files,
@@ -223,16 +197,12 @@ export const termsSections: TermSection[] = [
     },
     {
         id: "entire",
-        number: 18,
-        id: "entire",
         number: 19,
         title: "Entire Agreement",
         icon: Scroll,
         content: "These Terms, together with our Privacy Policy, constitute the entire agreement between you and us regarding the Service and supersede all prior agreements and understandings."
     },
     {
-        id: "contact",
-        number: 19,
         id: "contact",
         number: 20,
         title: "Contact",

@@ -149,9 +149,8 @@ export default function AddAccount() {
                         <MethodCard
                             icon={<Link className="w-6 h-6" />}
                             title="Connect Bank"
-                            description="Securely link your bank or brokerage (coming soon)"
-                            disabled
-                            onClick={() => { }}
+                            description="Securely link your bank or brokerage (Recommended)"
+                            onClick={() => setMethod('plaid')}
                         />
                     </div>
                 )}

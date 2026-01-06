@@ -40,6 +40,13 @@ Users may trigger account deletion via the application settings. This process is
 *   Backups are retained for 30 days.
 *   Data deleted from the live application will naturally age out of the backup cycle after 30 days. This is industry standard practice for disaster recovery compliance.
 
+### 3.4 Partial Deletion / Unlinking
+
+When a user unlinks a third-party data source (e.g., Plaid Bank Account) without deleting their ZakatFlow account:
+
+*   **Raw Data (Deleted):** The Access Token, Item ID, and cached raw transaction data from that institution are immediately hard-deleted.
+*   **Derived Data (Retained):** Historical Zakat Calculation Reports and asset summaries that were generated using that data are **retained** as part of the user's permanent record until the user explicitly deletes those reports or their entire account. This ensures users do not lose their history of religious compliance.
+
 ## 4. Exceptions
 
 Data may be retained beyond the standard schedule only in the event of:
