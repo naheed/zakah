@@ -2,6 +2,7 @@
  * Plaid Link Token Edge Function
  * 
  * Creates a Plaid Link token for the frontend to initialize Plaid Link.
+ * Uses direct Fetch API calls for Deno compatibility.
  * 
  * Required environment variables:
  * - PLAID_CLIENT_ID
@@ -11,11 +12,17 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from "npm:plaid@26.0.0";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Map environment name to Plaid API base URL
+const PLAID_ENVIRONMENTS: Record<string, string> = {
+    sandbox: "https://sandbox.plaid.com",
+    development: "https://development.plaid.com",
+    production: "https://production.plaid.com",
 };
 
 serve(async (req) => {
@@ -27,11 +34,14 @@ serve(async (req) => {
     try {
         console.log("Starting Plaid Link Token creation...");
 
-        // Get auth user
+        // Get auth header
         const authHeader = req.headers.get("Authorization");
-        if (!authHeader) {
-            console.error("Missing Auth Header");
-            throw new Error("Missing authorization header");
+        if (!authHeader?.startsWith("Bearer ")) {
+            console.error("Missing or invalid Authorization header");
+            return new Response(
+                JSON.stringify({ error: "Unauthorized" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
         }
 
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -40,13 +50,19 @@ serve(async (req) => {
             global: { headers: { Authorization: authHeader } },
         });
 
+        // Get user from session token
         const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
         if (authError || !user) {
-            console.error("CRITICAL: Supabase Auth Failed", authError);
-            throw new Error("User Authentication Failed: " + (authError?.message || "No user found"));
+            console.error("JWT validation failed:", authError);
+            return new Response(
+                JSON.stringify({ error: "Unauthorized" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
         }
 
-        console.log(`User authenticated: ${user.id}`);
+        const userId = user.id;
+        console.log(`User authenticated: ${userId}`);
 
         // Check for secrets
         const clientId = Deno.env.get("PLAID_CLIENT_ID");
@@ -63,40 +79,42 @@ serve(async (req) => {
             throw new Error("Missing PLAID_CLIENT_ID or PLAID_SECRET environment variables. Please check your Supabase Secrets.");
         }
 
-        // Initialize Plaid client
-        const configuration = new Configuration({
-            basePath: PlaidEnvironments[plaidEnv],
-            baseOptions: {
-                headers: {
-                    "PLAID-CLIENT-ID": clientId,
-                    "PLAID-SECRET": secret,
-                },
-            },
-        });
-
-        const plaidClient = new PlaidApi(configuration);
-
+        const baseUrl = PLAID_ENVIRONMENTS[plaidEnv] || PLAID_ENVIRONMENTS.sandbox;
+        
         console.log("Requesting Link Token from Plaid...");
 
-        // Create Link token
-        const response = await plaidClient.linkTokenCreate({
-            user: {
-                client_user_id: user.id,
+        // Create Link token using fetch API
+        const plaidResponse = await fetch(`${baseUrl}/link/token/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
             },
-            client_name: "ZakatFlow",
-            products: [Products.Investments, Products.Transactions],
-            country_codes: [CountryCode.Us],
-            language: "en",
-            // Optional: specify webhook for updates
-            // webhook: `${supabaseUrl}/functions/v1/plaid-webhook`,
+            body: JSON.stringify({
+                client_id: clientId,
+                secret: secret,
+                user: {
+                    client_user_id: userId,
+                },
+                client_name: "ZakatFlow",
+                products: ["investments", "transactions"],
+                country_codes: ["US"],
+                language: "en",
+            }),
         });
+
+        const plaidData = await plaidResponse.json();
+
+        if (!plaidResponse.ok) {
+            console.error("Plaid API Error:", JSON.stringify(plaidData));
+            throw new Error(plaidData.error_message || plaidData.error_code || "Plaid API error");
+        }
 
         console.log("Link Token received successfully");
 
         return new Response(
             JSON.stringify({
-                link_token: response.data.link_token,
-                expiration: response.data.expiration,
+                link_token: plaidData.link_token,
+                expiration: plaidData.expiration,
             }),
             {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -107,19 +125,7 @@ serve(async (req) => {
         console.error("Error Name:", error.name);
         console.error("Error Message:", error.message);
 
-        // Plaid-specific error logging
-        if (error.response) {
-            console.error("Plaid API Response Status:", error.response.status);
-            console.error("Plaid API Response Data:", JSON.stringify(error.response.data));
-        }
-
-        // Return 200 with error body so client can parse the message
-        // instead of getting generic "non-2x status code"
-        const errorMessage = error.response?.data?.error_message
-            || error.response?.data?.error_code
-            || error.message
-            || "Unknown error";
-
+        const errorMessage = error.message || "Unknown error";
         console.error("Returning error to client:", errorMessage);
 
         return new Response(

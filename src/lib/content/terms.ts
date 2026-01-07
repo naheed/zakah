@@ -67,6 +67,7 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "plaid",
         number: 5,
         title: "Secure Bank Connections (Plaid)",
         icon: Lightning,
@@ -102,6 +103,7 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "warranties",
         number: 8,
         title: "Service Sustainability & Warranties",
         icon: Shield,
@@ -114,6 +116,7 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "liability",
         number: 9,
         title: "Liability Limits",
         icon: Scales,
