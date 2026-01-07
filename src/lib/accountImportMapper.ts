@@ -71,21 +71,21 @@ const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData> = {
     'GOLD_FULL': 'goldValue',
     'SILVER_FULL': 'silverValue',
 
-    // Real estate
-    'REAL_ESTATE': 'rentalProperties',
-    'PROPERTY': 'rentalProperties',
+    // Real estate - map to rental income (net cash received)
+    'REAL_ESTATE': 'rentalPropertyIncome',
+    'PROPERTY': 'rentalPropertyIncome',
 
-    // Business
-    'BUSINESS': 'businessCash',
-    'INVENTORY': 'inventory',
-    'RECEIVABLES': 'receivables',
+    // Business - map to business fields
+    'BUSINESS': 'businessCashAndReceivables',
+    'INVENTORY': 'businessInventory',
+    'RECEIVABLES': 'goodDebtOwedToYou',
 
     // Liabilities (negative values)
-    'CREDIT_CARD': 'creditCardDebt',
-    'DEBT': 'otherShortTermDebt',
-    'LOAN': 'personalLoans',
-    'EXPENSE': 'creditCardDebt',
-    'LIABILITY': 'otherShortTermDebt',
+    'CREDIT_CARD': 'creditCardBalance',
+    'DEBT': 'unpaidBills',
+    'LOAN': 'studentLoansDue',
+    'EXPENSE': 'monthlyLivingExpenses',
+    'LIABILITY': 'unpaidBills',
 
     // Other
     'EXEMPT': null, // Not zakatable, don't map
