@@ -214,19 +214,22 @@ supabase/
 
 ---
 
-## Calculation Methodology
+## Core Logic & Methodology
 
-ZakatFlow supports multiple calculation modes:
+### Retrospective Obligation (The Tax Analogy)
+Unlike monthly expenses, Zakat is a **retrospective annual obligation**, similar to filing taxes.
+1.  **Hawl (Accrual Year)**: The lunar year during which wealth is held.
+2.  **Assessment Date**: The end of the Hawl. You calculate Zakat based on wealth held *on this day*.
+3.  **Payment Period**: Typically due immediately upon calculation.
 
-| Mode | Description |
-|------|-------------|
-| **Bradford** | Sheikh Joe Bradford's methodology (default) |
-| **Conservative** | Maximum Zakat interpretation |
-| **Optimized** | Minimum legitimate Zakat |
-| **Pure** | Strict madhab adherence |
+The app tracks your **Active Zakat Year**. When you run a calculation, it defaults to assessing the **Year Just Completed**, linking the liability to that period. Donations made *after* the calculation date (or advance payments during the year) count toward satisfying this liability.
+
+### Calculation Modes
+Based on Sheikh Joe Bradford's methodology.
+- **Bradford (Default)**: Follows modern scholarly rulings adaptable for Western contexts.
+- **Madhab Specific**: Configuration options for Hanafi, Maliki, Shafi'i, and Hanbali schools.
 
 ### Supported Asset Classes
-
 - Cash & Bank Accounts
 - Stocks, ETFs, Mutual Funds
 - Retirement Accounts (401k, IRA, Roth)

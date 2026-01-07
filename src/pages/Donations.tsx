@@ -39,6 +39,7 @@ export default function Donations() {
         addDonation,
         setHawlSettings: saveHawlSettings,
         setCalculatedAmount,
+        startNewYear,
     } = useDonationPersistence();
 
     // Zakat calculator persistence hook (for reading calculated amount)
@@ -176,7 +177,7 @@ export default function Donations() {
                                         <div className="flex items-center gap-2 text-sm text-foreground font-medium">
                                             <CalendarBlank className="w-4 h-4 text-primary" weight="duotone" />
                                             <span>
-                                                Hawl: {hawlSettings?.calendarType === 'hijri'
+                                                Hawl: {hawlSettings?.calendar_type === 'hijri'
                                                     ? `${formatHijri(summary.zakatYear.hawl_start)} → ${formatHijri(summary.zakatYear.hawl_end)}`
                                                     : `${formatDate(summary.zakatYear.hawl_start)} → ${formatDate(summary.zakatYear.hawl_end)}`
                                                 }
@@ -191,26 +192,35 @@ export default function Donations() {
                                         </div>
                                         {/* Subtle hint of the other calendar */}
                                         <div className="text-[10px] text-muted-foreground pl-6">
-                                            {hawlSettings?.calendarType === 'hijri'
+                                            {hawlSettings?.calendar_type === 'hijri'
                                                 ? `(${formatDate(summary.zakatYear.hawl_start)} → ${formatDate(summary.zakatYear.hawl_end)})`
                                                 : `(${formatHijri(summary.zakatYear.hawl_start)} → ${formatHijri(summary.zakatYear.hawl_end)})`
                                             }
                                         </div>
                                     </div>
 
-                                    <Badge variant="secondary" className="text-xs shrink-0 ml-2">
+                                    <Badge variant={summary.daysRemaining < 0 ? "destructive" : "secondary"} className="text-xs shrink-0 ml-2">
                                         <Clock className="w-3 h-3 mr-1" />
-                                        {summary.daysRemaining} days left
+                                        {summary.daysRemaining < 0
+                                            ? `${Math.abs(summary.daysRemaining)} days overdue`
+                                            : `${summary.daysRemaining} days left`}
                                     </Badge>
                                 </div>
 
                                 {/* Progress Section */}
                                 <div className="space-y-3">
                                     <div className="flex items-baseline justify-between">
-                                        <span className="text-3xl font-bold text-foreground">
-                                            {formatCurrency(summary.remaining)}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
+                                        <div className="flex flex-col">
+                                            <span className="text-3xl font-bold text-foreground">
+                                                {formatCurrency(summary.remaining)}
+                                            </span>
+                                            {summary.totalDonated > summary.zakatYear.calculated_amount && (
+                                                <span className="text-xs text-emerald-600 font-medium mt-1">
+                                                    + {formatCurrency(summary.totalDonated - summary.zakatYear.calculated_amount)} surplus
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="text-sm text-muted-foreground text-right pl-4">
                                             remaining of {formatCurrency(summary.zakatYear.calculated_amount)}
                                         </span>
                                     </div>
@@ -228,10 +238,20 @@ export default function Donations() {
 
                                     <p className="text-sm text-muted-foreground">
                                         {summary.percentComplete >= 100 ? (
-                                            <span className="text-primary flex items-center gap-1">
-                                                <CheckCircle weight="fill" className="w-4 h-4" />
-                                                Zakat fully distributed!
-                                            </span>
+                                            <div className="flex flex-col gap-3 mt-2">
+                                                <span className="text-primary flex items-center gap-1 font-medium">
+                                                    <CheckCircle weight="fill" className="w-5 h-5" />
+                                                    Zakat fully distributed!
+                                                </span>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="w-full sm:w-auto self-start"
+                                                    onClick={async () => await startNewYear()}
+                                                >
+                                                    Start Next Cycle
+                                                </Button>
+                                            </div>
                                         ) : (
                                             `${summary.percentComplete}% of Zakat distributed`
                                         )}

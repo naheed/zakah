@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUsageMetrics } from "@/hooks/useUsageMetrics";
 import { useAssetPersistence } from "@/hooks/useAssetPersistence";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
+import { useDonationPersistence } from "@/hooks/useDonationPersistence";
 import { formatLargeNumber, formatCount } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MetricsDisplay } from "../MetricsDisplay";
@@ -54,6 +55,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
   const { stats: userStats, fetchStats: fetchUserStats } = useReferral();
   const { fetchAccounts } = useAssetPersistence();
   const { stepIndex, uploadedDocuments, lastUpdated, startFresh, reportReady, formData } = useZakatPersistence();
+  const { summary } = useDonationPersistence();
   const [accounts, setAccounts] = useState<AssetAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(false);
 
@@ -321,11 +323,11 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                       <div className="w-full max-w-md">
                         <ZakatDashboard
                           calculatedAmount={displayZakatDue}
-                          donatedAmount={0} // TODO: Fetch from backend
-                          hawlStart="2025-01-15" // TODO: Fetch from user settings
-                          hawlEnd="2026-01-14"
-                          daysRemaining={45} // TODO: Calculate
-                          donationCount={0} // TODO: Fetch from backend
+                          donatedAmount={summary?.totalDonated || 0}
+                          hawlStart={summary?.zakatYear.hawl_start}
+                          hawlEnd={summary?.zakatYear.hawl_end}
+                          daysRemaining={summary?.daysRemaining || 0}
+                          donationCount={summary?.donations.length || 0}
                         />
                       </div>
                     )}

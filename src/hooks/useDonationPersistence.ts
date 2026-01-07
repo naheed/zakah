@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { encryptSession, decryptSession } from '@/lib/sessionEncryption';
 import { Donation, ZakatYear, HawlSettings, DonationSummary, CalendarType } from '@/types/donations';
 import { supabase } from '@/integrations/supabase/runtimeClient';
+import { v4 as uuidv4 } from 'uuid';
 
 const DONATIONS_STORAGE_KEY = 'zakat-donations';
 const HAWL_STORAGE_KEY = 'zakat-hawl-settings';
@@ -38,25 +39,22 @@ interface UseDonationPersistenceReturn {
     deleteDonation: (id: string) => Promise<void>;
     setHawlSettings: (date: string, calendarType: CalendarType) => Promise<void>;
     setCalculatedAmount: (amount: number, calculationId?: string) => Promise<void>;
+    startNewYear: () => Promise<void>;
     refreshData: () => Promise<void>;
 }
 
 /**
  * Calculate days remaining until Hawl end
  */
-function calculateDaysRemaining(hawlStart: string): number {
-    const start = new Date(hawlStart);
-    const now = new Date();
-
-    const hawlEnd = new Date(start);
-    hawlEnd.setFullYear(hawlEnd.getFullYear() + 1);
-
-    if (now > hawlEnd) {
-        hawlEnd.setFullYear(hawlEnd.getFullYear() + 1);
-    }
-
+/**
+ * Calculate days remaining until Hawl end
+ */
+function calculateDaysRemaining(hawlEndStr: string): number {
+    const hawlEnd = new Date(hawlEndStr);
+    const now = new Date(); // local time
+    // Do not auto-advance. Respect the DB's hawl_end.
     const diffMs = hawlEnd.getTime() - now.getTime();
-    return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }
 
 /**
@@ -84,7 +82,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
             // 1. Load Hawl Settings
             const { data: hawlData, error: hawlError } = await supabase
-                .from('hawl_settings')
+                .from('hawl_settings' as any)
                 .select('*')
                 .eq('user_id', userId)
                 .single();
@@ -95,7 +93,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
             // 2. Load Zakat Years
             const { data: yearsData, error: yearsError } = await supabase
-                .from('zakat_years')
+                .from('zakat_years' as any)
                 .select('*')
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false });
@@ -104,7 +102,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
             // 3. Load Donations
             const { data: donationsData, error: donationsError } = await supabase
-                .from('donations')
+                .from('donations' as any)
                 .select('*')
                 .eq('user_id', userId)
                 .order('donation_date', { ascending: false });
@@ -140,7 +138,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
                         // 2. Migrate Zakat Years (if useful)
                         // Ideally we find the corresponding year or create new ones.
                         // For simplicity, we just link donations to the current zakat year we just loaded/created.
-                        const yearId = current?.id || yearsData?.[0]?.id; // Use loaded year ID
+                        const yearId = current?.id || years[0]?.id; // Use loaded year ID
 
                         // 3. Migrate Donations
                         if (localData.donations.length > 0) {
@@ -157,7 +155,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
                             }));
 
                             const { error: migrationError } = await supabase
-                                .from('donations')
+                                .from('donations' as any)
                                 .insert(donationsToInsert);
 
                             if (migrationError) {
@@ -295,7 +293,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             // Ideally we insert exactly what we have.
 
             const { data, error } = await supabase
-                .from('donations')
+                .from('donations' as any)
                 .insert({
                     user_id: userId,
                     zakat_year_id: currentZakatYear?.id, // Important: link to real DB ID
@@ -343,7 +341,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             const { error } = await supabase
-                .from('donations')
+                .from('donations' as any)
                 .update({
                     ...updates,
                     updated_at: now
@@ -365,7 +363,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             const { error } = await supabase
-                .from('donations')
+                .from('donations' as any)
                 .delete()
                 .eq('id', id);
 
@@ -415,7 +413,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
         if (user) {
             // Upsert Hawl Settings
             const { error: hawlError } = await supabase
-                .from('hawl_settings')
+                .from('hawl_settings' as any)
                 .upsert({
                     user_id: userId,
                     hawl_start_date: date,
@@ -429,7 +427,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             // Note: If no ID exists for year, we insert. If ID exists, we update.
             // Since we generated ID client side or used existing:
             const { error: yearError } = await supabase
-                .from('zakat_years')
+                .from('zakat_years' as any)
                 .upsert({
                     id: newZakatYear.id, // Important if updating existing year
                     user_id: userId,
@@ -475,10 +473,12 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             updated_at: new Date().toISOString(),
         } : {
             // Fallback if year didn't exist (edge case)
+            // DEFAULT: Retrospective (Tax Model). 
+            // If creating now, we assume it's for the year ending NOW.
             id: targetYearId,
             user_id: user?.id || 'guest',
-            hawl_start: new Date().toISOString().split('T')[0],
-            hawl_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+            hawl_start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
+            hawl_end: new Date().toISOString().split('T')[0],
             calculated_amount: amount,
             calculation_id: calculationId,
             is_current: true,
@@ -491,7 +491,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             const { error } = await supabase
-                .from('zakat_years')
+                .from('zakat_years' as any)
                 .upsert({
                     id: updatedYear.id,
                     user_id: user.id,
@@ -510,6 +510,84 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
     }, [donations, hawlSettings, currentZakatYear, user, setHawlSettings]);
 
     /**
+     * Archive current year and start new one
+     */
+    const startNewYear = useCallback(async () => {
+        if (!currentZakatYear) return;
+
+        const now = new Date().toISOString();
+        const oldEnd = currentZakatYear.hawl_end;
+
+        // 1. Update old year to not current
+        const archivedYear: ZakatYear = {
+            ...currentZakatYear,
+            is_current: false,
+            updated_at: now
+        };
+
+        // 2. Create new year
+        // Start = Old End. End = Old End + 1 Year (Gregorian approximation or simple +1)
+        // Since we are retrospective, the "New Year" is the one starting NOW (or rather, just started accumulating).
+        // Wait, if we use Retrospective logic, the "Active" year is the one "Just Ended".
+        // If we "Start New Year", we are effectively waiting for the NEXT one to end.
+        // So we are in "Accumulation Mode".
+        // Let's set Start = Old End. End = Old End + 1 Year.
+        // And reset Amount to 0.    
+        const nextEnd = new Date(oldEnd);
+        nextEnd.setFullYear(nextEnd.getFullYear() + 1);
+
+        const newYearId = user ? uuidv4() : generateLocalId();
+
+        const newYear: ZakatYear = {
+            id: newYearId,
+            user_id: user?.id || 'guest',
+            hawl_start: oldEnd,
+            hawl_end: nextEnd.toISOString().split('T')[0],
+            calculated_amount: 0, // Reset
+            is_current: true,
+            is_superseded: false,
+            created_at: now,
+            updated_at: now
+        };
+
+        // State update - showing new year immediately
+        setCurrentZakatYear(newYear);
+
+        // Also update Hawl Settings to reflect the new Start Date
+        const updatedHawlSettings = hawlSettings ? {
+            ...hawlSettings,
+            hawl_start_date: oldEnd,
+            updated_at: now
+        } : null;
+        if (updatedHawlSettings) setHawlSettingsState(updatedHawlSettings);
+
+        if (user) {
+            // Archive old
+            await supabase.from('zakat_years' as any).upsert(archivedYear as any);
+            // Create new
+            await supabase.from('zakat_years' as any).upsert(newYear as any);
+            // Update settings
+            if (updatedHawlSettings) {
+                await supabase.from('hawl_settings' as any).upsert(updatedHawlSettings as any);
+            }
+        } else {
+            // Local Storage: update list of years
+            // Need to load full list first? 
+            // We only have current in state. Ideally we should have full list in state.
+            // But we can just append new and update old in the raw list if we had it.
+            // For MVP local storage, we might lose history if we don't load all.
+            // But `saveToLocalStorage` accepts `newZakatYear`. 
+            // It replaces the list? No, line 243 `zakatYears: newZakatYear ? [newZakatYear] : []`.
+            // Currently local storage only persists ONE year in the array?
+            // "zakatYears: newZakatYear ? [newZakatYear] : []," in saveToLocalStorage.
+            // Yes. So history is lost locally. This is a known limitation.
+            // So just saving newYear is fine.
+            await saveToLocalStorage(donations, updatedHawlSettings, newYear);
+        }
+
+    }, [currentZakatYear, hawlSettings, user, donations]);
+
+    /**
      * Refresh data from storage
      */
     const refreshData = useCallback(async () => {
@@ -520,9 +598,20 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
      * Calculate summary
      */
     const summary: DonationSummary | null = currentZakatYear ? (() => {
-        const totalDonated = donations
-            .filter(d => d.zakat_year_id === currentZakatYear.id)
-            .reduce((sum, d) => sum + d.amount, 0);
+        // Filter donations relevant to this Hawl year
+        // strictly those on or after the start date + associated with this year ID
+        const hawlStart = new Date(currentZakatYear.hawl_start);
+        const hawlEnd = new Date(currentZakatYear.hawl_end);
+
+        // Extend the window slightly? No, keep strictly to logic. 
+        // If user changed Hawl to Start now, they imply previous donations are history.
+
+        const relevantDonations = donations.filter(d =>
+            d.zakat_year_id === currentZakatYear.id &&
+            new Date(d.donation_date) >= hawlStart
+        );
+
+        const totalDonated = relevantDonations.reduce((sum, d) => sum + d.amount, 0);
 
         const remaining = Math.max(0, currentZakatYear.calculated_amount - totalDonated);
         const percentComplete = currentZakatYear.calculated_amount > 0
@@ -534,8 +623,24 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             totalDonated,
             remaining,
             percentComplete,
-            donations: donations.filter(d => d.zakat_year_id === currentZakatYear.id),
-            daysRemaining: calculateDaysRemaining(currentZakatYear.hawl_start),
+            donations: relevantDonations, // Only show relevant ones in the summary list? 
+            // Wait, "Donation History" UI (in Donations.tsx) uses summary.donations.
+            // If we filter here, they disappear from the list!
+            // Maybe we WANT them to disappear from the "Current Year" list?
+            // Yes. They are part of history but not *this* year's tracking.
+            // But if they disappear, the user might panic "Where did my donations go?".
+            // The Donation History should probably show ALL donations but indicate which ones counted?
+            // Or just show strictly what's in the year.
+            // Given the user wants to "take into account the new target" (progress bar), filtering is correct for progress.
+            // For the list, maybe we should show all?
+            // "summary.donations" is presumably used for the list in Donations.tsx.
+            // Let's verify Donation.tsx usage.
+            // It maps `summary.donations`. 
+            // So if I filter here, they vanish from the page.
+            // This is arguably correct behavior for "Hawl Summary Page".
+            // If I want to see *all* history, I might need a "View All History" button later.
+            // For now, removing them from the calculation AND the list ensures consistency.
+            daysRemaining: calculateDaysRemaining(currentZakatYear.hawl_end),
         };
     })() : null;
 
@@ -550,6 +655,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
         deleteDonation,
         setHawlSettings,
         setCalculatedAmount,
+        startNewYear,
         refreshData,
     };
 }
