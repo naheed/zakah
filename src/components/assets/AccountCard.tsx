@@ -1,6 +1,5 @@
 import {
     Wallet,
-    CurrencyDollar,
     ChartLineUp,
     CurrencyBtc,
     Bank,
@@ -8,7 +7,9 @@ import {
     House,
     ShieldCheck,
     CoinVertical,
-    DotsThreeOutline
+    DotsThreeOutline,
+    CheckCircle,
+    Warning
 } from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +17,16 @@ import { AssetAccount, AccountType } from "@/types/assets";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { getInstitutionLogoUrl, getInstitutionDisplayName } from "@/lib/institutionLogos";
 
 interface AccountCardProps {
     account: AssetAccount;
     latestValue?: number;
     lastUpdated?: string;
     onClick?: () => void;
-    compact?: boolean;  // Smaller version for dashboard preview
+    compact?: boolean;
 }
+
 // Icon mapping for account types
 const accountTypeIcons: Record<AccountType, React.ReactNode> = {
     CHECKING: <Bank className="w-5 h-5" weight="duotone" />,
@@ -40,20 +43,20 @@ const accountTypeIcons: Record<AccountType, React.ReactNode> = {
     OTHER: <DotsThreeOutline className="w-5 h-5" weight="duotone" />,
 };
 
-// Badge colors for account types
+// Badge colors for account types (subtle)
 const accountTypeBadgeColors: Record<AccountType, string> = {
-    CHECKING: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    SAVINGS: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    BROKERAGE: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    RETIREMENT_401K: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-    RETIREMENT_IRA: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-    ROTH_IRA: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-    CRYPTO_WALLET: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-    REAL_ESTATE: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-    TRUST: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-    METALS: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-    BUSINESS: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200",
-    OTHER: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+    CHECKING: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    SAVINGS: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    BROKERAGE: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    RETIREMENT_401K: "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+    RETIREMENT_IRA: "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+    ROTH_IRA: "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+    CRYPTO_WALLET: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+    REAL_ESTATE: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+    TRUST: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+    METALS: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
+    BUSINESS: "bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    OTHER: "bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
 };
 
 // Human readable account type names
@@ -72,56 +75,33 @@ const accountTypeLabels: Record<AccountType, string> = {
     OTHER: "Other",
 };
 
-// Helper to get logo URL
-function getInstitutionLogo(name: string): string | null {
-    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const n = normalize(name);
-
-    const domainMap: Record<string, string> = {
-        'charlesschwab': 'schwab.com',
-        'schwab': 'schwab.com',
-        'fidelity': 'fidelity.com',
-        'vanguard': 'vanguard.com',
-        'chase': 'chase.com',
-        'jpmorgan': 'jpmorgan.com',
-        'bankofamerica': 'bankofamerica.com',
-        'wellsfargo': 'wellsfargo.com',
-        'citibank': 'citi.com',
-        'citi': 'citi.com',
-        'coinbase': 'coinbase.com',
-        'robinhood': 'robinhood.com',
-        'etrade': 'etrade.com',
-        'morganstanley': 'morganstanley.com',
-        'betterment': 'betterment.com',
-        'wealthfront': 'wealthfront.com',
-        'sofi': 'sofi.com',
-        'ally': 'ally.com',
-        'allybank': 'ally.com',
-        'amex': 'americanexpress.com',
-        'americanexpress': 'americanexpress.com',
-        'discover': 'discover.com',
-        'capitalone': 'capitalone.com',
-    };
-
-    for (const key in domainMap) {
-        if (n.includes(key)) return `https://logo.clearbit.com/${domainMap[key]}`;
-    }
-
-    return null;
-}
-
+/**
+ * AccountCard - Material 3 Expressive "Hero Balance" Layout
+ * 
+ * Structure:
+ * ┌─────────────────────────────────────┐
+ * │ [Logo] Institution Name     [Type] │  ← Header
+ * │                                     │
+ * │         $123,456.78                 │  ← Hero Balance
+ * │                                     │
+ * │ Account Name              [Fresh ●] │  ← Footer
+ * └─────────────────────────────────────┘
+ */
 export function AccountCard({ account, latestValue, lastUpdated, onClick, compact }: AccountCardProps) {
     const icon = accountTypeIcons[account.type] || accountTypeIcons.OTHER;
     const badgeColor = accountTypeBadgeColors[account.type] || accountTypeBadgeColors.OTHER;
-    const typeLabel = accountTypeLabels[account.type] || account.type;
-    const logoUrl = getInstitutionLogo(account.institution_name);
+    const typeLabel = accountTypeLabels[account.type] || "Account";
+    const logoUrl = getInstitutionLogoUrl(account.institution_name);
+    const displayInstitution = getInstitutionDisplayName(account.institution_name);
 
-    // Calculate days since last update
+    // Calculate freshness
     const daysSinceUpdate = lastUpdated
         ? Math.floor((Date.now() - new Date(lastUpdated).getTime()) / (1000 * 60 * 60 * 24))
         : null;
 
+    const isFresh = daysSinceUpdate !== null && daysSinceUpdate <= 30;
     const isStale = daysSinceUpdate !== null && daysSinceUpdate > 30;
+    const isVeryStale = daysSinceUpdate !== null && daysSinceUpdate > 90;
 
     // Compact version for dashboard preview
     if (compact) {
@@ -134,21 +114,21 @@ export function AccountCard({ account, latestValue, lastUpdated, onClick, compac
                                 {logoUrl ? (
                                     <img
                                         src={logoUrl}
-                                        alt={account.institution_name}
-                                        className="w-full h-full object-contain p-0.5 bg-white"
+                                        alt={displayInstitution}
+                                        className="w-full h-full object-contain p-0.5"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
-                                            e.currentTarget.parentElement?.querySelector('.fallback-icon-compact')?.classList.remove('hidden');
+                                            e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
                                         }}
                                     />
                                 ) : null}
-                                <div className={`fallback-icon-compact flex items-center justify-center w-full h-full text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors ${logoUrl ? 'hidden' : ''}`}>
+                                <div className={`fallback-icon flex items-center justify-center w-full h-full text-muted-foreground ${logoUrl ? 'hidden' : ''}`}>
                                     {icon}
                                 </div>
                             </div>
                             <div className="min-w-0 flex-1">
                                 <h3 className="font-medium text-sm text-foreground truncate">{account.name}</h3>
-                                <p className="text-xs text-muted-foreground truncate">{account.institution_name}</p>
+                                <p className="text-xs text-muted-foreground truncate">{displayInstitution}</p>
                             </div>
                         </div>
                         {latestValue !== undefined && (
@@ -162,73 +142,80 @@ export function AccountCard({ account, latestValue, lastUpdated, onClick, compac
         );
     }
 
+    // Full "Hero Balance" layout
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:shadow-md transition-all group",
-                isStale && "border-amber-200 dark:border-amber-800"
+                "cursor-pointer hover:shadow-lg transition-all group min-h-[140px]",
+                isVeryStale && "border-destructive/50",
+                isStale && !isVeryStale && "border-amber-400/50"
             )}
             onClick={onClick}
         >
-            <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                    {/* Icon and Institution */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
+            <CardContent className="p-4 h-full flex flex-col">
+                {/* Header: Logo + Institution + Type Badge */}
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                        {/* Logo/Icon */}
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border group-hover:border-primary/30 transition-colors">
                             {logoUrl ? (
                                 <img
                                     src={logoUrl}
-                                    alt={account.institution_name}
-                                    className="w-full h-full object-contain p-1 bg-white"
+                                    alt={displayInstitution}
+                                    className="w-full h-full object-contain p-0.5"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                         e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
                                     }}
                                 />
                             ) : null}
-                            <div className={`fallback-icon flex items-center justify-center w-full h-full text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors ${logoUrl ? 'hidden' : ''}`}>
+                            <div className={`fallback-icon flex items-center justify-center w-full h-full text-muted-foreground group-hover:text-primary transition-colors ${logoUrl ? 'hidden' : ''}`}>
                                 {icon}
                             </div>
                         </div>
-                        <div>
-                            <h3 className="font-semibold text-foreground">{account.name}</h3>
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                {account.institution_name}
-                                {account.mask && (
-                                    <span className="text-muted-foreground/70 text-xs bg-muted px-1.5 rounded-sm">
-                                        ...{account.mask}
-                                    </span>
-                                )}
-                            </p>
-                        </div>
+                        {/* Institution Name */}
+                        <span className="text-sm font-medium text-muted-foreground truncate">
+                            {displayInstitution}
+                        </span>
                     </div>
-
-                    {/* Account Type Badge */}
-                    <Badge variant="secondary" className={cn("text-xs", badgeColor)}>
+                    {/* Type Badge */}
+                    <Badge variant="secondary" className={cn("text-[10px] px-2 py-0.5 shrink-0", badgeColor)}>
                         {typeLabel}
                     </Badge>
                 </div>
 
-                {/* Value and Last Updated */}
-                <div className="mt-4 flex items-end justify-between">
-                    <div>
-                        <p className="text-2xl font-bold text-foreground">
-                            {latestValue !== undefined ? formatCurrency(latestValue, 'USD') : '—'}
-                        </p>
-                        {lastUpdated && (
-                            <p className={cn(
-                                "text-xs mt-1",
-                                isStale ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
-                            )}>
-                                {isStale ? "⚠️ " : ""}
-                                Updated {daysSinceUpdate === 0
-                                    ? "today"
-                                    : daysSinceUpdate === 1
-                                        ? "yesterday"
-                                        : `${daysSinceUpdate} days ago`}
-                            </p>
-                        )}
-                    </div>
+                {/* Hero: Balance (centered, prominent) */}
+                <div className="flex-1 flex items-center justify-center py-3">
+                    <p className="text-3xl font-bold text-foreground tracking-tight">
+                        {latestValue !== undefined ? formatCurrency(latestValue, 'USD') : '—'}
+                    </p>
+                </div>
+
+                {/* Footer: Account Name + Freshness */}
+                <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm text-foreground truncate flex-1 font-medium">
+                        {account.name}
+                    </p>
+                    {/* Freshness Indicator */}
+                    {daysSinceUpdate !== null && (
+                        <div className={cn(
+                            "flex items-center gap-1 text-[10px] shrink-0",
+                            isFresh && "text-primary",
+                            isStale && !isVeryStale && "text-amber-600 dark:text-amber-400",
+                            isVeryStale && "text-destructive"
+                        )}>
+                            {isFresh ? (
+                                <CheckCircle weight="fill" className="w-3 h-3" />
+                            ) : (
+                                <Warning weight="fill" className="w-3 h-3" />
+                            )}
+                            <span>
+                                {daysSinceUpdate === 0 ? 'Today' :
+                                    daysSinceUpdate === 1 ? 'Yesterday' :
+                                        `${daysSinceUpdate}d ago`}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </CardContent>
         </Card>
