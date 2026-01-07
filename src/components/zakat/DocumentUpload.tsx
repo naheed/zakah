@@ -23,6 +23,8 @@ interface DocumentUploadProps {
   onDocumentAdded?: (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => void;
   /** Existing accounts to show for selection (filtered by context) */
   existingAccounts?: AccountWithLineItems[];
+  /** All accounts (unfiltered) for "Show all" option */
+  allAccounts?: AccountWithLineItems[];
   /** Called when user selects an existing account */
   onAccountSelected?: (account: AccountWithLineItems) => void;
   acceptedTypes?: string;
@@ -55,6 +57,7 @@ export function DocumentUpload({
   onDataExtracted,
   onDocumentAdded,
   existingAccounts = [],
+  allAccounts = [],
   onAccountSelected,
   acceptedTypes = ".pdf,.png,.jpg,.jpeg,.webp",
   label = "Upload Statement",
@@ -66,6 +69,7 @@ export function DocumentUpload({
   const [isDragging, setIsDragging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [showAllAccounts, setShowAllAccounts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -313,55 +317,78 @@ export function DocumentUpload({
         className="hidden"
       />
 
-      {/* Existing Accounts Selection (Option A: Inline Expansion) */}
-      {existingAccounts.length > 0 && (
+      {/* Existing Accounts Selection */}
+      {(existingAccounts.length > 0 || allAccounts.length > 0) && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">Use an existing account:</p>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-            {existingAccounts.map(account => (
-              <AccountChip
-                key={account.id}
-                name={account.name || 'Unnamed Account'}
-                institutionName={account.institution_name}
-                balance={account.balance || 0}
-                updatedAt={account.updated_at || account.created_at}
-                selected={selectedAccountId === account.id}
-                onClick={() => {
-                  setSelectedAccountId(selectedAccountId === account.id ? null : account.id);
-                }}
-              />
-            ))}
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Use an existing account:</p>
+            {allAccounts.length > existingAccounts.length && (
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showAllAccounts}
+                  onChange={(e) => setShowAllAccounts(e.target.checked)}
+                  className="rounded border-border"
+                />
+                Show all ({allAccounts.length})
+              </label>
+            )}
           </div>
 
-          {/* Use Selected Button */}
-          {selectedAccountId && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <Button
-                onClick={() => {
-                  const account = existingAccounts.find(a => a.id === selectedAccountId);
-                  if (account && onAccountSelected) {
-                    onAccountSelected(account);
-                    toast({
-                      title: 'Account imported',
-                      description: `Values from ${account.name} added to calculation`,
-                    });
-                    setSelectedAccountId(null);
-                    setStatus('success');
-                    setShowCelebration(true);
-                    setTimeout(() => setShowCelebration(false), 2000);
-                  }
-                }}
-                className="w-full"
-              >
-                <FolderOpen className="w-4 h-4 mr-2" />
-                Use {existingAccounts.find(a => a.id === selectedAccountId)?.name}
-              </Button>
-            </motion.div>
-          )}
+          {(() => {
+            const visibleAccounts = showAllAccounts ? allAccounts : existingAccounts;
+            return visibleAccounts.length > 0 ? (
+              <>
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+                  {visibleAccounts.map(account => (
+                    <AccountChip
+                      key={account.id}
+                      name={account.name || 'Unnamed Account'}
+                      institutionName={account.institution_name}
+                      balance={account.balance || 0}
+                      updatedAt={account.updated_at || account.created_at}
+                      selected={selectedAccountId === account.id}
+                      onClick={() => {
+                        setSelectedAccountId(selectedAccountId === account.id ? null : account.id);
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Use Selected Button */}
+                {selectedAccountId && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Button
+                      onClick={() => {
+                        const account = visibleAccounts.find(a => a.id === selectedAccountId);
+                        if (account && onAccountSelected) {
+                          onAccountSelected(account);
+                          toast({
+                            title: 'Account imported',
+                            description: `Values from ${account.name} added to calculation`,
+                          });
+                          setSelectedAccountId(null);
+                          setStatus('success');
+                          setShowCelebration(true);
+                          setTimeout(() => setShowCelebration(false), 2000);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <FolderOpen className="w-4 h-4 mr-2" />
+                      Use {visibleAccounts.find(a => a.id === selectedAccountId)?.name}
+                    </Button>
+                  </motion.div>
+                )}
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">No matching accounts found. Try "Show all" or upload a new document.</p>
+            );
+          })()}
 
           {/* Divider */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground">

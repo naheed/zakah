@@ -53,6 +53,7 @@ export function AssetStepWrapper({
 
   // State for existing accounts
   const [existingAccounts, setExistingAccounts] = useState<AccountWithLineItems[]>([]);
+  const [allAccounts, setAllAccounts] = useState<AccountWithLineItems[]>([]);
 
   // Map stepId to question context for filtering
   const getContextForStep = (stepId: string): QuestionContext => {
@@ -110,9 +111,19 @@ export function AssetStepWrapper({
         const context = getContextForStep(stepId);
         const filtered = filterRelevantAccounts(accountsWithItems, context, 6);
         setExistingAccounts(filtered);
+
+        // Also store all recent accounts (for "Show all" toggle)
+        const cutoffDate = new Date();
+        cutoffDate.setMonth(cutoffDate.getMonth() - 6);
+        const allRecent = accountsWithItems.filter(a => {
+          const date = new Date(a.updated_at || a.created_at || 0);
+          return date >= cutoffDate;
+        });
+        setAllAccounts(allRecent);
       } catch (err) {
         console.error('Error loading accounts for step:', err);
         setExistingAccounts([]);
+        setAllAccounts([]);
       }
     };
 
@@ -226,6 +237,7 @@ export function AssetStepWrapper({
           onDataExtracted={handleDataExtracted}
           onDocumentAdded={handleDocumentAddedWithPersistence}
           existingAccounts={existingAccounts}
+          allAccounts={allAccounts}
           onAccountSelected={handleAccountSelected}
           label={uploadLabel}
           description={uploadDescription}

@@ -96,17 +96,52 @@ const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData> = {
 /**
  * Question context to relevant categories mapping
  * Used to filter which accounts appear for each question
+ * 
+ * NOTE: Categories are intentionally overlapping to handle real-world scenarios:
+ * - Retirement accounts often appear in brokerage statements
+ * - Brokerage accounts may have retirement holdings
+ * - Credit cards may have rewards (cash-like)
  */
 const CONTEXT_TO_CATEGORIES: Record<QuestionContext, string[]> = {
-    'liquid-assets': ['CHECKING', 'SAVINGS', 'CASH', 'MONEY_MARKET', 'CD', 'LIQUID'],
-    'investments': ['STOCKS', 'EQUITY', 'ETF', 'MUTUAL_FUNDS', 'INDEX_FUNDS', 'BONDS', 'FIXED_INCOME', 'DIVIDENDS', 'ACTIVE_TRADING', 'OPTIONS', 'PROXY_30', 'PROXY_100'],
-    'retirement': ['RETIREMENT', '401K', 'IRA', 'ROTH_IRA', 'PENSION'],
-    'crypto': ['CRYPTO', 'CRYPTOCURRENCY', 'BITCOIN', 'ETHEREUM', 'STAKING', 'NFT'],
-    'precious-metals': ['GOLD', 'SILVER', 'METALS', 'GOLD_FULL', 'SILVER_FULL'],
-    'real-estate': ['REAL_ESTATE', 'PROPERTY'],
-    'business': ['BUSINESS', 'INVENTORY', 'RECEIVABLES'],
-    'trusts': ['TRUST'],
-    'debts': ['CREDIT_CARD', 'DEBT', 'LOAN', 'LIABILITY', 'EXPENSE'],
+    'liquid-assets': [
+        'CHECKING', 'SAVINGS', 'CASH', 'MONEY_MARKET', 'CD', 'LIQUID',
+        'BROKERAGE_CASH', 'SWEEP', 'CASH_SWEEP', // Brokerage sweep accounts
+    ],
+    'investments': [
+        'STOCKS', 'EQUITY', 'ETF', 'MUTUAL_FUNDS', 'INDEX_FUNDS', 'BONDS',
+        'FIXED_INCOME', 'DIVIDENDS', 'ACTIVE_TRADING', 'OPTIONS', 'PROXY_30', 'PROXY_100',
+        'BROKERAGE', 'SECURITIES', // Generic brokerage
+        // Retirement often in brokerage statements:
+        'RETIREMENT', '401K', 'IRA', 'ROTH_IRA', 'PENSION', 'HSA', '529',
+    ],
+    'retirement': [
+        'RETIREMENT', '401K', 'IRA', 'ROTH_IRA', 'PENSION', 'HSA', '529', '403B', '457',
+        // Retirement accounts hold investments:
+        'STOCKS', 'EQUITY', 'ETF', 'MUTUAL_FUNDS', 'INDEX_FUNDS', 'BONDS', 'FIXED_INCOME',
+        'BROKERAGE', 'SECURITIES',
+    ],
+    'crypto': [
+        'CRYPTO', 'CRYPTOCURRENCY', 'BITCOIN', 'ETHEREUM', 'STAKING', 'NFT',
+        'DEFI', 'WALLET', 'ALTCOIN', 'TOKEN',
+    ],
+    'precious-metals': [
+        'GOLD', 'SILVER', 'METALS', 'GOLD_FULL', 'SILVER_FULL',
+        'BULLION', 'COINS', 'PLATINUM', 'PALLADIUM',
+    ],
+    'real-estate': [
+        'REAL_ESTATE', 'PROPERTY', 'RENTAL', 'REIT', 'MORTGAGE_ASSET',
+    ],
+    'business': [
+        'BUSINESS', 'INVENTORY', 'RECEIVABLES', 'REVENUE', 'COMMERCIAL',
+    ],
+    'trusts': [
+        'TRUST', 'TRUSTEE', 'BENEFICIARY', 'ESTATE',
+    ],
+    'debts': [
+        'CREDIT_CARD', 'DEBT', 'LOAN', 'LIABILITY', 'EXPENSE',
+        'MORTGAGE', 'AUTO_LOAN', 'STUDENT_LOAN', 'PERSONAL_LOAN', 'HOME_EQUITY',
+        'BALANCE', 'OWED', 'PAYABLE', 'CREDIT_LINE',
+    ],
 };
 
 /**
