@@ -21,8 +21,8 @@ interface ImpactStatsProps {
     isLoading?: boolean;
     /** Additional class names */
     className?: string;
-    /** Variant: 'card' (default) or 'flat' */
-    variant?: 'card' | 'flat';
+    /** Variant: 'card' (default), 'flat', or 'community' (Assets + Zakat only) */
+    variant?: 'card' | 'flat' | 'community';
     /** Custom title override (default: "Your Impact") */
     title?: string;
     /** Custom footer message */
@@ -46,13 +46,14 @@ export function ImpactStats({
 }: ImpactStatsProps) {
 
     if (isLoading) {
-        return <ImpactStatsSkeleton variant={variant} className={className} />;
+        return <ImpactStatsSkeleton variant={variant === 'community' ? 'card' : variant} className={className} />;
     }
 
     const meetsThreshold = totalReferrals >= PRIVACY_THRESHOLD;
+    const isCommunity = variant === 'community';
 
-    const Wrapper = variant === 'card' ? motion.div : motion.div;
-    const wrapperClasses = variant === 'card'
+    const Wrapper = motion.div;
+    const wrapperClasses = (variant === 'card' || isCommunity)
         ? "bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 rounded-3xl p-8"
         : "";
 
@@ -69,20 +70,49 @@ export function ImpactStats({
                 </h3>
             </div>
 
-            {/* Main Stat: People Helped */}
-            <div className="flex flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-6xl font-black tracking-tight text-amber-900 dark:text-amber-100 font-work-sans">
-                        <AnimatedNumber value={totalReferrals} />
-                    </span>
+            {/* Main Stat: People Helped (hidden in community variant) */}
+            {!isCommunity && (
+                <div className="flex flex-col items-center">
+                    <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-6xl font-black tracking-tight text-amber-900 dark:text-amber-100 font-work-sans">
+                            <AnimatedNumber value={totalReferrals} />
+                        </span>
+                    </div>
+                    <p className="text-sm font-medium text-amber-800/60 dark:text-amber-400">
+                        {totalReferrals === 1 ? 'person' : 'people'} calculated
+                    </p>
                 </div>
-                <p className="text-sm font-medium text-amber-800/60 dark:text-amber-400">
-                    {totalReferrals === 1 ? 'person' : 'people'} calculated
-                </p>
-            </div>
+            )}
 
-            {/* Secondary Stats: Assets & Zakat */}
-            {meetsThreshold && (
+            {/* Community Variant: Hero Assets & Zakat */}
+            {isCommunity && (
+                <div className="grid grid-cols-2 gap-8">
+                    {/* Assets - Hero */}
+                    <div className="text-center space-y-2">
+                        <Wallet className="w-8 h-8 mx-auto text-amber-600 dark:text-amber-400" weight="duotone" />
+                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-amber-900 dark:text-amber-100 font-work-sans">
+                            <AnimatedNumber value={totalAssetsCalculated || 0} format={formatLargeNumber} />
+                        </span>
+                        <p className="text-xs font-bold uppercase tracking-wider text-amber-800/50 dark:text-amber-500/50">
+                            Assets Evaluated
+                        </p>
+                    </div>
+
+                    {/* Zakat - Hero */}
+                    <div className="text-center space-y-2">
+                        <Sparkle className="w-8 h-8 mx-auto text-green-600 dark:text-green-400" weight="duotone" />
+                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-green-700 dark:text-green-300 font-work-sans">
+                            <AnimatedNumber value={totalZakatCalculated || 0} format={formatLargeNumber} />
+                        </span>
+                        <p className="text-xs font-bold uppercase tracking-wider text-green-800/50 dark:text-green-500/50">
+                            Zakat Calculated
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Secondary Stats: Assets & Zakat (default/flat variants only) */}
+            {!isCommunity && meetsThreshold && (
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-200/30 dark:border-amber-800/30">
                     {/* Assets */}
                     <div className="space-y-1">

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { CheckCircle, ArrowRight } from '@phosphor-icons/react';
@@ -8,15 +6,11 @@ import { ReferralWidget } from '@/components/zakat/ReferralWidget';
 import { ImpactStats } from '@/components/zakat/ImpactStats';
 import { Button } from '@/components/ui/button';
 import { useUsageMetrics } from '@/hooks/useUsageMetrics';
-import { cn } from '@/lib/utils';
-
-const PRIVACY_THRESHOLD = 5;
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LogoutSuccess() {
     const { data: metrics, isLoading } = useUsageMetrics();
-
-    // Check if we can show metrics (privacy threshold)
-    const canShowMetrics = metrics && metrics.allTime.uniqueSessions >= 0; // Show for all, component handles threshold message
+    const { signInWithGoogle } = useAuth();
 
     return (
         <div className="min-h-screen bg-[#FDFCF8] dark:bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -29,7 +23,7 @@ export default function LogoutSuccess() {
 
             <div className="w-full max-w-md space-y-10 relative z-10">
 
-                {/* 1. Header & Logo (Centered & Big) */}
+                {/* 1. Confirmation Header */}
                 <motion.div
                     className="flex flex-col items-center text-center space-y-6"
                     initial={{ opacity: 0, y: 20 }}
@@ -53,38 +47,47 @@ export default function LogoutSuccess() {
                     </div>
                 </motion.div>
 
-                {/* 2. Impact Card (Universal Widget) */}
+                {/* 2. Share CTA (Moved up) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                    <ReferralWidget variant="compact" />
+                </motion.div>
+
+                {/* 3. Community Impact (Assets + Zakat only) */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
                 >
                     <ImpactStats
                         isLoading={isLoading}
                         totalReferrals={metrics?.allTime.calculations || 0}
+                        totalAssetsCalculated={metrics?.allTime.totalAssets || 0}
                         totalZakatCalculated={metrics?.allTime.totalZakat || 0}
+                        variant="community"
                         title="Community Impact"
                     />
                 </motion.div>
 
-                {/* 3. Share Action (Refined) */}
+                {/* 4. Sign Back In (Direct OAuth, bypasses /auth page) */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                    className="space-y-6"
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    className="text-center"
                 >
-                    <ReferralWidget variant="compact" />
-
-                    {/* Sign Back In */}
-                    <div className="text-center pt-4">
-                        <Link to="/auth">
-                            <Button variant="link" size="lg" className="text-base font-medium text-amber-900/60 dark:text-amber-100/60 hover:text-primary gap-2 transition-colors">
-                                Sign back in
-                                <ArrowRight className="w-4 h-4" />
-                            </Button>
-                        </Link>
-                    </div>
+                    <Button
+                        variant="link"
+                        size="lg"
+                        className="text-base font-medium text-amber-900/60 dark:text-amber-100/60 hover:text-primary gap-2 transition-colors"
+                        onClick={() => signInWithGoogle(true)}
+                    >
+                        Sign back in
+                        <ArrowRight className="w-4 h-4" />
+                    </Button>
                 </motion.div>
 
             </div>

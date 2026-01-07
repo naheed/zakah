@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (forcePrompt?: boolean) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -37,12 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (forcePrompt?: boolean) => {
     const redirectUrl = `${window.location.origin}/`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
+        queryParams: forcePrompt ? { prompt: 'select_account' } : undefined,
       },
     });
   };
