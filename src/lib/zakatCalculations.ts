@@ -823,7 +823,7 @@ function calculateAssetBreakdown(data: ZakatFormData): AssetBreakdown {
 
   const investments =
     data.activeInvestments +
-    (data.calculationMode === 'conservative' ? data.passiveInvestmentsValue : data.passiveInvestmentsValue * 0.30) +
+    (data.calculationMode === 'bradford' ? data.passiveInvestmentsValue : data.passiveInvestmentsValue * 0.30) +
     data.dividends;
 
   const retirement =

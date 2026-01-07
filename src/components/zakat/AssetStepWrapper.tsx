@@ -154,7 +154,12 @@ export function AssetStepWrapper({
         let lineItems: { description: string; amount: number; inferredCategory: string; confidence: number }[] = [];
 
         if (doc.lineItems && doc.lineItems.length > 0) {
-          lineItems = doc.lineItems;
+          lineItems = doc.lineItems.map(item => ({
+            description: item.description,
+            amount: item.amount,
+            inferredCategory: item.inferredCategory,
+            confidence: item.confidence ?? 1.0,
+          }));
         } else {
           // Legacy fallback
           lineItems = Object.entries(doc.extractedData)

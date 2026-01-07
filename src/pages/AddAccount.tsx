@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -105,9 +105,18 @@ export default function AddAccount() {
         );
     }
 
+    useEffect(() => {
+        if (!authLoading && !user) {
+            navigate('/auth', { state: { returnTo: '/assets/add' } });
+        }
+    }, [authLoading, user, navigate]);
+
     if (!user) {
-        navigate('/auth');
-        return null;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <Spinner className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
     }
 
     return (

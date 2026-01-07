@@ -53,12 +53,12 @@ describe('Zakat Calculations', () => {
             form.activeInvestments = 0;
             form.passiveInvestmentsValue = 10000;
 
-            // Conservative: 100% of passive
-            form.calculationMode = 'conservative';
+            // Bradford: 100% of passive investments
+            form.calculationMode = 'bradford';
             expect(calculateTotalAssets(form)).toBe(10000);
 
-            // Optimized: 30% of passive
-            form.calculationMode = 'optimized';
+            // Hanafi: 30% of passive (proxy for underlying zakatable assets)
+            form.calculationMode = 'hanafi';
             expect(calculateTotalAssets(form)).toBe(3000);
         });
     });

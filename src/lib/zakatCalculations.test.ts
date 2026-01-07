@@ -46,23 +46,16 @@ describe('Zakat Calculation Engine', () => {
             estimatedTaxRate: 0.25, // 25% tax
         };
 
-        it('Conservative Mode: Should tax 100% of balance', () => {
-            const data = { ...retirementData, calculationMode: 'conservative' as const };
-            const assets = calculateTotalAssets(data);
-            expect(assets).toBe(100000);
-        });
-
         it('Bradford Mode: Should exempt 401k completely if < 59.5', () => {
             const data = { ...retirementData, calculationMode: 'bradford' as const };
             const assets = calculateTotalAssets(data);
             expect(assets).toBe(0); // Fully exempt due to lack of accessibility
         });
 
-        it('Optimized Mode: Should deduct taxes and penalty (10%)', () => {
-            const data = { ...retirementData, calculationMode: 'optimized' as const };
+        it('Hanafi Mode: Should apply full value', () => {
+            const data = { ...retirementData, calculationMode: 'hanafi' as const };
             const assets = calculateTotalAssets(data);
-            // 100k * (1 - (0.25 tax + 0.10 penalty)) = 100k * 0.65 = 65k
-            expect(assets).toBe(65000);
+            expect(assets).toBe(100000);
         });
     });
 
@@ -72,14 +65,14 @@ describe('Zakat Calculation Engine', () => {
             passiveInvestmentsValue: 100000
         };
 
-        it('Conservative Mode: 100% Zakatable', () => {
-            const data = { ...investData, calculationMode: 'conservative' as const };
+        it('Bradford Mode: 100% Zakatable', () => {
+            const data = { ...investData, calculationMode: 'bradford' as const };
             const assets = calculateTotalAssets(data);
             expect(assets).toBe(100000);
         });
 
-        it('Optimized Mode: 30% Zakatable (Proxy for underlying assets)', () => {
-            const data = { ...investData, calculationMode: 'optimized' as const };
+        it('Hanafi Mode: 30% Zakatable (Proxy for underlying assets)', () => {
+            const data = { ...investData, calculationMode: 'hanafi' as const };
             const assets = calculateTotalAssets(data);
             expect(assets).toBe(30000);
         });

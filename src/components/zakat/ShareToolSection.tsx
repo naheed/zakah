@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, MessageCircle, Twitter, Facebook, Copy, Check, Users, Heart, Sparkles, Linkedin } from 'lucide-react';
+import { EnvelopeSimple, ChatCircle, TwitterLogo, FacebookLogo, Copy, Check, Users, Heart, Sparkle, LinkedinLogo } from '@phosphor-icons/react';
 import { useToast } from '@/hooks/use-toast';
 import { useReferral, getInviteUrl } from '@/hooks/useReferral';
 import { formatCurrency } from '@/lib/zakatCalculations';
@@ -108,7 +108,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
       <CardHeader className="text-center pb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Heart className="w-5 h-5 text-primary" />
+          <Heart className="w-5 h-5 text-primary" weight="fill" />
           <CardTitle className="text-xl">Share & Earn Hasanat</CardTitle>
         </div>
         
@@ -140,7 +140,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
             asChild
           >
             <a href={shareLinks.email} target="_blank" rel="noopener noreferrer">
-              <Mail className="w-4 h-4" />
+              <EnvelopeSimple className="w-4 h-4" />
               Email
             </a>
           </Button>
@@ -151,7 +151,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
             asChild
           >
             <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
+              <ChatCircle className="w-4 h-4" />
               WhatsApp
             </a>
           </Button>
@@ -162,7 +162,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
             asChild
           >
             <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer">
-              <Twitter className="w-4 h-4" />
+              <TwitterLogo className="w-4 h-4" />
               Twitter
             </a>
           </Button>
@@ -173,7 +173,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
             asChild
           >
             <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer">
-              <Facebook className="w-4 h-4" />
+              <FacebookLogo className="w-4 h-4" />
               Facebook
             </a>
           </Button>
@@ -184,7 +184,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
             asChild
           >
             <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer">
-              <Linkedin className="w-4 h-4" />
+              <LinkedinLogo className="w-4 h-4" />
               LinkedIn
             </a>
           </Button>
@@ -234,7 +234,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
                 } : undefined}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
               >
-                <Sparkles className="w-4 h-4 text-primary" />
+                <Sparkle className="w-4 h-4 text-primary" />
                 <p className="text-sm font-medium text-foreground">
                   Through your shares
                 </p>
@@ -267,7 +267,7 @@ export function ShareToolSection({ currency }: ShareToolSectionProps) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 }}
                   >
-                    <Heart className="w-4 h-4 text-muted-foreground" />
+                    <Heart className="w-4 h-4 text-muted-foreground" weight="fill" />
                     <span className="font-semibold">{formatCurrency(stats.totalZakatCalculated, currency)}</span>
                     <span className="text-muted-foreground">Zakat calculated</span>
                   </motion.div>
