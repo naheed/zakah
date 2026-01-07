@@ -52,12 +52,10 @@ serve(async (req) => {
 
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-        const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: `Bearer ${token}` } },
-        });
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-        // Get user from session token
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        // Get user by passing the JWT token directly (Edge Function pattern)
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
         if (authError || !user) {
             console.error("JWT validation failed:", authError);
