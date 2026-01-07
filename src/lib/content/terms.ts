@@ -42,8 +42,8 @@ export const termsSections: TermSection[] = [
         icon: Warning,
         content: "We designed this Service to empower you with calculation tools and educational resources. However, Zakat is a deeply personal act of worship, and financial situations are unique. We recommend that you:",
         disclaimer: {
-            strong: "No Professional Advice.",
-            text: "No Professional Advice. The Service does not provide financial, tax, legal, or religious advice. All calculations are for educational purposes only."
+            strong: "Important:",
+            text: "Important: The Service does not provide financial, tax, legal, or religious advice. All calculations are for educational purposes only."
         },
         listItems: [
             "Consult with qualified Islamic scholars for authoritative Zakat rulings",
@@ -67,7 +67,6 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "plaid",
         number: 5,
         title: "Secure Bank Connections (Plaid)",
         icon: Lightning,
@@ -103,7 +102,6 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "warranties",
         number: 8,
         title: "Service Sustainability & Warranties",
         icon: Shield,
@@ -116,7 +114,6 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
-        id: "liability",
         number: 9,
         title: "Liability Limits",
         icon: Scales,
@@ -205,7 +202,7 @@ export const termsSections: TermSection[] = [
         icon: AddressBook,
         content: "For questions about these Terms, please contact:",
         listItems: [
-            "Email: security@vora.dev"
+            "Email: privacy@vora.dev"
         ]
     }
 ];
