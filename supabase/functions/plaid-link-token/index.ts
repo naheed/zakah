@@ -42,8 +42,8 @@ serve(async (req) => {
 
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) {
-            console.error("Auth Error or No User:", authError);
-            throw new Error("Unauthorized");
+            console.error("CRITICAL: Supabase Auth Failed", authError);
+            throw new Error("User Authentication Failed: " + (authError?.message || "No user found"));
         }
 
         console.log(`User authenticated: ${user.id}`);
@@ -102,8 +102,16 @@ serve(async (req) => {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             }
         );
-    } catch (error) {
-        console.error("Error creating Plaid Link token:", error);
+    } catch (error: any) {
+        console.error("Error creating Plaid Link token:");
+        console.error("Error Name:", error.name);
+        console.error("Error Message:", error.message);
+
+        // Plaid-specific error logging
+        if (error.response) {
+            console.error("Plaid API Response Status:", error.response.status);
+            console.error("Plaid API Response Data:", JSON.stringify(error.response.data));
+        }
 
         // Return 200 with error body so client can parse the message
         // instead of getting generic "non-2x status code"
