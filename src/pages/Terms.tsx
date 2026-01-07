@@ -43,18 +43,6 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
       <div className="pl-11 space-y-4">
         {section.content && <Text>{section.content}</Text>}
 
-        {section.listItems && (
-          <StaggerContainer>
-            <List>
-              {section.listItems.map((item, idx) => (
-                <StaggerItem key={idx}>
-                  <ListItem>{renderListItem(item)}</ListItem>
-                </StaggerItem>
-              ))}
-            </List>
-          </StaggerContainer>
-        )}
-
         {section.disclaimer && (
           <ScrollReveal>
             <div className="mt-4 p-4 rounded-lg bg-tertiary/10 border border-tertiary/20 text-muted-foreground">
@@ -67,6 +55,18 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
               </div>
             </div>
           </ScrollReveal>
+        )}
+
+        {section.listItems && (
+          <StaggerContainer>
+            <List>
+              {section.listItems.map((item, idx) => (
+                <StaggerItem key={idx}>
+                  <ListItem>{renderListItem(item)}</ListItem>
+                </StaggerItem>
+              ))}
+            </List>
+          </StaggerContainer>
         )}
       </div>
       <Separator className="mt-8" />

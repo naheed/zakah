@@ -71,9 +71,9 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
                 title: "2.3 Uploaded Documents (AI Parsing)",
                 content: "When you upload financial documents (bank statements, brokerage statements, etc.) for automatic data extraction:",
                 listItems: [
-                    "Processing: Files are processed in memory by our trusted AI partners (currently Google Gemini) and are never saved to our permanent storage.",
-                    "Extraction: We only retain the specific numeric values needed for your calculation (e.g., account balances).",
-                    "Metadata: Filenames and institution names are session-only and cleared when you close your browser."
+                    "Data Extracted: We parse these documents to extract numeric values (like account balances) needed for your calculation.",
+                    "Ephemeral Processing: Documents are processed securely and not permanently stored. See Section 4 (AI Document Processing) for full security details.",
+                    "Metadata: Filenames are session-only and cleared when you close your browser."
                 ]
             },
             {
@@ -90,13 +90,11 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
                 content: "We may collect anonymized usage analytics to improve the Service, including pages visited and feature usage patterns."
             },
             {
-                title: "2.5 Browser Session Storage",
                 content: "While you use the calculator, your current session data (form values and extracted document values) is stored in your browser's localStorage. This data is:",
                 listItems: [
-                    "Encrypted with AES-256-GCM using a session-specific key",
-                    "The encryption key is stored in sessionStorage — it is automatically cleared when you close your browser",
-                    "Once the key is cleared, the encrypted data becomes unreadable — effectively deleted upon browser close",
-                    "For permanent storage, you must sign in and save your calculation (which uses separate end-to-end encryption with persistent keys)"
+                    "Local Storage: Data stays on your device during your session.",
+                    "Encrypted: We use zero-knowledge encryption so we cannot read your session data.",
+                    "Temporary: See Section 5.1 (Session Data Encryption) for details on how keys are cleared to ensure privacy."
                 ],
                 note: "Note: On shared or public computers, closing the browser ensures your session data cannot be recovered. For maximum privacy, you can also clear your browser data manually."
             }
@@ -309,8 +307,8 @@ This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), pro
     },
     {
         id: "contact",
-        title: "9. Contact Us",
+        title: "Contact Us",
         content: "If you have questions about this Privacy Policy or our data practices, please contact:",
-        note: "Email: security@vora.dev"
+        note: "Email: privacy@vora.dev"
     }
 ];

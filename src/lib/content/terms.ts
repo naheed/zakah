@@ -36,13 +36,14 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "guidance",
         number: 3,
         title: "Guidance, Not Advice",
         icon: Warning,
-        content: "We designed this Service to empower you with calculation tools and educational resources. However, Zakat is a deeply personal act of worship, and financial situations are unique. Therefore:",
+        content: "We designed this Service to empower you with calculation tools and educational resources. However, Zakat is a deeply personal act of worship, and financial situations are unique. We recommend that you:",
         disclaimer: {
-            strong: "The Service does not provide financial, tax, legal, or religious advice.",
-            text: "The Service does not provide financial, tax, legal, or religious advice. The calculations and information provided are for educational and informational purposes only. You should:"
+            strong: "No Professional Advice.",
+            text: "No Professional Advice. The Service does not provide financial, tax, legal, or religious advice. All calculations are for educational purposes only."
         },
         listItems: [
             "Consult with qualified Islamic scholars for authoritative Zakat rulings",
@@ -66,14 +67,14 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "plaid",
         number: 5,
         title: "Secure Bank Connections (Plaid)",
         icon: Lightning,
-        content: "We partner with Plaid Inc. (\"Plaid\") to securely connect your bank accounts. This integration is designed to be safe and transparent:",
+        content: "We partner with Plaid Inc. (\"Plaid\") to securely connect your bank accounts.",
         listItems: [
-            "Your Credentials Stay Safe: We never see or store your bank username or password—these are passed directly to Plaid.",
-            "Your Control: You can unlink your accounts at any time, which revokes our access to new data.",
-            "Plaid's Role: By connecting, you grant Plaid the authority to access and transmit your financial information to us, governed by their Privacy Policy."
+            "Grant of Authority: By connecting, you grant Plaid the authority to access and transmit your financial information to us, governed by their Privacy Policy.",
+            "Service Boundaries: Plaid is an independent service provider. While we trust our partners, we cannot accept liability for data handling that occurs on their systems."
         ]
     },
     {
@@ -96,14 +97,13 @@ export const termsSections: TermSection[] = [
         icon: Lightning,
         content: "When you upload documents for data extraction:",
         listItems: [
-            "Documents are processed by third-party AI services (Google Gemini)",
-            "We do not guarantee the accuracy of extracted data — AI systems can make errors",
-            "You are solely responsible for verifying all extracted values before finalizing your Zakat payment",
-            "Uploaded documents are processed in memory and not permanently stored",
-            "We accept no liability for under-payment or over-payment of Zakat resulting from calculation or parsing errors"
+            "Automated Assistance: We use AI to help extract data, but automation can make mistakes.",
+            "Your Final Audit: We provide the tools, but you provide the judgment. Please verify all extracted numbers before finalizing.",
+            "Liability Limits: Because we cannot control the quality of Uploaded documents or AI interpretation, we cannot accept liability for calculation errors."
         ]
     },
     {
+        id: "warranties",
         number: 8,
         title: "Service Sustainability & Warranties",
         icon: Shield,
@@ -116,6 +116,7 @@ export const termsSections: TermSection[] = [
         ]
     },
     {
+        id: "liability",
         number: 9,
         title: "Liability Limits",
         icon: Scales,
