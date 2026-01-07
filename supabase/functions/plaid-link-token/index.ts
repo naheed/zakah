@@ -11,7 +11,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -35,24 +35,30 @@ serve(async (req) => {
         console.log("Starting Plaid Link Token creation...");
 
         // Get auth header
-        const authHeader = req.headers.get("Authorization");
-        if (!authHeader?.startsWith("Bearer ")) {
-            console.error("Missing or invalid Authorization header");
-            return new Response(
-                JSON.stringify({ error: "Unauthorized" }),
-                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
+        // Get auth user
+        let authHeader = req.headers.get("Authorization");
+        if (!authHeader) {
+            console.error("Missing Auth Header");
+            throw new Error("Missing authorization header");
+        }
+
+        // Clean header: Ensure we have the raw token, then rebuild "Bearer <token>"
+        const token = authHeader.replace("Bearer ", "").trim();
+        console.log(`Auth Token received (first 10 chars): ${token.substring(0, 10)}...`);
+
+        if (!token) {
+            throw new Error("Authorization header present but empty");
         }
 
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
         const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: authHeader } },
+            global: { headers: { Authorization: `Bearer ${token}` } },
         });
 
         // Get user from session token
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
+
         if (authError || !user) {
             console.error("JWT validation failed:", authError);
             return new Response(
@@ -80,7 +86,7 @@ serve(async (req) => {
         }
 
         const baseUrl = PLAID_ENVIRONMENTS[plaidEnv] || PLAID_ENVIRONMENTS.sandbox;
-        
+
         console.log("Requesting Link Token from Plaid...");
 
         // Create Link token using fetch API
