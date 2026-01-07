@@ -102,7 +102,7 @@ serve(async (req: any) => {
   }
 
   try {
-    const { documentBase64, documentType, mimeType } = await req.json();
+    const { documentBase64, documentType, mimeType, extractionType = 'financial_statement' } = await req.json();
 
     if (!documentBase64) {
       return new Response(
@@ -128,10 +128,12 @@ serve(async (req: any) => {
       );
     }
 
-    console.log(`Processing ${documentType} document (${mimeType}), base64 length: ${documentBase64.length}`);
+    console.log(`Processing ${documentType} document (${mimeType}), extractionType: ${extractionType}`);
 
-    // V2 System Prompt: Line Item Extraction
-    const systemPrompt = `You are an expert financial auditor for Zakat purification.
+    // --- PROMPT REGISTRY ---
+    let systemPrompt = "";
+    let tools = [];
+    const STATEMENT_PROMPT = `You are an expert financial auditor for Zakat purification.
 
 OBJECTIVE:
 Extract every financial line item from the document with extreme precision. Do not aggregate values yourself. List them individually so they can be classified correctly.
@@ -182,7 +184,101 @@ ACCOUNT IDENTIFICATION (CRITICAL):
   - This is VITAL to distinguish multiple accounts at the same bank.
 `;
 
-    const userPrompt = `Analyze this ${documentType} and extract financial data for Zakat calculation.`;
+    const RECEIPT_PROMPT = `You are an expert at parsing donation receipts and tax acknowledgement letters for Zakat tracking.
+
+OBJECTIVE:
+Extract structured details from a donation receipt.
+
+CRITICAL FIELDS TO EXTRACT:
+1. **Organization Name**: The Name of the charity or non-profit receiving the funds.
+2. **Donation Amount**: The numeric value of the donation.
+3. **Date**: The date the donation was made (YYYY-MM-DD). this is CRITICAL.
+4. **Tax ID**: The EIN or Tax ID of the organization if present.
+5. **Address**: The physical address of the organization if present.
+6. **Donor Name**: The name of the person who donated.
+
+RULES:
+- If the document contains multiple donations (e.g. a yearly summary), extract the TOTAL amount for the 'donationAmount', or the most recent specific donation if ambiguous.
+- Convert dates to YYYY-MM-DD.
+- Return null for missing fields.
+`;
+
+    // --- TOOL DEFINITIONS ---
+
+    // 1. Tool for Financial Statements
+    const TOOLS_STATEMENT = [
+      {
+        functionDeclarations: [
+          {
+            name: "extract_financial_data",
+            description: "Extract structured financial line items from document",
+            parameters: {
+              type: "object",
+              properties: {
+                lineItems: {
+                  type: "array",
+                  description: "List of extracted line items.",
+                  items: {
+                    type: "object",
+                    properties: {
+                      description: { type: "string", description: "Description as shown on statement" },
+                      amount: { type: "number", description: "Numeric value" },
+                      inferredCategory: { type: "string", description: "One of the OUTPUT CATEGORIES" },
+                      confidence: { type: "number", description: "Confidence 0.0-1.0" }
+                    },
+                    required: ["description", "amount", "inferredCategory"]
+                  }
+                },
+                summary: { type: "string", description: "Brief summary of the document" },
+                documentDate: { type: "string", description: "Statement date in YYYY-MM-DD format." },
+                institutionName: { type: "string", description: "Financial institution name" },
+                accountName: { type: "string", description: "Account type/nickname" },
+                accountId: { type: "string", description: "Last 4 digits of account number" },
+                notes: { type: "string", description: "Any important notes" },
+              },
+              required: ["lineItems", "summary", "documentDate", "institutionName", "accountName"]
+            }
+          }
+        ]
+      }
+    ];
+
+    // 2. Tool for Donation Receipts
+    const TOOLS_RECEIPT = [
+      {
+        functionDeclarations: [
+          {
+            name: "extract_donation_receipt",
+            description: "Extract details from a donation receipt",
+            parameters: {
+              type: "object",
+              properties: {
+                organizationName: { type: "string", description: "Name of the charity" },
+                donationAmount: { type: "number", description: "Total amount donated" },
+                donationDate: { type: "string", description: "Date of donation (YYYY-MM-DD)" },
+                taxId: { type: "string", description: "EIN/Tax ID of the charity" },
+                address: { type: "string", description: "Address of the charity" },
+                donorName: { type: "string", description: "Name of the donor" },
+                paymentMethod: { type: "string", description: "Credit Card, Check, ACH, etc." },
+                campaign: { type: "string", description: "Campaign or Fund name if specified" }
+              },
+              required: ["organizationName", "donationAmount", "donationDate"]
+            }
+          }
+        ]
+      }
+    ];
+
+    // --- SELECTION LOGIC ---
+    if (extractionType === 'donation_receipt') {
+      systemPrompt = RECEIPT_PROMPT;
+      tools = TOOLS_RECEIPT;
+    } else {
+      systemPrompt = STATEMENT_PROMPT;
+      tools = TOOLS_STATEMENT;
+    }
+
+    const userPrompt = `Analyze this ${documentType} and extract data.`;
 
     const parts: any[] = [
       { text: systemPrompt + "\n\n" + userPrompt }
@@ -201,46 +297,11 @@ ACCOUNT IDENTIFICATION (CRITICAL):
 
     const requestBody = {
       contents: [{ parts }],
-      tools: [
-        {
-          functionDeclarations: [
-            {
-              name: "extract_financial_data",
-              description: "Extract structured financial line items from document",
-              parameters: {
-                type: "object",
-                properties: {
-                  lineItems: {
-                    type: "array",
-                    description: "List of extracted line items.",
-                    items: {
-                      type: "object",
-                      properties: {
-                        description: { type: "string", description: "Description as shown on statement" },
-                        amount: { type: "number", description: "Numeric value" },
-                        inferredCategory: { type: "string", description: "One of the OUTPUT CATEGORIES" },
-                        confidence: { type: "number", description: "Confidence 0.0-1.0" }
-                      },
-                      required: ["description", "amount", "inferredCategory"]
-                    }
-                  },
-                  summary: { type: "string", description: "Brief summary of the document" },
-                  documentDate: { type: "string", description: "Statement date in YYYY-MM-DD format. MUST be a real date from the document, in the past. Example: 2025-11-29" },
-                  institutionName: { type: "string", description: "Financial institution name (e.g., Charles Schwab, Fidelity, Vanguard)" },
-                  accountName: { type: "string", description: "Account type/nickname (e.g., Brokerage, Roth IRA)" },
-                  accountId: { type: "string", description: "Last 4 digits of account number (e.g. '1234') for deduplication" },
-                  notes: { type: "string", description: "Any important notes" },
-                },
-                required: ["lineItems", "summary", "documentDate", "institutionName", "accountName"]
-              }
-            }
-          ]
-        }
-      ],
+      tools: tools,
       toolConfig: {
         functionCallingConfig: {
           mode: "ANY",
-          allowedFunctionNames: ["extract_financial_data"],
+          allowedFunctionNames: extractionType === 'donation_receipt' ? ["extract_donation_receipt"] : ["extract_financial_data"],
         },
       },
     };
@@ -285,20 +346,30 @@ ACCOUNT IDENTIFICATION (CRITICAL):
     const content = candidate?.content;
     const functionCallPart = content?.parts?.find((part: any) => part.functionCall);
 
-    if (!functionCallPart || functionCallPart.functionCall?.name !== "extract_financial_data") {
-      console.error("No valid function call in response:", JSON.stringify(data));
+    // --- RESPONSE HANDLING ---
+    const args = functionCallPart.functionCall.args || {};
+
+    if (extractionType === 'donation_receipt') {
+      // Return Receipt Data Structure
       return new Response(
         JSON.stringify({
-          error: "Could not extract data from document",
-          extractedData: {},
-          lineItems: [],
-          summary: "Unable to parse the document. Please ensure it is a clear image of a financial statement."
+          success: true,
+          data: {
+            organizationName: (args as any).organizationName,
+            donationAmount: (args as any).donationAmount,
+            donationDate: (args as any).donationDate,
+            taxId: (args as any).taxId,
+            address: (args as any).address,
+            donorName: (args as any).donorName,
+            paymentMethod: (args as any).paymentMethod,
+            campaign: (args as any).campaign
+          }
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const args = functionCallPart.functionCall.args || {};
+    // Default: Asset Statement Logic
     const lineItems: ExtractionLineItem[] = (args as any).lineItems || [];
 
     // Aggregate for backward compatibility with existing UI

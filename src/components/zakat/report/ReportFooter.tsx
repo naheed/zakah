@@ -1,17 +1,22 @@
 import { formatCurrency } from "@/lib/zakatCalculations";
-import { Sparkle } from "@phosphor-icons/react";
+import { Sparkle, HandHeart, ArrowRight } from "@phosphor-icons/react";
 import { ReferralWidget } from "../ReferralWidget";
+import { Link } from "react-router-dom";
 
 interface ReportFooterProps {
     interestToPurify: number;
     dividendsToPurify: number;
     currency: string;
+    zakatDue?: number; // Pass to donations page
     referralStats?: { totalReferrals: number; totalAssetsCalculated: number; totalZakatCalculated: number };
     referralCode?: string;
 }
 
-export function ReportFooter({ interestToPurify, dividendsToPurify, currency, referralStats, referralCode }: ReportFooterProps) {
+export function ReportFooter({ interestToPurify, dividendsToPurify, currency, zakatDue, referralStats, referralCode }: ReportFooterProps) {
     const totalPurification = interestToPurify + dividendsToPurify;
+
+    // Build donations URL with Zakat amount
+    const donationsUrl = zakatDue ? `/donations?zakatDue=${zakatDue}` : '/donations';
 
     return (
         <footer className="mt-12 space-y-8">
@@ -33,6 +38,25 @@ export function ReportFooter({ interestToPurify, dividendsToPurify, currency, re
                     </div>
                 </div>
             )}
+
+            {/* Track Donations CTA */}
+            <Link
+                to={donationsUrl}
+                className="block bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-xl p-5 transition-colors group"
+            >
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                            <HandHeart className="w-5 h-5 text-primary" weight="duotone" />
+                        </div>
+                        <div>
+                            <p className="font-semibold text-foreground group-hover:text-primary transition-colors">Track Your Zakat Donations</p>
+                            <p className="text-sm text-muted-foreground">Already made a donation? Log it here to track your progress.</p>
+                        </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                </div>
+            </Link>
 
             {/* Impact (Enhanced Widget) - Full Width */}
             <div className="w-full">

@@ -37,6 +37,7 @@ import { useSavedCalculations } from "@/hooks/useSavedCalculations";
 import { formatCurrency, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from "@/lib/zakatCalculations";
 import { useReferral } from "@/hooks/useReferral";
 import { MiniReportWidget } from "../dashboard/MiniReportWidget";
+import { ZakatDashboard } from "@/components/donations/ZakatDashboard";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -315,6 +316,19 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                     transition={{ delay: 0.5 }}
                     className="flex flex-col items-center gap-8 border-t border-border/50 pt-8"
                   >
+                    {/* Zakat Dashboard - Show when user has a calculated amount */}
+                    {displayZakatDue > 0 && (
+                      <div className="w-full max-w-md">
+                        <ZakatDashboard
+                          calculatedAmount={displayZakatDue}
+                          donatedAmount={0} // TODO: Fetch from backend
+                          hawlStart="2025-01-15" // TODO: Fetch from user settings
+                          hawlEnd="2026-01-14"
+                          daysRemaining={45} // TODO: Calculate
+                          donationCount={0} // TODO: Fetch from backend
+                        />
+                      </div>
+                    )}
                     {(metrics || metricsLoading || userStats) ? (
                       <>
                         <ImpactStats

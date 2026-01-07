@@ -19,33 +19,33 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | Feature | Description |
 |---------|-------------|
 | **Guided Wizard** | Simple mode for quick estimates, detailed mode for comprehensive analysis |
-| **AI Document Parsing** | Upload bank/brokerage statements; AI extracts line items automatically |
-| **Multi-Source Asset Tracking** | Manual entry, PDF upload, or bank connection (Plaid—coming soon) |
+| **Asset Intelligence** | Upload bank statements; AI extracts line items automatically |
+| **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
+| **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid—coming soon) |
 | **Scholarly Methodology** | Based on AMJA, AAOIFI guidelines, and Sheikh Joe Bradford's rulings |
 | **Madhab Support** | Configure calculations per Hanafi, Maliki, Shafi'i, Hanbali, or balanced approach |
 | **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
 | **Export Options** | PDF report, CSV breakdown, or print-friendly web view |
-| **Privacy-First** | Local-first for guests; secure cloud storage for authenticated users |
+| **Privacy-First** | Local-first encryption for guests; cloud sync for signed-in users |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
 │                        Frontend (React)                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   Wizard    │  │   Assets    │  │   Report    │              │
-│  │   Pages     │  │   Dashboard │  │   Export    │              │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │
-│         │                │                │                      │
-│         └────────────────┼────────────────┘                      │
-│                          ▼                                       │
-│              ┌─────────────────────┐                             │
-│              │   Zakat Calculation │                             │
-│              │      Engine         │                             │
-│              └─────────────────────┘                             │
-└─────────────────────────────────────────────────────────────────┘
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
+│  │   Wizard    │  │   Assets    │  │  Donations  │  │   Report    │ │
+│  │   Pages     │  │   Dashboard │  │  Tracking   │  │   Export    │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘ │
+│         │                │                │                │        │
+│         └────────────────┼────────────────┼────────────────┘        │
+│                          ▼                ▼                         │
+│              ┌─────────────────────┐  ┌─────────────────────┐       │
+│              │   Zakat Calculation │  │   Active Hawl       │       │
+│              │      Engine         │  │      Manager        │       │
+│              └─────────────────────┘  └─────────────────────┘       │
+└─────────────────────────────────────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
@@ -140,7 +140,8 @@ src/
 │   ├── zakat/             # Domain-specific components
 │   │   ├── steps/         # Wizard step components
 │   │   └── report/        # Report generation components
-│   └── assets/            # Asset management components
+│   ├── assets/            # Asset management components
+│   └── donations/         # Donation tracking & receipt scanning
 ├── hooks/
 │   ├── useAuth.ts         # Authentication state
 │   ├── useAssetPersistence.ts  # Asset CRUD operations
@@ -197,6 +198,19 @@ supabase/
 | `PROXY_30` | Passive investments (stocks, ETFs) | 30% proxy |
 | `PROXY_100` | Active trading, cryptocurrency | 100% |
 | `EXEMPT` | Personal use, unvested, liabilities | 0% |
+
+### Donation Tracking Model
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Hawl Settings  │────▶│   Zakat Year    │────▶│   Donation      │
+│                 │     │                 │     │                 │
+│ user_id         │     │ hawl_start      │     │ amount          │
+│ calendar_type   │     │ calculated_amt  │     │ recipient       │
+└─────────────────┘     │ is_current      │     │ receipt_url     │
+                        └─────────────────┘     │ notes           │
+                                                └─────────────────┘
+```
 
 ---
 
@@ -270,12 +284,13 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 | Phase | Status | Description |
 |-------|--------|-------------|
 | Core Calculator | ✅ Complete | Guided wizard with all asset classes |
-| AI Document Parsing | ✅ Complete | Extract line items from PDFs/images |
+| Asset Intelligence | ✅ Complete | Extract line items from PDFs/images |
+| Donation Tracking | ✅ Complete | Receipt scanning, Active Hawl, Cloud Sync |
 | Asset Dashboard | ✅ Complete | Manage accounts and statements |
 | Export (PDF/CSV) | ✅ Complete | Download reports |
 | Sankey Visualization | ✅ Complete | Visual asset flow chart |
-| Plaid Integration | 🔄 In Progress | Bank account connection |
-| Classification System | 📋 Planned | ML-powered asset categorization |
+| Plaid Integration | 📋 Planned | Bank account connection |
+| Charity Directory | 📋 Planned | Search & filter vetted recipients |
 | Mobile App | 📋 Planned | React Native implementation |
 
 ---

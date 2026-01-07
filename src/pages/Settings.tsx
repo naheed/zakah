@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, FileText, Trash, UserMinus, CaretDown, User, Users, Check, Sun, Moon, Monitor } from "@phosphor-icons/react";
+import { ArrowLeft, FileText, Trash, UserMinus, CaretDown, User, Users, Check, Sun, Moon, Monitor, CalendarBlank } from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/zakat/Footer";
 import { getPrimaryUrl } from "@/lib/domainConfig";
+import { HawlDatePicker } from "@/components/donations/HawlDatePicker";
+import { CalendarType as HawlCalendarType } from "@/types/donations";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -48,8 +50,13 @@ export default function Settings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(true);
   const [calculationOpen, setCalculationOpen] = useState(false);
+  const [hawlOpen, setHawlOpen] = useState(false);
   const [documentsOpen, setDocumentsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+
+  // Hawl date state (TODO: Persist to Supabase)
+  const [hawlDate, setHawlDate] = useState<string | undefined>();
+  const [hawlCalendarType, setHawlCalendarType] = useState<HawlCalendarType>('gregorian');
 
   const {
     formData,
@@ -425,6 +432,34 @@ export default function Settings() {
                     </p>
                   )}
                 </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Zakat Year (Hawl) Settings */}
+          <Collapsible open={hawlOpen} onOpenChange={setHawlOpen}>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-2">
+                  <CalendarBlank className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Zakat Year (Hawl)</span>
+                </div>
+                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", hawlOpen && "rotate-180")} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 p-4 bg-card rounded-lg border border-border">
+                <HawlDatePicker
+                  value={hawlDate}
+                  calendarType={hawlCalendarType}
+                  onChange={(date, type) => {
+                    setHawlDate(date);
+                    setHawlCalendarType(type);
+                    toast.success('Hawl date saved');
+                    // TODO: Persist to Supabase
+                  }}
+                  showCountdown={true}
+                />
               </div>
             </CollapsibleContent>
           </Collapsible>

@@ -256,13 +256,26 @@ User → Portfolio → Account → Snapshot → LineItem
 
 ---
 
-## Phase 13: Distribution Strategy (Donations) ⬜ PLANNED
-
-> **Goal:** Rethink Zakat distribution. Empower users to investigate 8 different categories of recipients and explore aligned charities.
-
-- [ ] Create `/distribute` (or `/donate`) visual exploration page
-- [ ] **Educational Layer**: Interactive guide to the 8 categories of Zakat recipients (Masakeen, Fuqara, etc.)
-- [ ] **Discovery Layer**: "Browse by Impact" - connect categories to vetted charities
+## Phase 13: Donation Tracking & Distribution ✅ PARTIAL
+ 
+> **Goal:** Empower users to track their Zakat payments, scan receipts, and explore the 8 categories of recipients.
+ 
+### 13.1 Donation Tracking (MVP) ✅ COMPLETE
+- [x] Create `/donations` route and Dashboard widget
+- [x] **Active Hawl Logic**: Track "Zakat Due" vs "Paid" with progress bar
+- [x] **Robust Dates**: Hijri/Gregorian toggle and storage normalization
+- [x] **AI Receipt Scanning**: Extract details from images/PDFs (Gemini 2.0 Flash)
+- [x] **Persistence**: Dual-mode (Guest Local + Cloud Link) with auto-migration
+ 
+### 13.2 Charity Discovery (Next) ⬜ PLANNED
+- [ ] Charity Directory Integration (Search/Filter)
+- [ ] "Verified" Badge logic
+- [ ] Deep dive content for 8 Categories of Recipients
+ 
+### 13.3 In-App Payments (Future) ⬜ PLANNED
+- [ ] Stripe Connect Integration
+- [ ] 1-Click Zakat payment
+- [ ] Recurring donation setup
 - [ ] **Mission**: Move beyond "donate and forget" to "strategic spiritual impact"
 
 ---
@@ -283,7 +296,7 @@ User → Portfolio → Account → Snapshot → LineItem
 | # | Phase | Status | Next Action |
 |---|-------|--------|-------------|
 | 1 | Phase 12: Knowledge (FAQ) | ⬜ Planned | Create FAQ Component |
-| 2 | Phase 13: Distribution | ⬜ Planned | Design Categories Diagram |
+| 2 | Phase 13: Distribution (Charity) | ⬜ Planned | Design Charity Directory |
 | 3 | Phase 14: Feedback | ⬜ Planned | Evaluate tools vs build |
 | 4 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
 | 5 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |

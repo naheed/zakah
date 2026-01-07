@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
 
+## [0.11.0] - 2026-01-06
+
+### Added
+- **Donation Tracking (Phase 1 MVP)**
+  - **New Module**: Full `/donations` route for tracking Zakat payments.
+  - **Active Hawl Tracking**: Interactive progress bar for current Zakat year goal vs. paid amount.
+  - **AI Receipt Scanning**: Production integration with Gemini 2.0 Flash (via Edge Function) to extract Organization, Amount, Date, and Category from uploaded receipts.
+  - **Robust Date System**: Hybrid Gregorian/Hijri support with "Smart Display" (e.g., "18 Rajab 1447 AH") and custom Hawl Date Picker.
+  - **Cloud Sync & Migration**:
+    - **Logged-in Users**: Data securely stored in Supabase (Postgres) with Row Level Security.
+    - **Guest Protection**: LocalStorage encryption (AES-256-GCM).
+    - **Magic Migration**: Auto-uploads guest data to cloud upon sign-in.
+  - **Intelligent Categories**: Auto-inference of Quranic recipient categories (e.g., "Relief" → "Poor & Needy").
+
 ## [0.10.0] - 2026-01-04
 
 ### Added
