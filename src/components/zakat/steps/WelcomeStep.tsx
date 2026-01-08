@@ -391,7 +391,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                       <p className="font-bold text-foreground">Sign in to save your progress</p>
                       <p className="text-sm text-muted-foreground mt-1">Sync across devices and verify your history.</p>
                     </div>
-                    <Button variant="default" onClick={signInWithGoogle} className="w-full gap-2">
+                    <Button variant="default" onClick={() => signInWithGoogle()} className="w-full gap-2">
                       <SignIn className="w-4 h-4" />
                       Sign in with Google
                     </Button>
@@ -550,7 +550,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               <Button
                 variant="outline"
                 size="lg"
-                onClick={signInWithGoogle}
+                onClick={() => signInWithGoogle()}
                 className="gap-2 h-12 px-6 bg-background hover:bg-muted/50 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
