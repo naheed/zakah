@@ -211,6 +211,86 @@ export type Database = {
           },
         ]
       }
+      donations: {
+        Row: {
+          amount: number
+          created_at: string
+          donation_date: string
+          extracted_via_ai: boolean | null
+          id: string
+          notes: string | null
+          receipt_url: string | null
+          recipient_category: string
+          recipient_name: string
+          updated_at: string
+          user_id: string
+          zakat_year_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          donation_date: string
+          extracted_via_ai?: boolean | null
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          recipient_category: string
+          recipient_name: string
+          updated_at?: string
+          user_id: string
+          zakat_year_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          donation_date?: string
+          extracted_via_ai?: boolean | null
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          recipient_category?: string
+          recipient_name?: string
+          updated_at?: string
+          user_id?: string
+          zakat_year_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_zakat_year_id_fkey"
+            columns: ["zakat_year_id"]
+            isOneToOne: false
+            referencedRelation: "zakat_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hawl_settings: {
+        Row: {
+          calendar_type: string
+          created_at: string
+          hawl_start_date: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calendar_type?: string
+          created_at?: string
+          hawl_start_date: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calendar_type?: string
+          created_at?: string
+          hawl_start_date?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       plaid_accounts: {
         Row: {
           account_id: string
@@ -662,6 +742,45 @@ export type Database = {
         }
         Relationships: []
       }
+      zakat_years: {
+        Row: {
+          calculated_amount: number
+          calculation_id: string | null
+          created_at: string
+          hawl_end: string
+          hawl_start: string
+          id: string
+          is_current: boolean
+          is_superseded: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calculated_amount?: number
+          calculation_id?: string | null
+          created_at?: string
+          hawl_end: string
+          hawl_start: string
+          id?: string
+          is_current?: boolean
+          is_superseded?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calculated_amount?: number
+          calculation_id?: string | null
+          created_at?: string
+          hawl_end?: string
+          hawl_start?: string
+          id?: string
+          is_current?: boolean
+          is_superseded?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -714,7 +833,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      calendar_type: "gregorian" | "hijri"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -841,6 +960,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      calendar_type: ["gregorian", "hijri"],
+    },
   },
 } as const
