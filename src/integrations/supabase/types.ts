@@ -596,6 +596,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          created_at: string
+          encrypted_master_key: string | null
+          id: string
+          persistence_mode: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_master_key?: string | null
+          id: string
+          persistence_mode?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_master_key?: string | null
+          id?: string
+          persistence_mode?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       zakat_anonymous_events: {
         Row: {
           created_at: string
