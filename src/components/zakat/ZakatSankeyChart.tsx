@@ -26,7 +26,7 @@ export function ZakatSankeyChart({
   data,
   enhancedData,
   currency,
-  height = 400,
+  height = 350, // Reduced height for wider aspect ratio
 }: ZakatSankeyChartProps) {
 
   const { resolvedTheme } = useTheme();
@@ -140,7 +140,7 @@ export function ZakatSankeyChart({
         <ResponsiveSankey
           data={formattedData}
           theme={formattedData.chartTheme}
-          margin={{ top: 20, right: 160, bottom: 20, left: 160 }}
+          margin={{ top: 40, right: 180, bottom: 40, left: 180 }}
           align="justify"
           sort={(a: any, b: any) => {
             // Zakat Due always at top (sortOrder = 0)
@@ -152,18 +152,18 @@ export function ZakatSankeyChart({
           colors={(node: any) => node.nodeColor || "#999"}
           nodeOpacity={1}
           nodeHoverOthersOpacity={0.35}
-          nodeThickness={18}
-          nodeSpacing={16}
+          nodeThickness={24}
+          nodeSpacing={32}
           nodeBorderWidth={0}
           nodeBorderColor={{ from: 'color', modifiers: [['darker', 0.8]] }}
-          linkOpacity={isDark ? 0.7 : 0.5}
+          linkOpacity={isDark ? 0.6 : 0.4}
           linkBlendMode="normal"
           linkHoverOthersOpacity={0.1}
-          linkContract={3}
+          linkContract={4}
           enableLinkGradient={true}
           labelPosition="outside"
           labelOrientation="horizontal"
-          labelPadding={20}
+          labelPadding={24}
           labelTextColor={{ from: 'theme', theme: 'text.fill' }}
           nodeTooltip={({ node }: any) => {
             const isZakat = node.id === getSafeId("Zakat Due");
