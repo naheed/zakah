@@ -88,7 +88,7 @@ export function AddDonationModal({ open, onClose, onSave, zakatYearId }: AddDona
                 if (nameLower.includes('relief') || nameLower.includes('aid')) inferredCat = 'AL_FUQARAA';
                 else if (nameLower.includes('school') || nameLower.includes('academy') || nameLower.includes('university')) inferredCat = 'FI_SABILILLAH';
                 else if (nameLower.includes('mosque') || nameLower.includes('masjid')) inferredCat = 'FI_SABILILLAH';
-                else if (nameLower.includes('refugee')) inferredCat = 'IBN_SABIL';
+                else if (nameLower.includes('refugee')) inferredCat = 'IBN_AL_SABIL';
 
                 setCategory(inferredCat);
 
