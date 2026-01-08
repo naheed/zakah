@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { formatCurrency, formatCompactCurrency, formatPercent } from "@/lib/zakatCalculations";
 import { ASSET_COLORS } from "./sankey/constants";
 import { SankeyChartData, EnhancedSankeyChartData } from "./sankey/types";
-import { Wallet, ArrowDown } from "@phosphor-icons/react";
+import { ArrowDown, ShieldSlash, Wallet } from "@phosphor-icons/react";
 
 // Re-export types
 export type { SankeyChartData, EnhancedSankeyChartData };
@@ -26,84 +26,162 @@ export function ZakatSankeyChart({
   data,
   enhancedData,
   currency,
-  height = 350, // Reduced height for wider aspect ratio
+  height = 450,
 }: ZakatSankeyChartProps) {
 
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  const { formattedData, totalLiabilities, netZakatableWealth } = useMemo(() => {
+  const { formattedData, totalLiabilities, netZakatableWealth, hasExemptions, totalExempt, totalAssets } = useMemo(() => {
     // 1. Build Asset List
+    // We strictly follow the "Option A" logic but simplified for Nivo's layout engine.
+    // To ensure nodes are sized correctly on the LEFT (Gross Value), we must account for WHERE THE REST OF THE MONEY GOES.
+    // Flow Conservation: Input (Gross) = Output (Zakat + Retained Wealth + Exemptions)
+
     const assets = enhancedData?.enhancedBreakdown
       ? [
-        { id: "Cash & Savings", value: enhancedData.enhancedBreakdown.liquidAssets.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.liquidAssets.total, zakatablePercent: enhancedData.enhancedBreakdown.liquidAssets.zakatablePercent, color: ASSET_COLORS["Cash & Savings"] },
-        { id: "Precious Metals", value: enhancedData.enhancedBreakdown.preciousMetals.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.preciousMetals.total, zakatablePercent: enhancedData.enhancedBreakdown.preciousMetals.zakatablePercent, color: ASSET_COLORS["Precious Metals"] },
-        { id: "Crypto & Digital", value: enhancedData.enhancedBreakdown.crypto.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.crypto.total, zakatablePercent: enhancedData.enhancedBreakdown.crypto.zakatablePercent, color: ASSET_COLORS["Crypto & Digital"] },
-        { id: "Investments", value: enhancedData.enhancedBreakdown.investments.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.investments.total, zakatablePercent: enhancedData.enhancedBreakdown.investments.zakatablePercent, color: ASSET_COLORS["Investments"] },
-        { id: "Retirement", value: enhancedData.enhancedBreakdown.retirement.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.retirement.total, zakatablePercent: enhancedData.enhancedBreakdown.retirement.zakatablePercent, color: ASSET_COLORS["Retirement"] },
-        { id: "Trusts", value: enhancedData.enhancedBreakdown.trusts.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.trusts.total, zakatablePercent: enhancedData.enhancedBreakdown.trusts.zakatablePercent, color: ASSET_COLORS["Trusts"] },
-        { id: "Real Estate", value: enhancedData.enhancedBreakdown.realEstate.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.realEstate.total, zakatablePercent: enhancedData.enhancedBreakdown.realEstate.zakatablePercent, color: ASSET_COLORS["Real Estate"] },
-        { id: "Business", value: enhancedData.enhancedBreakdown.business.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.business.total, zakatablePercent: enhancedData.enhancedBreakdown.business.zakatablePercent, color: ASSET_COLORS["Business"] },
-        { id: "Debt Owed to You", value: enhancedData.enhancedBreakdown.debtOwedToYou.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.debtOwedToYou.total, zakatablePercent: enhancedData.enhancedBreakdown.debtOwedToYou.zakatablePercent, color: ASSET_COLORS["Debt Owed to You"] },
-        { id: "Illiquid Assets", value: enhancedData.enhancedBreakdown.illiquidAssets.zakatableAmount, grossValue: enhancedData.enhancedBreakdown.illiquidAssets.total, zakatablePercent: enhancedData.enhancedBreakdown.illiquidAssets.zakatablePercent, color: ASSET_COLORS["Illiquid Assets"] },
+        { id: "Cash & Savings", grossValue: enhancedData.enhancedBreakdown.liquidAssets.total, netValue: enhancedData.enhancedBreakdown.liquidAssets.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.liquidAssets.zakatablePercent, color: ASSET_COLORS["Cash & Savings"] },
+        { id: "Precious Metals", grossValue: enhancedData.enhancedBreakdown.preciousMetals.total, netValue: enhancedData.enhancedBreakdown.preciousMetals.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.preciousMetals.zakatablePercent, color: ASSET_COLORS["Precious Metals"] },
+        { id: "Crypto & Digital", grossValue: enhancedData.enhancedBreakdown.crypto.total, netValue: enhancedData.enhancedBreakdown.crypto.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.crypto.zakatablePercent, color: ASSET_COLORS["Crypto & Digital"] },
+        { id: "Investments", grossValue: enhancedData.enhancedBreakdown.investments.total, netValue: enhancedData.enhancedBreakdown.investments.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.investments.zakatablePercent, color: ASSET_COLORS["Investments"] },
+        { id: "Retirement", grossValue: enhancedData.enhancedBreakdown.retirement.total, netValue: enhancedData.enhancedBreakdown.retirement.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.retirement.zakatablePercent, color: ASSET_COLORS["Retirement"] },
+        { id: "Trusts", grossValue: enhancedData.enhancedBreakdown.trusts.total, netValue: enhancedData.enhancedBreakdown.trusts.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.trusts.zakatablePercent, color: ASSET_COLORS["Trusts"] },
+        { id: "Real Estate", grossValue: enhancedData.enhancedBreakdown.realEstate.total, netValue: enhancedData.enhancedBreakdown.realEstate.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.realEstate.zakatablePercent, color: ASSET_COLORS["Real Estate"] },
+        { id: "Business", grossValue: enhancedData.enhancedBreakdown.business.total, netValue: enhancedData.enhancedBreakdown.business.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.business.zakatablePercent, color: ASSET_COLORS["Business"] },
+        { id: "Debt Owed to You", grossValue: enhancedData.enhancedBreakdown.debtOwedToYou.total, netValue: enhancedData.enhancedBreakdown.debtOwedToYou.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.debtOwedToYou.zakatablePercent, color: ASSET_COLORS["Debt Owed to You"] },
+        { id: "Illiquid Assets", grossValue: enhancedData.enhancedBreakdown.illiquidAssets.total, netValue: enhancedData.enhancedBreakdown.illiquidAssets.zakatableAmount, zakatablePercent: enhancedData.enhancedBreakdown.illiquidAssets.zakatablePercent, color: ASSET_COLORS["Illiquid Assets"] },
       ]
       : [
-        { id: "Cash & Savings", value: data.liquidAssets, color: ASSET_COLORS["Cash & Savings"] },
-        { id: "Investments", value: data.investments, color: ASSET_COLORS["Investments"] },
-        { id: "Retirement", value: data.retirement, color: ASSET_COLORS["Retirement"] },
-        { id: "Real Estate", value: data.realEstate, color: ASSET_COLORS["Real Estate"] },
-        { id: "Business", value: data.business, color: ASSET_COLORS["Business"] },
-        { id: "Other Assets", value: data.otherAssets, color: ASSET_COLORS["Other Assets"] },
+        { id: "Cash & Savings", grossValue: data.liquidAssets, netValue: data.liquidAssets, zakatablePercent: 1, color: ASSET_COLORS["Cash & Savings"] },
+        { id: "Investments", grossValue: data.investments, netValue: data.investments, zakatablePercent: 1, color: ASSET_COLORS["Investments"] },
+        { id: "Retirement", grossValue: data.retirement, netValue: data.retirement, zakatablePercent: 1, color: ASSET_COLORS["Retirement"] },
+        { id: "Real Estate", grossValue: data.realEstate, netValue: data.realEstate, zakatablePercent: 1, color: ASSET_COLORS["Real Estate"] },
+        { id: "Business", grossValue: data.business, netValue: data.business, zakatablePercent: 1, color: ASSET_COLORS["Business"] },
+        { id: "Other Assets", grossValue: data.otherAssets, netValue: data.otherAssets, zakatablePercent: 1, color: ASSET_COLORS["Other Assets"] },
       ];
 
-    // Filter zero assets
-    const activeAssets = assets.filter((a) => a.value > 0);
-    const totalZakatable = activeAssets.reduce((sum, a) => sum + a.value, 0);
+    // Filter active assets
+    const activeAssets = assets.filter((a) => a.grossValue > 1);
 
-    if (totalZakatable === 0) return { formattedData: { nodes: [], links: [] }, totalLiabilities: 0, netZakatableWealth: 0 };
+    // Calculate global stats
+    const totalAssetsVal = activeAssets.reduce((sum, a) => sum + a.grossValue, 0);
+    const totalExemptVal = activeAssets.reduce((sum, a) => sum + (a.grossValue - a.netValue), 0);
+    const totalNetVal = activeAssets.reduce((sum, a) => sum + a.netValue, 0);
+
+    // If no data, return empty
+    if (totalAssetsVal === 0) return {
+      formattedData: { nodes: [], links: [] },
+      totalLiabilities: 0,
+      netZakatableWealth: 0,
+      hasExemptions: false,
+      totalExempt: 0,
+      totalAssets: 0
+    };
 
     const liabilities = enhancedData?.totalLiabilities ?? data.totalLiabilities;
     const netWealth = enhancedData?.netZakatableWealth ?? data.netZakatableWealth;
     const zakatDue = enhancedData?.zakatDue ?? data.zakatDue;
+    const hasExemptionRules = totalExemptVal > 1;
 
-    // 2. Define Nodes - Simple 2-column: Assets → Zakat
-    const nodes: any[] = [
-      // Zakat node FIRST for top positioning
-      { id: getSafeId("Zakat Due"), displayName: "Zakat Due", nodeColor: "#15803d", sortOrder: 0 },
-      // Asset nodes
-      ...activeAssets.map((a, i) => ({
+    // --- NODE DEFINITIONS ---
+    const nodes: any[] = [];
+
+    // 1. Source Nodes (Left Column) - Individual Assets
+    activeAssets.forEach((a) => {
+      nodes.push({
         id: getSafeId(a.id),
         displayName: a.id,
         nodeColor: a.color,
-        grossValue: (a as any).grossValue,
-        zakatablePercent: (a as any).zakatablePercent,
-        sortOrder: i + 1
-      })),
-    ];
+        isSource: true
+      });
+    });
 
-    // 3. Define Links - Direct flows from each asset to Zakat
+    // 2. Target Nodes (Right Column)
+    // - Zakat Due (Top priority)
+    // - Retained Wealth (Where the 97.5% goes)
+    // - Exempt (Where the non-zakatable portion goes)
+
+    nodes.push({
+      id: "Zakat_Due",
+      displayName: "Zakat Due",
+      nodeColor: "#16a34a", // Green-600
+      isZakat: true
+    });
+
+    nodes.push({
+      id: "Retained_Wealth",
+      displayName: "Retained Wealth",
+      nodeColor: isDark ? "#334155" : "#cbd5e1", // Slate-700 / Slate-300
+      isRetained: true
+    });
+
+    if (hasExemptionRules) {
+      nodes.push({
+        id: "Exempt",
+        displayName: "Not Zakatable",
+        nodeColor: "#94a3b8", // Slate-400
+        isExempt: true
+      });
+    }
+
+    // --- LINK DEFINITIONS ---
+    // Strict flow conservation: Every dollar in Source must go to a Target
     const links: any[] = [];
 
-    // Calculate each asset's contribution to Zakat (proportional to their share of net wealth)
-    const zakatRate = 0.025; // 2.5%
-
     activeAssets.forEach((asset) => {
-      // Each asset contributes proportionally
-      const assetShare = asset.value / totalZakatable;
-      const assetZakatContribution = netWealth * zakatRate * assetShare;
+      // 1. Calculate Splits
+      const exemptAmount = asset.grossValue - asset.netValue;
 
-      if (assetZakatContribution > 0.01) {
+      // Of the Net Value, 2.5% is Zakat, 97.5% is Retained
+      // Note: We use the global zakat rate logic to be consistent with calculator
+      // Zakat Contribution = (Asset Net / Total Net) * Zakat Due
+      // This handles cases where Zakat might be capped or adjusted globally, though usually it's strict 2.5%
+      const zakatContribution = totalNetVal > 0 ? (asset.netValue / totalNetVal) * zakatDue : 0;
+      const retainedAmount = asset.netValue - zakatContribution;
+
+      // 2. Create Links
+
+      // Link -> Zakat Due
+      if (zakatContribution > 0.01) {
         links.push({
           source: getSafeId(asset.id),
-          target: getSafeId("Zakat Due"),
-          value: assetZakatContribution,
+          target: "Zakat_Due",
+          value: zakatContribution,
           startColor: asset.color,
-          endColor: "#15803d",
-          assetName: asset.id
+          endColor: "#16a34a",
+          assetName: asset.id,
+          type: "zakat"
+        });
+      }
+
+      // Link -> Retained Wealth (Big flow)
+      if (retainedAmount > 0.01) {
+        links.push({
+          source: getSafeId(asset.id),
+          target: "Retained_Wealth",
+          value: retainedAmount,
+          startColor: asset.color,
+          endColor: isDark ? "#334155" : "#cbd5e1",
+          assetName: asset.id,
+          type: "retained"
+        });
+      }
+
+      // Link -> Exempt (if applicable)
+      if (hasExemptionRules && exemptAmount > 0.01) {
+        links.push({
+          source: getSafeId(asset.id),
+          target: "Exempt",
+          value: exemptAmount,
+          startColor: asset.color, // Or use gray startColor: "#94a3b8"
+          endColor: "#94a3b8",
+          assetName: asset.id,
+          type: "exempt"
         });
       }
     });
 
+    // Chart Theme
     const chartTheme = {
       text: {
         fill: isDark ? "#e2e8f0" : "#334155",
@@ -125,7 +203,10 @@ export function ZakatSankeyChart({
     return {
       formattedData: { nodes, links, chartTheme },
       totalLiabilities: liabilities,
-      netZakatableWealth: netWealth
+      netZakatableWealth: netWealth,
+      hasExemptions: hasExemptionRules,
+      totalExempt: totalExemptVal,
+      totalAssets: totalAssetsVal
     };
   }, [data, enhancedData, isDark]);
 
@@ -133,103 +214,135 @@ export function ZakatSankeyChart({
     return <div className="h-48 flex items-center justify-center text-muted-foreground">No assets to display</div>;
   }
 
+  // Define sort order function
+  // We want: Zakat (Top Right), Retained (Middle Right), Exempt (Bottom Right)
+  // Assets (Left) sorted by value
+  const sortNodes = (a: any, b: any) => {
+    // 1. Zakat always first
+    if (a.isZakat) return -1;
+    if (b.isZakat) return 1;
+
+    // 2. Exempt always last
+    if (a.isExempt) return 1;
+    if (b.isExempt) return -1;
+
+    // 3. Retained Middle (implicitly handled if Zakat is top and Exempt is bottom)
+
+    // 4. Sources sort by value (Descending)
+    // Note: Sankey computes node.value as sum of links. 
+    // For source nodes, this equals grossValue.
+    // For target nodes, it equals total flow in.
+    return (b.value || 0) - (a.value || 0);
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Sankey Chart */}
+    <div className="space-y-6">
       <div style={{ height }} className="w-full">
         <ResponsiveSankey
           data={formattedData}
           theme={formattedData.chartTheme}
-          margin={{ top: 40, right: 180, bottom: 40, left: 180 }}
+          margin={{ top: 20, right: 160, bottom: 20, left: 160 }}
           align="justify"
-          sort={(a: any, b: any) => {
-            // Zakat Due always at top (sortOrder = 0)
-            if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
-              return a.sortOrder - b.sortOrder;
-            }
-            return 0;
-          }}
+          // @ts-ignore - Nivo types can be strict about sort function signature
+          sort={sortNodes}
           colors={(node: any) => node.nodeColor || "#999"}
           nodeOpacity={1}
           nodeHoverOthersOpacity={0.35}
-          nodeThickness={24}
-          nodeSpacing={32}
+          nodeThickness={18}
+          nodeSpacing={24}
           nodeBorderWidth={0}
           nodeBorderColor={{ from: 'color', modifiers: [['darker', 0.8]] }}
           linkOpacity={isDark ? 0.6 : 0.4}
           linkBlendMode="normal"
           linkHoverOthersOpacity={0.1}
-          linkContract={4}
+          linkContract={2}
           enableLinkGradient={true}
           labelPosition="outside"
           labelOrientation="horizontal"
-          labelPadding={24}
+          labelPadding={16}
           labelTextColor={{ from: 'theme', theme: 'text.fill' }}
-          nodeTooltip={({ node }: any) => {
-            const isZakat = node.id === getSafeId("Zakat Due");
-            const displayId = node.displayName || node.id;
-            const isRuleApplied = node.zakatablePercent !== undefined && node.zakatablePercent < 1;
 
-            return (
-              <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-xl border border-border text-xs z-50 min-w-[180px]">
-                <div className="font-bold mb-1 text-sm border-b border-border/50 pb-1">{displayId}</div>
-                <div className="space-y-1 mt-1.5">
-                  {!isZakat && node.grossValue && (
-                    <div className="flex justify-between gap-4">
-                      <span className="text-muted-foreground">Gross Value:</span>
-                      <span className="font-mono">{formatCurrency(node.grossValue, currency)}</span>
-                    </div>
-                  )}
-                  {isRuleApplied && (
-                    <div className="flex justify-between gap-4 text-tertiary font-medium bg-tertiary/10 px-1.5 py-0.5 rounded">
-                      <span>Zakatable Rule:</span>
-                      <span>{formatPercent(node.zakatablePercent)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between gap-4 pt-1 border-t border-border/50">
-                    <span className="font-bold">{isZakat ? "2.5% Zakat:" : "Zakatable:"}</span>
-                    <span className="font-mono font-bold text-primary">{formatCurrency(node.value, currency)}</span>
-                  </div>
-                </div>
+          // --- TOOLTIPS ---
+          nodeTooltip={({ node }: any) => (
+            <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-xl border border-border text-xs z-50 min-w-[160px]">
+              <div className="font-bold mb-1 border-b border-border/50 pb-1">{node.displayName || node.id}</div>
+              <div className="font-mono font-bold text-primary">
+                {formatCurrency(node.value, currency)}
               </div>
-            )
-          }}
+              {node.isZakat && <div className="text-[10px] text-muted-foreground mt-1">Total Zakat Due</div>}
+              {node.isRetained && <div className="text-[10px] text-muted-foreground mt-1">Wealth retained after Zakat</div>}
+              {node.isExempt && <div className="text-[10px] text-muted-foreground mt-1">Assets exempt from Zakat rules</div>}
+              {node.isSource && <div className="text-[10px] text-muted-foreground mt-1">Gross Asset Value</div>}
+            </div>
+          )}
+
           linkTooltip={({ link }: any) => (
             <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-xl border border-border text-xs z-50 min-w-[180px]">
               <div className="text-muted-foreground mb-1">
-                {link.assetName} contribution
+                {link.assetName} → {link.target.displayName || link.target.id}
               </div>
               <div className="font-mono font-bold text-base text-primary">
                 {formatCurrency(link.value, currency)}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-1">
-                2.5% of proportional share
+              <div className="text-[10px] text-muted-foreground mt-1 italic">
+                {link.type === 'zakat' && "2.5% Contribution"}
+                {link.type === 'retained' && "Retained Wealth (97.5%)"}
+                {link.type === 'exempt' && "Exempt Amount"}
               </div>
             </div>
           )}
-          label={(node) => `${node.displayName || node.id}\n${formatCompactCurrency(node.value, currency)}`}
+
+          // Custom Label: hide label for Retained Wealth to reduce clutter? 
+          // Or user might want to see it. Let's show all for now but keep them compact.
+          label={(node) => {
+            // For Retained Wealth, maybe simplify label
+            if (node.id === "Retained_Wealth") return `Retained\n${formatCompactCurrency(node.value, currency)}`;
+            return `${node.displayName || node.id}\n${formatCompactCurrency(node.value, currency)}`;
+          }}
         />
       </div>
 
-      {/* Liabilities Badge - Shows deductions as summary */}
-      {totalLiabilities > 0 && (
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/30 rounded-lg py-2 px-4 mx-auto max-w-fit">
-          <ArrowDown className="w-4 h-4 text-destructive" weight="bold" />
-          <span>
-            <span className="font-medium text-destructive">{formatCompactCurrency(totalLiabilities, currency)}</span>
-            {" "}in liabilities deducted
-          </span>
-          <span className="text-muted-foreground/50">→</span>
-          <span>
-            Net Wealth: <span className="font-medium text-foreground">{formatCompactCurrency(netZakatableWealth, currency)}</span>
-          </span>
+      {/* Summary Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        {/* Total Assets */}
+        <div className="bg-muted/30 rounded-xl p-3 flex flex-col items-center justify-center">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Total Assets</span>
+          <span className="text-lg font-bold font-mono">{formatCompactCurrency(totalAssets, currency)}</span>
         </div>
-      )}
+
+        {/* Deductions (Liabilities + Exempt) */}
+        <div className="bg-muted/30 rounded-xl p-3 flex flex-col items-center justify-center relative overflow-hidden group">
+          <div className="absolute inset-0 bg-destructive/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
+            <ArrowDown className="w-3 h-3" /> Deductions
+          </span>
+          <div className="flex gap-2 items-baseline">
+            {totalLiabilities > 0 && (
+              <span className="text-sm font-medium text-destructive" title="Liabilities">
+                -{formatCompactCurrency(totalLiabilities, currency)} (Liab)
+              </span>
+            )}
+            {totalExempt > 0 && (
+              <span className="text-sm font-medium text-muted-foreground" title="Exemptions">
+                -{formatCompactCurrency(totalExempt, currency)} (Exempt)
+              </span>
+            )}
+            {totalLiabilities === 0 && totalExempt === 0 && <span className="text-sm text-muted-foreground">-</span>}
+          </div>
+        </div>
+
+        {/* Net Wealth */}
+        <div className="bg-primary/5 rounded-xl p-3 flex flex-col items-center justify-center border border-primary/10">
+          <span className="text-xs uppercase tracking-wider text-primary/80 font-semibold flex items-center gap-1">
+            <Wallet className="w-3 h-3" /> Net Wealth
+          </span>
+          <span className="text-lg font-bold font-mono text-primary">{formatCompactCurrency(netZakatableWealth, currency)}</span>
+        </div>
+      </div>
     </div>
   );
 }
 
-// Mock export for testing
 export function ZakatSankeyMock() {
   return null;
 }
