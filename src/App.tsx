@@ -6,7 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
+import { VaultProvider } from "@/context/VaultContext";
 import { ZakatPersistenceProvider } from "@/context/ZakatPersistenceContext";
+import { VaultGuard } from "@/components/vault";
+import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 
 import Auth from "./pages/Auth";
@@ -35,39 +38,72 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ZakatPersistenceProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
+          <VaultProvider>
+            <ZakatPersistenceProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <ScrollToTop />
+                  <Routes>
+                    {/* Calculator - Vault optional (frictionless first experience) */}
+                    <Route path="/" element={
+                      <VaultGuard optional>
+                        <Index />
+                      </VaultGuard>
+                    } />
 
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/calculations" element={<SavedCalculations />} />
-                  <Route path="/methodology" element={<Methodology />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/invite/:code" element={<Invite />} />
-                  <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
-                  <Route path="/extraction-test" element={<ExtractionTest />} />
-                  <Route path="/assets" element={<Assets />} />
-                  <Route path="/assets/add" element={<AddAccount />} />
-                  <Route path="/assets/:accountId" element={<AccountDetail />} />
-                  <Route path="/donations" element={<Donations />} />
-                  <Route path="/logout" element={<LogoutSuccess />} />
-                  <Route path="/dev" element={<DevTools />} />
-                  <Route path="/sankey-test" element={<SankeyTest />} />
-                  <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
-                  <Route path="/extraction-test" element={<ExtractionTest />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </ZakatPersistenceProvider>
+                    <Route path="/auth" element={<Auth />} />
+
+                    {/* Protected data routes - Vault required */}
+                    <Route path="/calculations" element={
+                      <VaultGuard>
+                        <SavedCalculations />
+                      </VaultGuard>
+                    } />
+                    <Route path="/assets" element={
+                      <VaultGuard>
+                        <Assets />
+                      </VaultGuard>
+                    } />
+                    <Route path="/assets/add" element={
+                      <VaultGuard>
+                        <AddAccount />
+                      </VaultGuard>
+                    } />
+                    <Route path="/assets/:accountId" element={
+                      <VaultGuard>
+                        <AccountDetail />
+                      </VaultGuard>
+                    } />
+                    <Route path="/donations" element={
+                      <VaultGuard>
+                        <Donations />
+                      </VaultGuard>
+                    } />
+
+                    {/* Public routes */}
+                    <Route path="/methodology" element={<Methodology />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/invite/:code" element={<Invite />} />
+                    <Route path="/logout" element={<LogoutSuccess />} />
+
+                    {/* Dev routes */}
+                    <Route path="/dev" element={<DevTools />} />
+                    <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
+                    <Route path="/extraction-test" element={<ExtractionTest />} />
+                    <Route path="/sankey-test" element={<SankeyTest />} />
+
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </ZakatPersistenceProvider>
+          </VaultProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
@@ -75,3 +111,4 @@ const App = () => (
 );
 
 export default App;
+

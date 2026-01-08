@@ -28,6 +28,7 @@ import { StepNavigatorDrawer } from "./StepNavigatorDrawer";
 import { UserMenu } from "./UserMenu";
 import { SaveProgressPrompt } from "./SaveProgressPrompt";
 import { PresenceIndicator } from "./PresenceIndicator";
+import { PrivacyShield } from "@/components/vault/PrivacyShield";
 import { List, GearSix, Sun, Moon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
@@ -400,13 +401,16 @@ export function ZakatWizard() {
               )}
 
               {/* Header Actions */}
-              <UserMenu onHome={() => setCurrentStepIndex(0)} />
+              <div className="flex items-center gap-2">
+                <PrivacyShield />
+                <UserMenu onHome={() => setCurrentStepIndex(0)} />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <main className={`max-w-4xl mx-auto px-4 ${isWelcomePage ? 'py-4' : 'py-6 pb-32'}`}>
+      <main className={`${isWelcomePage ? 'w-full' : 'max-w-4xl mx-auto px-4 py-6 pb-32'}`}>
 
         {/* Progress Bar - In Content Flow (User Feedback) */}
         {!isWelcomePage && (

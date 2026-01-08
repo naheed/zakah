@@ -65,7 +65,7 @@ export function ReportHero({
                 </div>
 
                 {/* The "Story" (Equation) (Right) */}
-                <div className="col-span-1 md:col-span-12 lg:col-span-7 bg-muted/30 rounded-2xl p-7 flex flex-col justify-center">
+                <div className="col-span-1 md:col-span-12 lg:col-span-7 bg-surface-container-low rounded-2xl p-7 flex flex-col justify-center">
                     <div className="flex flex-col sm:flex-row items-center justify-between text-center w-full mb-6 sm:mb-2 gap-4 sm:gap-0">
                         {/* Step 1 */}
                         <div className="flex flex-col items-center sm:items-start">

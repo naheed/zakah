@@ -54,7 +54,7 @@ export function ImpactStats({
 
     const Wrapper = motion.div;
     const wrapperClasses = (variant === 'card' || isCommunity)
-        ? "bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 rounded-3xl p-8"
+        ? "bg-tertiary/5 dark:bg-tertiary/10 border border-tertiary/20 dark:border-tertiary/20 rounded-3xl p-8"
         : "";
 
     return (
@@ -65,7 +65,7 @@ export function ImpactStats({
             transition={{ duration: 0.5 }}
         >
             <div className="space-y-1">
-                <h3 className="text-xs font-bold tracking-widest text-amber-700/70 dark:text-amber-500/70 uppercase">
+                <h3 className="text-xs font-bold tracking-widest text-tertiary/70 uppercase">
                     {title}
                 </h3>
             </div>
@@ -74,11 +74,11 @@ export function ImpactStats({
             {!isCommunity && (
                 <div className="flex flex-col items-center">
                     <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-6xl font-black tracking-tight text-amber-900 dark:text-amber-100 font-work-sans">
+                        <span className="text-6xl font-black tracking-tight text-tertiary-foreground dark:text-tertiary">
                             <AnimatedNumber value={totalReferrals} />
                         </span>
                     </div>
-                    <p className="text-sm font-medium text-amber-800/60 dark:text-amber-400">
+                    <p className="text-sm font-medium text-tertiary/60 dark:text-tertiary/80">
                         {totalReferrals === 1 ? 'person' : 'people'} calculated
                     </p>
                 </div>

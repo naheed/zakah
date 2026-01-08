@@ -21,6 +21,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/runtimeClient";
 import { toast } from "sonner";
+import { usePrivacyVault } from "@/hooks/usePrivacyVault";
 import {
   Collapsible,
   CollapsibleContent,
@@ -42,6 +43,7 @@ import { Footer } from "@/components/zakat/Footer";
 import { getPrimaryUrl } from "@/lib/domainConfig";
 import { HawlDatePicker } from "@/components/donations/HawlDatePicker";
 import { CalendarType as HawlCalendarType } from "@/types/donations";
+import { PrivacyShield } from "@/components/vault/PrivacyShield";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -65,12 +67,19 @@ export default function Settings() {
     resetCalculator
   } = useZakatPersistence();
 
+  const { resetVault } = usePrivacyVault();
+
   const handleDeleteAllData = async () => {
     setIsDeleting(true);
     try {
       // 1. Clear Local Data (Always)
       resetCalculator();
       localStorage.removeItem('zakat_private_key'); // Legacy key if any
+      localStorage.removeItem('zakat-guest-history');
+      localStorage.removeItem('zakat-donations');
+
+      // Clear Vault (Keys & Mode)
+      await resetVault();
 
       // 2. If User, clean up cloud data (Optional - maybe user just wants local clear?)
       // The user feedback implies they just want "Delete Data" to work.
@@ -156,13 +165,15 @@ export default function Settings() {
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card border-b border-border">
-          <div className="max-w-2xl mx-auto px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={handleBack}>
-                <ArrowLeft className="h-5 w-5" />
-                <span className="sr-only">Go back</span>
-              </Button>
-              <h1 className="text-lg font-semibold text-foreground">Settings</h1>
+          <div className="container mx-auto px-4 py-3 max-w-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <h1 className="text-xl font-bold">Settings</h1>
+              </div>
+              <PrivacyShield />
             </div>
           </div>
         </div>

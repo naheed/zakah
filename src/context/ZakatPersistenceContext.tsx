@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { ZakatFormData, defaultFormData } from '@/lib/zakatCalculations';
 import { UploadedDocument, generateDocumentId, sanitizeDocumentForStorage } from '@/lib/documentTypes';
-import { encryptSession, decryptSession, isSessionEncrypted, deobfuscateLegacy } from '@/lib/sessionEncryption';
+import { encryptData, decryptData, isVaultEncrypted, shouldUpgradeToVault, reEncryptWithVault } from '@/lib/unifiedEncryption';
+import { isSessionEncrypted, deobfuscateLegacy } from '@/lib/sessionEncryption';
 
 const STORAGE_KEY = 'zakat-calculator-data';
 const HISTORY_STORAGE_KEY = 'zakat-guest-history';
@@ -65,10 +66,10 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
 
                 let parsed: PersistedData | null = null;
 
-                // Try to decrypt with session encryption (v2)
-                if (isSessionEncrypted(stored)) {
-                    console.debug('[Persistence] Detected encrypted session (v2)');
-                    parsed = await decryptSession<PersistedData>(stored);
+                // Try to decrypt with unified encryption (handles both vault and session)
+                if (isVaultEncrypted(stored) || isSessionEncrypted(stored)) {
+                    console.debug('[Persistence] Detected encrypted session');
+                    parsed = await decryptData<PersistedData>(stored);
                 }
 
                 // If decryption failed or data is legacy format, try legacy decode
@@ -124,7 +125,7 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
 
             try {
                 // console.debug('[Persistence] Saving data. StepIndex:', stepIndex, 'ReportReady:', reportReady);
-                const encrypted = await encryptSession(data);
+                const encrypted = await encryptData(data);
                 localStorage.setItem(STORAGE_KEY, encrypted);
             } catch (e) {
                 console.error('Failed to save data:', e);
@@ -198,7 +199,7 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
             };
 
             // 3. Encrypt payload
-            const encryptedPayload = await encryptSession(payload);
+            const encryptedPayload = await encryptData(payload);
 
             // 4. Load history
             const historyRaw = localStorage.getItem(HISTORY_STORAGE_KEY);
@@ -214,7 +215,7 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
             // 5. Update or Append
             const decryptedHistoryPromises = history.map(async (item) => {
                 try {
-                    return await decryptSession<any>(item);
+                    return await decryptData<any>(item);
                 } catch { return null; }
             });
 
@@ -231,7 +232,7 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
             }
 
             // 6. Re-encrypt all
-            const reEncryptedHistoryPromises = decryptedHistory.map(item => encryptSession(item));
+            const reEncryptedHistoryPromises = decryptedHistory.map(item => encryptData(item));
             const reEncryptedHistory = await Promise.all(reEncryptedHistoryPromises);
 
             localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(reEncryptedHistory));

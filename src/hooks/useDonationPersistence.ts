@@ -10,7 +10,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { encryptSession, decryptSession } from '@/lib/sessionEncryption';
+import { usePrivacyVault } from '@/hooks/usePrivacyVault';
+import { encryptData, decryptData, isVaultEncrypted } from '@/lib/unifiedEncryption';
+import { isSessionEncrypted } from '@/lib/sessionEncryption';
 import { Donation, ZakatYear, HawlSettings, DonationSummary, CalendarType } from '@/types/donations';
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { v4 as uuidv4 } from 'uuid';
@@ -66,6 +68,7 @@ function generateLocalId(): string {
 
 export function useDonationPersistence(): UseDonationPersistenceReturn {
     const { user } = useAuth();
+    const { persistenceMode } = usePrivacyVault();
     const [donations, setDonations] = useState<Donation[]>([]);
     const [hawlSettings, setHawlSettingsState] = useState<HawlSettings | null>(null);
     const [currentZakatYear, setCurrentZakatYear] = useState<ZakatYear | null>(null);
@@ -82,7 +85,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
             // 1. Load Hawl Settings
             const { data: hawlData, error: hawlError } = await supabase
-                .from('hawl_settings' as any)
+                .from('hawl_settings')
                 .select('*')
                 .eq('user_id', userId)
                 .single();
@@ -93,7 +96,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
             // 2. Load Zakat Years
             const { data: yearsData, error: yearsError } = await supabase
-                .from('zakat_years' as any)
+                .from('zakat_years')
                 .select('*')
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false });
@@ -102,7 +105,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
             // 3. Load Donations
             const { data: donationsData, error: donationsError } = await supabase
-                .from('donations' as any)
+                .from('donations')
                 .select('*')
                 .eq('user_id', userId)
                 .order('donation_date', { ascending: false });
@@ -126,7 +129,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             const localRaw = localStorage.getItem(DONATIONS_STORAGE_KEY);
             if (localRaw) {
                 try {
-                    const localData = await decryptSession<LocalDonationData>(localRaw);
+                    const localData = await decryptData<LocalDonationData>(localRaw);
                     if (localData && (localData.donations.length > 0 || localData.hawlSettings)) {
                         console.log('[DonationPersistence] Migrating local data to cloud...');
 
@@ -189,7 +192,8 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             const encryptedData = localStorage.getItem(DONATIONS_STORAGE_KEY);
 
             if (encryptedData) {
-                const data = await decryptSession<LocalDonationData>(encryptedData);
+                // Use unified decryption (handles both vault and session encrypted data)
+                const data = await decryptData<LocalDonationData>(encryptedData);
 
                 if (data) {
                     setDonations(data.donations || []);
@@ -212,7 +216,8 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
         setLoading(true);
 
         try {
-            if (user) {
+            // Respect persistence mode: if local, stay local even if logged in
+            if (user && persistenceMode !== 'local') {
                 await loadFromSupabase();
             } else {
                 await loadFromLocalStorage();
@@ -222,7 +227,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
         } finally {
             setLoading(false);
         }
-    }, [user, loadFromSupabase, loadFromLocalStorage]);
+    }, [user, persistenceMode, loadFromSupabase, loadFromLocalStorage]);
 
     // Load data on mount and when user changes
     useEffect(() => {
@@ -245,7 +250,8 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
                 lastUpdated: new Date().toISOString(),
             };
 
-            const encrypted = await encryptSession(data);
+            // Use unified encryption (vault when available, session fallback)
+            const encrypted = await encryptData(data);
             localStorage.setItem(DONATIONS_STORAGE_KEY, encrypted);
         } catch (error) {
             console.error('[DonationPersistence] Error saving to localStorage:', error);

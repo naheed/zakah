@@ -39,6 +39,7 @@ import { formatCurrency, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_
 import { useReferral } from "@/hooks/useReferral";
 import { MiniReportWidget } from "../dashboard/MiniReportWidget";
 import { ZakatDashboard } from "@/components/donations/ZakatDashboard";
+import { PrivacyShield } from "@/components/vault/PrivacyShield";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -172,11 +173,12 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
   // Also show if loading history to prevent flash of landing page
   if (user || hasLocalSession || reportReady || latestCalculation || savedLoading) {
     return (
-      <div className="min-h-[85vh] flex flex-col font-work-sans">
+      <div className="min-h-[85vh] flex flex-col">
         {/* Header - Minimal */}
         <div className="flex items-center justify-between px-6 py-4">
           <Logo size="md" />
           <div className="flex items-center gap-2">
+            <PrivacyShield />
             {!user && (
               <Link to="/settings">
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
@@ -192,8 +194,8 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
         <div className="flex-1 px-4 md:px-6 py-8 md:py-12 overflow-y-auto">
           <div className="w-full max-w-3xl mx-auto space-y-12">
 
-            {/* 1. Hero Section: Greeting & Impact */}
-            <div className="space-y-8 text-center">
+            {/* 1. Hero Section: Greeting */}
+            <div className="space-y-4 text-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -202,17 +204,15 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground mb-4">
                   Welcome back{firstName ? `, ${firstName}` : ''}
                 </h1>
-
-                {/* Impact Stats moved below Report Card */}
               </motion.div>
             </div>
 
-            {/* 2. Primary Action Area */}
+            {/* 2. Primary Action Area (Calculations) */}
             <div className="space-y-6">
 
               {/* DASHBOARD LOGIC */}
 
-              {/* 1. Continue In Progress (Priority: High) */}
+              {/* A. Continue In Progress (Priority: High) */}
               {hasLocalSession && !reportReady && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -258,7 +258,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 </motion.div>
               )}
 
-              {/* 2. Latest Report Hero (if NO active session or if Report Ready) */}
+              {/* B. Latest Report Hero (if NO active session or if Report Ready) */}
               {((latestCalculation && !savedLoading) || reportReady || savedLoading) && (!hasLocalSession || reportReady) && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -302,71 +302,16 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                       </CardContent>
                     </Card>
                   )}
-
-                  {/* Start New Button below Report */}
-                  <div className="flex justify-center pt-6 pb-8">
-                    <Button variant="outline" onClick={() => { startFresh(); onNext(); }} className="gap-2 text-muted-foreground hover:text-foreground">
-                      <Calculator className="w-4 h-4" />
-                      Start a new calculation
-                    </Button>
-                  </div>
-
-                  {/* Impact Stats - Community or Personal (Moved Here) */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex flex-col items-center gap-8 border-t border-border/50 pt-8"
-                  >
-                    {/* Zakat Dashboard - Show when user has a calculated amount */}
-                    {displayZakatDue > 0 && (
-                      <div className="w-full max-w-md">
-                        <ZakatDashboard
-                          calculatedAmount={displayZakatDue}
-                          donatedAmount={summary?.totalDonated || 0}
-                          hawlStart={summary?.zakatYear.hawl_start}
-                          hawlEnd={summary?.zakatYear.hawl_end}
-                          daysRemaining={summary?.daysRemaining || 0}
-                          donationCount={summary?.donations.length || 0}
-                        />
-                      </div>
-                    )}
-                    {(metrics || metricsLoading || userStats) ? (
-                      <>
-                        <ImpactStats
-                          variant="flat"
-                          isLoading={metricsLoading && !userStats}
-                          totalReferrals={impactData.referrals}
-                          totalAssetsCalculated={impactData.assets}
-                          totalZakatCalculated={impactData.zakat}
-                          title={impactData.title}
-                          className="scale-90 md:scale-100 origin-top"
-                        />
-                        <div className="w-full max-w-md">
-                          <ReferralWidget
-                            variant="full"
-                            title={showUserImpact ? undefined : "Join the movement"}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      // Skeleton loader to prevent layout shift ("glitchy load")
-                      <div className="w-full max-w-md space-y-4">
-                        <Skeleton className="h-24 w-full rounded-xl" />
-                        <Skeleton className="h-32 w-full rounded-xl" />
-                      </div>
-                    )}
-                  </motion.div>
                 </motion.div>
               )}
 
-              {/* 3. Empty State (Start New) - Only if NOTHING else matches */}
+              {/* C. Empty State (Start New) - Only if NOTHING else matches */}
               {(!latestCalculation || !user) && !hasLocalSession && !reportReady && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="flex justify-center"
+                  className="flex justify-center py-12"
                 >
                   <Button
                     onClick={onNext}
@@ -380,12 +325,63 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                   </Button>
                 </motion.div>
               )}
-
             </div>
 
-            {/* 3. Auth Prompt (Anonymous Only) */}
+            {/* 3. Donations Dashboard (Full Width) */}
+            {displayZakatDue > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="w-full"
+              >
+                <ZakatDashboard
+                  calculatedAmount={displayZakatDue}
+                  donatedAmount={summary?.totalDonated || 0}
+                  hawlStart={summary?.zakatYear.hawl_start}
+                  hawlEnd={summary?.zakatYear.hawl_end}
+                  daysRemaining={summary?.daysRemaining || 0}
+                  donationCount={summary?.donations.length || 0}
+                />
+              </motion.div>
+            )}
+
+            {/* 4. Impact Stats (Full Width) */}
+            {(metrics || metricsLoading || userStats) && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="w-full pt-4"
+              >
+                <ImpactStats
+                  variant="flat"
+                  isLoading={metricsLoading && !userStats}
+                  totalReferrals={impactData.referrals}
+                  totalAssetsCalculated={impactData.assets}
+                  totalZakatCalculated={impactData.zakat}
+                  title={impactData.title}
+                  className="w-full origin-top"
+                />
+              </motion.div>
+            )}
+
+            {/* 5. Referral Widget (Full Width) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="w-full"
+            >
+              <ReferralWidget
+                variant="full"
+                title={showUserImpact ? undefined : "Join the movement"}
+              />
+            </motion.div>
+
+            {/* 6. Auth Prompt (Anonymous Only) */}
             {!user && (
-              <div className="max-w-md mx-auto">
+              <div className="max-w-md mx-auto pt-8">
                 <Card className="border-dashed border-2 bg-muted/30">
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                     <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm">
@@ -495,9 +491,9 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
 
   // First-time user experience - optimized landing page
   return (
-    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
+    <div className="min-h-[90vh] flex flex-col bg-background selection:bg-primary/20">
       {/* Hero Section */}
-      <section className="flex-1 flex items-center justify-center px-4 py-8 md:py-12 relative overflow-hidden">
+      <section className="flex-1 flex flex-col justify-center px-4 py-12 md:py-20 relative overflow-hidden">
         {/* Background blobs */}
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-3xl pointer-events-none" />
