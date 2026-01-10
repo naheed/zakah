@@ -70,8 +70,9 @@ export default function Settings() {
   const { resetVault } = usePrivacyVault();
 
   const deleteUserAssets = async (userId: string) => {
-    // Manually cascade delete asset data to ensure everything is gone
-    // 1. Get portfolios to find accounts
+    // Manually cascade delete asset data
+    // Note: We use try/catch to ensure one failure doesn't block the rest
+    // 1. Get portfolios
     const { data: portfolios } = await supabase.from('portfolios').select('id').eq('user_id', userId);
     const portfolioIds = portfolios?.map(p => p.id) || [];
 
@@ -87,15 +88,20 @@ export default function Settings() {
 
         if (snapshotIds.length > 0) {
           // 4. Delete line items
-          await supabase.from('asset_line_items').delete().in('snapshot_id', snapshotIds);
+          const { error: liError } = await supabase.from('asset_line_items').delete().in('snapshot_id', snapshotIds);
+          if (liError) console.error("Error deleting line items:", liError);
+
           // 5. Delete snapshots
-          await supabase.from('asset_snapshots').delete().in('id', snapshotIds);
+          const { error: sError } = await supabase.from('asset_snapshots').delete().in('id', snapshotIds);
+          if (sError) console.error("Error deleting snapshots:", sError);
         }
         // 6. Delete accounts
-        await supabase.from('asset_accounts').delete().in('id', accountIds);
+        const { error: aError } = await supabase.from('asset_accounts').delete().in('id', accountIds);
+        if (aError) console.error("Error deleting accounts:", aError);
       }
       // 7. Delete portfolios
-      await supabase.from('portfolios').delete().in('id', portfolioIds);
+      const { error: pError } = await supabase.from('portfolios').delete().in('id', portfolioIds);
+      if (pError) console.error("Error deleting portfolios:", pError);
     }
   };
 
