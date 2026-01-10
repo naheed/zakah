@@ -21,14 +21,15 @@ import type { PersistenceMode } from '@/lib/CryptoService';
 interface PersistenceChoiceModalProps {
     open: boolean;
     onSelect: (mode: PersistenceMode) => void;
+    onDismiss?: () => void;
 }
 
-export function PersistenceChoiceModal({ open, onSelect }: PersistenceChoiceModalProps) {
+export function PersistenceChoiceModal({ open, onSelect, onDismiss }: PersistenceChoiceModalProps) {
     const [selected, setSelected] = useState<PersistenceMode>(null);
 
     return (
-        <Dialog open={open}>
-            <DialogContent className="sm:max-w-md" hideCloseButton>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onDismiss?.()}>
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <Shield weight="duotone" className="w-6 h-6 text-primary" />

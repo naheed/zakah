@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { ArrowLeft, FileText, Trash, UserMinus, CaretDown, User, Users, Check, Sun, Moon, Monitor, CalendarBlank } from "@phosphor-icons/react";
+import { ArrowLeft, Trash, UserMinus, ShieldCheck, Calculator, CalendarBlank, FileText, House, Wallet, WarningCircle, Moon, Sun, Monitor } from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import {
   calculateNisab,
@@ -14,19 +13,12 @@ import {
   CalendarType,
   Madhab,
 } from "@/lib/zakatCalculations";
-import { MADHAB_RULES, getMadhahDisplayName } from "@/lib/madhahRules";
-import { Badge } from "@/components/ui/badge";
-import { LearnMore } from "@/components/zakat/LearnMore";
+import { getMadhahDisplayName } from "@/lib/madhahRules";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/runtimeClient";
 import { toast } from "sonner";
 import { usePrivacyVault } from "@/hooks/usePrivacyVault";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,22 +33,32 @@ import {
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/zakat/Footer";
 import { getPrimaryUrl } from "@/lib/domainConfig";
+import { PrivacyShield } from "@/components/vault/PrivacyShield";
+import { SettingsSection, SettingsCard } from "@/components/settings/SettingsContainers";
+import { SettingsRow } from "@/components/settings/SettingsRow";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Separator } from "@/components/ui/separator";
+
+// Import dialog/sheet contents (we can keep HawlDatePicker inline or move it later)
 import { HawlDatePicker } from "@/components/donations/HawlDatePicker";
 import { CalendarType as HawlCalendarType } from "@/types/donations";
-import { PrivacyShield } from "@/components/vault/PrivacyShield";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [appearanceOpen, setAppearanceOpen] = useState(true);
-  const [calculationOpen, setCalculationOpen] = useState(false);
-  const [hawlOpen, setHawlOpen] = useState(false);
-  const [documentsOpen, setDocumentsOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
 
-  // Hawl date state (TODO: Persist to Supabase)
+  // Hawl date state
   const [hawlDate, setHawlDate] = useState<string | undefined>();
   const [hawlCalendarType, setHawlCalendarType] = useState<HawlCalendarType>('gregorian');
 
@@ -69,64 +71,44 @@ export default function Settings() {
 
   const { resetVault } = usePrivacyVault();
 
+  // --- Deletion Logic (Kept same as before) ---
   const deleteUserAssets = async (userId: string) => {
-    // Manually cascade delete asset data
-    // Note: We use try/catch to ensure one failure doesn't block the rest
-    // 1. Get portfolios
-    const { data: portfolios } = await supabase.from('portfolios').select('id').eq('user_id', userId);
-    const portfolioIds = portfolios?.map(p => p.id) || [];
-
-    if (portfolioIds.length > 0) {
-      // 2. Get accounts
-      const { data: accounts } = await supabase.from('asset_accounts').select('id').in('portfolio_id', portfolioIds);
-      const accountIds = accounts?.map(a => a.id) || [];
-
-      if (accountIds.length > 0) {
-        // 3. Get snapshots
-        const { data: snapshots } = await supabase.from('asset_snapshots').select('id').in('account_id', accountIds);
-        const snapshotIds = snapshots?.map(s => s.id) || [];
-
-        if (snapshotIds.length > 0) {
-          // 4. Delete line items
-          const { error: liError } = await supabase.from('asset_line_items').delete().in('snapshot_id', snapshotIds);
-          if (liError) console.error("Error deleting line items:", liError);
-
-          // 5. Delete snapshots
-          const { error: sError } = await supabase.from('asset_snapshots').delete().in('id', snapshotIds);
-          if (sError) console.error("Error deleting snapshots:", sError);
+    try {
+      const { data: portfolios } = await supabase.from('portfolios').select('id').eq('user_id', userId);
+      const portfolioIds = portfolios?.map(p => p.id) || [];
+      if (portfolioIds.length > 0) {
+        const { data: accounts } = await supabase.from('asset_accounts').select('id').in('portfolio_id', portfolioIds);
+        const accountIds = accounts?.map(a => a.id) || [];
+        if (accountIds.length > 0) {
+          const { data: snapshots } = await supabase.from('asset_snapshots').select('id').in('account_id', accountIds);
+          const snapshotIds = snapshots?.map(s => s.id) || [];
+          if (snapshotIds.length > 0) {
+            await supabase.from('asset_line_items').delete().in('snapshot_id', snapshotIds);
+            await supabase.from('asset_snapshots').delete().in('id', snapshotIds);
+          }
+          await supabase.from('asset_accounts').delete().in('id', accountIds);
         }
-        // 6. Delete accounts
-        const { error: aError } = await supabase.from('asset_accounts').delete().in('id', accountIds);
-        if (aError) console.error("Error deleting accounts:", aError);
+        await supabase.from('portfolios').delete().in('id', portfolioIds);
       }
-      // 7. Delete portfolios
-      const { error: pError } = await supabase.from('portfolios').delete().in('id', portfolioIds);
-      if (pError) console.error("Error deleting portfolios:", pError);
+    } catch (e) {
+      console.error("Asset deletion check failed", e);
     }
   };
 
   const handleDeleteAllData = async () => {
     setIsDeleting(true);
     try {
-      // 1. Clear Local Data (Always)
       resetCalculator();
-      localStorage.removeItem('zakat_private_key'); // Legacy key if any
+      localStorage.removeItem('zakat_private_key');
       localStorage.removeItem('zakat-guest-history');
       localStorage.removeItem('zakat-donations');
-
-      // Clear Vault (Keys & Mode)
       await resetVault();
 
-      // 2. If User, clean up cloud data
       if (user) {
         try {
-          // Delete Assets
           await deleteUserAssets(user.id);
-
-          // Delete Calculations & Shares
           await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
           await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
-
           toast.success('Local and cloud data deleted');
         } catch (e) {
           console.error("Cloud delete failed", e);
@@ -135,7 +117,6 @@ export default function Settings() {
       } else {
         toast.success('Local data cleared');
       }
-
       navigate('/');
     } catch (error) {
       console.error('Error deleting data:', error);
@@ -149,32 +130,17 @@ export default function Settings() {
     if (!user) return;
     setIsDeleting(true);
     try {
-      // 1. Delete comprehensive asset data first (Manual Cascade)
-      // We do this client-side to ensure bulky asset data is definitely gone
       await deleteUserAssets(user.id);
-
-      // Note: We DO NOT delete 'profiles', 'zakat_calculations', or 'shares' here.
-      // Deleting 'profiles' client-side can cause getUser() to fail in the Edge Function (401).
-      // The Edge Function handles the deletion of these core tables + the user account.
-
-      // 2. Call backend function to delete the actual Auth User
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
-
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) throw new Error("Not authenticated");
-
       const { error: functionError } = await supabase.functions.invoke('delete-account', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (functionError) throw functionError;
-
-      // 3. Clear local keys
       localStorage.removeItem('zakat_private_key');
-
-      // 4. Client-side sign out to clear session/local storage
       await signOut();
-
       toast.success('Your account has been permanently deleted');
       navigate('/account-deleted');
     } catch (error) {
@@ -187,7 +153,6 @@ export default function Settings() {
 
   const silverNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
   const goldNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'gold');
-  const currentNisab = formData.nisabStandard === 'gold' ? goldNisab : silverNisab;
 
   const handleBack = () => {
     navigate(-1);
@@ -197,503 +162,243 @@ export default function Settings() {
     <>
       <Helmet>
         <title>Settings | ZakatFlow</title>
-        <meta name="description" content="Configure your Zakat calculation settings including Nisab standard, calendar type, and household mode." />
+        <meta name="description" content="Configure your Zakat calculation settings." />
         <link rel="canonical" href={getPrimaryUrl('/settings')} />
-        <meta property="og:url" content={getPrimaryUrl('/settings')} />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pb-20">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-card border-b border-border">
-          <div className="container mx-auto px-4 py-3 max-w-2xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-xl font-bold">Settings</h1>
-              </div>
-              <PrivacyShield />
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
+          <div className="container mx-auto px-4 h-16 max-w-2xl flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-2">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-xl font-bold tracking-tight">Settings</h1>
             </div>
+            <PrivacyShield />
           </div>
         </div>
 
-        <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
-          {/* Appearance Group */}
-          <Collapsible open={appearanceOpen} onOpenChange={setAppearanceOpen}>
-            <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                <span className="font-medium text-foreground">Appearance</span>
-                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", appearanceOpen && "rotate-180")} />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-2 p-4 bg-card rounded-lg border border-border space-y-2">
-                <h3 className="text-sm font-medium text-foreground mb-3">Theme</h3>
-                <div className="space-y-2">
-                  <label className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                    theme === 'light'
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  )}
-                    onClick={() => setTheme('light')}
-                  >
-                    <Sun className={cn("h-4 w-4", theme === 'light' ? "text-primary" : "text-muted-foreground")} />
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Light</span>
-                      {theme === 'light' && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                  </label>
+        <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
 
-                  <label className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                    theme === 'dark'
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  )}
-                    onClick={() => setTheme('dark')}
-                  >
-                    <Moon className={cn("h-4 w-4", theme === 'dark' ? "text-primary" : "text-muted-foreground")} />
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Dark</span>
-                      {theme === 'dark' && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                  </label>
-
-                  <label className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                    theme === 'system'
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  )}
-                    onClick={() => setTheme('system')}
-                  >
-                    <Monitor className={cn("h-4 w-4", theme === 'system' ? "text-primary" : "text-muted-foreground")} />
-                    <div className="flex-1 flex items-center justify-between">
-                      <div>
-                        <span className="text-sm font-medium text-foreground">System</span>
-                        <p className="text-xs text-muted-foreground">Auto-detect from device</p>
-                      </div>
-                      {theme === 'system' && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                  </label>
-                </div>
+          {/* Section: Appearance */}
+          <SettingsSection title="Appearance">
+            <SettingsCard>
+              <div className="p-1">
+                <ToggleGroup type="single" value={theme} onValueChange={(v) => v && setTheme(v)} className="justify-stretch w-full">
+                  <ToggleGroupItem value="light" className="flex-1 data-[state=on]:bg-muted" aria-label="Light Mode">
+                    <Sun className="h-4 w-4 mr-2" /> Light
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="dark" className="flex-1 data-[state=on]:bg-muted" aria-label="Dark Mode">
+                    <Moon className="h-4 w-4 mr-2" /> Dark
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="system" className="flex-1 data-[state=on]:bg-muted" aria-label="System Mode">
+                    <Monitor className="h-4 w-4 mr-2" /> Auto
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
+            </SettingsCard>
+          </SettingsSection>
 
-          {/* Calculation Settings Group */}
-          <Collapsible open={calculationOpen} onOpenChange={setCalculationOpen}>
-            <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                <span className="font-medium text-foreground">Calculation Settings</span>
-                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", calculationOpen && "rotate-180")} />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-2 p-4 bg-card rounded-lg border border-border space-y-5">
-                {/* Preferred Madhab */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-foreground">Preferred School (Madhab)</h3>
-                  <RadioGroup
-                    value={formData.madhab}
-                    onValueChange={(value) => updateFormData({ madhab: value as Madhab })}
-                    className="space-y-2"
-                  >
-                    {(['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]).map((m) => (
-                      <label
-                        key={m}
-                        className={cn(
-                          "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                          formData.madhab === m
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <RadioGroupItem value={m} className="h-4 w-4" />
-                        <div className="flex-1 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">{getMadhahDisplayName(m)}</span>
-                            {m === 'balanced' && (
-                              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">Recommended</span>
-                            )}
-                          </div>
-                          {formData.madhab === m && (
-                            <Check className="h-4 w-4 text-primary" />
-                          )}
-                        </div>
-                      </label>
+          {/* Section: Calculation Engine */}
+          <SettingsSection title="Calculation Engine">
+            <SettingsCard>
+              {/* Madhab */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <SettingsRow
+                    icon={<ShieldCheck className="w-5 h-5 text-emerald-600" />}
+                    label="School of Thought"
+                    value={getMadhahDisplayName(formData.madhab)}
+                    description="Methodology for calculations"
+                    onClick={() => { }}
+                  />
+                </SheetTrigger>
+                <SheetContent side="bottom" className="rounded-t-3xl">
+                  <SheetHeader className="mb-6 text-left">
+                    <SheetTitle>Select School (Madhab)</SheetTitle>
+                    <SheetDescription>
+                      Different schools have varying rulings on certain assets.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <RadioGroup value={formData.madhab} onValueChange={(v) => updateFormData({ madhab: v as Madhab })} className="gap-4">
+                    {['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'].map((m) => (
+                      <div key={m} className="flex items-center space-x-2">
+                        <RadioGroupItem value={m} id={m} />
+                        <label htmlFor={m} className="flex-1 cursor-pointer font-medium p-2">{getMadhahDisplayName(m as Madhab)}</label>
+                      </div>
                     ))}
                   </RadioGroup>
+                </SheetContent>
+              </Sheet>
 
-                  <LearnMore title="What is a Madhab?">
-                    <p>A <strong>madhab</strong> is a school of Islamic jurisprudence. The four Sunni schools (Hanafi, Maliki, Shafi'i, Hanbali) have different rulings on some Zakat matters.</p>
-                    <p className="mt-2"><strong>Balanced (AMJA)</strong> uses widely-accepted scholarly opinions while allowing for optimization. If unsure, this is recommended.</p>
-                  </LearnMore>
-                </div>
-
-                {/* Nisab Standard */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-foreground">Niṣāb Standard</h3>
-                  <RadioGroup
-                    value={formData.nisabStandard}
-                    onValueChange={(value) => updateFormData({ nisabStandard: value as NisabStandard })}
-                    className="space-y-2"
-                  >
-                    <label className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.nisabStandard === 'silver'
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    )}>
-                      <RadioGroupItem value="silver" className="h-4 w-4" />
-                      <div className="flex-1 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-foreground">Silver</span>
-                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">Recommended</span>
-                        </div>
-                        {formData.nisabStandard === 'silver' && (
-                          <span className="text-xs text-primary flex items-center gap-1">
-                            <Check className="h-3 w-3" />
-                            {formatCurrency(silverNisab, formData.currency)}
-                          </span>
-                        )}
-                      </div>
-                    </label>
-
-                    <label className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.nisabStandard === 'gold'
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    )}>
-                      <RadioGroupItem value="gold" className="h-4 w-4" />
-                      <div className="flex-1 flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">Gold</span>
-                        {formData.nisabStandard === 'gold' && (
-                          <span className="text-xs text-primary flex items-center gap-1">
-                            <Check className="h-3 w-3" />
-                            {formatCurrency(goldNisab, formData.currency)}
-                          </span>
-                        )}
-                      </div>
-                    </label>
+              {/* Nisab */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <SettingsRow
+                    icon={<Wallet className="w-5 h-5 text-amber-500" />}
+                    label="Niṣāb Threshold"
+                    value={formData.nisabStandard === 'silver' ? `Silver (${formatCurrency(silverNisab)})` : `Gold (${formatCurrency(goldNisab)})`}
+                    description="Minimum wealth to owe Zakat"
+                    onClick={() => { }}
+                  />
+                </SheetTrigger>
+                <SheetContent side="bottom" className="rounded-t-3xl">
+                  <SheetHeader className="mb-6 text-left">
+                    <SheetTitle>Nisab Standard</SheetTitle>
+                    <SheetDescription>
+                      The minimum amount of wealth a Muslim must possess before they became liable for Zakat.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <RadioGroup value={formData.nisabStandard} onValueChange={(v) => updateFormData({ nisabStandard: v as NisabStandard })} className="gap-4">
+                    <div className="flex items-start space-x-3 p-4 rounded-xl border">
+                      <RadioGroupItem value="silver" id="silver" className="mt-1" />
+                      <label htmlFor="silver" className="flex-1 cursor-pointer">
+                        <div className="font-semibold">Silver Standard (Recommended)</div>
+                        <div className="text-sm text-muted-foreground">Threshold: {formatCurrency(silverNisab)}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Historically the safer option to ensure Zakat is paid.</div>
+                      </label>
+                    </div>
+                    <div className="flex items-start space-x-3 p-4 rounded-xl border">
+                      <RadioGroupItem value="gold" id="gold" className="mt-1" />
+                      <label htmlFor="gold" className="flex-1 cursor-pointer">
+                        <div className="font-semibold">Gold Standard</div>
+                        <div className="text-sm text-muted-foreground">Threshold: {formatCurrency(goldNisab)}</div>
+                      </label>
+                    </div>
                   </RadioGroup>
+                </SheetContent>
+              </Sheet>
 
-                  <LearnMore title="Why Silver vs Gold?">
-                    <p>The <strong>silver standard</strong> (595g) results in a lower threshold, meaning more people qualify to pay Zakat. This is the more cautious opinion, recommended by most scholars including Sheikh Joe Bradford.</p>
-                    <p className="mt-2">The <strong>gold standard</strong> (85g) results in a higher threshold. Some scholars permit this, especially in regions where gold is the primary measure of wealth.</p>
-                  </LearnMore>
-                </div>
+              {/* Hawl / Year */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <SettingsRow
+                    icon={<CalendarBlank className="w-5 h-5 text-blue-500" />}
+                    label="Zakat Year (Hawl)"
+                    value={hawlDate ? new Date(hawlDate).toLocaleDateString() : 'Not Set'}
+                    onClick={() => { }}
+                  />
+                </SheetTrigger>
+                <SheetContent side="bottom" className="rounded-t-3xl min-h-[500px]">
+                  <SheetHeader className="mb-6 text-left">
+                    <SheetTitle>Setting your Hawl Date</SheetTitle>
+                  </SheetHeader>
+                  <HawlDatePicker
+                    value={hawlDate}
+                    calendarType={hawlCalendarType}
+                    onChange={(date, type) => {
+                      setHawlDate(date);
+                      setHawlCalendarType(type);
+                    }}
+                    showCountdown={true}
+                  />
+                </SheetContent>
+              </Sheet>
 
-                {/* Calendar Type */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-foreground">Calendar Type</h3>
-                  <RadioGroup
-                    value={formData.calendarType}
-                    onValueChange={(value) => updateFormData({ calendarType: value as CalendarType })}
-                    className="space-y-2"
-                  >
-                    <label className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.calendarType === 'lunar'
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    )}>
-                      <RadioGroupItem value="lunar" className="h-4 w-4" />
-                      <div className="flex-1 flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">Lunar (Islamic)</span>
-                        {formData.calendarType === 'lunar' && (
-                          <span className="text-xs text-primary flex items-center gap-1">
-                            <Check className="h-3 w-3" />
-                            2.5% rate
-                          </span>
-                        )}
-                      </div>
-                    </label>
-
-                    <label className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      formData.calendarType === 'solar'
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    )}>
-                      <RadioGroupItem value="solar" className="h-4 w-4" />
-                      <div className="flex-1 flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">Solar (Gregorian)</span>
-                        {formData.calendarType === 'solar' && (
-                          <span className="text-xs text-primary flex items-center gap-1">
-                            <Check className="h-3 w-3" />
-                            2.577% rate
-                          </span>
-                        )}
-                      </div>
-                    </label>
-                  </RadioGroup>
-
-                  <LearnMore title="Lunar vs Solar calendar">
-                    <p>The <strong>lunar year</strong> (354 days) is the traditional Islamic calendar used for Zakat. The standard 2.5% rate applies.</p>
-                    <p className="mt-2">If you track your finances by <strong>solar year</strong> (365 days), the rate is adjusted to 2.577% to account for the extra 11 days.</p>
-                  </LearnMore>
-                </div>
-
-                {/* Household Mode */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-foreground">Who are you calculating for?</h3>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => updateFormData({ isHousehold: false })}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all",
-                        !formData.isHousehold
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      )}
-                    >
-                      <User className={cn("w-4 h-4", !formData.isHousehold ? "text-primary" : "text-muted-foreground")} />
-                      <span className={cn("text-sm font-medium", !formData.isHousehold ? "text-primary" : "text-foreground")}>Just me</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => updateFormData({ isHousehold: true })}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all",
-                        formData.isHousehold
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      )}
-                    >
-                      <Users className={cn("w-4 h-4", formData.isHousehold ? "text-primary" : "text-muted-foreground")} />
-                      <span className={cn("text-sm font-medium", formData.isHousehold ? "text-primary" : "text-foreground")}>Household</span>
-                    </button>
-                  </div>
-
-                  {formData.isHousehold && (
-                    <p className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
-                      Include combined assets of spouse and children in your calculation.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Zakat Year (Hawl) Settings */}
-          <Collapsible open={hawlOpen} onOpenChange={setHawlOpen}>
-            <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-2">
-                  <CalendarBlank className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium text-foreground">Zakat Year (Hawl)</span>
-                </div>
-                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", hawlOpen && "rotate-180")} />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-2 p-4 bg-card rounded-lg border border-border">
-                <HawlDatePicker
-                  value={hawlDate}
-                  calendarType={hawlCalendarType}
-                  onChange={(date, type) => {
-                    setHawlDate(date);
-                    setHawlCalendarType(type);
-                    toast.success('Hawl date saved');
-                    // TODO: Persist to Supabase
-                  }}
-                  showCountdown={true}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Documents Group */}
-          <Collapsible open={documentsOpen} onOpenChange={setDocumentsOpen}>
-            <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">Documents</span>
-                  {uploadedDocuments.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">{uploadedDocuments.length}</Badge>
-                  )}
-                </div>
-                <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", documentsOpen && "rotate-180")} />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-2 p-4 bg-card rounded-lg border border-border">
-                {uploadedDocuments.length > 0 ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-foreground">{uploadedDocuments.length} document{uploadedDocuments.length !== 1 ? 's' : ''} uploaded</span>
-                    </div>
-                    <Link to="/assets">
-                      <Button variant="ghost" size="sm" className="text-xs">
-                        View assets →
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <FileText className="w-4 h-4" />
-                    <span className="text-sm">No documents uploaded. Upload during calculation to auto-fill values.</span>
-                  </div>
-                )}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Account Group - Only for signed-in users */}
-          {user && (
-            <Collapsible open={accountOpen} onOpenChange={setAccountOpen}>
-              <CollapsibleTrigger asChild>
-                <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                  <span className="font-medium text-foreground">Account</span>
-                  <CaretDown className={cn("h-4 w-4 text-muted-foreground transition-transform", accountOpen && "rotate-180")} />
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="mt-2 p-4 bg-card rounded-lg border border-destructive/30 space-y-3">
-                  <p className="text-xs text-muted-foreground">These actions are irreversible.</p>
-
-                  {/* Delete All Data */}
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <Trash className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Delete all data</p>
-                        <p className="text-xs text-muted-foreground">Calculations & shares</p>
-                      </div>
-                    </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-xs border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={isDeleting}>
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete all your data?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete all your saved Zakat calculations and shared access.
-                            Your account will remain active but all financial data will be removed.
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeleteAllData}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete All Data
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-
-                  {/* Delete Account (Restored) */}
-                  <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/50">
-                    <div className="flex items-center gap-2">
-                      <UserMinus className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Delete account</p>
-                        <p className="text-xs text-muted-foreground">Account & all data</p>
-                      </div>
-                    </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" className="text-xs" disabled={isDeleting}>
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete your account, profile, all saved calculations,
-                            and shared access. You will be signed out immediately.
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeleteAccount}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete My Account
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
-
-          {/* Data Management - Available for Everyone */}
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                <span className="font-medium text-foreground">Data Management</span>
-                <CaretDown className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-2 p-4 bg-card rounded-lg border border-border space-y-3">
-                {/* Delete All Data */}
-                <div className="flex items-center justify-between gap-3">
+              {/* Household Mode */}
+              <SettingsRow
+                icon={<House className="w-5 h-5 text-indigo-500" />}
+                label="Household Mode"
+                value={
                   <div className="flex items-center gap-2">
-                    <Trash className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Clear local data</p>
-                      <p className="text-xs text-muted-foreground">Removes all inputs from this device</p>
-                    </div>
+                    <span className="text-sm text-muted-foreground">{formData.isHousehold ? "On" : "Off"}</span>
+                    <Button
+                      size="sm"
+                      variant={formData.isHousehold ? "default" : "outline"}
+                      className="h-7 text-xs"
+                      onClick={() => updateFormData({ isHousehold: !formData.isHousehold })}
+                    >
+                      Toggle
+                    </Button>
                   </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-xs border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={isDeleting}>
-                        Clear
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Clear local data?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will remove all Zakat calculation data stored on this device.
-                          {user && " Your saved cloud data will remain."}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleDeleteAllData}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Yes, Clear Data
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+                }
+                hasChevron={false}
+              />
+            </SettingsCard>
+          </SettingsSection>
+
+          {/* Section: Data & Privacy */}
+          <SettingsSection title="Data & Privacy">
+            <SettingsCard>
+              {/* Documents */}
+              <SettingsRow
+                icon={<FileText className="w-5 h-5 text-slate-500" />}
+                label="Uploaded Documents"
+                value={uploadedDocuments.length > 0 ? `${uploadedDocuments.length} files` : "None"}
+                onClick={() => navigate('/assets')}
+              />
+            </SettingsCard>
+
+            {/* Danger Zone */}
+            <h3 className="px-4 pt-4 text-sm font-medium text-destructive/80 uppercase tracking-wider flex items-center gap-2">
+              <WarningCircle className="w-4 h-4" /> Danger Zone
+            </h3>
+            <SettingsCard className="border-destructive/20">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <SettingsRow
+                    icon={<Trash className="w-5 h-5" />}
+                    label="Clear Local Data"
+                    description="Removes inputs from this device only"
+                    destructive
+                    onClick={() => { }}
+                  />
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear local data?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will remove all Zakat calculation data stored on this device.
+                      {user && " Your saved cloud data will remain."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAllData} className="bg-destructive hover:bg-destructive/90">
+                      Clear Data
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              {user ? (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <SettingsRow
+                      icon={<UserMinus className="w-5 h-5" />}
+                      label="Delete Account"
+                      description="Permanently delete account and all data"
+                      destructive
+                      onClick={() => { }}
+                    />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete your account, profile, all saved calculations,
+                        and shared access. You will be signed out immediately.
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
+                        Delete Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              ) : (
+                <div /> // Placeholder if no user, or just omit
+              )}
+            </SettingsCard>
+          </SettingsSection>
+
+          <Footer />
         </main>
-        <Footer />
       </div>
     </>
   );

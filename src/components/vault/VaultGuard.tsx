@@ -49,10 +49,11 @@ export function VaultGuard({
     const [generatedPhrase, setGeneratedPhrase] = useState<string>('');
     const [isInitializing, setIsInitializing] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
+    const [setupDismissed, setSetupDismissed] = useState(false);
 
     // Determine if we should show the setup flow
     const needsSetup = status === 'needs_setup';
-    const showSetupFlow = needsSetup || (setupStep !== 'idle' && setupStep !== 'complete');
+    const showSetupFlow = !setupDismissed && (needsSetup || (setupStep !== 'idle' && setupStep !== 'complete'));
 
     // Handle persistence mode selection
     const handlePersistenceChoice = useCallback(async (mode: PersistenceMode) => {
@@ -72,6 +73,11 @@ export function VaultGuard({
             setIsInitializing(false);
         }
     }, [initializeVault]);
+
+    const handleDismissSetup = useCallback(() => {
+        setSetupDismissed(true);
+        setSetupStep('idle');
+    }, []);
 
     // Handle phrase confirmation
     const handlePhraseConfirm = useCallback(() => {
@@ -94,8 +100,8 @@ export function VaultGuard({
         );
     }
 
-    // Optional mode: allow children without vault if no setup has been started
-    if (optional && needsSetup && setupStep === 'idle') {
+    // Optional mode: allow children without vault if no setup has been started or if dismissed
+    if (optional && needsSetup && (setupStep === 'idle' || setupDismissed)) {
         return <>{children}</>;
     }
 
@@ -115,6 +121,7 @@ export function VaultGuard({
                 <PersistenceChoiceModal
                     open={setupStep === 'choice'}
                     onSelect={handlePersistenceChoice}
+                    onDismiss={handleDismissSetup}
                 />
 
                 {/* Step 2: Display and confirm recovery phrase */}
