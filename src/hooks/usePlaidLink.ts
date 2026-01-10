@@ -26,6 +26,18 @@ export function usePlaidLink() {
     const [linkToken, setLinkToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const getAccessToken = useCallback(async () => {
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw new Error(sessionError.message);
+
+        const token = data.session?.access_token;
+        if (!token) {
+            throw new Error('Your session has expired. Please sign in again to connect your bank.');
+        }
+
+        return token;
+    }, []);
+
     /**
      * Step 1: Get a Link token from our Edge Function
      */
@@ -34,7 +46,13 @@ export function usePlaidLink() {
         setError(null);
 
         try {
-            const { data, error: fnError } = await supabase.functions.invoke('plaid-link-token');
+            const accessToken = await getAccessToken();
+
+            const { data, error: fnError } = await supabase.functions.invoke('plaid-link-token', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
 
             if (fnError) {
                 throw new Error(fnError.message);
@@ -58,7 +76,7 @@ export function usePlaidLink() {
             });
             return null;
         }
-    }, [toast]);
+    }, [getAccessToken, toast]);
 
     /**
      * Step 2: Open Plaid Link (called by component when user clicks)
@@ -91,8 +109,13 @@ export function usePlaidLink() {
                     setStatus('exchanging');
 
                     try {
+                        const accessToken = await getAccessToken();
+
                         // Exchange the public token
                         const { data, error: exchangeError } = await supabase.functions.invoke('plaid-exchange-token', {
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                            },
                             body: {
                                 public_token: publicToken,
                                 institution: metadata.institution,
@@ -142,7 +165,7 @@ export function usePlaidLink() {
 
             linkHandler.open();
         });
-    }, [linkToken, initializePlaid, toast]);
+    }, [getAccessToken, linkToken, initializePlaid, toast]);
 
     /**
      * Reset state
