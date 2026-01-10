@@ -97,9 +97,13 @@ export async function unwrapDEK(wrappedDEK: string, phrase: string): Promise<Cry
 
         const dekBytes = jose.base64url.decode(payload.dek as string);
 
+        // Ensure we pass an ArrayBuffer (not ArrayBufferLike) to WebCrypto
+        const dekKeyBuffer = new ArrayBuffer(dekBytes.byteLength);
+        new Uint8Array(dekKeyBuffer).set(dekBytes);
+
         return crypto.subtle.importKey(
             'raw',
-            dekBytes,
+            dekKeyBuffer,
             { name: 'AES-GCM', length: 256 },
             true,
             ['encrypt', 'decrypt']
@@ -167,9 +171,13 @@ export async function getCachedDEK(): Promise<CryptoKey | null> {
         const dekBytes = await get<Uint8Array>(DEK_STORAGE_KEY);
         if (!dekBytes) return null;
 
+        // Ensure we pass an ArrayBuffer (not ArrayBufferLike) to WebCrypto
+        const dekKeyBuffer = new ArrayBuffer(dekBytes.byteLength);
+        new Uint8Array(dekKeyBuffer).set(dekBytes);
+
         return crypto.subtle.importKey(
             'raw',
-            dekBytes,
+            dekKeyBuffer,
             { name: 'AES-GCM', length: 256 },
             true,
             ['encrypt', 'decrypt']

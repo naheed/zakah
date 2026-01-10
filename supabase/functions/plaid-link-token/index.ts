@@ -35,27 +35,24 @@ serve(async (req) => {
         console.log("Starting Plaid Link Token creation...");
 
         // Get auth header
-        // Get auth user
-        let authHeader = req.headers.get("Authorization");
-        if (!authHeader) {
-            console.error("Missing Auth Header");
-            throw new Error("Missing authorization header");
-        }
-
-        // Clean header: Ensure we have the raw token, then rebuild "Bearer <token>"
-        const token = authHeader.replace("Bearer ", "").trim();
-        console.log(`Auth Token received (first 10 chars): ${token.substring(0, 10)}...`);
-
-        if (!token) {
-            throw new Error("Authorization header present but empty");
+        const authHeader = req.headers.get("Authorization");
+        if (!authHeader?.startsWith("Bearer ")) {
+            console.error("Missing or invalid Authorization header");
+            return new Response(
+                JSON.stringify({ error: "Unauthorized" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
         }
 
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-        const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-        // Get user by passing the JWT token directly (Edge Function pattern)
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        // Validate the user via the passed JWT (do not rely on server-side session storage)
+        const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+            global: { headers: { Authorization: authHeader } },
+        });
+
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
 
         if (authError || !user) {
             console.error("JWT validation failed:", authError);

@@ -59,7 +59,7 @@ export default function Assets() {
 
     // Helper to calculate total value of a document
     const getDocumentValue = (doc: UploadedDocument) => {
-        return Object.values(doc.extractedData).reduce((sum, val) => {
+        return Object.values(doc.extractedData).reduce<number>((sum, val) => {
             if (typeof val === 'number') return sum + val;
             return sum;
         }, 0);
