@@ -498,7 +498,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="w-full max-w-6xl grid md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
+        <div className="w-full max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
           {/* Left Side - CTA (Primary focus) */}
           <motion.div className="order-1 flex flex-col" variants={containerVariants} initial="hidden" animate="visible">
             {/* Brand Logo - Hero placement */}
