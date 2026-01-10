@@ -149,11 +149,13 @@ export default function Settings() {
     if (!user) return;
     setIsDeleting(true);
     try {
-      // 1. Delete all data first (Manual Cascade)
+      // 1. Delete comprehensive asset data first (Manual Cascade)
+      // We do this client-side to ensure bulky asset data is definitely gone
       await deleteUserAssets(user.id);
-      await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
-      await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
-      await supabase.from('profiles').delete().eq('user_id', user.id);
+
+      // Note: We DO NOT delete 'profiles', 'zakat_calculations', or 'shares' here.
+      // Deleting 'profiles' client-side can cause getUser() to fail in the Edge Function (401).
+      // The Edge Function handles the deletion of these core tables + the user account.
 
       // 2. Call backend function to delete the actual Auth User
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -174,7 +176,7 @@ export default function Settings() {
       await signOut();
 
       toast.success('Your account has been permanently deleted');
-      navigate('/');
+      navigate('/account-deleted');
     } catch (error) {
       console.error('Error deleting account:', error);
       toast.error('Failed to delete account. Please try again or contact support.');

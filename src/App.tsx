@@ -29,6 +29,7 @@ import AccountDetail from "./pages/AccountDetail";
 import LogoutSuccess from "./pages/LogoutSuccess";
 import DevTools from "./pages/DevTools";
 import SankeyTest from "./pages/SankeyTest";
+import AccountDeleted from "./pages/AccountDeleted";
 import Donations from "./pages/Donations";
 
 const queryClient = new QueryClient();
@@ -90,6 +91,7 @@ const App = () => (
                     <Route path="/about" element={<About />} />
                     <Route path="/invite/:code" element={<Invite />} />
                     <Route path="/logout" element={<LogoutSuccess />} />
+                    <Route path="/account-deleted" element={<AccountDeleted />} />
 
                     {/* Dev routes */}
                     <Route path="/dev" element={<DevTools />} />
