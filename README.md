@@ -22,6 +22,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Asset Intelligence** | Upload bank statements; AI extracts line items automatically |
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
 | **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid—coming soon) |
+| **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
 | **Scholarly Methodology** | Based on AMJA, AAOIFI guidelines, and Sheikh Joe Bradford's rulings |
 | **Madhab Support** | Configure calculations per Hanafi, Maliki, Shafi'i, Hanbali, or balanced approach |
 | **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
@@ -141,6 +142,7 @@ src/
 │   │   ├── steps/         # Wizard step components
 │   │   └── report/        # Report generation components
 │   ├── assets/            # Asset management components
+│   ├── settings/          # Settings page components (new)
 │   └── donations/         # Donation tracking & receipt scanning
 ├── hooks/
 │   ├── useAuth.ts         # Authentication state
@@ -177,8 +179,8 @@ supabase/
 │                 │     │                 │     │                 │
 │ user_id         │     │ institution     │     │ statement_date  │
 │ currency        │     │ type            │     │ total_value     │
-└─────────────────┘     │ mask            │     │ method          │
-                        └─────────────────┘     └────────┬────────┘
+│                 │     │ mask            │     │ method          │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
                                                          │
                                                          ▼
                                                 ┌─────────────────┐
@@ -291,7 +293,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 | Donation Tracking | ✅ Complete | Receipt scanning, Active Hawl, Cloud Sync |
 | Asset Dashboard | ✅ Complete | Manage accounts and statements |
 | Export (PDF/CSV) | ✅ Complete | Download reports |
-| Sankey Visualization | ✅ Complete | Visual asset flow chart |
+| Visualization | ✅ Complete | Sankey Chart visual asset flow |
+| Settings Redesign | ✅ Complete | Expressive Dashboard & Data Safety |
 | Plaid Integration | 📋 Planned | Bank account connection |
 | Charity Directory | 📋 Planned | Search & filter vetted recipients |
 | Mobile App | 📋 Planned | React Native implementation |

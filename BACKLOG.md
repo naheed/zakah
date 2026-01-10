@@ -35,7 +35,7 @@
 
 - [x] Delete all data
 - [x] Delete account
-- [ ] **Compliance:** Send confirmation email upon account deletion (Policy 3.2)
+- [x] **Compliance:** Send confirmation email upon account deletion (Policy 3.2)
 - [x] New route `/assets` showing cards for each connected account
 - [x] AccountCard component with icons, badges, stale indicators
 - [x] `/assets/add` with modular Add flow (Upload/Manual/API stub)
@@ -69,48 +69,17 @@
 
 ---
 
-## Phase 9: Download Report Redesign ✅ COMPLETE
-
-> **Goal:** Fix PDF bugs, add user info, madhab settings, referral metrics, and machine-readable YoY data.
-
-### 9.1 Fix Font Bug (Blocking) ✅
-- [x] Register WorkSans italic or remove italic usage
-- [x] Verify PDF download works
-
-### 9.2 Content Spec (For UX Designer) ✅
-- [x] User name + Hijri date in header
-- [x] Madhab setting in Configuration
-- [x] Methodology summary (key rulings applied)
-
-### 9.3 Implementation ✅
-- [x] Update `ZakatPDFData` interface
-- [x] Pass user info, madhab, referral stats to PDF (V2 generator)
-- [x] Add CSV Export feature
-
----
-
-## Phase 10: Visualization Improvements (Sankey) ✅ COMPLETE
-
-> **Goal:** Make the Zakat flow visualization accurate, readable, and beautiful.
-
-- [x] **Granular Flows**: Assets flow individually to Zakat node (Rainbow output)
-- [x] **Waterfall Logic**: Deduct liabilities from Cash first
-- [x] **Safe Processing**: Sanitize IDs to prevent special character crashes
-- [x] **Tooltip Cleanup**: Unified tooltips for Nodes and Links
-
----
-
-## Phase 4: Account Connections (Plaid API) ⬜ PLANNED
+## Phase 4: Account Connections (Plaid API) 🏗️ IN PROGRESS
 
 > **Goal:** Enable automatic bank/brokerage sync via Plaid.
 
 ### 4.1 Plaid Integration
-- [ ] Set up Plaid account and get API keys
-- [ ] Create `/api/plaid/link-token` Edge Function
-- [ ] Create `/api/plaid/exchange-token` Edge Function  
+- [x] Set up Plaid account and get API keys
+- [x] Create `/api/plaid/link-token` Edge Function
+- [x] Create `/api/plaid/exchange-token` Edge Function  
+- [x] Store Plaid access tokens securely (encrypted)
+- [x] Fetch accounts and balances on demand (via Exchange Token)
 - [ ] Implement `PlaidMethod.tsx` in Add Account flow
-- [ ] Store Plaid access tokens securely (encrypted)
-- [ ] Fetch accounts and balances on demand
 - [ ] Map Plaid account types to V2 `AccountType` enum
 - [ ] **Compliance:** Implement `/item/remove` in `delete-account` function (Policy 3.1)
 
@@ -204,6 +173,37 @@
 
 ---
 
+## Phase 9: Download Report Redesign ✅ COMPLETE
+
+> **Goal:** Fix PDF bugs, add user info, madhab settings, referral metrics, and machine-readable YoY data.
+
+### 9.1 Fix Font Bug (Blocking) ✅
+- [x] Register WorkSans italic or remove italic usage
+- [x] Verify PDF download works
+
+### 9.2 Content Spec (For UX Designer) ✅
+- [x] User name + Hijri date in header
+- [x] Madhab setting in Configuration
+- [x] Methodology summary (key rulings applied)
+
+### 9.3 Implementation ✅
+- [x] Update `ZakatPDFData` interface
+- [x] Pass user info, madhab, referral stats to PDF (V2 generator)
+- [x] Add CSV Export feature
+
+---
+
+## Phase 10: Visualization Improvements (Sankey) ✅ COMPLETE
+
+> **Goal:** Make the Zakat flow visualization accurate, readable, and beautiful.
+
+- [x] **Granular Flows**: Assets flow individually to Zakat node (Rainbow output)
+- [x] **Waterfall Logic**: Deduct liabilities from Cash first
+- [x] **Safe Processing**: Sanitize IDs to prevent special character crashes
+- [x] **Tooltip Cleanup**: Unified tooltips for Nodes and Links
+
+---
+
 ## Phase 11: Privacy & Legal Audit ✅ COMPLETE
 
 > **Goal:** Ensure 100% alignment between legal docs and engineering implementation.
@@ -215,63 +215,34 @@
 
 ---
 
-## Database Schema Reference
+## Phase 12: Settings & Security Redesign ✅ COMPLETE
 
-```
-User → Portfolio → Account → Snapshot → LineItem
-                         ↘        ↗
-                       SourceDoc
-                         ↓
-                    ZakatReport (frozen)
-```
+> **Goal:** Modernize settings UX, improve data safety, and enhance compliance.
 
-**Key Tables:**
-- `portfolios` - User's portfolio container
-- `asset_accounts` - Bank, Brokerage, Crypto, etc.
-- `asset_snapshots` - Point-in-time statement captures
-- `asset_line_items` - Granular holdings
-
-**Zakat Categories:**
-- `LIQUID` - 100% Zakatable (Cash)  
-- `PROXY_30` - 30% Zakatable (Stocks)
-- `PROXY_100` - 100% Zakatable (Crypto)
-- `EXEMPT` - 0% (Personal Use)
-- `CUSTOM` - User override
-
----
-
----
-
-## Phase 12: Knowledge & Trust (FAQ) ⬜ PLANNED
-
-> **Goal:** Address common user questions directly on the landing page to build trust and reduce hesitation.
-
-- [ ] Create `FAQ.tsx` component (Accordion style)
-- [ ] Add "Frequently Asked Questions" section to Landing Page (below Hero/About)
-- [ ] Content curation:
-    - "Is my data private?"
-    - "Which scholar approved this?" (Link to Methodology)
-    - "How is Zakat calculated on 401k?"
-    - "Can I save my progress?"
+- [x] **Expressive Dashboard**: Redesign Settings page with Material 3 Principles
+- [x] **Data Safety**: Separate "Clear Local Data" vs "Delete Account" (Danger Zone)
+- [x] **Compliance**: Fix cascading deletion logic for assets
+- [x] **Exit Experience**: Create dedicated "Account Deleted" landing page
+- [x] **Local Access**: Allow viewing local assets/documents without forced sign-in
 
 ---
 
 ## Phase 13: Donation Tracking & Distribution ✅ PARTIAL
- 
+
 > **Goal:** Empower users to track their Zakat payments, scan receipts, and explore the 8 categories of recipients.
- 
+
 ### 13.1 Donation Tracking (MVP) ✅ COMPLETE
 - [x] Create `/donations` route and Dashboard widget
 - [x] **Active Hawl Logic**: Track "Zakat Due" vs "Paid" with progress bar
 - [x] **Robust Dates**: Hijri/Gregorian toggle and storage normalization
 - [x] **AI Receipt Scanning**: Extract details from images/PDFs (Gemini 2.0 Flash)
 - [x] **Persistence**: Dual-mode (Guest Local + Cloud Link) with auto-migration
- 
+
 ### 13.2 Charity Discovery (Next) ⬜ PLANNED
 - [ ] Charity Directory Integration (Search/Filter)
 - [ ] "Verified" Badge logic
 - [ ] Deep dive content for 8 Categories of Recipients
- 
+
 ### 13.3 In-App Payments (Future) ⬜ PLANNED
 - [ ] Stripe Connect Integration
 - [ ] 1-Click Zakat payment
@@ -299,7 +270,7 @@ User → Portfolio → Account → Snapshot → LineItem
 | 2 | Phase 13: Distribution (Charity) | ⬜ Planned | Design Charity Directory |
 | 3 | Phase 14: Feedback | ⬜ Planned | Evaluate tools vs build |
 | 4 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
-| 5 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
+| 5 | Phase 4: Plaid API | ⚠️ In Progress | Implement UI Integration |
 | 6 | Phase 5: Charity Program | ⬜ Planned | Re-evaluate after Phase 13 |
 
 ## Phase 15: Apple Authentication ⬜ PLANNED
@@ -311,3 +282,25 @@ User → Portfolio → Account → Snapshot → LineItem
 - [ ] **Supabase Dashboard**: Enable Apple provider with Client ID, Team ID, Key ID, and Secret Key.
 - [ ] **Frontend**: Update `useAuth` hook and add Sign in with Apple button to `Auth.tsx` and `WelcomeStep.tsx`.
 
+## Database Schema Reference
+
+```
+User → Portfolio → Account → Snapshot → LineItem
+                         ↘        ↗
+                       SourceDoc
+                         ↓
+                    ZakatReport (frozen)
+```
+
+**Key Tables:**
+- `portfolios` - User's portfolio container
+- `asset_accounts` - Bank, Brokerage, Crypto, etc.
+- `asset_snapshots` - Point-in-time statement captures
+- `asset_line_items` - Granular holdings
+
+**Zakat Categories:**
+- `LIQUID` - 100% Zakatable (Cash)  
+- `PROXY_30` - 30% Zakatable (Stocks)
+- `PROXY_100` - 100% Zakatable (Crypto)
+- `EXEMPT` - 0% (Personal Use)
+- `CUSTOM` - User override

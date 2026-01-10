@@ -16,6 +16,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
 
+## [0.12.0] - 2026-01-09
+
+### Added
+- **Settings Page Redesign**
+  - **Expressive Dashboard**: Complete overhaul of `/settings` using Material 3 Expressive design principles.
+  - **New Components**: Semantic `SettingsSection`, `SettingsCard`, and `SettingsRow` for consistent UI.
+  - **Unified "Danger Zone"**: Consolidated "Clear Local Data" and "Delete Account" into a distinct, high-friction area to prevent accidents.
+  - **Interactive Sheets**: Complex selections (Madhab, Nisab, Hawl Date) now use modern bottom sheets/dialogs.
+- **Data Deletion Compliance**
+  - **Account Deleted Page**: New dedicated landing page (`/account-deleted`) providing confirmation and feedback collection after account deletion.
+  - **Cascade Deletion**: Fixed backend logic to correctly cascade deletion to all related asset tables (`portfolios`, `asset_accounts`, etc.).
+- **Local Asset Access**
+  - **Unauthenticated Vault View**: Users can now view locally stored asset documents in `/assets` without signing in.
+  - **Hybrid Dashboard**: "My Assets" page now cleanly separates "Local Documents" (device-only) from "Connected Accounts" (cloud).
+
+### Changed
+- **Icon System**: Strict enforcement of `@phosphor-icons/react` across the entire application (removed `lucide-react`).
+- **Vault Guard**: Improved "Secure Your Data" modal to be dismissible, allowing guest access to local features without forced setup.
+- **Landing Page**: Improved center alignment and responsiveness of the Hero section.
+
+### Fixed
+- **401 Deletion Error**: Resolved issue where deleting an account returned a 401 Unauthorized error due to race conditions in token invalidation.
+- **Upload Regression**: Fixed regression where clicking "Uploaded Documents" falsely required login.
+
 ## [0.11.0] - 2026-01-06
 
 ### Added
