@@ -301,4 +301,13 @@ User → Portfolio → Account → Snapshot → LineItem
 | 4 | Phase 6: Reports | ⬜ Planned | Create `/reports` route |
 | 5 | Phase 4: Plaid API | ⬜ Planned | Set up Plaid account |
 | 6 | Phase 5: Charity Program | ⬜ Planned | Re-evaluate after Phase 13 |
-| 7 | Phase 7: Migration | ⬜ Future | Design consent flow |
+
+## Phase 15: Apple Authentication ⬜ PLANNED
+
+> **Goal:** Support Sign in with Apple for iOS users.
+
+### Implementation Plan
+- [ ] **Apple Developer Console**: Configure App ID, Service ID, and Keys.
+- [ ] **Supabase Dashboard**: Enable Apple provider with Client ID, Team ID, Key ID, and Secret Key.
+- [ ] **Frontend**: Update `useAuth` hook and add Sign in with Apple button to `Auth.tsx` and `WelcomeStep.tsx`.
+

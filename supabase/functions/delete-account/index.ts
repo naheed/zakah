@@ -51,6 +51,34 @@ serve(async (req: Request) => {
 
         console.log("Cleaning up user data...");
 
+        // 0. Clean up Assets (Manual Cascade)
+        // 1. Get portfolios to find accounts
+        const { data: portfolios } = await supabaseAdmin.from('portfolios').select('id').eq('user_id', user.id);
+        const portfolioIds = portfolios?.map(p => p.id) || [];
+
+        if (portfolioIds.length > 0) {
+            // 2. Get accounts
+            const { data: accounts } = await supabaseAdmin.from('asset_accounts').select('id').in('portfolio_id', portfolioIds);
+            const accountIds = accounts?.map(a => a.id) || [];
+
+            if (accountIds.length > 0) {
+                // 3. Get snapshots
+                const { data: snapshots } = await supabaseAdmin.from('asset_snapshots').select('id').in('account_id', accountIds);
+                const snapshotIds = snapshots?.map(s => s.id) || [];
+
+                if (snapshotIds.length > 0) {
+                    // 4. Delete line items
+                    await supabaseAdmin.from('asset_line_items').delete().in('snapshot_id', snapshotIds);
+                    // 5. Delete snapshots
+                    await supabaseAdmin.from('asset_snapshots').delete().in('id', snapshotIds);
+                }
+                // 6. Delete accounts
+                await supabaseAdmin.from('asset_accounts').delete().in('id', accountIds);
+            }
+            // 7. Delete portfolios
+            await supabaseAdmin.from('portfolios').delete().in('id', portfolioIds);
+        }
+
         // Delete shares
         await supabaseAdmin.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
 
@@ -58,9 +86,6 @@ serve(async (req: Request) => {
         await supabaseAdmin.from('zakat_calculations').delete().eq('user_id', user.id);
 
         // Delete profile
-        // Try both 'id' and 'user_id' to be safe, or just 'id' if we knew schema. 
-        // Based on client code using 'user_id', we'll use that. 
-        // But usually profiles.id IS the user_id. We'll try user_id matches.
         await supabaseAdmin.from('profiles').delete().eq('user_id', user.id);
 
         // 4. Delete the user from Auth

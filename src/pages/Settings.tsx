@@ -69,6 +69,36 @@ export default function Settings() {
 
   const { resetVault } = usePrivacyVault();
 
+  const deleteUserAssets = async (userId: string) => {
+    // Manually cascade delete asset data to ensure everything is gone
+    // 1. Get portfolios to find accounts
+    const { data: portfolios } = await supabase.from('portfolios').select('id').eq('user_id', userId);
+    const portfolioIds = portfolios?.map(p => p.id) || [];
+
+    if (portfolioIds.length > 0) {
+      // 2. Get accounts
+      const { data: accounts } = await supabase.from('asset_accounts').select('id').in('portfolio_id', portfolioIds);
+      const accountIds = accounts?.map(a => a.id) || [];
+
+      if (accountIds.length > 0) {
+        // 3. Get snapshots
+        const { data: snapshots } = await supabase.from('asset_snapshots').select('id').in('account_id', accountIds);
+        const snapshotIds = snapshots?.map(s => s.id) || [];
+
+        if (snapshotIds.length > 0) {
+          // 4. Delete line items
+          await supabase.from('asset_line_items').delete().in('snapshot_id', snapshotIds);
+          // 5. Delete snapshots
+          await supabase.from('asset_snapshots').delete().in('id', snapshotIds);
+        }
+        // 6. Delete accounts
+        await supabase.from('asset_accounts').delete().in('id', accountIds);
+      }
+      // 7. Delete portfolios
+      await supabase.from('portfolios').delete().in('id', portfolioIds);
+    }
+  };
+
   const handleDeleteAllData = async () => {
     setIsDeleting(true);
     try {
@@ -81,17 +111,20 @@ export default function Settings() {
       // Clear Vault (Keys & Mode)
       await resetVault();
 
-      // 2. If User, clean up cloud data (Optional - maybe user just wants local clear?)
-      // The user feedback implies they just want "Delete Data" to work.
-      // If we want a FULL wipe, we should do cloud too.
+      // 2. If User, clean up cloud data
       if (user) {
         try {
+          // Delete Assets
+          await deleteUserAssets(user.id);
+
+          // Delete Calculations & Shares
           await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
           await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
+
           toast.success('Local and cloud data deleted');
         } catch (e) {
           console.error("Cloud delete failed", e);
-          toast.success('Local data cleared (Cloud sync failed)');
+          toast.error('Cloud cleanup failed, but local data cleared');
         }
       } else {
         toast.success('Local data cleared');
@@ -110,7 +143,8 @@ export default function Settings() {
     if (!user) return;
     setIsDeleting(true);
     try {
-      // 1. Delete data (legacy cleanup, kept for safety)
+      // 1. Delete all data first (Manual Cascade)
+      await deleteUserAssets(user.id);
       await supabase.from('zakat_calculation_shares').delete().eq('owner_id', user.id);
       await supabase.from('zakat_calculations').delete().eq('user_id', user.id);
       await supabase.from('profiles').delete().eq('user_id', user.id);
@@ -127,19 +161,17 @@ export default function Settings() {
       });
       if (functionError) throw functionError;
 
-      // 2. Clear local keys
+      // 3. Clear local keys
       localStorage.removeItem('zakat_private_key');
 
-      // 3. Client-side sign out to clear session/local storage
-      await signOut(); // Uses the robust signOut from useAuth
+      // 4. Client-side sign out to clear session/local storage
+      await signOut();
 
-      // Navigation is handled by signOut usually, but safety net:
-      // toast is shown by signOut? No, usually not.
       toast.success('Your account has been permanently deleted');
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast.error('Failed to delete account');
+      toast.error('Failed to delete account. Please try again or contact support.');
     } finally {
       setIsDeleting(false);
     }
