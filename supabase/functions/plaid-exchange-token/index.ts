@@ -147,7 +147,9 @@ serve(async (req) => {
         });
         const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
         if (authError || !user) {
-            throw new Error("Unauthorized");
+            console.error("Auth verification failed:", authError);
+            if (!user) console.error("No user found in session");
+            throw new Error(`Unauthorized: ${authError?.message || "User not found"}`);
         }
 
         // Get Plaid credentials
