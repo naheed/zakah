@@ -36,10 +36,13 @@ serve(async (req) => {
 
         // Get auth header
         const authHeader = req.headers.get("Authorization");
+        console.log("Authorization header present:", !!authHeader);
+        console.log("Authorization header format:", authHeader ? (authHeader.startsWith("Bearer ") ? "Valid Bearer format" : "Invalid format") : "Missing");
+        
         if (!authHeader?.startsWith("Bearer ")) {
             console.error("Missing or invalid Authorization header");
             return new Response(
-                JSON.stringify({ error: "Unauthorized" }),
+                JSON.stringify({ error: "Unauthorized - Please sign in to connect your bank" }),
                 { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             );
         }
