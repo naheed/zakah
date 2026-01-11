@@ -12,7 +12,7 @@ import {
 import { ExtractionLineItem } from '@/hooks/useDocumentParsingV2';
 
 // Map AI categories to Zakat categories
-function mapToZakatCategory(inferredCategory: string): ZakatCategory {
+export function mapToZakatCategory(inferredCategory: string): ZakatCategory {
     const cat = inferredCategory.toUpperCase();
 
     // Cash = 100% Liquid

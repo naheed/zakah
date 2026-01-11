@@ -13,8 +13,10 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useExtractionFlow } from '@/hooks/useExtractionFlow';
 import { useAssetPersistence } from '@/hooks/useAssetPersistence';
-import { usePlaidLink } from '@/hooks/usePlaidLink';
+
 import { useToast } from '@/hooks/use-toast';
+import { PlaidMethod } from '@/components/assets/add/PlaidMethod';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -39,10 +41,10 @@ export default function AddAccount() {
         onSuccess: () => navigate('/assets'),
     });
 
-    // Plaid Link integration
-    const plaidLink = usePlaidLink();
+
 
     const [method, setMethod] = useState<AddMethod>('select');
+
     const [saving, setSaving] = useState(false);
 
     // Manual entry state
@@ -311,72 +313,12 @@ export default function AddAccount() {
                 )}
 
                 {method === 'plaid' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Connect Bank</CardTitle>
-                            <CardDescription>
-                                Securely link your bank or brokerage to automatically import account data
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {!user && !authLoading ? (
-                                <div className="text-center py-8">
-                                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                                        <Link className="w-8 h-8 text-muted-foreground" />
-                                    </div>
-                                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                                        Please sign in to securely connect your bank accounts.
-                                    </p>
-                                    <Button
-                                        size="lg"
-                                        onClick={() => navigate('/auth', { state: { returnTo: '/assets/add' } })}
-                                    >
-                                        Sign in to Connect
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
-                                        <Link className="w-8 h-8" />
-                                    </div>
-                                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                                        ZakatFlow uses Plaid to securely connect to your financial institution.
-                                        Your login credentials are never stored on our servers.
-                                    </p>
-                                    <Button
-                                        size="lg"
-                                        onClick={async () => {
-                                            const result = await plaidLink.openPlaidLink();
-                                            if (result.success) {
-                                                navigate('/assets');
-                                            }
-                                        }}
-                                        disabled={plaidLink.isLoading}
-                                    >
-                                        {plaidLink.isLoading ? (
-                                            <Spinner className="w-4 h-4 mr-2 animate-spin" />
-                                        ) : null}
-                                        {plaidLink.status === 'loading_token' && 'Preparing...'}
-                                        {plaidLink.status === 'exchanging' && 'Connecting...'}
-                                        {(plaidLink.status === 'idle' || plaidLink.status === 'ready') && 'Connect Your Bank'}
-                                    </Button>
-                                </div>
-                            )}
-
-                            {plaidLink.error && (
-                                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                                    <p className="text-sm text-red-800 dark:text-red-200">
-                                        {plaidLink.error}
-                                    </p>
-                                </div>
-                            )}
-
-                            <Button variant="ghost" onClick={() => { setMethod('select'); plaidLink.reset(); }} className="w-full">
-                                ← Back to options
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <PlaidMethod
+                        onSuccess={() => navigate('/assets')}
+                        onCancel={() => setMethod('select')}
+                    />
                 )}
+
             </main>
 
             <Footer />

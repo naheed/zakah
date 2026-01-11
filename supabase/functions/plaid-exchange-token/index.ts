@@ -14,6 +14,55 @@ const corsHeaders = {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// --- Encryption Helper (AES-GCM) ---
+// Securely encrypts token using a derived key from a random salt + Master Key
+async function encryptToken(text: string, masterKey: string): Promise<string> {
+    const enc = new TextEncoder();
+
+    // 1. Generate a random salt (16 bytes)
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+
+    // 2. Import Master Key
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(masterKey),
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+    );
+
+    // 3. Derive Encryption Key (AES-256) using key + salt
+    const key = await crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt"]
+    );
+
+    // 4. Encrypt
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        enc.encode(text)
+    );
+
+    // 5. Pack: [Salt (16)] + [IV (12)] + [Ciphertext]
+    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    combined.set(salt);
+    combined.set(iv, salt.length);
+    combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+    return btoa(String.fromCharCode(...combined));
+}
+
+
 // Plaid API base URLs by environment
 const PLAID_URLS: Record<string, string> = {
     sandbox: "https://sandbox.plaid.com",
@@ -131,7 +180,7 @@ serve(async (req) => {
             .from("plaid_items")
             .insert({
                 user_id: user.id,
-                access_token: accessToken, // In production, encrypt this!
+                access_token: await encryptToken(accessToken, Deno.env.get("PLAID_ENCRYPTION_KEY")!),
                 item_id: itemId,
                 institution_id: institution?.institution_id,
                 institution_name: institution?.name,

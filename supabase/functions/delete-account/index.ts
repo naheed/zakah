@@ -46,6 +46,106 @@ serve(async (req: Request) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
         );
 
+        // --- Decryption Helper (Match Encryption in plaid-exchange-token) ---
+        async function decryptToken(encryptedBase64: string, masterKey: string): Promise<string> {
+            const enc = new TextEncoder();
+
+            // 1. Decode Base64
+            const binaryStr = atob(encryptedBase64);
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+                bytes[i] = binaryStr.charCodeAt(i);
+            }
+
+            // 2. Extract Salt (16), IV (12), and Ciphertext
+            // Layout: [Salt 16] [IV 12] [Ciphertext...]
+            const salt = bytes.slice(0, 16);
+            const iv = bytes.slice(16, 28);
+            const data = bytes.slice(28);
+
+            // 3. Import Master Key
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw",
+                enc.encode(masterKey),
+                { name: "PBKDF2" },
+                false,
+                ["deriveKey"]
+            );
+
+            // 4. Derive Decryption Key using extracted Salt
+            const key = await crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: salt,
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["decrypt"]
+            );
+
+            // 5. Decrypt
+            const decryptedBuffer = await crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                data
+            );
+
+            return new TextDecoder().decode(decryptedBuffer);
+        }
+
+        // 2a. Revoke Plaid Tokens (Compliance)
+        // Access tokens should be encrypted in a real prod env, here we simply retrieve them.
+        // In the next step, we will verify if encryption is active and decrypt if necessary.
+        // For now, let's fetch items and attempt revocation.
+
+        const plaidClientId = Deno.env.get("PLAID_CLIENT_ID");
+        const plaidSecret = Deno.env.get("PLAID_SECRET");
+        const plaidEnv = Deno.env.get("PLAID_ENV") || "sandbox";
+
+        if (plaidClientId && plaidSecret) {
+            console.log("Plaid credentials found. Checking for connected items...");
+            const { data: plaidItems } = await supabaseAdmin
+                .from("plaid_items")
+                .select("access_token")
+                .eq("user_id", user.id);
+
+            if (plaidItems && plaidItems.length > 0) {
+                console.log(`Found ${plaidItems.length} Plaid items to revoke.`);
+
+                const PLAID_ENVIRONMENTS: Record<string, string> = {
+                    sandbox: "https://sandbox.plaid.com",
+                    development: "https://development.plaid.com",
+                    production: "https://production.plaid.com",
+                };
+                const baseUrl = PLAID_ENVIRONMENTS[plaidEnv];
+
+                for (const item of plaidItems) {
+                    try {
+                        const encryptedToken = item.access_token;
+                        // Decrypt using the same key (ANON KEY for this demo)
+                        // In prod, ensure this key matches what was used to encrypt.
+                        const decryptedToken = await decryptToken(encryptedToken, Deno.env.get("PLAID_ENCRYPTION_KEY")!);
+
+                        console.log("Revoking Plaid access token...");
+                        await fetch(`${baseUrl}/item/remove`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                client_id: plaidClientId,
+                                secret: plaidSecret,
+                                access_token: decryptedToken
+                            })
+                        });
+                    } catch (err) {
+                        console.error("Failed to revoke Plaid token (continuing deletion):", err);
+                    }
+                }
+            }
+        }
+
         // 3. Clean up user data (admin client bypasses RLS)
         // We delete in order of dependencies (shares -> calculations -> profile -> auth)
 
