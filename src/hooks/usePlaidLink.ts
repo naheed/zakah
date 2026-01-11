@@ -27,14 +27,33 @@ export function usePlaidLink() {
     const [error, setError] = useState<string | null>(null);
 
     const getAccessToken = useCallback(async () => {
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw new Error(sessionError.message);
+        // First try getSession, then fallback to getUser for fresh token
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+            console.error('[Plaid] Session error:', sessionError);
+            throw new Error(sessionError.message);
+        }
 
-        const token = data.session?.access_token;
+        let token = sessionData.session?.access_token;
+        
+        // If no session token, try refreshing
         if (!token) {
+            console.log('[Plaid] No session token, attempting refresh...');
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError) {
+                console.error('[Plaid] Refresh error:', refreshError);
+                throw new Error('Your session has expired. Please sign in again to connect your bank.');
+            }
+            token = refreshData.session?.access_token;
+        }
+
+        if (!token) {
+            console.error('[Plaid] No access token available');
             throw new Error('Your session has expired. Please sign in again to connect your bank.');
         }
 
+        console.log('[Plaid] Got access token:', token.substring(0, 20) + '...');
         return token;
     }, []);
 
