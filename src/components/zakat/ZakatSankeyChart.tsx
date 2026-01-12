@@ -250,7 +250,7 @@ export function ZakatSankeyChart({
 
   return (
     <div className="space-y-6">
-      <div style={{ height }} className="w-full">
+      <div style={{ height, width: width || '100%', maxWidth: '100%' }} className="mx-auto">
         <ResponsiveSankey
           data={formattedData}
           theme={formattedData.chartTheme}

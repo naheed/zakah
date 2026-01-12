@@ -458,12 +458,29 @@ export function calculateEnhancedAssetBreakdown(
   if (data.foreignCurrency > 0) liquidItems.push({ name: 'Foreign Currency', value: data.foreignCurrency, zakatablePercent: 1.0, zakatableAmount: data.foreignCurrency });
   const liquidTotal = liquidItems.reduce((s, i) => s + i.value, 0);
 
-  // Precious Metals - only include if jewelryZakatable for this madhab
+  // Precious Metals
+  // ALWAYS include in the list so they appear in Sankey chart.
+  // If not zakatable (e.g. jewelry in Shafi'i), set zakatableAmount to 0.
   const metalsItems: AssetItem[] = [];
   const jewelryZakatable = MODE_RULES[safeMadhab].jewelryZakatable;
-  if (data.hasPreciousMetals && jewelryZakatable) {
-    if (data.goldValue > 0) metalsItems.push({ name: 'Gold', value: data.goldValue, zakatablePercent: 1.0, zakatableAmount: data.goldValue });
-    if (data.silverValue > 0) metalsItems.push({ name: 'Silver', value: data.silverValue, zakatablePercent: 1.0, zakatableAmount: data.silverValue });
+
+  if (data.hasPreciousMetals) {
+    if (data.goldValue > 0) {
+      metalsItems.push({
+        name: 'Gold',
+        value: data.goldValue,
+        zakatablePercent: jewelryZakatable ? 1.0 : 0,
+        zakatableAmount: jewelryZakatable ? data.goldValue : 0
+      });
+    }
+    if (data.silverValue > 0) {
+      metalsItems.push({
+        name: 'Silver',
+        value: data.silverValue,
+        zakatablePercent: jewelryZakatable ? 1.0 : 0,
+        zakatableAmount: jewelryZakatable ? data.silverValue : 0
+      });
+    }
   }
   const metalsTotal = metalsItems.reduce((s, i) => s + i.value, 0);
 
