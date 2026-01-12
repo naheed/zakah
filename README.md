@@ -21,7 +21,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Guided Wizard** | Simple mode for quick estimates, detailed mode for comprehensive analysis |
 | **Asset Intelligence** | Upload bank statements; AI extracts line items automatically |
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
-| **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid—coming soon) |
+| **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid Integrated) |
 | **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
 | **Scholarly Methodology** | Based on AMJA, AAOIFI guidelines, and Sheikh Joe Bradford's rulings |
 | **Madhab Support** | Configure calculations per Hanafi, Maliki, Shafi'i, Hanbali, or balanced approach |
@@ -110,6 +110,12 @@ Create a `.env` file with your Supabase credentials:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_SUPABASE_PROJECT_ID=your-project-id
+
+# Edge Function Secrets (Supabase Dashboard)
+PLAID_CLIENT_ID=...
+PLAID_SECRET=...
+PLAID_ENV=sandbox|development|production
+PLAID_ENCRYPTION_KEY=32-byte-hex-string-generated-via-openssl
 ```
 
 ### Database Setup
@@ -266,6 +272,8 @@ Deploy Supabase Edge Functions:
 ```bash
 supabase functions deploy parse-financial-document
 supabase functions deploy delete-account
+supabase functions deploy plaid-link-token
+supabase functions deploy plaid-exchange-token
 ```
 
 ---
@@ -295,7 +303,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 | Export (PDF/CSV) | ✅ Complete | Download reports |
 | Visualization | ✅ Complete | Sankey Chart visual asset flow |
 | Settings Redesign | ✅ Complete | Expressive Dashboard & Data Safety |
-| Plaid Integration | 📋 Planned | Bank account connection |
+| Plaid Integration | ✅ Complete | Bank account connection |
 | Charity Directory | 📋 Planned | Search & filter vetted recipients |
 | Mobile App | 📋 Planned | React Native implementation |
 

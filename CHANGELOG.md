@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## 🌟 Feature Highlights (Quick Look)
+| Version | Major Feature | Released |
+|---|---|---|
+| **v0.13.0** | 🏦 **Plaid Bank Sync** (Connect Bank Accounts) | Jan 11, 2026 |
+| **v0.12.0** | ⚙️ **Settings Redesign** (Material 3 UI) | Jan 9, 2026 |
+| **v0.11.0** | 🧾 **Donation Tracking** (Receipt Scanning) | Jan 6, 2026 |
+| **v0.6.0** | 🕌 **Madhab Support** (4 Schools of Thought) | Jan 3, 2026 |
+| **v0.1.0** | 🧠 **AI Extraction** (Asset Intelligence) | Dec 30, 2025 |
+
+---
+
 ## [Unreleased]
 
 ### Planned
@@ -16,7 +27,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
 
-## [0.12.0] - 2026-01-09
+## [0.13.0] - 2026-01-11
+
+### Added
+- **Plaid Bank Integration (Phase 4)**
+  - **Connect Bank Flow**: Users can now link bank accounts securely via Plaid Link (`PlaidMethod.tsx`).
+  - **Automated Sync**: Fetches Account balances and Investment holdings (Stocks, Crypto, etc.).
+  - **Smart Mapping**: Auto-maps Plaid asset subtypes to Zakat categories (e.g., `401k` -> `Retirement`, `CD` -> `Cash`).
+- **Security Architecture (Critical Upgrade)**
+  - **Server-Side Encryption**: Plaid Access Tokens are encrypted using AES-256-GCM with a unique 16-byte random salt per token.
+  - **Key Management**: Introduced `PLAID_ENCRYPTION_KEY` (32-byte hex secret) for sovereign encryption control.
+  - **Zero-Knowledge Hybrid**: Retains "Privacy Vault" (client-only encryption) for user data while using Server-Side encryption *only* for renewable infrastructure tokens (Plaid).
+- **Compliance**
+  - **Revocation**: `delete-account` Edge Function now decrypts tokens and calls Plaid's `/item/remove` API to permanently revoke bank access upon account deletion.
+
+## [Unreleased]
 
 ### Added
 - **Settings Page Redesign**
