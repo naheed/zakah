@@ -8,19 +8,19 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Check, Info } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import { CalculationMode } from '@/lib/zakatCalculations';
+import { Madhab } from '@/lib/zakatCalculations';
 import { getModeDisplayName, getModeDescription } from '@/lib/madhahRules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MODE_RULES } from '@/lib/zakatCalculations';
 
 interface MethodologySelectorProps {
-    value: CalculationMode;
-    onChange: (mode: CalculationMode) => void;
-    onSave?: (mode: CalculationMode) => void;
+    value: Madhab;
+    onChange: (mode: Madhab) => void;
+    onSave?: (mode: Madhab) => void;
     className?: string;
 }
 
-const MODES = Object.keys(MODE_RULES) as CalculationMode[];
+const MODES = Object.keys(MODE_RULES) as Madhab[];
 
 export function MethodologySelector({
     value,
@@ -28,11 +28,11 @@ export function MethodologySelector({
     onSave,
     className
 }: MethodologySelectorProps) {
-    const [pendingSave, setPendingSave] = useState<CalculationMode | null>(null);
+    const [pendingSave, setPendingSave] = useState<Madhab | null>(null);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Debounced save (2 seconds)
-    const debouncedSave = useCallback((mode: CalculationMode) => {
+    const debouncedSave = useCallback((mode: Madhab) => {
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
@@ -52,7 +52,7 @@ export function MethodologySelector({
         };
     }, []);
 
-    const handleSelect = (mode: CalculationMode) => {
+    const handleSelect = (mode: Madhab) => {
         if (mode === value) return;
         onChange(mode);
         if (onSave) {

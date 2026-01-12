@@ -1,4 +1,4 @@
-import { formatCurrency, CalculationMode } from "@/lib/zakatCalculations";
+import { formatCurrency, Madhab } from "@/lib/zakatCalculations";
 import { getModeDisplayName } from "@/lib/madhahRules";
 import { SealCheck, Minus, Equals, ShieldCheck, BookOpen } from "@phosphor-icons/react";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -13,7 +13,7 @@ interface ReportHeroProps {
     currency: string;
     isAboveNisab: boolean;
     madhab: string;
-    calculationMode: CalculationMode;
+    calculationMode: Madhab;
 }
 
 export function ReportHero({

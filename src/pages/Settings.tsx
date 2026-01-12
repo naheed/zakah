@@ -13,10 +13,8 @@ import {
   CalendarType,
   Madhab,
   MADHAB_RULES,
-  MadhahRules,
-  getCalculationModeForMadhab
 } from "@/lib/zakatCalculations";
-import { getMadhahDisplayName } from "@/lib/madhahRules";
+import { getMadhhabDisplayName, MadhhabRules } from "@/lib/madhahRules";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/runtimeClient";
@@ -229,15 +227,13 @@ export default function Settings() {
                     value={formData.madhab}
                     onValueChange={(v) => {
                       const newMadhab = v as Madhab;
-                      const newMode = getCalculationModeForMadhab(newMadhab);
                       updateFormData({
-                        madhab: newMadhab,
-                        calculationMode: newMode
+                        madhab: newMadhab
                       });
                     }}
                     className="gap-4"
                   >
-                    {(Object.values(MADHAB_RULES) as MadhahRules[]).map((rule) => (
+                    {(Object.values(MADHAB_RULES) as MadhhabRules[]).map((rule) => (
                       <div key={rule.name} className="flex items-center space-x-2">
                         <RadioGroupItem value={rule.name} id={rule.name} />
                         <label htmlFor={rule.name} className="flex-1 cursor-pointer font-medium p-2">

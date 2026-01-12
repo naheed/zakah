@@ -573,7 +573,7 @@ export function ZakatPDFDocumentV2({
                                 <Svg width={8} height={8} viewBox="0 0 24 24" style={{ marginRight: 2 }}>
                                     <Path d="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1z" fill={COLORS.primary} />
                                 </Svg>
-                                <Text>{data.calculationModeLabel} Mode</Text>
+                                <Text>{data.madhabLabel} Mode</Text>
 
                                 <Text style={{ marginHorizontal: 4 }}>•</Text>
 
@@ -708,8 +708,8 @@ export async function generateZakatPDFV2(
                 nisabStandard: data.nisabStandard,
                 nisabLabel: data.nisabStandard === 'gold' ? 'Gold Standard' : 'Silver Standard',
                 nisabValue: calculations.nisab || 0,
-                calculationMode: data.calculationMode,
-                calculationModeLabel: data.calculationMode,
+                calculationMode: data.madhab,
+                calculationModeLabel: data.madhab,
                 zakatRate: data.isSimpleMode ? 0.025 : 0.0257, // Approx
                 grossAssets: calculations.totalAssets || 0,
                 totalZakatableAssets: calculations.netZakatableWealth + calculations.totalLiabilities, // Approx

@@ -105,8 +105,8 @@ export const fiqhExplanations = {
   // CALCULATION MODES - 4 Fiqh-Based Methodologies
   // ==========================================================================
   calculationModes: {
-    title: "Four Methodology Options",
-    explanation: "Bradford: 30% passive, retirement exempt under 59½. Hanafi: 100% all, jewelry included. Maliki/Shafi'i: jewelry exempt, 12-mo debts. Hanbali: jewelry exempt, full deduction.",
+    title: "ZakatFlow Methodology",
+    explanation: "We follow Sheikh Joe Bradford's balanced approach: 30% for passive investments, retirement accounts exempt under 59½, jewelry exempt (majority view), and 12-month debt deduction.",
   },
   bradfordExclusion: {
     title: "Bradford Exclusion Rule",
@@ -145,12 +145,12 @@ export const fiqhExplanations = {
   // RETIREMENT (Enhanced for Bradford Rule)
   // ==========================================================================
   retirementAccounts: {
-    title: "Three Approaches to Retirement",
-    explanation: "Conservative: full balance. Optimized: after taxes/penalties. Bradford: Traditional accounts under 59½ fully exempt due to lack of complete ownership.",
+    title: "Retirement Account Approach",
+    explanation: "Traditional 401(k)/IRA under 59½ are exempt (lack complete ownership per Sheikh Bradford). Roth contributions are always zakatable. HSA is fully zakatable.",
   },
   rothIRA: {
-    title: "Roth IRA Dual Treatment",
-    explanation: "Contributions: accessible tax-free anytime, fully zakatable in all modes. Earnings: subject to penalty under 59½, treated per your chosen calculation mode.",
+    title: "Roth IRA Treatment",
+    explanation: "Contributions: accessible tax-free anytime, fully zakatable. Earnings: subject to penalty under 59½, exempt until you reach that age.",
   },
   rothContributions: {
     title: "Roth Contributions (Principal)",

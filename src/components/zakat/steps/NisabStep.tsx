@@ -1,4 +1,4 @@
-import { ZakatFormData, calculateNisab, formatCurrency, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, NisabStandard, CalculationMode } from "@/lib/zakatCalculations";
+import { ZakatFormData, calculateNisab, formatCurrency, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, NisabStandard, Madhab } from "@/lib/zakatCalculations";
 import { nisabContent } from "@/lib/zakatContent";
 import { QuestionLayout } from "../QuestionLayout";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -28,8 +28,8 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
         >
           <label
             className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.nisabStandard === 'silver'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
               }`}
           >
             <RadioGroupItem value="silver" id="silver" />
@@ -44,8 +44,8 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
 
           <label
             className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.nisabStandard === 'gold'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
               }`}
           >
             <RadioGroupItem value="gold" id="gold" />
@@ -66,15 +66,15 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
           <WhyTooltip {...fiqhExplanations.calculationModes} />
         </div>
         <RadioGroup
-          value={data.calculationMode}
-          onValueChange={(value) => updateData({ calculationMode: value as CalculationMode })}
+          value={data.madhab}
+          onValueChange={(value) => updateData({ calculationMode: value as Madhab })}
           className="space-y-3"
         >
           {/* Bradford Mode */}
           <label
-            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.calculationMode === 'bradford'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'balanced'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
               }`}
           >
             <RadioGroupItem value="bradford" id="bradford" className="mt-1" />
@@ -92,9 +92,9 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
 
           {/* Hanafi Mode */}
           <label
-            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.calculationMode === 'hanafi'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'hanafi'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
               }`}
           >
             <RadioGroupItem value="hanafi" id="hanafi" className="mt-1" />
@@ -111,9 +111,9 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
 
           {/* Maliki/Shafi'i Mode */}
           <label
-            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.calculationMode === 'maliki-shafii'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'maliki-shafii'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
               }`}
           >
             <RadioGroupItem value="maliki-shafii" id="maliki-shafii" className="mt-1" />
@@ -130,9 +130,9 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
 
           {/* Hanbali Mode */}
           <label
-            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.calculationMode === 'hanbali'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'hanbali'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
               }`}
           >
             <RadioGroupItem value="hanbali" id="hanbali" className="mt-1" />

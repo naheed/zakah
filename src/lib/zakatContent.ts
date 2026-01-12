@@ -55,22 +55,12 @@ The majority of scholars, relief organizations, and researchers advocate for the
 • *Anfa' li'l-fuqarā'* — most beneficial for the poor
 • *Aḥwaṭ* — the precautionary principle
 
-The gold standard remains valid for those holding wealth exclusively in gold bullion.
-
-**Calculation Mode Selection:**
-On this page, you also choose how to treat complex assets like retirement accounts:
-• **Conservative** — Pay on full asset values (safest)
-• **Optimized** — Deduct taxes and penalties (accessible balance)
-• **Bradford Exclusion** — Exempt Traditional 401(k)/IRA under 59½ (per Sheikh Joe Bradford's ruling on *milk tām*)`,
+The gold standard remains valid for those holding wealth exclusively in gold bullion.`,
   },
   tips: [
     {
       title: "Why Silver is Recommended",
       content: "If one possesses wealth exceeding the silver niṣāb, they are undoubtedly wealthy enough to contribute. This ensures no eligible Zakat is missed.",
-    },
-    {
-      title: "Choosing a Calculation Mode",
-      content: "All three modes are valid scholarly positions. Conservative is safest, Optimized balances practicality, and Bradford Exclusion follows a specific fiqh ruling on ownership requirements.",
     },
   ],
 };
@@ -247,8 +237,8 @@ If a company derives <5% revenue from impermissible sources (interest, alcohol, 
       content: "Mudir: trades frequently, holds < 1 year, intent is capital gain. Muḥtakir: buy-and-hold, holds > 1 year, intent is dividends/long-term growth.",
     },
     {
-      title: "Conservative vs Optimized",
-      content: "Conservative mode pays on 100% of passive investments. Optimized mode applies the 30% rule. Both are valid scholarly positions.",
+      title: "The 30% Rule",
+      content: "For long-term investments (Muḥtakir), we apply the AAOIFI 30% proxy—only the company's liquid assets are Zakatable, not the full market cap.",
     },
   ],
 };
@@ -258,35 +248,27 @@ export const retirementContent: StepContent = {
   title: "What retirement accounts do you have?",
   subtitle: "401(k), IRA, Roth, HSA, and other tax-advantaged accounts.",
   learnMore: {
-    title: "Three Approaches to Retirement Account Zakat",
-    content: `Retirement accounts present the most complex Zakat challenge due to access restrictions and deferred taxes. The debate centers on **Milk Tām** (complete ownership) and **Qudrah ʿala al-Taṣarruf** (ability to dispose).
+    title: "Retirement Accounts & Complete Ownership",
+    content: `Retirement accounts present a unique Zakat challenge due to access restrictions and deferred taxes. The key principle is **Milk Tām** (complete ownership).
 
-**1. Conservative Mode:**
-Pay Zakat on the **full vested balance**. This is the safest approach—if in doubt, pay more.
-
-**2. Optimized Mode (AMJA Position):**
-The funds ARE accessible—the penalty is a deterrent, not a prohibition. However, it's unjust to pay Zakat on money that belongs to the government.
-• Start with **Vested Balance**
-• Subtract 10% early withdrawal penalty (if under 59½)
-• Subtract estimated federal + state taxes
-• Result = Net Zakatable Value
-
-**3. Bradford Exclusion Rule:**
-Sheikh Joe Bradford argues that Traditional 401(k)/IRA accounts under age 59½ **lack milk tām entirely**:
-• The 10% penalty + taxes create a legal barrier
+**Our Approach (Bradford Methodology):**
+Sheikh Joe Bradford argues that Traditional 401(k)/IRA accounts under age 59½ **lack milk tām**:
+• The 10% penalty + taxes create a legal barrier to access
 • This resembles **māl ḍimār** (inaccessible wealth)
-• Such accounts are fully **exempt** until age 59½
+• Such accounts are **exempt** until age 59½
 
 **Roth IRA (Dual Treatment):**
-• **Contributions** — Accessible tax-free anytime → Fully Zakatable in ALL modes
-• **Earnings** — Subject to penalty if under 59½ → Treated per your chosen mode
+• **Contributions** — Accessible tax-free anytime → Fully Zakatable
+• **Earnings** — Subject to penalty if under 59½ → Exempt until 59½
 
-**HSA Accounts:** Fully accessible for medical expenses → Fully Zakatable.`,
+**HSA Accounts:** Fully accessible for medical expenses → Fully Zakatable.
+
+**After Age 59½:** All retirement accounts become fully accessible and are Zakatable at 100% of value.`,
   },
   tips: [
     {
-      title: "Which Mode Should I Choose?",
-      content: "Conservative if you want certainty. Optimized for practical balance. Bradford if you follow Sheikh Joe Bradford's fiqh reasoning on ownership requirements.",
+      title: "Why This Approach?",
+      content: "We follow the principle that you should not pay Zakat on wealth you cannot truly access. This is the ruling of Sheikh Joe Bradford based on classical fiqh principles.",
     },
     {
       title: "401(k) Loans",

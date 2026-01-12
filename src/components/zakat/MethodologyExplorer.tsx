@@ -8,11 +8,11 @@ import { cn } from '@/lib/utils';
 import { Check, CaretDown, CaretUp, Info, ListNumbers, Coins, TrendUp, ShieldCheck } from '@phosphor-icons/react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 
-type CalculationMode = 'bradford' | 'hanafi' | 'maliki' | 'hanbali';
+import { Madhab } from '@/lib/zakatCalculations';
 
-const MODES: { id: CalculationMode; label: string; rules: any }[] = [
+const MODES: { id: Madhab; label: string; rules: any }[] = [
     {
-        id: 'bradford',
+        id: 'balanced',
         label: 'Bradford (Balanced)',
         rules: {
             jewelry: 'Zakatable (Ahwat)',
@@ -24,17 +24,32 @@ const MODES: { id: CalculationMode; label: string; rules: any }[] = [
         id: 'hanafi',
         label: 'Hanafi',
         rules: {
-            jewelry: 'Zakatable',
-            retirement: 'Net Accessible',
+            retirement: 'Tax/Penalty Deductible',
+            pension: 'Accessible Only',
+            gold: 'Zakatable',
+            jewelry: 'Zakatable (Silver/Gold)',
+            passive: '100% Market'
+        }
+    },
+    {
+        id: 'shafii',
+        label: 'Shafi\'i',
+        rules: {
+            retirement: 'Tax/Penalty Deductible',
+            pension: 'Accessible Only',
+            gold: 'Zakatable',
+            jewelry: 'Exempt (Permissible)',
             passive: '100% Market'
         }
     },
     {
         id: 'maliki',
-        label: 'Maliki / Shafi\'i',
+        label: 'Maliki',
         rules: {
-            jewelry: 'Exempt',
-            retirement: 'Net Accessible',
+            retirement: 'Tax/Penalty Deductible',
+            pension: 'Accessible Only',
+            gold: 'Zakatable',
+            jewelry: 'Exempt (Permissible)',
             passive: '100% Market'
         }
     },
@@ -42,17 +57,20 @@ const MODES: { id: CalculationMode; label: string; rules: any }[] = [
         id: 'hanbali',
         label: 'Hanbali',
         rules: {
-            jewelry: 'Exempt',
-            retirement: 'Net Accessible',
+            retirement: 'Tax/Penalty Deductible',
+            pension: 'Accessible Only',
+            gold: 'Zakatable',
+            jewelry: 'Exempt (Permissible)',
             passive: '100% Market'
         }
     }
 ];
 
 const AHMED_IMPACT = {
-    bradford: { amount: 3025, label: "Lowest" },
+    balanced: { amount: 3025, label: "Lowest" },
     hanafi: { amount: 5490, label: "Moderate" },
     maliki: { amount: 10290, label: "Highest" },
+    shafii: { amount: 10290, label: "Highest" },
     hanbali: { amount: 5290, label: "Moderate" }
 };
 
@@ -67,7 +85,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
         if (mode === 'hanafi') {
             school = content.schools.find((s: any) => s.name === 'Hanafi');
             displayTitle = "Zakatable (Hanafi View)";
-        } else if (mode === 'bradford') {
+        } else if (mode === 'balanced') {
             school = content.schools.find((s: any) => s.name === 'Bradford');
             displayTitle = "Zakatable (Bradford View)";
         } else {
@@ -79,7 +97,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
 
     } else if (title.includes("Retirement")) {
         let approach;
-        if (mode === 'bradford') {
+        if (mode === 'balanced') {
             approach = content.approaches[0]; // Bradford is index 0
         } else {
             approach = content.approaches[1]; // Others are index 1
@@ -89,7 +107,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
         displayBasis = approach?.basis;
 
     } else if (title.includes("Stocks")) {
-        if (mode === 'bradford') {
+        if (mode === 'balanced') {
             displayText = content.rule30.description;
             displayTitle = "30% Rule (Passive)";
             displayBasis = content.rule30.standard;
@@ -136,7 +154,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
 };
 
 export const MethodologyExplorer = () => {
-    const [selectedMode, setSelectedMode] = useState<CalculationMode>('bradford');
+    const [selectedMode, setSelectedMode] = useState<Madhab>('balanced');
     const content = methodologyContent;
 
     return (
@@ -249,25 +267,25 @@ export const MethodologyExplorer = () => {
                                             animate={{ scale: 1, opacity: 1 }}
                                             className="text-4xl font-bold text-emerald-400"
                                         >
-                                            ${AHMED_IMPACT[selectedMode].amount.toLocaleString()}
+                                            ${(AHMED_IMPACT[selectedMode as keyof typeof AHMED_IMPACT]?.amount || 0).toLocaleString()}
                                         </motion.div>
                                     </AnimatePresence>
                                     <Badge variant="outline" className="mt-2 text-slate-300 border-slate-700 bg-slate-800/50">
-                                        {AHMED_IMPACT[selectedMode].label} Estimate
+                                        {(AHMED_IMPACT[selectedMode as keyof typeof AHMED_IMPACT]?.label || "")} Estimate
                                     </Badge>
                                 </div>
 
                                 <div className="pt-4 border-t border-slate-700 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-400">Jewelry</span>
-                                        <span className={['hanafi', 'bradford'].includes(selectedMode) ? "text-emerald-400" : "text-emerald-400"}>
-                                            {['hanafi', 'bradford'].includes(selectedMode) ? 'Included' : 'Exempt'}
+                                        <span className={['hanafi', 'balanced'].includes(selectedMode) ? "text-emerald-400" : "text-emerald-400"}>
+                                            {['hanafi', 'balanced'].includes(selectedMode) ? 'Included' : 'Exempt'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-400">401k</span>
-                                        <span className={selectedMode === 'bradford' ? "text-emerald-400" : "text-amber-400"}>
-                                            {selectedMode === 'bradford' ? 'Exempt' : 'Taxed'}
+                                        <span className={selectedMode === 'balanced' ? "text-emerald-400" : "text-amber-400"}>
+                                            {selectedMode === 'balanced' ? 'Exempt' : 'Taxed'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">

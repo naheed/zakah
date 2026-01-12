@@ -1,9 +1,21 @@
 
 import { describe, it, expect } from 'vitest';
-import { calculateZakat, defaultFormData, getCalculationModeForMadhab } from '../zakatCalculations';
+import { calculateZakat, defaultFormData, calculateNisab, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '../zakatCalculations';
 import { ZakatFormData } from '../zakatTypes';
 
+// =============================================================================
 // Super Ahmed Benchmark Data
+// =============================================================================
+// Ahmed is a 40-year-old with:
+// - $10,000 cash
+// - $5,000 personal jewelry (gold)
+// - $100,000 in 401(k) (vested)
+// - $50,000 in passive investments (ETFs)
+// - $2,000 credit card debt
+// - $2,000/month mortgage
+// - $1,000/month living expenses
+// =============================================================================
+
 const ahmedBase: ZakatFormData = {
     ...defaultFormData,
     // Assets
@@ -28,126 +40,215 @@ const ahmedBase: ZakatFormData = {
 
 describe('Zakat Calculations - Super Ahmed Benchmark', () => {
 
-    it('Scenario A: Bradford (Balanced) Mode', () => {
-        // Expectation:
-        // Jewelry: Exempt ($0)
-        // 401k: Exempt (< 59.5) ($0)
-        // Stocks: 30% rule ($15,000)
-        // Total Assets: 10k(cash) + 15k(stocks) = 25,000
-        // Liabilities: 2k(CC) + 24k(mortgage) + 1k(living) = 27,000
-        // Net: 0
+    // =========================================================================
+    // Core Madhab Logic Matrix
+    // =========================================================================
+    // Base Case: Ahmed with:
+    // Assets: Cash(10k) + Jewelry(5k) + 401k(100k) + Stock(50k) = 165k Gross (varies by Madhab)
+    // Liabilities: CC(2k) + Mortgage(2k/mo = 24k/yr) + Living(1k) = 27k Total (varies by Madhab)
+    // Verify specific Zakatable Amount results per category.
 
-        const data: ZakatFormData = {
-            ...ahmedBase,
-            calculationMode: 'bradford',
-            madhab: 'balanced'
-        };
-        const result = calculateZakat(data);
+    // Definition of Expected Values for Ahmed
+    const SCENARIOS = [
+        {
+            madhab: 'balanced',
+            // Assets: Cash(10k) + Jewelry(0) + 401k(0) + Stock(15k) = 25,000
+            // Liabil: CC(2k) + Mortgage(24k) + Living(12k) = 38,000
+            expectedAssets: 25000,
+            expectedLiabilities: 38000,
+            expectedNet: 0,
+            breakdown: { jewelry: 0, retirement: 0, investments: 15000 }
+        },
+        {
+            madhab: 'hanafi',
+            // Assets: Cash(10k) + Jewelry(5k) + 401k(65k) + Stock(50k) = 130,000
+            // Liabil: All Debt (38k)
+            expectedAssets: 130000,
+            expectedLiabilities: 38000,
+            expectedNet: 92000,
+            breakdown: { jewelry: 5000, retirement: 65000, investments: 50000 }
+        },
+        {
+            madhab: 'shafii',
+            // Assets: Cash(10k) + Jewelry(0) + 401k(65k) + Stock(50k) = 125,000
+            // Liabil: None (0)
+            expectedAssets: 125000,
+            expectedLiabilities: 0,
+            expectedNet: 125000, // 125k > Nisab
+            breakdown: { jewelry: 0, retirement: 65000, investments: 50000 }
+        },
+        {
+            madhab: 'maliki',
+            // Assets: Same as Shafii (125k) - Note: Maliki usually shares rules w/ Shafii on assets, logic from test E
+            // Liabil: 12-Month Rule (38k)
+            expectedAssets: 125000,
+            expectedLiabilities: 38000,
+            expectedNet: 87000,
+            breakdown: { jewelry: 0, retirement: 65000, investments: 50000 }
+        },
+        {
+            madhab: 'hanbali',
+            // Assets: Same as Shafii (125k) - Jewelry Exempt
+            // Liabil: Full Deduction (38k) - Like Hanafi
+            expectedAssets: 125000,
+            expectedLiabilities: 38000,
+            expectedNet: 87000,
+            breakdown: { jewelry: 0, retirement: 65000, investments: 50000 }
+        }
+    ] as const;
 
-        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(0);
-        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(0);
-        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(15000);
+    SCENARIOS.forEach((scenario) => {
+        it(`Calculates correctly for ${scenario.madhab}`, () => {
+            // Feature: CALC-Logic-Matrix
+            const data: ZakatFormData = {
+                ...ahmedBase,
+                madhab: scenario.madhab
+            };
+            const result = calculateZakat(data);
 
-        expect(result.totalAssets).toBe(25000);
-        expect(result.totalLiabilities).toBe(27000);
-        expect(result.netZakatableWealth).toBe(0);
-    });
+            expect(result.totalAssets).toBe(scenario.expectedAssets);
+            expect(result.totalLiabilities).toBe(scenario.expectedLiabilities);
+            expect(result.netZakatableWealth).toBe(scenario.expectedNet);
 
-    it('Scenario B: Hanafi Mode', () => {
-        // Expectation:
-        // Jewelry: Zakatable ($5,000)
-        // 401k: Net Accessible. 
-        //   Tax (25%) + Penalty (10%) = 35% deduction.
-        //   $100k * 0.65 = $65,000.
-        // Stocks: 100% Market Value ($50,000) - Hanafi strict usually 100% or based on inventory
-        // Total Assets: 10k(cash) + 5k(jewelry) + 65k(401k) + 50k(stocks) = 130,000
-        // Liabilities: 
-        //   Current System Cap: 12 months ($24k) + Immediate ($3k) = $27k.
-        //   (Note: Ideally Hanafi subtracts FULL mortgage, but we lack that data field)
-        // Net: 130,000 - 27,000 = 103,000.
-
-        const data: ZakatFormData = {
-            ...ahmedBase,
-            calculationMode: 'hanafi',
-            madhab: 'hanafi'
-        };
-        const result = calculateZakat(data);
-
-        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(5000);
-        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(65000);
-        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(50000);
-
-        expect(result.totalAssets).toBe(130000);
-        expect(result.netZakatableWealth).toBe(103000);
-    });
-
-    it('Scenario C: Shafii Mode (No Debt Deduction)', () => {
-        // Shafi'i position: Debt does NOT prevent Zakat (Al-Nawawi)
-        // Jewelry: Exempt ($0)
-        // 401k: Net Accessible ($65,000)
-        // Stocks: 100% ($50,000)
-        // Total Assets: 10k + 65k + 50k = 125,000
-        // Liabilities: $0 (Shafi'i: no debt deduction)
-        // Net: 125,000
-
-        const data: ZakatFormData = {
-            ...ahmedBase,
-            calculationMode: 'shafii',
-            madhab: 'shafii'
-        };
-        const result = calculateZakat(data);
-
-        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(0);
-        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(65000);
-        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(50000);
-
-        expect(result.totalAssets).toBe(125000);
-        expect(result.totalLiabilities).toBe(0); // Shafi'i: no deduction
-        expect(result.netZakatableWealth).toBe(125000);
-    });
-
-    it('Scenario D: Maliki Mode (12-Month Deduction)', () => {
-        // Maliki uses 12-month deduction like Bradford
-        // Total Assets: 125,000 (same as Shafi'i)
-        // Liabilities: 12 months ($27,000)
-        // Net: 98,000
-
-        const data: ZakatFormData = {
-            ...ahmedBase,
-            calculationMode: 'maliki',
-            madhab: 'maliki'
-        };
-        const result = calculateZakat(data);
-
-        expect(result.totalLiabilities).toBe(27000);
-        expect(result.netZakatableWealth).toBe(98000);
-    });
-
-    it('Scenario E: Hanbali Mode (Full Debt Deduction)', () => {
-        // Hanbali uses full debt deduction like Hanafi (but jewelry exempt)
-        // Jewelry: Exempt ($0)
-        // Total Assets: 125,000
-        // Liabilities: Full (same formula as Hanafi) = $27,000
-
-        const data: ZakatFormData = {
-            ...ahmedBase,
-            calculationMode: 'hanbali',
-            madhab: 'hanbali'
-        };
-        const result = calculateZakat(data);
-
-        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(0); // Jewelry exempt
-        expect(result.totalLiabilities).toBe(27000);
+            // Detailed breakdowns
+            expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(scenario.breakdown.jewelry);
+            expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(scenario.breakdown.retirement);
+            expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(scenario.breakdown.investments);
+        });
     });
 
 });
 
-describe('Madhab to Calculation Mode Mapping', () => {
-    it('maps correctly', () => {
-        expect(getCalculationModeForMadhab('balanced')).toBe('bradford');
-        expect(getCalculationModeForMadhab('hanafi')).toBe('hanafi');
-        expect(getCalculationModeForMadhab('shafii')).toBe('shafii');
-        expect(getCalculationModeForMadhab('maliki')).toBe('maliki');
-        expect(getCalculationModeForMadhab('hanbali')).toBe('hanbali');
+// =============================================================================
+// Edge Case Tests
+// =============================================================================
+
+describe('Zakat Calculations - Edge Cases', () => {
+
+    it('Zero assets should return zero zakat', () => {
+        // Feature: CALC-08 (Zero State)
+        const data: ZakatFormData = {
+            ...defaultFormData,
+            madhab: 'balanced'
+        };
+        const result = calculateZakat(data);
+
+        expect(result.totalAssets).toBe(0);
+        expect(result.zakatDue).toBe(0);
+        expect(result.isAboveNisab).toBe(false);
     });
+
+    it('Below nisab should return zero zakat', () => {
+        // Feature: CALC-01 (Nisab Threshold)
+        const nisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
+
+        const data: ZakatFormData = {
+            ...defaultFormData,
+            madhab: 'balanced',
+            cashOnHand: Math.floor(nisab * 0.5) // Half of nisab
+        };
+        const result = calculateZakat(data);
+
+        expect(result.isAboveNisab).toBe(false);
+        expect(result.zakatDue).toBe(0);
+    });
+
+    it('Exactly at nisab should be zakatable', () => {
+        // Feature: CALC-01 (Nisab Threshold)
+        const nisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
+
+        const data: ZakatFormData = {
+            ...defaultFormData,
+            madhab: 'balanced',
+            cashOnHand: Math.ceil(nisab) // Exactly at nisab
+        };
+        const result = calculateZakat(data);
+
+        expect(result.isAboveNisab).toBe(true);
+        expect(result.zakatDue).toBeGreaterThan(0);
+    });
+
+    it('Age 59.5+ should make 401k fully zakatable', () => {
+        // Feature: CALC-09 (Retirement Age Threshold)
+        const data: ZakatFormData = {
+            ...ahmedBase,
+            madhab: 'balanced',
+            age: 60, // Over 59.5
+            isOver59Half: true
+        };
+        const result = calculateZakat(data);
+
+        // At age 60, 401k is fully accessible (no penalty)
+        // With 25% tax rate: $100,000 * 0.75 = $75,000
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(75000);
+    });
+
+    it('Roth contributions are always zakatable, earnings exempt under 59.5 in Balanced', () => {
+        // Feature: CALC-10 (Roth IRA Rules)
+        const data: ZakatFormData = {
+            ...defaultFormData,
+            madhab: 'balanced',
+            age: 40,
+            rothIRAContributions: 20000, // Contributions (always zakatable)
+            rothIRAEarnings: 10000, // Earnings (exempt under 59.5 in Balanced)
+        };
+        const result = calculateZakat(data);
+
+        // Contributions should be included, earnings exempt
+        expect(result.totalAssets).toBe(20000);
+    });
+
+    it('Roth earnings are zakatable at age 59.5+', () => {
+        const data: ZakatFormData = {
+            ...defaultFormData,
+            madhab: 'balanced',
+            age: 60,
+            isOver59Half: true,
+            rothIRAContributions: 20000,
+            rothIRAEarnings: 10000,
+        };
+        const result = calculateZakat(data);
+
+        // Both contributions and earnings should be included
+        expect(result.totalAssets).toBe(30000);
+    });
+
+});
+
+// =============================================================================
+// Calculation Consistency Tests
+// =============================================================================
+
+describe('Zakat Calculations - Single Source of Truth', () => {
+
+    it('Solar vs Lunar year rate difference', () => {
+        // Feature: CALC-11 (Calendar Types)
+        const dataLunar: ZakatFormData = {
+            ...defaultFormData,
+            madhab: 'balanced',
+            calendarType: 'lunar',
+            cashOnHand: 100000
+        };
+        const dataSOlar: ZakatFormData = {
+            ...dataLunar,
+            calendarType: 'solar'
+        };
+
+        const resultLunar = calculateZakat(dataLunar);
+        const resultSolar = calculateZakat(dataSOlar);
+
+        expect(resultLunar.zakatRate).toBe(0.025); // 2.5%
+        expect(resultSolar.zakatRate).toBeCloseTo(0.02577, 4); // ~2.577%
+        expect(resultSolar.zakatDue).toBeGreaterThan(resultLunar.zakatDue);
+    });
+
+    it('Gold vs Silver nisab standard', () => {
+        // Feature: CALC-12 (Nisab Standards)
+        const silverNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
+        const goldNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'gold');
+
+        // Gold nisab should be significantly higher than silver
+        expect(goldNisab).toBeGreaterThan(silverNisab * 5);
+    });
+
 });

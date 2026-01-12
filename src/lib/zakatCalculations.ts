@@ -1,6 +1,6 @@
 // Zakat Calculation Logic based on Sheikh Joe Bradford's methodology
 
-import { MODE_RULES, MADHAB_RULES, getCalculationModeForMadhab } from './madhahRules';
+import { MODE_RULES, MADHAB_RULES } from './madhahRules';
 import {
   ZakatFormData,
   ZakatCalculationResult,
@@ -11,7 +11,7 @@ import {
   LiabilityItem,
   CalendarType,
   NisabStandard,
-  CalculationMode,
+  Madhab,
   Madhab,
   ZakatReport
 } from './zakatTypes';
@@ -89,7 +89,6 @@ export const defaultFormData: ZakatFormData = {
   currency: 'USD',
   calendarType: 'lunar',
   nisabStandard: 'silver',
-  calculationMode: 'bradford',
   madhab: 'balanced',
   isHousehold: false,
   isSimpleMode: false,
@@ -173,12 +172,12 @@ export function calculateRetirementAccessible(
   vestedBalance: number,
   age: number,
   taxRate: number,
-  mode: CalculationMode
+  madhab: Madhab
 ): number {
   // Bradford Exclusion Rule: Traditional 401(k)/IRA fully exempt under 59½
   // Based on Sheikh Joe Bradford's ruling that these accounts lack milk tām
   // (complete ownership) and qudrah 'ala al-tasarruf (ability to dispose)
-  if (mode === 'bradford' && age < 59.5) {
+  if (madhab === 'balanced' && age < 59.5) {
     return 0; // Fully exempt - treated as māl ḍimār (inaccessible wealth)
   }
 
@@ -190,7 +189,7 @@ export function calculateRetirementAccessible(
 
 export function calculateTotalAssets(data: ZakatFormData): number {
   let total = 0;
-  const { calculationMode } = data;
+  const { madhab } = data;
 
   // Module A: Liquid Assets
   total += data.checkingAccounts;
@@ -202,7 +201,7 @@ export function calculateTotalAssets(data: ZakatFormData): number {
 
   // Precious Metals - only include if jewelryZakatable for this mode
   if (data.hasPreciousMetals) {
-    const jewelryZakatable = MODE_RULES[calculationMode].jewelryZakatable;
+    const jewelryZakatable = MODE_RULES[madhab].jewelryZakatable;
     // Gold and silver coins/bars are always zakatable
     // Personal jewelry is only zakatable in Hanafi mode
     if (jewelryZakatable) {
@@ -229,10 +228,10 @@ export function calculateTotalAssets(data: ZakatFormData): number {
   // Module B: Investments
   total += data.activeInvestments; // 100% - active trading
 
-  // Passive investments: use mode-specific rate (30% for Bradford, 100% for others)
-  // Safety check: Fallback to 'bradford' if mode is undefined/invalid
-  const safeMode = MODE_RULES[calculationMode] ? calculationMode : 'bradford';
-  const passiveRate = MODE_RULES[safeMode].passiveInvestmentRate;
+  // Passive investments: use madhab-specific rate (30% for Balanced, 100% for others)
+  // Safety check: Fallback to 'balanced' if madhab is undefined/invalid
+  const safeMadhab = MODE_RULES[madhab] ? madhab : 'balanced';
+  const passiveRate = MODE_RULES[safeMadhab].passiveInvestmentRate;
   total += data.passiveInvestmentsValue * passiveRate;
 
   // Dividends (after purification)
@@ -248,15 +247,15 @@ export function calculateTotalAssets(data: ZakatFormData): number {
   // - Other modes: treated like 401k (tax/penalty deduction)
   if (data.isOver59Half) {
     total += data.rothIRAEarnings;
-  } else if (calculationMode === 'bradford') {
-    // Roth earnings exempt under Bradford rule (lacks accessibility)
+  } else if (madhab === 'balanced') {
+    // Roth earnings exempt under Balanced/Bradford rule (lacks accessibility)
     // Contributions remain zakatable above
   } else {
     total += calculateRetirementAccessible(
       data.rothIRAEarnings,
       data.age,
       data.estimatedTaxRate,
-      calculationMode
+      madhab
     );
   }
 
@@ -265,14 +264,14 @@ export function calculateTotalAssets(data: ZakatFormData): number {
     data.fourOhOneKVestedBalance,
     data.age,
     data.estimatedTaxRate,
-    calculationMode
+    madhab
   );
 
   total += calculateRetirementAccessible(
     data.traditionalIRABalance,
     data.age,
     data.estimatedTaxRate,
-    calculationMode
+    madhab
   );
 
   // Already withdrawn amounts (post-tax, post-penalty)
@@ -331,7 +330,7 @@ export function calculateTotalLiabilities(data: ZakatFormData): number {
   }
 
   // Immediate debts are always deductible (all schools that allow deduction)
-  total += data.monthlyLivingExpenses;
+  total += data.monthlyLivingExpenses * 12; // Annualized living expenses (12-month obligation)
   total += data.insuranceExpenses;
   total += data.creditCardBalance; // Due immediately
   total += data.unpaidBills; // Due immediately
@@ -348,7 +347,9 @@ export function calculateTotalLiabilities(data: ZakatFormData): number {
   }
 
   if (data.hasTaxPayments) {
-    total += data.propertyTax;
+    total += data.propertyTax; // Recurring annual obligation - deductible
+    // Note: estimatedTaxPayment is NOT deducted - it's a one-time estimated payment,
+    // not a recurring 12-month debt (Maliki ruling distinguishes dayn mustaqir vs ghair mustaqir)
     total += data.lateTaxPayments;
   }
 
@@ -445,8 +446,8 @@ export function calculateEnhancedAssetBreakdown(
   const pctOfNet = (amount: number) =>
     netZakatableWealth > 0 ? amount / netZakatableWealth : 0;
 
-  // Safety check: Fallback to 'bradford' if mode is undefined/invalid
-  const safeMode = MODE_RULES[data.calculationMode] ? data.calculationMode : 'bradford';
+  // Safety check: Fallback to 'balanced' if madhab is undefined/invalid
+  const safeMadhab = MODE_RULES[data.madhab] ? data.madhab : 'balanced';
 
   // Liquid Assets (cash only)
   const liquidItems: AssetItem[] = [];
@@ -457,9 +458,9 @@ export function calculateEnhancedAssetBreakdown(
   if (data.foreignCurrency > 0) liquidItems.push({ name: 'Foreign Currency', value: data.foreignCurrency, zakatablePercent: 1.0, zakatableAmount: data.foreignCurrency });
   const liquidTotal = liquidItems.reduce((s, i) => s + i.value, 0);
 
-  // Precious Metals - only include if jewelryZakatable for this mode
+  // Precious Metals - only include if jewelryZakatable for this madhab
   const metalsItems: AssetItem[] = [];
-  const jewelryZakatable = MODE_RULES[safeMode].jewelryZakatable;
+  const jewelryZakatable = MODE_RULES[safeMadhab].jewelryZakatable;
   if (data.hasPreciousMetals && jewelryZakatable) {
     if (data.goldValue > 0) metalsItems.push({ name: 'Gold', value: data.goldValue, zakatablePercent: 1.0, zakatableAmount: data.goldValue });
     if (data.silverValue > 0) metalsItems.push({ name: 'Silver', value: data.silverValue, zakatablePercent: 1.0, zakatableAmount: data.silverValue });
@@ -479,7 +480,7 @@ export function calculateEnhancedAssetBreakdown(
 
   // Investments
   const investmentItems: AssetItem[] = [];
-  const passiveZakatablePercent = MODE_RULES[safeMode].passiveInvestmentRate;
+  const passiveZakatablePercent = MODE_RULES[safeMadhab].passiveInvestmentRate;
   const passiveZakatableAmount = data.passiveInvestmentsValue * passiveZakatablePercent;
   if (data.activeInvestments > 0) investmentItems.push({ name: 'Active Investments', value: data.activeInvestments, zakatablePercent: 1.0, zakatableAmount: data.activeInvestments });
   if (data.passiveInvestmentsValue > 0) investmentItems.push({
@@ -503,7 +504,7 @@ export function calculateEnhancedAssetBreakdown(
   if (data.rothIRAContributions > 0) retirementItems.push({ name: 'Roth IRA Contributions', value: data.rothIRAContributions, zakatablePercent: 1.0, zakatableAmount: data.rothIRAContributions });
 
   const rothEarningsZakatable = data.isOver59Half ? data.rothIRAEarnings :
-    (data.calculationMode === 'bradford' ? 0 : calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, data.calculationMode));
+    (data.madhab === 'balanced' ? 0 : calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, data.madhab));
   if (data.rothIRAEarnings > 0) retirementItems.push({
     name: 'Roth IRA Earnings',
     value: data.rothIRAEarnings,
@@ -511,7 +512,7 @@ export function calculateEnhancedAssetBreakdown(
     zakatablePercent: data.rothIRAEarnings > 0 ? rothEarningsZakatable / data.rothIRAEarnings : 0
   });
 
-  const fourOhOneKZakatable = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode);
+  const fourOhOneKZakatable = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.madhab);
   if (data.fourOhOneKVestedBalance > 0) retirementItems.push({
     name: '401(k) Vested',
     value: data.fourOhOneKVestedBalance,
@@ -519,7 +520,7 @@ export function calculateEnhancedAssetBreakdown(
     zakatablePercent: data.fourOhOneKVestedBalance > 0 ? fourOhOneKZakatable / data.fourOhOneKVestedBalance : 0
   });
 
-  const iraZakatable = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.calculationMode);
+  const iraZakatable = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.madhab);
   if (data.traditionalIRABalance > 0) retirementItems.push({
     name: 'Traditional IRA',
     value: data.traditionalIRABalance,

@@ -1,5 +1,5 @@
 import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
-import { MODE_RULES } from "@/lib/madhahRules";
+import { MADHAB_RULES } from "@/lib/madhahRules";
 import { investmentsContent } from "@/lib/zakatContent";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
@@ -10,10 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
-  // Use MODE_RULES for passive investment rate
-  // Bradford: 30% (underlying zakatable assets proxy)
-  // Hanafi/Maliki-Shafii/Hanbali: 100% (full market value)
-  const passiveRate = MODE_RULES[data.calculationMode].passiveInvestmentRate;
+  // Use MADHAB_RULES for passive investment rate
+  // Balanced: 30% (underlying zakatable assets proxy)
+  // Hanafi/Maliki/Shafii/Hanbali: 100% (full market value)
+  const passiveRate = MADHAB_RULES[data.madhab].passiveInvestmentRate;
   const passiveZakatable = data.passiveInvestmentsValue * passiveRate;
 
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);

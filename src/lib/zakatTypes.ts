@@ -1,7 +1,9 @@
 export type CalendarType = 'lunar' | 'solar';
 export type NisabStandard = 'silver' | 'gold';
-export type CalculationMode = 'bradford' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali';
 export type Madhab = 'balanced' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali';
+
+// Legacy alias for backward compatibility during migration
+// No alias needed, Madhab is the single source of truth
 
 // Maliki distinction: Mudir (active trader) vs Muhtakir (long-term holder)
 export type InvestmentIntent = 'mudir' | 'muhtakir';
@@ -17,8 +19,7 @@ export interface ZakatFormData {
     currency: string;
     calendarType: CalendarType;
     nisabStandard: NisabStandard;
-    calculationMode: CalculationMode;
-    madhab: Madhab; // User's preferred school of thought
+    madhab: Madhab; // User's preferred school of thought (determines all calculation rules)
     isHousehold: boolean; // Whether calculating for household or just self
     isSimpleMode: boolean; // Whether using simple 4-question mode
     householdMembers: HouseholdMember[]; // Track family members for household mode
