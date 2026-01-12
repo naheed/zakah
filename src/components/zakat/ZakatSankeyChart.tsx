@@ -241,8 +241,8 @@ export function ZakatSankeyChart({
   // We need tighter margins on mobile.
   const isSmallScreen = (width || 800) < 500;
   const margin = isSmallScreen
-    ? { top: 10, right: 90, bottom: 10, left: 90 } // Compact margins for mobile
-    : { top: 20, right: 130, bottom: 20, left: 130 }; // Spacious for desktop (reduced from 160 to prevent squish)
+    ? { top: 10, right: 90, bottom: 10, left: 100 } // Compact margins for mobile (increased left for labels)
+    : { top: 20, right: 130, bottom: 20, left: 180 }; // Increased left from 130->180 to fit long labels
 
   // Adjust align based on screen size/flow
   // 'justify' stretches nodes to edges, 'center' might be better if we have space issues?
@@ -340,18 +340,26 @@ export function ZakatSankeyChart({
           <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
             <ArrowDown className="w-3 h-3" /> Deductions
           </span>
-          <div className="flex gap-2 items-baseline">
-            {totalLiabilities > 0 && (
-              <span className="text-sm font-medium text-destructive" title="Liabilities">
-                -{formatCompactCurrency(totalLiabilities, currency)} (Liab)
-              </span>
+          <div className="flex flex-col items-center">
+            <div className="flex gap-2 items-baseline">
+              {totalLiabilities > 0 && (
+                <span className="text-lg font-bold font-mono text-destructive" title="Liabilities">
+                  -{formatCompactCurrency(totalLiabilities, currency)}
+                </span>
+              )}
+              {totalExempt > 0 && (
+                <span className="text-lg font-bold font-mono text-muted-foreground" title="Exemptions">
+                  -{formatCompactCurrency(totalExempt, currency)}
+                </span>
+              )}
+              {totalLiabilities === 0 && totalExempt === 0 && <span className="text-lg font-bold font-mono text-muted-foreground">-</span>}
+            </div>
+            {(totalLiabilities > 0 || totalExempt > 0) && (
+              <div className="text-[10px] text-muted-foreground flex gap-2">
+                {totalLiabilities > 0 && <span>(Liab)</span>}
+                {totalExempt > 0 && <span>(Exempt)</span>}
+              </div>
             )}
-            {totalExempt > 0 && (
-              <span className="text-sm font-medium text-muted-foreground" title="Exemptions">
-                -{formatCompactCurrency(totalExempt, currency)} (Exempt)
-              </span>
-            )}
-            {totalLiabilities === 0 && totalExempt === 0 && <span className="text-sm text-muted-foreground">-</span>}
           </div>
         </div>
 
