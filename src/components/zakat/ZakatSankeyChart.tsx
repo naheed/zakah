@@ -26,6 +26,7 @@ export function ZakatSankeyChart({
   data,
   enhancedData,
   currency,
+  width,
   height = 450,
 }: ZakatSankeyChartProps) {
 
