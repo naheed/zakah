@@ -333,7 +333,7 @@ export function ZakatSankeyChart({
 
         {/* Net Wealth */}
         <div className="bg-primary/5 rounded-xl p-3 flex flex-col items-center justify-center border border-primary/10">
-          <span className="text-xs uppercase tracking-wider text-primary/80 font-semibold flex items-center gap-1">
+          <span className="text-xs uppercase tracking-wider text-primary font-semibold flex items-center gap-1">
             <Wallet className="w-3 h-3" /> Net Wealth
           </span>
           <span className="text-lg font-bold font-mono text-primary">{formatCompactCurrency(netZakatableWealth, currency)}</span>

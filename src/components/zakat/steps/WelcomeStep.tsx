@@ -249,7 +249,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                   {latestCalculation && !savedLoading && (
                     <div className="pt-2 border-t border-dashed border-border/50">
                       <div className="flex items-center justify-between mb-3 px-1 mt-4">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Past Reports</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Past Reports</h2>
                         <Link to="/calculations" className="text-xs text-primary hover:underline">View All</Link>
                       </div>
                       <MiniReportWidget calculation={latestCalculation} onLoad={handleLoadCalculation} />
@@ -285,7 +285,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
 
                       <CardContent className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center justify-between relative z-10">
                         <div>
-                          <div className="flex items-center gap-2 mb-2 text-primary/80 font-medium text-sm">
+                          <div className="flex items-center gap-2 mb-2 text-primary font-medium text-sm">
                             <CheckCircle weight="fill" />
                             <span>Calculated {getRelativeTime() || 'recently'}</span>
                           </div>
@@ -520,9 +520,9 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               {assetTypes.map((asset, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/50 border border-border text-sm font-medium text-muted-foreground"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-sm font-medium border border-border"
                 >
-                  <CheckCircle className="w-3.5 h-3.5 text-primary" weight="fill" />
+                  <CheckCircle className="w-3.5 h-3.5" weight="fill" />
                   {asset}
                 </span>
               ))}
@@ -531,7 +531,8 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
             {/* Subhead */}
             <motion.p
               variants={itemVariants}
-              className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
+              className="text-lg text-foreground mb-8 leading-relaxed max-w-lg"
+              style={{ color: '#0c0a09' }}
             >
               Calculate your obligations with confidence. We help you navigate the complexity of modern assets—from RSUs to Crypto—so you can make informed choices.
             </motion.p>

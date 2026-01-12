@@ -55,7 +55,11 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           <Label className="text-foreground">Are you over 59½?</Label>
           <p className="text-sm text-muted-foreground">No early withdrawal penalty</p>
         </div>
-        <Switch checked={data.isOver59Half} onCheckedChange={(checked) => updateData({ isOver59Half: checked })} />
+        <Switch
+          checked={data.isOver59Half}
+          onCheckedChange={(checked) => updateData({ isOver59Half: checked })}
+          aria-label="Are you over 59 and a half years old"
+        />
       </div>
 
       <div className="space-y-3">
@@ -63,7 +67,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           <h3 className="font-medium text-foreground">401(k) / 403(b)</h3>
           <WhyTooltip {...(showBradfordExempt ? fiqhExplanations.bradfordExclusion : fiqhExplanations.retirementAccounts)} />
           {showBradfordExempt && (
-            <Badge variant="secondary" className="text-xs bg-tertiary/15 text-tertiary border-0">
+            <Badge variant="secondary" className="text-xs bg-tertiary/15 text-amber-800 dark:text-amber-400 border-0">
               Exempt
             </Badge>
           )}
@@ -81,7 +85,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           <div className="p-3 bg-accent rounded-lg text-sm">
             <span className="text-muted-foreground">Zakatable amount: </span>
             {showBradfordExempt ? (
-              <span className="font-medium text-tertiary">$0.00 (Exempt)</span>
+              <span className="font-medium text-amber-800 dark:text-amber-400">$0.00 (Exempt)</span>
             ) : (
               <span className="font-medium text-primary">{formatCurrency(accessible401k, data.currency)} (After tax/penalty)</span>
             )}
@@ -93,7 +97,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">Traditional IRA</h3>
           {showBradfordExempt && (
-            <Badge variant="secondary" className="text-xs bg-tertiary/15 text-tertiary border-0">
+            <Badge variant="secondary" className="text-xs bg-tertiary/15 text-amber-800 dark:text-amber-400 border-0">
               Exempt
             </Badge>
           )}
@@ -111,7 +115,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
           <div className="p-3 bg-accent rounded-lg text-sm">
             <span className="text-muted-foreground">Zakatable amount: </span>
             {showBradfordExempt ? (
-              <span className="font-medium text-tertiary">$0.00 (Exempt)</span>
+              <span className="font-medium text-amber-800 dark:text-amber-400">$0.00 (Exempt)</span>
             ) : (
               <span className="font-medium text-primary">{formatCurrency(accessibleIRA, data.currency)} (After tax/penalty)</span>
             )}

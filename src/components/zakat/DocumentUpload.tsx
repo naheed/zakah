@@ -490,7 +490,7 @@ export function DocumentUpload({
             <span>PNG, JPG, WebP</span>
           </div>
 
-          <p className="text-xs text-muted-foreground/70 mt-3 max-w-xs mx-auto">
+          <p className="text-xs text-muted-foreground mt-3 max-w-xs mx-auto">
             You'll review extracted values before adding to your calculation.
           </p>
         </div>

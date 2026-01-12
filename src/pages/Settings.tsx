@@ -174,7 +174,7 @@ export default function Settings() {
         <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
           <div className="container mx-auto px-4 h-16 max-w-2xl flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-2">
+              <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-2" aria-label="Go back">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-xl font-bold tracking-tight">Settings</h1>
@@ -190,13 +190,13 @@ export default function Settings() {
             <SettingsCard>
               <div className="p-1">
                 <ToggleGroup type="single" value={theme} onValueChange={(v) => v && setTheme(v)} className="justify-stretch w-full">
-                  <ToggleGroupItem value="light" className="flex-1 data-[state=on]:bg-muted" aria-label="Light Mode">
+                  <ToggleGroupItem value="light" className="flex-1 data-[state=on]:bg-foreground data-[state=on]:text-background" aria-label="Light Mode">
                     <Sun className="h-4 w-4 mr-2" /> Light
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="dark" className="flex-1 data-[state=on]:bg-muted" aria-label="Dark Mode">
+                  <ToggleGroupItem value="dark" className="flex-1 data-[state=on]:bg-foreground data-[state=on]:text-background" aria-label="Dark Mode">
                     <Moon className="h-4 w-4 mr-2" /> Dark
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="system" className="flex-1 data-[state=on]:bg-muted" aria-label="System Mode">
+                  <ToggleGroupItem value="system" className="flex-1 data-[state=on]:bg-foreground data-[state=on]:text-background" aria-label="System Mode">
                     <Monitor className="h-4 w-4 mr-2" /> Auto
                   </ToggleGroupItem>
                 </ToggleGroup>
@@ -349,7 +349,7 @@ export default function Settings() {
             </SettingsCard>
 
             {/* Danger Zone */}
-            <h3 className="px-4 pt-4 text-sm font-medium text-destructive/80 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="px-4 pt-4 text-sm font-medium text-destructive uppercase tracking-wider flex items-center gap-2">
               <WarningCircle className="w-4 h-4" /> Danger Zone
             </h3>
             <SettingsCard className="border-destructive/20">

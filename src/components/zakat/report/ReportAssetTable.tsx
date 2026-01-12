@@ -90,7 +90,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                 </td>
                                 <td className="px-2 py-3.5 text-center">
                                     {cat.zakatablePercent === 1 ? (
-                                        <span className="font-bold text-muted-foreground/50 text-xs">100%</span>
+                                        <span className="font-bold text-muted-foreground text-xs">100%</span>
                                     ) : (
                                         <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
                                             {formatPercent(cat.zakatablePercent)}
@@ -129,7 +129,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                             <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Weight</div>
                             <div className="text-right">
                                 {cat.zakatablePercent === 1 ? (
-                                    <span className="font-bold text-muted-foreground/50 text-xs">100%</span>
+                                    <span className="font-bold text-muted-foreground text-xs">100%</span>
                                 ) : (
                                     <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
                                         {formatPercent(cat.zakatablePercent)}

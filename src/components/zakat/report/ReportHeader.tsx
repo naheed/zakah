@@ -15,7 +15,7 @@ export function ReportHeader({ userName, reportDate, reportId }: ReportHeaderPro
         <header className="flex flex-col sm:flex-row justify-between items-start mb-10 pb-6 border-b border-border">
             <div>
                 {/* Bismillah */}
-                <div className="font-arabic text-xl text-primary/80 mb-4">بسم الله الرحمن الرحيم</div>
+                <div className="font-arabic text-xl text-primary mb-4">بسم الله الرحمن الرحيم</div>
 
                 <h1 className="text-3xl font-extrabold tracking-tight text-foreground leading-none mb-1">
                     {reportDate.getFullYear()} Zakat Record
@@ -31,7 +31,7 @@ export function ReportHeader({ userName, reportDate, reportId }: ReportHeaderPro
                         ZakatFlow
                     </div>
                 </div>
-                <div className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest">Date Generated</div>
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Date Generated</div>
                 <div className="text-sm font-medium text-foreground">
                     {format(reportDate, "MMM d, yyyy")}
                 </div>

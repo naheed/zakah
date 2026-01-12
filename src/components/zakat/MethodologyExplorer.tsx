@@ -112,20 +112,20 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                <div className="p-4 rounded-lg bg-card border border-border">
                     <h4 className="font-semibold text-foreground mb-2">{displayTitle}</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">{displayText}</p>
 
                     {displayEvidence && (
                         <div className="mt-3 pt-3 border-t border-border/50">
-                            <p className="text-xs font-semibold text-primary/80 mb-1">Evidence (Dalil):</p>
+                            <p className="text-xs font-semibold text-primary mb-1">Evidence (Dalil):</p>
                             <p className="text-xs italic text-muted-foreground">"{displayEvidence}"</p>
                         </div>
                     )}
 
                     {displayBasis && (
                         <div className="mt-3 pt-3 border-t border-border/50">
-                            <p className="text-xs font-semibold text-primary/80 mb-1">Scholarly Basis:</p>
+                            <p className="text-xs font-semibold text-primary mb-1">Scholarly Basis:</p>
                             <p className="text-xs italic text-muted-foreground">"{displayBasis}"</p>
                         </div>
                     )}
@@ -157,7 +157,7 @@ export const MethodologyExplorer = () => {
                                         "px-4 py-2 rounded-full text-sm font-medium transition-all border",
                                         selectedMode === mode.id
                                             ? "bg-primary text-primary-foreground border-primary shadow-md transform scale-105"
-                                            : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground"
+                                            : "bg-transparent text-muted-foreground border-border hover:bg-muted/20 hover:text-foreground"
                                     )}
                                 >
                                     {mode.label}
@@ -281,7 +281,7 @@ export const MethodologyExplorer = () => {
                         </CardContent>
                     </Card>
 
-                    <div className="p-4 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
+                    <div className="p-4 rounded-lg bg-transparent border border-border text-sm text-muted-foreground">
                         <p>
                             <strong>Why this matters:</strong> Choosing a methodology isn't just about math—it's about following a conviction.
                             ZakatFlow empowers you to calculate 100% correctly according to your school.

@@ -237,7 +237,7 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
                         </ScrollArea>
 
                         <div className="p-2 border-t bg-muted/20">
-                            <Button variant="ghost" size="sm" onClick={handleAddItem} className="text-primary hover:text-primary/80">
+                            <Button variant="ghost" size="sm" onClick={handleAddItem} className="text-primary hover:text-primary">
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Line Item
                             </Button>

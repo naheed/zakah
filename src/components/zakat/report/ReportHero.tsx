@@ -45,7 +45,7 @@ export function ReportHero({
                     <div>
                         <div className="flex items-center gap-2 mb-3">
                             <SealCheck weight="fill" className="text-primary text-xl" />
-                            <span className="text-xs font-bold uppercase tracking-widest text-primary/80">
+                            <span className="text-xs font-bold uppercase tracking-widest text-primary">
                                 Fulfilling the Third Pillar
                             </span>
                         </div>

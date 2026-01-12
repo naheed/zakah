@@ -356,7 +356,7 @@ export function InteractiveDemo() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <span className="capitalize font-medium text-primary/80">{selectedMode}</span>
+                    <span className="capitalize font-medium text-primary">{selectedMode}</span>
                     <span className="text-muted-foreground/60">·</span>
                     <span className="group-hover:underline">{otherModeLabel}: {formatCurrency(otherZakat, "USD")}</span>
                   </motion.button>

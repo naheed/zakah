@@ -35,10 +35,10 @@ export function SaveProgressPrompt({
     }
 
     // Show prompt after PROMPT_AFTER_STEPS questions (not on results)
-    const shouldShow = 
-      !loading && 
-      !user && 
-      currentStepIndex >= PROMPT_AFTER_STEPS && 
+    const shouldShow =
+      !loading &&
+      !user &&
+      currentStepIndex >= PROMPT_AFTER_STEPS &&
       currentStepIndex < totalSteps - 1 && // Not on results
       !hasBeenDismissed;
 
@@ -79,6 +79,7 @@ export function SaveProgressPrompt({
           <div className="bg-card border border-border rounded-xl shadow-float p-4">
             <button
               onClick={handleDismiss}
+              aria-label="Dismiss save prompt"
               className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-4 h-4" weight="bold" />
@@ -88,7 +89,7 @@ export function SaveProgressPrompt({
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <FloppyDisk className="w-5 h-5 text-primary" weight="fill" />
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-foreground text-sm">
                   Save your progress?
@@ -96,18 +97,18 @@ export function SaveProgressPrompt({
                 <p className="text-xs text-muted-foreground mt-1">
                   Create a free account to save your calculation and access it anytime.
                 </p>
-                
+
                 <div className="flex gap-2 mt-3">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     onClick={handleSignUp}
                     className="gap-1.5 min-h-10"
                   >
                     <UserCirclePlus className="w-4 h-4" weight="bold" />
                     Create Account
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="ghost"
                     onClick={handleDismiss}
                     className="min-h-10"

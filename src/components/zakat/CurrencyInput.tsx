@@ -55,10 +55,10 @@ export function CurrencyInput({
   const [showBreakdown, setShowBreakdown] = useState(false);
   const lastExternalValue = useRef(value);
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   // Determine if label should float (focused or has value)
   const shouldFloat = isFocused || inputValue.length > 0;
-  
+
   // Sync inputValue when external value changes (from document upload)
   useEffect(() => {
     // Only update if the value was changed externally (not by user input)
@@ -67,16 +67,16 @@ export function CurrencyInput({
       lastExternalValue.current = value;
     }
   }, [value, isFocused]);
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    
+
     const parsed = parseMathExpression(newValue);
     onChange(parsed);
     lastExternalValue.current = parsed;
   };
-  
+
   const handleBlur = () => {
     setIsFocused(false);
     if (inputValue) {
@@ -90,8 +90,8 @@ export function CurrencyInput({
     inputRef.current?.focus();
   };
 
-  const displayDescription = isHousehold && householdDescription 
-    ? householdDescription 
+  const displayDescription = isHousehold && householdDescription
+    ? householdDescription
     : description;
 
   const hasContributions = documentContributions.length > 0;
@@ -102,9 +102,9 @@ export function CurrencyInput({
       {displayDescription && (
         <p className="text-sm text-muted-foreground">{displayDescription}</p>
       )}
-      
+
       {/* M3 Filled Text Field Container */}
-      <motion.div 
+      <motion.div
         onClick={handleContainerClick}
         className={cn(
           "relative bg-surface-container-high rounded-t-lg cursor-text transition-colors",
@@ -120,11 +120,11 @@ export function CurrencyInput({
           htmlFor={typeof label === 'string' ? label : undefined}
           className={cn(
             "absolute left-10 pointer-events-none transition-colors",
-            shouldFloat 
-              ? "text-xs font-medium" 
+            shouldFloat
+              ? "text-xs font-medium"
               : "text-base",
-            isFocused 
-              ? "text-primary" 
+            isFocused
+              ? "text-primary"
               : "text-muted-foreground"
           )}
           initial={false}
@@ -136,7 +136,7 @@ export function CurrencyInput({
         >
           {label}
         </motion.label>
-        
+
         {/* Currency Symbol */}
         <span className={cn(
           "absolute left-3 top-1/2 -translate-y-1/2 transition-colors",
@@ -144,7 +144,7 @@ export function CurrencyInput({
         )}>
           {currency}
         </span>
-        
+
         {/* Math Hint Icon */}
         <TooltipProvider>
           <Tooltip>
@@ -152,6 +152,7 @@ export function CurrencyInput({
               <button
                 type="button"
                 tabIndex={-1}
+                aria-label="Calculator hint"
                 className={cn(
                   "absolute right-3 top-1/2 -translate-y-1/2 transition-colors",
                   "text-muted-foreground/50 hover:text-primary"
@@ -166,7 +167,7 @@ export function CurrencyInput({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        
+
         {/* Input */}
         <Input
           ref={inputRef}
@@ -176,25 +177,26 @@ export function CurrencyInput({
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
-          placeholder={shouldFloat ? placeholder : ""}
+          placeholder={shouldFloat ? placeholder : undefined}
+          aria-label={typeof label === 'string' ? label : fieldName || 'Currency input'}
           className={cn(
             "pl-10 pt-6 pb-2 h-14 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0",
             "font-mono tabular-nums tracking-wide",
           )}
         />
-        
+
         {/* Active Indicator Line Animation */}
         <motion.div
           className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary origin-center"
           initial={false}
-          animate={{ 
+          animate={{
             scaleX: isFocused ? 1 : 0,
-            opacity: isFocused ? 1 : 0 
+            opacity: isFocused ? 1 : 0
           }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         />
       </motion.div>
-      
+
       {hasContributions && (
         <Collapsible open={showBreakdown} onOpenChange={setShowBreakdown}>
           <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:underline w-full">
@@ -210,7 +212,7 @@ export function CurrencyInput({
           <CollapsibleContent className="pt-2">
             <div className="bg-muted/50 rounded-lg p-3 space-y-2">
               {documentContributions.map((contribution) => (
-                <div 
+                <div
                   key={contribution.documentId}
                   className="flex items-center justify-between text-sm"
                 >

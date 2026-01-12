@@ -29,55 +29,55 @@ const optionalCategories: {
   label: string;
   description: string;
 }[] = [
-  {
-    id: 'hasPreciousMetals',
-    icon: Diamond,
-    label: 'Precious Metals',
-    description: 'Gold, silver, or jewelry',
-  },
-  {
-    id: 'hasCrypto',
-    icon: CurrencyBtc,
-    label: 'Cryptocurrency',
-    description: 'Bitcoin, Ethereum, staking, DeFi',
-  },
-  {
-    id: 'hasTrusts',
-    icon: Scroll,
-    label: 'Trusts & Estates',
-    description: 'Revocable or irrevocable trusts',
-  },
-  {
-    id: 'hasRealEstate',
-    icon: Buildings,
-    label: 'Investment Property',
-    description: 'Real estate for sale or rental income',
-  },
-  {
-    id: 'hasBusiness',
-    icon: Storefront,
-    label: 'Business Assets',
-    description: 'Inventory, receivables, business cash',
-  },
-  {
-    id: 'hasIlliquidAssets',
-    icon: PaintBrush,
-    label: 'Collectibles',
-    description: 'Art, antiques, or livestock for sale',
-  },
-  {
-    id: 'hasDebtOwedToYou',
-    icon: Handshake,
-    label: 'Money Owed',
-    description: 'Personal loans you expect to collect',
-  },
-  {
-    id: 'hasTaxPayments',
-    icon: Receipt,
-    label: 'Outstanding Taxes',
-    description: 'Property tax or late payments due',
-  },
-];
+    {
+      id: 'hasPreciousMetals',
+      icon: Diamond,
+      label: 'Precious Metals',
+      description: 'Gold, silver, or jewelry',
+    },
+    {
+      id: 'hasCrypto',
+      icon: CurrencyBtc,
+      label: 'Cryptocurrency',
+      description: 'Bitcoin, Ethereum, staking, DeFi',
+    },
+    {
+      id: 'hasTrusts',
+      icon: Scroll,
+      label: 'Trusts & Estates',
+      description: 'Revocable or irrevocable trusts',
+    },
+    {
+      id: 'hasRealEstate',
+      icon: Buildings,
+      label: 'Investment Property',
+      description: 'Real estate for sale or rental income',
+    },
+    {
+      id: 'hasBusiness',
+      icon: Storefront,
+      label: 'Business Assets',
+      description: 'Inventory, receivables, business cash',
+    },
+    {
+      id: 'hasIlliquidAssets',
+      icon: PaintBrush,
+      label: 'Collectibles',
+      description: 'Art, antiques, or livestock for sale',
+    },
+    {
+      id: 'hasDebtOwedToYou',
+      icon: Handshake,
+      label: 'Money Owed',
+      description: 'Personal loans you expect to collect',
+    },
+    {
+      id: 'hasTaxPayments',
+      icon: Receipt,
+      label: 'Outstanding Taxes',
+      description: 'Property tax or late payments due',
+    },
+  ];
 
 // M3 spring animation config
 const springConfig = { type: "spring" as const, stiffness: 400, damping: 25 };
@@ -142,11 +142,11 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
               )}
             </AnimatePresence>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {optionalCategories.map((category, index) => {
               const isSelected = data[category.id];
-              
+
               return (
                 <Tooltip key={category.id}>
                   <TooltipTrigger asChild>
@@ -165,23 +165,23 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
                         // M3 State layers via hover/focus
                         isSelected
                           ? "bg-secondary border-secondary text-secondary-foreground"
-                          : "bg-card border-border hover:bg-accent/50 hover:border-primary/30"
+                          : "bg-card border-border hover:bg-accent/50 hover:border-primary/30 text-neutral-900 dark:text-neutral-100"
                       )}
                     >
                       {/* Icon */}
-                      <category.icon 
-                        weight={isSelected ? "fill" : "duotone"} 
+                      <category.icon
+                        weight={isSelected ? "fill" : "duotone"}
                         className={cn(
                           "w-7 h-7",
                           isSelected ? "text-secondary-foreground" : "text-primary"
-                        )} 
+                        )}
                       />
-                      
+
                       {/* Label */}
                       <span className="text-xs font-medium leading-tight">
                         {category.label}
                       </span>
-                      
+
                       {/* Selected checkmark */}
                       <AnimatePresence>
                         {isSelected && (
@@ -206,9 +206,9 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
             })}
           </div>
         </div>
-        
+
         {/* Helper text */}
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="text-sm text-neutral-900 dark:text-neutral-100 text-center">
           Not sure? Select it anyway — you can skip any question later.
         </p>
       </div>

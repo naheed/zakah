@@ -57,10 +57,12 @@ export const SettingsRow = forwardRef<HTMLButtonElement | HTMLDivElement, Settin
 
                     {/* Text Content */}
                     <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className={cn(
-                            "text-base font-medium truncate",
-                            destructive ? "text-destructive" : "text-foreground"
-                        )}>
+                        <span
+                            className={cn(
+                                "text-base font-medium truncate",
+                                destructive ? "text-[var(--text-destructive)]" : "text-foreground"
+                            )}
+                        >
                             {label}
                         </span>
                         {description && (

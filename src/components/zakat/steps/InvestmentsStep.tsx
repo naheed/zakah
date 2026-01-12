@@ -100,8 +100,9 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
         />
 
         <div className="space-y-2">
-          <Label className="text-sm text-foreground">Purification % (Non-Halal Income)</Label>
+          <Label htmlFor="dividend-purification" className="text-sm text-foreground">Purification % (Non-Halal Income)</Label>
           <Input
+            id="dividend-purification"
             type="number"
             min={0}
             max={100}

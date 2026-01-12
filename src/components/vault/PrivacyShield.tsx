@@ -33,8 +33,8 @@ export function PrivacyShield() {
 
     if (isGuest) {
         Icon = Lock;
-        colorClass = "text-tertiary dark:text-tertiary"; // Using design system tertiary (gold) for cautionary
-        bgClass = "bg-tertiary/10 hover:bg-tertiary/20";
+        colorClass = "text-tertiary";
+        bgClass = "bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30";
         label = "Device Only";
     } else if (isCloud) {
         Icon = CloudCheck;

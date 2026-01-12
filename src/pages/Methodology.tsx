@@ -28,7 +28,7 @@ const Methodology = () => {
   const headerContent = (
     <div>
       <Text variant="lead">{content.header.intro}</Text>
-      <Card className="bg-muted/50 border-border shadow-none mt-4">
+      <Card className="bg-card border-border shadow-sm mt-4">
         <CardContent className="p-4 pt-4">
           <p className="text-sm text-muted-foreground">
             <strong className="text-foreground">Primary Influences:</strong> {content.header.primaryInfluences}
@@ -86,7 +86,7 @@ const Methodology = () => {
                         </h4>
                         <p className="text-sm text-muted-foreground">{condition.description}</p>
                         {condition.example && (
-                          <p className="text-xs mt-2 text-primary/80 italic">{condition.example}</p>
+                          <p className="text-xs mt-2 text-primary italic">{condition.example}</p>
                         )}
                       </div>
                     </StaggerItem>
