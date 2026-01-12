@@ -28,6 +28,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
 
+## [0.15.0] - 2026-01-11
+
+### Added
+- **Systemic Accessibility Architecture**
+  - **Container Tokens**: Introduced Material 3-style tokens (e.g., `bg-tertiary-container`) to `index.css` and Tailwind config. This ensures scientifically calculated contrast ratios (WCAG AA) for tinted backgrounds in both Light and Dark modes, replacing fragile opacity hacks.
+  - **Comprehensive Coverage**: New E2E test suite `static-pages-a11y.spec.ts` guaranteeing 0 violations on Auth, Methodology, Privacy, Terms, About, and Logout pages.
+- **Semantic Chart Palette**
+  - **Psychological Mapping**: Restored intuitive color coding for assets (Blue=Investments, Purple=Retirement, Emerald=Cash, Gold=Crypto) using new durability-focused `chart-*` tokens.
+  - **Dark Mode Optimization**: Calibrated saturation/lightness for dark mode readability (~75% Lightness).
+
+### Changed
+- **Link Design**: Standardized body links to `text-foreground underline decoration-primary` for accessible high-contrast navigation.
+- **Methodology Page**: Refactored status indicators (Include/Deductible) to use semantic `text-success` / `text-destructive` tokens.
+- **Assets Page**: Unified icon styling to `text-primary` for a cleaner, brand-aligned visual rhythm.
+
+### Fixed
+- **Dark Mode Contrast**: Resolved persistent failures on "About" and "Logout" pages by fixing animation timing in tests and simplifying text color rules.
+- **DOM Validity**: Fixed invalid `ul > div > li` nesting in `scroll-reveal` component.
+
 ## [0.14.0] - 2026-01-11
 
 ### Added

@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Status: Early Access](https://img.shields.io/badge/Status-Early%20Access-orange.svg)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Accessibility: WCAG AA](https://img.shields.io/badge/Accessibility-WCAG%20AA-success.svg)](https://www.w3.org/WAI/WCAG2AA-Conformance)
 
 **Zakat calculation made simple.** A guided, step-by-step application for accurate Islamic wealth purification.
 
@@ -275,6 +276,30 @@ supabase functions deploy delete-account
 supabase functions deploy plaid-link-token
 supabase functions deploy plaid-exchange-token
 ```
+
+---
+
+---
+
+## Quality Assurance & Accessibility
+
+ZakatFlow maintains a zero-tolerance policy for accessibility violations on public pages. We adhere to **WCAG 2.1 AA** standards.
+
+### The Quality Bar
+All new UI changes must pass the accessibility suite. We use a "System Design" approach (Container Tokens) to prevent contrast regressions.
+
+```bash
+# Run the Accessibility Suite
+npx playwright test e2e/static-pages-a11y.spec.ts
+
+# Run the Full Suite (Core + Static + Auth)
+npx playwright test
+```
+
+### Design Standards
+- **Contrast**: Use `text-foreground` or `text-primary` (checked against background). Avoid `gray-500`.
+- **Surfaces**: Use `bg-muted` or `bg-*-container` tokens. Do not use opacity hacks like `bg-primary/10`.
+- **Links**: Must use `underline` or clear visual distinction beyond color.
 
 ---
 

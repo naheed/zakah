@@ -78,6 +78,12 @@
 
 ## ✅ Completed Milestones (History)
 
+### Phase 9: System Design & Accessibility ✅
+> **Released: v0.15.0 (Jan 2026)**
+- **Systemic Contrast:** Concept of "Container Tokens" (`bg-tertiary-container`) for fail-safe contrast in Light/Dark modes.
+- **Theme Integrity:** Semantic Chart Palette restoring psychological color mapping (Blue=Investments, Purple=Retirement).
+- **Quality Assurance:** 100% E2E Accessibility Coverage for all public static pages.
+
 ### Phase 4: Account Connections (Plaid) ✅
 > **Released: v0.13.0 (Jan 2026)**
 - **Bank Sync:** Plaid Link integration for automatic balance updates
