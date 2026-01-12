@@ -61,17 +61,17 @@ serve(async (req) => {
         // Validate the user via the passed JWT (do not rely on server-side session storage)
         const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
         const token = authHeader.replace("Bearer ", "");
-        const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
 
-        if (claimsError || !claimsData?.claims?.sub) {
-            console.error("JWT validation failed:", claimsError);
+        if (authError || !user) {
+            console.error("JWT validation failed:", authError);
             return new Response(
                 JSON.stringify({ error: "Unauthorized - Please sign in to connect your bank" }),
                 { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             );
         }
 
-        const userId = claimsData.claims.sub;
+        const userId = user.id;
         console.log(`User authenticated: ${userId}`);
 
         // Check for secrets
