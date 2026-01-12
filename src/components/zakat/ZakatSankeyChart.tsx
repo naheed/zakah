@@ -235,21 +235,33 @@ export function ZakatSankeyChart({
     return (b.value || 0) - (a.value || 0);
   };
 
+  // Dynamic margins based on width
+  // Mobile (320px) -> 160px margins left 0 width!
+  // We need tighter margins on mobile.
+  const isSmallScreen = (width || 800) < 500;
+  const margin = isSmallScreen
+    ? { top: 10, right: 90, bottom: 10, left: 90 } // Compact margins for mobile
+    : { top: 20, right: 130, bottom: 20, left: 130 }; // Spacious for desktop (reduced from 160 to prevent squish)
+
+  // Adjust align based on screen size/flow
+  // 'justify' stretches nodes to edges, 'center' might be better if we have space issues?
+  // Stick to 'justify' but ensure margins allow it.
+
   return (
     <div className="space-y-6">
       <div style={{ height }} className="w-full">
         <ResponsiveSankey
           data={formattedData}
           theme={formattedData.chartTheme}
-          margin={{ top: 20, right: 160, bottom: 20, left: 160 }}
+          margin={margin}
           align="justify"
           // @ts-ignore - Nivo types can be strict about sort function signature
           sort={sortNodes}
           colors={(node: any) => node.nodeColor || "#999"}
           nodeOpacity={1}
           nodeHoverOthersOpacity={0.35}
-          nodeThickness={18}
-          nodeSpacing={24}
+          nodeThickness={isSmallScreen ? 12 : 18}
+          nodeSpacing={isSmallScreen ? 16 : 24}
           nodeBorderWidth={0}
           nodeBorderColor={{ from: 'color', modifiers: [['darker', 0.8]] }}
           linkOpacity={isDark ? 0.6 : 0.4}
@@ -259,7 +271,7 @@ export function ZakatSankeyChart({
           enableLinkGradient={true}
           labelPosition="outside"
           labelOrientation="horizontal"
-          labelPadding={16}
+          labelPadding={isSmallScreen ? 8 : 16}
           labelTextColor={{ from: 'theme', theme: 'text.fill' }}
 
           // --- TOOLTIPS ---
@@ -295,9 +307,20 @@ export function ZakatSankeyChart({
           // Custom Label: hide label for Retained Wealth to reduce clutter? 
           // Or user might want to see it. Let's show all for now but keep them compact.
           label={(node) => {
+            const val = formatCompactCurrency(node.value, currency);
+            if (isSmallScreen) {
+              // Compact labels for mobile
+              if (node.id === "Retained_Wealth") return `Retained\n${val}`;
+              if (node.id === "Zakat_Due") return `Zakat\n${val}`;
+              if (node.id === "Exempt") return `Exempt\n${val}`;
+              // Truncate long source names
+              const name = (node.displayName || node.id).substring(0, 10);
+              return `${name}\n${val}`;
+            }
+            // Desktop
             // For Retained Wealth, maybe simplify label
-            if (node.id === "Retained_Wealth") return `Retained\n${formatCompactCurrency(node.value, currency)}`;
-            return `${node.displayName || node.id}\n${formatCompactCurrency(node.value, currency)}`;
+            if (node.id === "Retained_Wealth") return `Retained\n${val}`;
+            return `${node.displayName || node.id}\n${val}`;
           }}
         />
       </div>
