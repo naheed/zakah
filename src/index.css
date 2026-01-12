@@ -125,82 +125,101 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Warm dark neutrals - M3 On-Surface (87% lightness) */
+    /* SYSTEM DESIGN: Dark Mode v2 */
+    /* Based on Relative Luminance. Target Contrast: > 4.5:1 for Text */
+
+    /* 1. Base Surfaces (Warm Dark Grey) */
+    /* Reduced saturation to prevent muddy browns, kept lightness < 15% */
     --background: 30 8% 9%;
-    --foreground: 35 8% 87%;
+    --foreground: 35 8% 90%;
+    /* Off-white (15:1 contrast) */
 
     --card: 32 10% 14%;
-    --card-foreground: 35 8% 87%;
+    /* Slightly elevated surface */
+    --card-foreground: 35 8% 90%;
 
     --popover: 30 12% 18%;
-    --popover-foreground: 35 8% 87%;
+    /* Highest surface */
+    --popover-foreground: 35 8% 90%;
 
-    --primary: 158 64% 51%;
-    --primary-foreground: 165 91% 9%;
+    /* 2. Brand Colors */
 
-    --secondary: 35 8% 45%;
-    --secondary-foreground: 35 8% 87%;
+    /* Primary: Antique Sage (Organic, muted) */
+    /* Lightness 60% -> Readable against 9% bg (~6:1) */
+    --primary: 158 40% 60%;
+    /* On-Primary: Deep Jungle Ink (not pure black) */
+    --primary-foreground: 158 50% 5%;
 
-    /* Text hierarchy - WCAG 2.2 AA compliant (4.5:1 minimum) */
-    --muted: 35 8% 45%;
-    --muted-foreground: 35 8% 72%;
-    /* Fixed: 5.5:1 ratio (was 65% ~4:1) */
+    /* Secondary: Surface Container Highest */
+    /* Lightness 25% for backgrounds -> supports 90% text (9:1) */
+    --secondary: 35 8% 25%;
+    --secondary-foreground: 35 8% 90%;
 
-    /* Section headers - Enhanced contrast */
-    --section-header: 35 8% 78%;
-    /* 6:1 ratio for small caps on dark */
+    /* Tertiary: Old Gold (Metallic, not neon) */
+    /* Lightness 65% -> Readable on dark (~6:1) */
+    --tertiary: 45 60% 65%;
+    --tertiary-foreground: 40 20% 10%;
+
+    /* 3. Text & Interaction Hierarchy */
+
+    /* Muted: Subtle Separator */
+    --muted: 35 8% 15%;
+    --muted-foreground: 35 8% 70%;
+
+    /* Section headers */
+    --section-header: 35 8% 80%;
 
     --accent: 178 84% 10%;
     --accent-foreground: 172 66% 50%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 85% 97%;
-
-    /* Tertiary: Gold - ENHANCED for dark mode visibility */
-    /* Increased lightness from 55% to 70% for better contrast on dark backgrounds */
-    --tertiary: 45 85% 70%;
-    --tertiary-foreground: 40 50% 8%;
+    --destructive-foreground: 0 85% 5%;
 
     /* Success: Warm green */
     --success: 145 60% 50%;
-    --success-foreground: 145 80% 10%;
+    --success-foreground: 145 80% 5%;
 
-    /* M3 Surface Containers - Dark */
+    /* 4. M3 Surface Containers - Dark */
     --surface-container-lowest: 30 10% 6%;
     --surface-container-low: 30 10% 10%;
     --surface-container: 30 8% 14%;
     --surface-container-high: 32 8% 18%;
     --surface-container-highest: 32 8% 22%;
 
+    /* 5. Utility Colors */
     --border: 35 10% 25%;
     --input: 35 10% 25%;
-    --ring: 158 64% 51%;
+    --ring: 158 85% 75%;
+    /* Matches Primary */
 
+    /* Sidebar - Matches Surfaces */
     --sidebar-background: 30 10% 10%;
-    --sidebar-foreground: 35 8% 87%;
-    --sidebar-primary: 158 64% 51%;
-    --sidebar-primary-foreground: 165 91% 9%;
-    --sidebar-accent: 172 66% 50%;
-    --sidebar-accent-foreground: 178 84% 10%;
+    --sidebar-foreground: 35 8% 90%;
+    --sidebar-primary: 158 85% 75%;
+    --sidebar-primary-foreground: 158 100% 5%;
+    --sidebar-accent: 35 8% 25%;
+    --sidebar-accent-foreground: 35 8% 90%;
     --sidebar-border: 35 10% 25%;
-    --sidebar-ring: 158 64% 51%;
+    --sidebar-ring: 158 85% 75%;
 
-    --chart-1: 156 71% 66%;
-    --chart-2: 141 76% 73%;
-    --chart-3: 170 76% 64%;
-    --chart-4: 81 84% 67%;
-    --chart-5: 45 85% 60%;
+    /* Charts (Optimized for Dark) */
+    --chart-1: 158 85% 75%;
+    --chart-2: 170 76% 64%;
+    --chart-3: 45 85% 70%;
+    --chart-4: 141 76% 73%;
+    --chart-5: 27 87% 65%;
 
     --sidebar: 32 10% 14%;
 
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.15);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.15);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 2px 4px -1px hsl(0 0% 0% / 0.2);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 4px 6px -1px hsl(0 0% 0% / 0.2);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 8px 10px -1px hsl(0 0% 0% / 0.2);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.35);
+    /* Shadows (Darker intensity) */
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.5);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.5);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.6), 0 1px 2px -1px hsl(0 0% 0% / 0.6);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.6), 0 1px 2px -1px hsl(0 0% 0% / 0.6);
+    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.6), 0 2px 4px -1px hsl(0 0% 0% / 0.6);
+    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.6), 0 4px 6px -1px hsl(0 0% 0% / 0.6);
+    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.6), 0 8px 10px -1px hsl(0 0% 0% / 0.6);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.7);
   }
 }
 

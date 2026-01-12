@@ -3,6 +3,7 @@ import { getModeDisplayName } from "@/lib/madhahRules";
 import { SealCheck, Minus, Equals, ShieldCheck, BookOpen } from "@phosphor-icons/react";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface ReportHeroProps {
     zakatDue: number;
@@ -24,7 +25,8 @@ export function ReportHero({
     isAboveNisab,
     madhab,
     calculationMode,
-}: ReportHeroProps) {
+    className
+}: ReportHeroProps & { className?: string }) {
     // Format helpers
     const wholeZakat = Math.floor(zakatDue);
     const decimalZakat = (zakatDue % 1).toFixed(2).substring(1); // .00
@@ -36,12 +38,45 @@ export function ReportHero({
     // Madhab Label
     const madhabLabel = madhab ? (madhab.charAt(0).toUpperCase() + madhab.slice(1) + " Madhab") : "Standard Madhab";
 
+    // Animation Variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 20
+            }
+        }
+    };
+
     return (
-        <section className="mb-10">
+        <motion.section
+            className={cn("mb-10", className)}
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
 
                 {/* The "Action" Card (Left) */}
-                <div className="col-span-1 md:col-span-12 lg:col-span-5 border-2 border-primary/20 bg-card rounded-2xl p-7 relative flex flex-col justify-between min-h-[180px]">
+                <motion.div
+                    variants={itemVariants}
+                    className="col-span-1 md:col-span-12 lg:col-span-5 border-2 border-primary/20 bg-card rounded-2xl p-7 relative flex flex-col justify-between min-h-[180px]"
+                >
                     <div>
                         <div className="flex items-center gap-2 mb-3">
                             <SealCheck weight="fill" className="text-primary text-xl" />
@@ -62,10 +97,13 @@ export function ReportHero({
                             This amount represents 2.5% of your zakatable wealth, purified and ready for distribution to those in need.
                         </p>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* The "Story" (Equation) (Right) */}
-                <div className="col-span-1 md:col-span-12 lg:col-span-7 bg-surface-container-low rounded-2xl p-7 flex flex-col justify-center">
+                <motion.div
+                    variants={itemVariants}
+                    className="col-span-1 md:col-span-12 lg:col-span-7 bg-surface-container-low rounded-2xl p-7 flex flex-col justify-center"
+                >
                     <div className="flex flex-col sm:flex-row items-center justify-between text-center w-full mb-6 sm:mb-2 gap-4 sm:gap-0">
                         {/* Step 1 */}
                         <div className="flex flex-col items-center sm:items-start">
@@ -110,8 +148,8 @@ export function ReportHero({
                             <span className="text-muted-foreground font-semibold bg-muted px-2 py-0.5 rounded">Below Nisab</span>
                         )}
                     </div>
-                </div>
+                </motion.div>
             </div>
-        </section>
+        </motion.section>
     );
 }

@@ -124,7 +124,8 @@ export function ResultsStep({
   const totalPurification = interestToPurify + dividendsToPurify;
 
   // Trigger confetti on mount if above nisab
-  const showConfetti = useConfetti(isAboveNisab);
+  // Disabled per design review to reduce visual noise
+  const showConfetti = false; // useConfetti(isAboveNisab);
 
   // Track anonymous usage metrics when results are shown
   useEffect(() => {
@@ -255,7 +256,7 @@ export function ResultsStep({
             <Button
               onClick={handleDownload}
               disabled={isGeneratingPDF}
-              className="gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm"
+              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
             >
               {isGeneratingPDF ? (
                 <ArrowCounterClockwise className="w-4 h-4 animate-spin" />

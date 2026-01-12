@@ -355,7 +355,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 className="w-full pt-4"
               >
                 <ImpactStats
-                  variant="flat"
+                  variant="compact"
                   isLoading={metricsLoading && !userStats}
                   totalReferrals={impactData.referrals}
                   totalAssetsCalculated={impactData.assets}
@@ -531,8 +531,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
             {/* Subhead */}
             <motion.p
               variants={itemVariants}
-              className="text-lg text-foreground mb-8 leading-relaxed max-w-lg"
-              style={{ color: '#0c0a09' }}
+              className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
             >
               Calculate your obligations with confidence. We help you navigate the complexity of modern assets—from RSUs to Crypto—so you can make informed choices.
             </motion.p>

@@ -21,8 +21,8 @@ interface ImpactStatsProps {
     isLoading?: boolean;
     /** Additional class names */
     className?: string;
-    /** Variant: 'card' (default), 'flat', or 'community' (Assets + Zakat only) */
-    variant?: 'card' | 'flat' | 'community';
+    /** Variant: 'card' (default), 'flat', 'community', or 'compact' (Dashboard) */
+    variant?: 'card' | 'flat' | 'community' | 'compact';
     /** Custom title override (default: "Your Impact") */
     title?: string;
     /** Custom footer message */
@@ -52,7 +52,40 @@ export function ImpactStats({
     const meetsThreshold = totalReferrals >= PRIVACY_THRESHOLD;
     const isCommunity = variant === 'community';
 
+    const isCompact = variant === 'compact';
     const Wrapper = motion.div;
+
+    // Compact Variant: Single horizontal flow
+    if (isCompact) {
+        return (
+            <Wrapper
+                className={cn(
+                    "bg-tertiary/5 border border-tertiary/10 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-muted-foreground",
+                    className
+                )}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-tertiary/10 rounded-full text-tertiary">
+                        <Users className="w-4 h-4" weight="fill" />
+                    </div>
+                    <span className="font-semibold text-tertiary">
+                        <AnimatedNumber value={totalReferrals} /> people
+                    </span>
+                </div>
+
+                <span className="hidden sm:inline text-border">|</span>
+
+                <p className="text-center sm:text-left">
+                    evaluated <span className="font-semibold text-foreground"><AnimatedNumber value={totalAssetsCalculated || 0} format={formatLargeNumber} /></span> in assets
+                    {' '}& calculated <span className="font-semibold text-primary"><AnimatedNumber value={totalZakatCalculated || 0} format={formatLargeNumber} /></span> in Zakat
+                </p>
+            </Wrapper>
+        );
+    }
+
     const wrapperClasses = (variant === 'card' || isCommunity)
         ? "bg-tertiary/5 dark:bg-tertiary/10 border border-tertiary/20 dark:border-tertiary/20 rounded-3xl p-8"
         : "";
@@ -70,7 +103,7 @@ export function ImpactStats({
                 </h3>
             </div>
 
-            {/* Main Stat: People Helped (hidden in community variant) */}
+            {/* Main Stat: People Helped */}
             {!isCommunity && (
                 <div className="flex flex-col items-center">
                     <div className="flex items-baseline justify-center gap-1">
@@ -89,22 +122,22 @@ export function ImpactStats({
                 <div className="grid grid-cols-2 gap-8">
                     {/* Assets - Hero */}
                     <div className="text-center space-y-2">
-                        <Wallet className="w-8 h-8 mx-auto text-amber-600 dark:text-amber-400" weight="duotone" />
-                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-amber-900 dark:text-amber-100 font-work-sans">
+                        <Wallet className="w-8 h-8 mx-auto text-tertiary" weight="duotone" />
+                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-foreground font-work-sans">
                             <AnimatedNumber value={totalAssetsCalculated || 0} format={formatLargeNumber} />
                         </span>
-                        <p className="text-xs font-bold uppercase tracking-wider text-amber-800/50 dark:text-amber-500/50">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                             Assets Evaluated
                         </p>
                     </div>
 
                     {/* Zakat - Hero */}
                     <div className="text-center space-y-2">
-                        <Sparkle className="w-8 h-8 mx-auto text-green-600 dark:text-green-400" weight="duotone" />
-                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-green-700 dark:text-green-300 font-work-sans">
+                        <Sparkle className="w-8 h-8 mx-auto text-primary" weight="duotone" />
+                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-primary font-work-sans">
                             <AnimatedNumber value={totalZakatCalculated || 0} format={formatLargeNumber} />
                         </span>
-                        <p className="text-xs font-bold uppercase tracking-wider text-green-800/50 dark:text-green-500/50">
+                        <p className="text-xs font-bold uppercase tracking-wider text-primary/70">
                             Zakat Calculated
                         </p>
                     </div>
@@ -113,32 +146,32 @@ export function ImpactStats({
 
             {/* Secondary Stats: Assets & Zakat (default/flat variants only) */}
             {!isCommunity && meetsThreshold && (
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-200/30 dark:border-amber-800/30">
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-tertiary/20">
                     {/* Assets */}
                     <div className="space-y-1">
-                        <div className="flex items-center justify-center gap-1.5 text-amber-700/70 dark:text-amber-500/70 mb-1">
+                        <div className="flex items-center justify-center gap-1.5 text-tertiary/70 mb-1">
                             <Wallet className="w-3.5 h-3.5" />
                         </div>
-                        <p className="text-lg font-bold text-amber-900 dark:text-amber-100">
+                        <p className="text-lg font-bold text-foreground">
                             <AnimatedNumber
                                 value={totalAssetsCalculated || 0}
                                 format={formatLargeNumber}
                             />
                         </p>
-                        <p className="text-[10px] uppercase font-bold tracking-wider text-amber-800/40 dark:text-amber-500/50">
+                        <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
                             Assets
                         </p>
                     </div>
 
                     {/* Zakat */}
                     <div className="space-y-1">
-                        <div className="flex items-center justify-center gap-1.5 text-green-700/70 dark:text-green-500/70 mb-1">
+                        <div className="flex items-center justify-center gap-1.5 text-primary/70 mb-1">
                             <Sparkle className="w-3.5 h-3.5" />
                         </div>
-                        <p className="text-lg font-bold text-amber-900 dark:text-amber-100">
+                        <p className="text-lg font-bold text-primary">
                             {formatLargeNumber(totalZakatCalculated || 0)}
                         </p>
-                        <p className="text-[10px] uppercase font-bold tracking-wider text-amber-800/40 dark:text-amber-500/50">
+                        <p className="text-[10px] uppercase font-bold tracking-wider text-primary/60">
                             Zakat
                         </p>
                     </div>
@@ -151,7 +184,7 @@ export function ImpactStats({
                 </div>
             ) : !meetsThreshold && totalReferrals > 0 && (
                 <div className="pt-2">
-                    <p className="text-xs text-amber-800/50 dark:text-amber-500/50 italic">
+                    <p className="text-xs text-muted-foreground italic">
                         Help {5 - totalReferrals} more people to see aggregated community impact
                     </p>
                 </div>
@@ -160,7 +193,10 @@ export function ImpactStats({
     );
 }
 
-function ImpactStatsSkeleton({ variant, className }: { variant: 'card' | 'flat', className?: string }) {
+function ImpactStatsSkeleton({ variant, className }: { variant: 'card' | 'flat' | 'compact' | 'community', className?: string }) {
+    if (variant === 'compact') {
+        return <Skeleton className={cn("h-14 w-full rounded-2xl", className)} />
+    }
     if (variant === 'flat') {
         return (
             <div className={cn("text-center space-y-4", className)}>
