@@ -266,17 +266,19 @@ export function getCategoryColor(id: string): string {
 
     switch (category.group) {
         case 'cash':
-            return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
+            return 'bg-chart-4/10 text-chart-4 border border-chart-4/20'; // Emerald
         case 'investments':
-            return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+            return 'bg-chart-2/10 text-chart-2 border border-chart-2/20'; // Blue
         case 'retirement':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+            return 'bg-chart-3/10 text-chart-3 border border-chart-3/20'; // Purple
         case 'crypto':
-            return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+            return 'bg-chart-5/10 text-chart-5 border border-chart-5/20'; // Gold
         case 'commodities':
-            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+            // Gold/Silver -> Tertiary (Gold) - or could use Chart 5
+            return 'bg-tertiary-container text-tertiary-on-container border border-tertiary-container/50';
         case 'liabilities':
-            return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+            // Red -> Destructive
+            return 'bg-destructive/10 text-destructive border border-destructive/20';
         default:
             return 'bg-secondary text-secondary-foreground';
     }

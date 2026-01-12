@@ -67,7 +67,7 @@ export default function About() {
                   href="https://www.vora.dev"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-foreground hover:text-primary underline decoration-primary/50 hover:decoration-primary transition-colors font-medium"
+                  className="text-foreground underline decoration-primary/50 hover:decoration-primary transition-colors font-medium"
                 >
                   Naheed
                 </a>

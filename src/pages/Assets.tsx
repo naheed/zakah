@@ -107,7 +107,7 @@ export default function Assets() {
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-indigo-500" />
+                                <FileText className="w-5 h-5 text-primary" />
                                 Local Documents
                             </h2>
                             <span className="text-xs font-medium px-2 py-1 bg-indigo-50 text-indigo-700 rounded-full dark:bg-indigo-950 dark:text-indigo-300">

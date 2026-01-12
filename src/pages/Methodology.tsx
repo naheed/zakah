@@ -318,7 +318,7 @@ const Methodology = () => {
               <Text>{content.business.intro}</Text>
               <div className="grid md:grid-cols-2 gap-8 mt-6">
                 <div>
-                  <Heading level={4} className="mt-0 text-green-600 mb-2">Include (Zakatable)</Heading>
+                  <Heading level={4} className="mt-0 text-success mb-2">Include (Zakatable)</Heading>
                   <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
                     {content.business.zakatable.list.map((item, i) => (
                       <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
@@ -387,7 +387,7 @@ const Methodology = () => {
                             </ul>
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-red-500 mb-1">Not Deductible</p>
+                            <p className="text-xs font-bold text-destructive mb-1">Not Deductible</p>
                             <ul className="text-xs list-disc pl-4 text-muted-foreground">
                               {content.debts.notDeductible.list.map((l, i) => <li key={i}>{l}</li>)}
                             </ul>

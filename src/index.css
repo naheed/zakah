@@ -104,10 +104,15 @@ All colors MUST be HSL.
     --sidebar-ring: 161 93% 30%;
 
     --chart-1: 158 64% 51%;
-    --chart-2: 141 69% 58%;
-    --chart-3: 172 66% 50%;
-    --chart-4: 82 77% 55%;
-    --chart-5: 45 90% 48%;
+    /* Sage (Primary) */
+    --chart-2: 215 50% 50%;
+    /* Antique Blue (Investments) */
+    --chart-3: 260 40% 55%;
+    /* Dusty Purple (Retirement) */
+    --chart-4: 150 60% 45%;
+    /* Deep Emerald (Cash) */
+    --chart-5: 35 80% 50%;
+    /* Gold (Crypto) */
 
     --sidebar: 38 25% 98%;
 
@@ -227,10 +232,15 @@ All colors MUST be HSL.
 
     /* Charts (Optimized for Dark) */
     --chart-1: 158 85% 75%;
-    --chart-2: 170 76% 64%;
-    --chart-3: 45 85% 70%;
-    --chart-4: 141 76% 73%;
-    --chart-5: 27 87% 65%;
+    /* Sage */
+    --chart-2: 215 80% 75%;
+    /* Antique Blue */
+    --chart-3: 260 70% 75%;
+    /* Dusty Purple */
+    --chart-4: 150 80% 70%;
+    /* Emerald */
+    --chart-5: 35 90% 65%;
+    /* Gold */
 
     --sidebar: 32 10% 14%;
 

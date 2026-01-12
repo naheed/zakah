@@ -46,7 +46,8 @@ test.describe('Static Pages Accessibility', () => {
                 } else if (path === '/terms') {
                     await expect(page.getByText(/Last updated/i).first()).toBeVisible();
                 } else if (path === '/about') {
-                    await expect(page.getByText('Islam is beautiful')).toBeVisible();
+                    await expect(page.getByText('Naheed')).toBeVisible();
+                    await page.waitForTimeout(2000); // Wait for fade-in animation to complete for full contrast
                 }
 
                 // 5. Scan
