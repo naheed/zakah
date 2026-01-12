@@ -236,27 +236,27 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact', title }:
           {/* Quick share buttons */}
           <div className="flex gap-1.5">
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer">
+              <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Share via WhatsApp">
                 <ChatCircleDots className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <a href={shareLinks.email} target="_blank" rel="noopener noreferrer">
+              <a href={shareLinks.email} target="_blank" rel="noopener noreferrer" aria-label="Share via Email">
                 <Envelope className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer">
+              <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" aria-label="Share via Twitter">
                 <TwitterLogo className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer">
+              <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Share via Facebook">
                 <FacebookLogo className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer">
+              <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Share via LinkedIn">
                 <LinkedinLogo className="w-4 h-4" />
               </a>
             </Button>

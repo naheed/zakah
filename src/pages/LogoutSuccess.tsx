@@ -82,7 +82,7 @@ export default function LogoutSuccess() {
                     <Button
                         variant="link"
                         size="lg"
-                        className="text-base font-medium text-amber-900/60 dark:text-amber-100/60 hover:text-primary gap-2 transition-colors"
+                        className="text-base font-medium text-muted-foreground hover:text-foreground gap-2 transition-colors"
                         onClick={() => signInWithGoogle(true)}
                     >
                         Sign back in

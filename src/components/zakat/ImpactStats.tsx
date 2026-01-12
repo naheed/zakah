@@ -86,9 +86,11 @@ export function ImpactStats({
         );
     }
 
-    const wrapperClasses = (variant === 'card' || isCommunity)
+    const wrapperClasses = (variant === 'card')
         ? "bg-tertiary/5 dark:bg-tertiary/10 border border-tertiary/20 dark:border-tertiary/20 rounded-3xl p-8"
-        : "";
+        : (isCommunity)
+            ? "bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-8 md:p-10 shadow-sm"
+            : "";
 
     return (
         <Wrapper
@@ -98,7 +100,7 @@ export function ImpactStats({
             transition={{ duration: 0.5 }}
         >
             <div className="space-y-1">
-                <h3 className="text-xs font-bold tracking-widest text-tertiary/70 uppercase">
+                <h3 className="text-xs font-bold tracking-widest text-tertiary uppercase">
                     {title}
                 </h3>
             </div>
@@ -117,27 +119,31 @@ export function ImpactStats({
                 </div>
             )}
 
-            {/* Community Variant: Hero Assets & Zakat */}
+            {/* Community Variant: Hero Assets & Zakat (Refined) */}
             {isCommunity && (
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-2 gap-8 md:gap-12 py-4">
                     {/* Assets - Hero */}
                     <div className="text-center space-y-2">
-                        <Wallet className="w-8 h-8 mx-auto text-tertiary" weight="duotone" />
-                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-foreground font-work-sans">
+                        <div className="w-10 h-10 mx-auto rounded-full bg-tertiary/10 flex items-center justify-center mb-3">
+                            <Wallet className="w-5 h-5 text-tertiary" weight="fill" />
+                        </div>
+                        <span className="block text-3xl md:text-4xl font-bold tracking-tight text-foreground font-serif">
                             <AnimatedNumber value={totalAssetsCalculated || 0} format={formatLargeNumber} />
                         </span>
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             Assets Evaluated
                         </p>
                     </div>
 
                     {/* Zakat - Hero */}
                     <div className="text-center space-y-2">
-                        <Sparkle className="w-8 h-8 mx-auto text-primary" weight="duotone" />
-                        <span className="block text-4xl sm:text-5xl font-black tracking-tight text-primary font-work-sans">
+                        <div className="w-10 h-10 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                            <Sparkle className="w-5 h-5 text-primary" weight="fill" />
+                        </div>
+                        <span className="block text-3xl md:text-4xl font-bold tracking-tight text-foreground font-serif">
                             <AnimatedNumber value={totalZakatCalculated || 0} format={formatLargeNumber} />
                         </span>
-                        <p className="text-xs font-bold uppercase tracking-wider text-primary/70">
+                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary">
                             Zakat Calculated
                         </p>
                     </div>
