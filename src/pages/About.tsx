@@ -29,7 +29,7 @@ export default function About() {
         <StaggerContainer className="text-center max-w-2xl" staggerDelay={0.15}>
           {/* Opening Quote Mark */}
           <StaggerItem variant="fade">
-            <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none">"</span>
+            <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none" aria-hidden="true">"</span>
           </StaggerItem>
 
           {/* Main Quote - First Part */}
@@ -67,7 +67,7 @@ export default function About() {
                   href="https://www.vora.dev"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline font-medium"
+                  className="text-foreground hover:text-primary underline decoration-primary/50 hover:decoration-primary transition-colors font-medium"
                 >
                   Naheed
                 </a>
@@ -77,7 +77,7 @@ export default function About() {
 
           {/* Closing Quote Mark */}
           <StaggerItem variant="fade">
-            <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none mt-4 inline-block">
+            <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none mt-4 inline-block" aria-hidden="true">
               "
             </span>
           </StaggerItem>

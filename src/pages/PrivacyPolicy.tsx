@@ -37,8 +37,8 @@ const SectionRenderer: React.FC<{ section: SectionContent; index: number }> = ({
         <StaggerContainer>
           <List>
             {section.listItems.map((item, idx) => (
-              <StaggerItem key={idx}>
-                <ListItem>{item}</ListItem>
+              <StaggerItem key={idx} as="li" className="pl-2">
+                {item}
               </StaggerItem>
             ))}
           </List>
@@ -56,7 +56,7 @@ const SectionRenderer: React.FC<{ section: SectionContent; index: number }> = ({
                 <StaggerContainer>
                   <List>
                     {sub.listItems.map((li, k) => (
-                      <StaggerItem key={k}><ListItem>{li}</ListItem></StaggerItem>
+                      <StaggerItem key={k} as="li" className="pl-2">{li}</StaggerItem>
                     ))}
                   </List>
                 </StaggerContainer>

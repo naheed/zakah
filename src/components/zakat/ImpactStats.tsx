@@ -143,7 +143,7 @@ export function ImpactStats({
                         <span className="block text-3xl md:text-4xl font-bold tracking-tight text-foreground font-serif">
                             <AnimatedNumber value={totalZakatCalculated || 0} format={formatLargeNumber} />
                         </span>
-                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary">
+                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             Zakat Calculated
                         </p>
                     </div>

@@ -35,8 +35,8 @@ export default function LogoutSuccess() {
                     </div>
 
                     <div className="space-y-2">
-                        <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="w-6 h-6 text-green-700 dark:text-green-500" strokeWidth={2.5} />
+                        <div className="w-12 h-12 rounded-full bg-success-container flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="w-6 h-6 text-success-on-container" strokeWidth={2.5} />
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground font-work-sans">
                             You're signed out

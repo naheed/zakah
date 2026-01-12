@@ -22,7 +22,7 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
       const [label, email] = text.split(': ');
       return (
         <span>
-          {label}: <a href={`mailto:${email}`} className="text-primary hover:underline">{email}</a>
+          {label}: <a href={`mailto:${email}`} className="text-foreground hover:text-primary underline decoration-primary/50 hover:decoration-primary transition-colors">{email}</a>
         </span>
       );
     }
@@ -47,8 +47,8 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
           <StaggerContainer>
             <List>
               {section.listItems.map((item, idx) => (
-                <StaggerItem key={idx}>
-                  <ListItem>{renderListItem(item)}</ListItem>
+                <StaggerItem key={idx} as="li" className="pl-2">
+                  {renderListItem(item)}
                 </StaggerItem>
               ))}
             </List>
@@ -57,7 +57,7 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
 
         {section.disclaimer && (
           <ScrollReveal>
-            <div className="mt-4 p-4 rounded-lg bg-tertiary/10 border border-tertiary/20 text-muted-foreground">
+            <div className="mt-4 p-4 rounded-lg bg-tertiary-container border border-tertiary-container/20 text-tertiary-on-container">
               <div className="flex items-start gap-2">
                 <section.icon className="w-5 h-5 text-tertiary shrink-0 mt-0.5" weight="duotone" />
                 <p className="text-sm">

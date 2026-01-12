@@ -66,6 +66,19 @@ All colors MUST be HSL.
     --success: 145 65% 42%;
     --success-foreground: 145 80% 98%;
 
+    /* Container Tokens (Systemic Contrast Safety) */
+    /* Tertiary Container */
+    --tertiary-container: 40 20% 96%;
+    --on-tertiary-container: 42 90% 20%;
+
+    /* Primary Container */
+    --primary-container: 158 30% 96%;
+    --on-primary-container: 161 93% 20%;
+
+    /* Success Container */
+    --success-container: 145 30% 96%;
+    --on-success-container: 145 80% 20%;
+
     /* M3 Surface Container Hierarchy */
     --surface-container-lowest: 38 30% 100%;
     --surface-container-low: 38 25% 98%;
@@ -178,6 +191,16 @@ All colors MUST be HSL.
     /* Success: Warm green */
     --success: 145 60% 50%;
     --success-foreground: 145 80% 5%;
+
+    /* Container Tokens - Dark */
+    --tertiary-container: 40 20% 16%;
+    --on-tertiary-container: 40 60% 90%;
+
+    --primary-container: 158 30% 16%;
+    --on-primary-container: 158 85% 90%;
+
+    --success-container: 145 30% 16%;
+    --on-success-container: 145 60% 90%;
 
     /* 4. M3 Surface Containers - Dark */
     --surface-container-lowest: 30 10% 6%;

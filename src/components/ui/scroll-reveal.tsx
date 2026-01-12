@@ -160,15 +160,19 @@ interface StaggerItemProps {
   children: ReactNode;
   className?: string;
   variant?: "fade" | "slide-up" | "slide-left" | "slide-right" | "scale";
+  as?: "div" | "li" | "span";
 }
 
 export function StaggerItem({
   children,
   className,
   variant = "slide-up",
+  as = "div",
 }: StaggerItemProps) {
+  const Component = as === "li" ? motion.li : as === "span" ? motion.span : motion.div;
+
   return (
-    <motion.div
+    <Component
       variants={variants[variant]}
       transition={{
         type: "spring",
@@ -178,6 +182,6 @@ export function StaggerItem({
       className={cn(className)}
     >
       {children}
-    </motion.div>
+    </Component>
   );
 }
