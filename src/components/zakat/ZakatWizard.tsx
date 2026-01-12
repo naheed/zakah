@@ -37,31 +37,35 @@ import { SavedCalculation } from "@/hooks/useSavedCalculations";
 // Animation variants for step transitions
 const stepVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 50 : -50, // Reduced offset for subtler movement
+    x: direction > 0 ? 20 : -20, // Reduced offset for subtler movement (was 50)
     opacity: 0,
-    scale: 0.98, // Slight scale effect
+    // scale: 0.98, // Removed scale to prevent blurriness during text rendering
   }),
   center: {
     x: 0,
     opacity: 1,
-    scale: 1,
+    // scale: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 50 : -50,
+    x: direction < 0 ? 20 : -20,
     opacity: 0,
-    scale: 0.98,
+    // scale: 0.98,
   }),
 };
 
 const stepTransition = {
   type: "spring" as const,
-  stiffness: 300,
-  damping: 28, // Slightly bouncier
-  mass: 0.8,
+  stiffness: 250, // Softer (was 300)
+  damping: 30, // Smoother (was 28)
+  mass: 1,
 };
 
-const SWIPE_THRESHOLD = 100; // Increased to prevent accidental swipes on button taps
-const SWIPE_VELOCITY_THRESHOLD = 800; // Increased to require more deliberate swipes
+const SWIPE_THRESHOLD = 50; // Reduced for easier intent (was 100)
+const SWIPE_VELOCITY_THRESHOLD = 500; // Reduced (was 800)
+
+// ... (StepId, Step, allSteps interfaces remain unchanged) ...
+
+
 
 type StepId =
   | 'welcome'
@@ -432,9 +436,13 @@ export function ZakatWizard() {
             animate="center"
             exit="exit"
             transition={stepTransition}
+
+            // Layout Projection: Animates height changes smoothly!
+            layout="position"
+
             drag={!isWelcomePage ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.15}
+            dragElastic={0.1} // Reduced, matches plan
             onDragEnd={handleDragEnd}
             className="touch-pan-y"
           >
