@@ -1,5 +1,5 @@
 import { motion, useInView, Variants, UseInViewOptions } from "framer-motion";
-import { useRef, ReactNode } from "react";
+import { useEffect, useRef, ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface ScrollRevealProps {
@@ -13,7 +13,7 @@ interface ScrollRevealProps {
 }
 
 const variants: Record<string, Variants> = {
-  "fade": {
+  fade: {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
   },
@@ -29,11 +29,15 @@ const variants: Record<string, Variants> = {
     hidden: { opacity: 0, x: -24 },
     visible: { opacity: 1, x: 0 },
   },
-  "scale": {
+  scale: {
     hidden: { opacity: 0, scale: 0.95 },
     visible: { opacity: 1, scale: 1 },
   },
 };
+
+function supportsIntersectionObserver() {
+  return typeof window !== "undefined" && "IntersectionObserver" in window;
+}
 
 export function ScrollReveal({
   children,
@@ -46,12 +50,37 @@ export function ScrollReveal({
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, margin });
+  const [forceVisible, setForceVisible] = useState(false);
+
+  // Fail-open: if IntersectionObserver is unavailable (or never fires in some iframes),
+  // ensure content becomes visible so pages don't render as blank.
+  useEffect(() => {
+    if (!supportsIntersectionObserver()) {
+      setForceVisible(true);
+      return;
+    }
+
+    if (isInView) return;
+
+    const el = ref.current;
+    if (!el) return;
+
+    // Only auto-reveal elements that should be visible on initial paint.
+    const rect = el.getBoundingClientRect();
+    const nearViewport = rect.top < window.innerHeight + 100;
+    if (!nearViewport) return;
+
+    const t = window.setTimeout(() => setForceVisible(true), 350);
+    return () => window.clearTimeout(t);
+  }, [isInView]);
+
+  const shouldShow = forceVisible || isInView;
 
   return (
     <motion.div
       ref={ref}
       initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      animate={shouldShow ? "visible" : "hidden"}
       variants={variants[variant]}
       transition={{
         type: "spring",
@@ -84,12 +113,34 @@ export function StaggerContainer({
 }: StaggerContainerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, margin });
+  const [forceVisible, setForceVisible] = useState(false);
+
+  useEffect(() => {
+    if (!supportsIntersectionObserver()) {
+      setForceVisible(true);
+      return;
+    }
+
+    if (isInView) return;
+
+    const el = ref.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const nearViewport = rect.top < window.innerHeight + 100;
+    if (!nearViewport) return;
+
+    const t = window.setTimeout(() => setForceVisible(true), 350);
+    return () => window.clearTimeout(t);
+  }, [isInView]);
+
+  const shouldShow = forceVisible || isInView;
 
   return (
     <motion.div
       ref={ref}
       initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      animate={shouldShow ? "visible" : "hidden"}
       variants={{
         hidden: {},
         visible: {

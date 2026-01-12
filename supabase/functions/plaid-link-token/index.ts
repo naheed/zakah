@@ -47,25 +47,31 @@ serve(async (req) => {
             );
         }
 
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+        const supabaseUrl = Deno.env.get("SUPABASE_URL");
+        const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+            console.error("Missing backend configuration secrets (SUPABASE_URL / SUPABASE_ANON_KEY)");
+            return new Response(
+                JSON.stringify({ error: "Server misconfigured" }),
+                { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
 
         // Validate the user via the passed JWT (do not rely on server-side session storage)
-        const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: authHeader } },
-        });
+        const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+        const token = authHeader.replace("Bearer ", "");
+        const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
 
-        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
-
-        if (authError || !user) {
-            console.error("JWT validation failed:", authError);
+        if (claimsError || !claimsData?.claims?.sub) {
+            console.error("JWT validation failed:", claimsError);
             return new Response(
-                JSON.stringify({ error: "Unauthorized" }),
+                JSON.stringify({ error: "Unauthorized - Please sign in to connect your bank" }),
                 { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             );
         }
 
-        const userId = user.id;
+        const userId = claimsData.claims.sub;
         console.log(`User authenticated: ${userId}`);
 
         // Check for secrets

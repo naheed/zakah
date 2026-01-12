@@ -128,10 +128,17 @@ serve(async (req) => {
     try {
         const authHeader = req.headers.get("Authorization");
         console.log("Authorization header present:", !!authHeader);
-        console.log("Authorization header format:", authHeader ? (authHeader.startsWith("Bearer ") ? "Valid Bearer format" : "Invalid format") : "Missing");
-        
-        if (!authHeader) {
-            console.error("Missing authorization header");
+        console.log(
+            "Authorization header format:",
+            authHeader
+                ? authHeader.startsWith("Bearer ")
+                    ? "Valid Bearer format"
+                    : "Invalid format"
+                : "Missing"
+        );
+
+        if (!authHeader?.startsWith("Bearer ")) {
+            console.error("Missing or invalid authorization header");
             return new Response(
                 JSON.stringify({ error: "Unauthorized - Please sign in to connect your bank" }),
                 { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -148,15 +155,27 @@ serve(async (req) => {
         const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        // Verify user from auth header
-        const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-            global: { headers: { Authorization: authHeader } },
-        });
-        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        // Verify user from JWT passed in Authorization header
+        const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+        if (!anonKey) {
+            console.error("Missing SUPABASE_ANON_KEY secret");
+            return new Response(
+                JSON.stringify({ error: "Server misconfigured" }),
+                { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
+
+        const token = authHeader.replace("Bearer ", "");
+        const supabaseAuth = createClient(supabaseUrl, anonKey);
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
         if (authError || !user) {
             console.error("Auth verification failed:", authError);
-            if (!user) console.error("No user found in session");
-            throw new Error(`Unauthorized: ${authError?.message || "User not found"}`);
+            if (!user) console.error("No user found for token");
+            return new Response(
+                JSON.stringify({ error: "Unauthorized - Please sign in to connect your bank" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
         }
 
         // Get Plaid credentials
