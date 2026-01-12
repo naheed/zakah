@@ -5,7 +5,8 @@ export const methodologyContent = {
     header: {
         title: "Methodology & References",
         intro: "Zakat rules are derived from the four Sunni schools of jurisprudence (Madhabs) and contemporary research. ZakatFlow empowers you to select the methodology that best aligns with your understanding, backed by clear evidence.",
-        primaryInfluences: "Influenced by the works of Sheikh Joe Bradford, The Assembly of Muslim Jurists of America (AMJA), AAOIFI Shariah Standards, and classical texts."
+        primaryInfluences: "Influenced by the works of Sheikh Joe Bradford and AAOIFI Shariah Standards. Our 'Balanced (Bradford)' mode follows his published methodology.",
+        scholarsNote: "Note: AMJA (Assembly of Muslim Jurists of America) has distinct positions on retirement accounts. Their fatwa requires Zakat on the net withdrawable amount annually—differing from Sheikh Bradford's exemption for those under 59½. We plan to add AMJA as a separate option in a future update."
     },
     principles: {
         id: "principles",
@@ -124,7 +125,7 @@ export const methodologyContent = {
                     evidence: "Settling debts takes precedence."
                 }
             ],
-            zakatFlowApproach: "Currently, ZakatFlow applies the AMJA/Maliki standard (12-month deduction) across most modes. This aligns with Dr. Yusuf Al-Qaradawi's modern view in 'Fiqh al-Zakah' that for long-term debts (like mortgages), only the immediate annual obligation should be deducted to preserve the interest of the poor."
+            zakatFlowApproach: "ZakatFlow applies the Maliki/Bradford standard (12-month deduction) for the Balanced mode. The Shafi'i position—that debt does not reduce Zakatable wealth—is implemented separately. Imam Al-Nawawi (Shafi'i school) argues that Zakat is a right attached to the specific asset, not a personal liability, so debts owed to others do not diminish it."
         },
         practicalGuidance: {
             title: "Choosing Your Mode",
@@ -276,7 +277,7 @@ export const methodologyContent = {
                 title: "Bradford Mode (Balanced)",
                 tag: "Recommended",
                 description: "401(k) and IRA assets are EXEMPT from Zakat if you are under 59½.",
-                basis: "Scholarly Basis: Sheikh Joe Bradford argues in \"Zakat on Retirement Plans Revisited\" that the combined effect of the 10% penalty + income taxes (often 30-40% total) creates a substantial barrier similar to māl ḍimār (inaccessible wealth). This differs from other assets because the penalty is a Shariah-valid barrier (government restriction) rather than just a cost.",
+                basis: "Scholarly Basis: Sheikh Joe Bradford argues in his book \"Simple Zakat Guide: Understand and Calculate Your Zakat\" that the combined effect of the 10% penalty + income taxes (often 30-40% total) creates a substantial barrier similar to māl ḍimār (inaccessible wealth). This differs from other assets because the penalty is a Shariah-valid barrier (government restriction) rather than just a cost.",
                 steps: [
                     "Under 59½: $0 Zakat",
                     "Over 59½: Zakatable on accessible amount"
@@ -450,7 +451,7 @@ export const methodologyContent = {
             title: "Owed BY You",
             intro: "Deduct immediate debts (due within 12 months).",
             views: [],
-            zakatFlowView: "ZakatFlow follows the Maliki middle path as adopted by AMJA: only immediate obligations (due within 12 months) reduce your Zakatable wealth."
+            zakatFlowView: "ZakatFlow follows the Maliki/Bradford view: only immediate obligations (due within 12 months) reduce your Zakatable wealth. The Shafi'i mode applies no deduction at all."
         },
         deductible: {
             title: "Deductible",
@@ -590,6 +591,43 @@ export const methodologyContent = {
             text: ""
         }
     },
+    faq: {
+        id: "faq",
+        number: 14.5,
+        title: "Common Questions",
+        icon: Warning,
+        intro: "Answers to frequently asked questions about Zakat distribution and special cases.",
+        forgivingDebt: {
+            title: "Can I Forgive a Debt as Zakat?",
+            question: "If someone owes me money, can I count forgiving that debt as my Zakat payment?",
+            majorityView: {
+                label: "Majority View (Hanafi, Hanbali, Maliki)",
+                ruling: "No",
+                explanation: "Zakat requires Tamlik—the transfer of ownership of an asset to the recipient. Forgiving a debt extinguishes a liability but does not transfer anything. The poor person does not 'receive' wealth; they simply owe less."
+            },
+            minorityView: {
+                label: "Minority View (Some Shafi'i scholars, Hasan al-Basri)",
+                ruling: "Yes, in limited cases",
+                explanation: "Some hold that relieving a debtor qualifies as supporting Al-Gharimin (the indebted), one of the eight Zakat categories explicitly mentioned in the Quran (9:60)."
+            },
+            recommendation: "If you wish to forgive a debt, consider: (1) Calculate the debt amount, (2) Pay that amount as Zakat to a separate eligible recipient, (3) Then forgive the original debt as Sadaqah (voluntary charity). This satisfies both the Tamlik requirement and your charitable intent."
+        },
+        fiSabilAllah: {
+            title: "What Does 'Fi Sabil Allah' Mean?",
+            question: "Can Zakat funds be used for any 'good cause'?",
+            classicalView: {
+                label: "Classical Position (Ibn Qudamah, Al-Mughni)",
+                ruling: "Restricted to defense and Jihad",
+                explanation: "Ibn Qudamah explicitly argues that 'Fi Sabil Allah' (In the Cause of God), when unqualified in legal texts, refers to the defense of the Muslim community. He specifically argues against using Zakat for Hajj pilgrimage."
+            },
+            modernView: {
+                label: "Contemporary Extension",
+                ruling: "Broader interpretation",
+                explanation: "Some modern scholars extend this category to include Da'wah (Islamic education and propagation), Islamic schools, and intellectual defense of Islam. This remains debated."
+            },
+            recommendation: "If you follow the traditional opinion, direct your 'Fi Sabil Allah' portion to refugee relief, humanitarian organizations, or verified Islamic relief efforts. Consult your local scholar for guidance specific to your situation."
+        }
+    },
     references: {
         id: "references",
         number: 15,
@@ -598,7 +636,7 @@ export const methodologyContent = {
         primary: {
             title: "Primary Sources",
             list: [
-                { name: "Sheikh Joe Bradford", text: "\"Simple Zakat Guide: Understand and Calculate Your Zakat\" — A comprehensive book and methodology for American Muslims. Also: \"Zakat on Retirement Plans Revisited\" (article).", link: { url: "https://joebradford.net", display: "joebradford.net" } },
+                { name: "Sheikh Joe Bradford", text: "\"Simple Zakat Guide: Understand and Calculate Your Zakat\" — A comprehensive book and methodology for American Muslims.", link: { url: "https://joebradford.net", display: "joebradford.net" } },
                 { name: "Assembly of Muslim Jurists of America (AMJA)", text: "Fatwas on Zakat, retirement accounts, mortgage deduction, and contemporary financial instruments. Fatwa #77832 on Retirement Accounts.", link: { url: "https://www.amjaonline.org", display: "amjaonline.org" } },
                 { name: "AAOIFI Shariah Standard 35", text: "\"Zakah\" — Technical standard from the Accounting and Auditing Organization for Islamic Financial Institutions. Source of the 30% rule for passive investments." },
                 { name: "Islamic Finance Guru", text: "Detailed guides on Zakat for cryptocurrency, investments, and modern assets.", link: { url: "https://www.islamicfinanceguru.com", display: "islamicfinanceguru.com" } },

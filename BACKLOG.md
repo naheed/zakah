@@ -46,6 +46,29 @@
 
 ## 🧊 Icebox & Deferred
 > **Goal:** Great ideas that aren't critical for MVP.
+
+### AMJA Calculation Mode (Research Complete)
+> **Background:** AMJA (Assembly of Muslim Jurists of America) has distinct positions from Sheikh Joe Bradford.
+
+| Issue | Bradford (Current) | AMJA (Proposed) |
+|-------|-------------------|-----------------|
+| **401k < 59.5** | Exempt (inaccessible) | **Zakatable annually** (net withdrawable) |
+| **Passive Investments** | 30% proxy | No proxy rule (100%) |
+| **Jewelry** | Exempt (majority view) | Zakatable (prudent view) |
+
+**Implementation Tasks:**
+- [ ] Add `amja` to `Madhab` and `CalculationMode` types
+- [ ] Add AMJA entry to `MADHAB_RULES` with: `jewelryZakatable: true`, `debtDeductionMethod: 'twelve_month'`
+- [ ] Add AMJA entry to `MODE_RULES` with: `retirementMethod: 'net_accessible'`, `passiveInvestmentRate: 1.0`
+- [ ] Update Settings.tsx to show 6th option
+- [ ] Add tests for AMJA calculation scenarios
+
+**References:**
+- [AMJA Fatwa on 401k](https://amjaonline.org) by Dr. Main Khalid Al-Qudah
+- [AMJA Fatwa Bank](https://amjaonline.org)
+
+---
+
 - **Smart Features:** Automated Hawl date detection
 - **Migration:** Data import script for legacy V1 users
 - **UI:** Smart Confidence Flagging for AI extraction

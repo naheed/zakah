@@ -81,19 +81,19 @@ describe('Zakat Calculations - Super Ahmed Benchmark', () => {
         expect(result.netZakatableWealth).toBe(103000);
     });
 
-    it('Scenario C: Shafi\'i/Maliki Mode', () => {
-        // Expectation:
+    it('Scenario C: Shafii Mode (No Debt Deduction)', () => {
+        // Shafi'i position: Debt does NOT prevent Zakat (Al-Nawawi)
         // Jewelry: Exempt ($0)
         // 401k: Net Accessible ($65,000)
         // Stocks: 100% ($50,000)
         // Total Assets: 10k + 65k + 50k = 125,000
-        // Liabilities: 12 months ($27,000)
-        // Net: 98,000
+        // Liabilities: $0 (Shafi'i: no debt deduction)
+        // Net: 125,000
 
         const data: ZakatFormData = {
             ...ahmedBase,
-            calculationMode: 'maliki-shafii',
-            madhab: 'shafii' // Consolidated: Shafi'i/Maliki/Hanbali
+            calculationMode: 'shafii',
+            madhab: 'shafii'
         };
         const result = calculateZakat(data);
 
@@ -102,7 +102,42 @@ describe('Zakat Calculations - Super Ahmed Benchmark', () => {
         expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(50000);
 
         expect(result.totalAssets).toBe(125000);
+        expect(result.totalLiabilities).toBe(0); // Shafi'i: no deduction
+        expect(result.netZakatableWealth).toBe(125000);
+    });
+
+    it('Scenario D: Maliki Mode (12-Month Deduction)', () => {
+        // Maliki uses 12-month deduction like Bradford
+        // Total Assets: 125,000 (same as Shafi'i)
+        // Liabilities: 12 months ($27,000)
+        // Net: 98,000
+
+        const data: ZakatFormData = {
+            ...ahmedBase,
+            calculationMode: 'maliki',
+            madhab: 'maliki'
+        };
+        const result = calculateZakat(data);
+
+        expect(result.totalLiabilities).toBe(27000);
         expect(result.netZakatableWealth).toBe(98000);
+    });
+
+    it('Scenario E: Hanbali Mode (Full Debt Deduction)', () => {
+        // Hanbali uses full debt deduction like Hanafi (but jewelry exempt)
+        // Jewelry: Exempt ($0)
+        // Total Assets: 125,000
+        // Liabilities: Full (same formula as Hanafi) = $27,000
+
+        const data: ZakatFormData = {
+            ...ahmedBase,
+            calculationMode: 'hanbali',
+            madhab: 'hanbali'
+        };
+        const result = calculateZakat(data);
+
+        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(0); // Jewelry exempt
+        expect(result.totalLiabilities).toBe(27000);
     });
 
 });
@@ -111,6 +146,8 @@ describe('Madhab to Calculation Mode Mapping', () => {
     it('maps correctly', () => {
         expect(getCalculationModeForMadhab('balanced')).toBe('bradford');
         expect(getCalculationModeForMadhab('hanafi')).toBe('hanafi');
-        expect(getCalculationModeForMadhab('shafii')).toBe('maliki-shafii');
+        expect(getCalculationModeForMadhab('shafii')).toBe('shafii');
+        expect(getCalculationModeForMadhab('maliki')).toBe('maliki');
+        expect(getCalculationModeForMadhab('hanbali')).toBe('hanbali');
     });
 });

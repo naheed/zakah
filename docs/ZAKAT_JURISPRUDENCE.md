@@ -46,9 +46,15 @@ Originating in Kufa, Iraq—a bustling cosmopolitan trade center—the Hanafi sc
 
 ### 2.3 Hawl Continuity
 
-> **Hanafi Position**: Nisab required at **Start** and **End** only. Mid-year fluctuations are ignored (unless wealth reaches absolute zero).
+> **Hanafi Position**: Nisab at **Start & End only** (dips ignored)
 
 **Rationale**: Simplified accounting for pre-modern merchants lacking sophisticated ledgers.
+
+> [!NOTE]
+> **Shafi'i, Maliki, Hanbali** require **continuous** Nisab possession. Any dip below threshold during the year breaks the Hawl.
+
+> [!IMPORTANT]
+> **ZakatFlow Implementation**: Full Hawl tracking requires connected accounts via Plaid for complete asset visibility. Without this, users should manually verify their Nisab status using their own records.
 
 ### 2.4 Jewelry
 

@@ -8,30 +8,44 @@ export interface MadhahRules {
     name: string;
     displayName: string;
     jewelryZakatable: boolean;
-    debtDeductionMethod: 'full' | 'immediate_only' | 'twelve_month';
+    debtDeductionMethod: 'full' | 'none' | 'twelve_month';
     retirementMethod: 'gross' | 'net_accessible';
 }
 
 export const MADHAB_RULES: Record<Madhab, MadhahRules> = {
     balanced: {
         name: 'balanced',
-        displayName: 'Balanced (AMJA)',
-        jewelryZakatable: true, // Conservative default for generic "Balanced" (Hanafi overlap)
-        debtDeductionMethod: 'twelve_month',
+        displayName: 'Balanced (Bradford)',
+        jewelryZakatable: false, // Majority view (exempt)
+        debtDeductionMethod: 'twelve_month', // Modern synthesis
         retirementMethod: 'net_accessible',
     },
     hanafi: {
         name: 'hanafi',
         displayName: 'Hanafi',
-        jewelryZakatable: true,
-        debtDeductionMethod: 'full',
+        jewelryZakatable: true, // Gold/silver taxed regardless of form
+        debtDeductionMethod: 'full', // All debts to humans deductible
         retirementMethod: 'net_accessible',
     },
     shafii: {
         name: 'shafii',
-        displayName: "Shafi'i / Maliki / Hanbali",
-        jewelryZakatable: false, // Personal use exempt
-        debtDeductionMethod: 'twelve_month', // Common modern fatwa across these schools
+        displayName: "Shafi'i",
+        jewelryZakatable: false, // Personal adornment exempt
+        debtDeductionMethod: 'none', // Debt does NOT prevent Zakat (Al-Nawawi)
+        retirementMethod: 'net_accessible',
+    },
+    maliki: {
+        name: 'maliki',
+        displayName: 'Maliki',
+        jewelryZakatable: false, // Personal adornment exempt
+        debtDeductionMethod: 'twelve_month', // Deductible only if no other assets
+        retirementMethod: 'net_accessible',
+    },
+    hanbali: {
+        name: 'hanbali',
+        displayName: 'Hanbali',
+        jewelryZakatable: false, // Personal adornment exempt
+        debtDeductionMethod: 'full', // Full deduction (like Hanafi)
         retirementMethod: 'net_accessible',
     },
 };
@@ -58,8 +72,17 @@ export const MODE_RULES: Record<CalculationMode, ModeRules> = {
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
     },
-    'maliki-shafii': {
-        // Consolidated: Shafi'i, Maliki, Hanbali all use these same rules in our implementation
+    shafii: {
+        jewelryZakatable: false, // Personal jewelry exempt
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 1.0,
+    },
+    maliki: {
+        jewelryZakatable: false, // Personal jewelry exempt
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 1.0,
+    },
+    hanbali: {
         jewelryZakatable: false, // Personal jewelry exempt
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
@@ -144,7 +167,9 @@ export function getModeDisplayName(mode: CalculationMode): string {
     const names: Record<CalculationMode, string> = {
         bradford: 'Balanced (Sheikh Joe Bradford)',
         hanafi: 'Hanafi',
-        'maliki-shafii': "Shafi'i / Maliki / Hanbali",
+        shafii: "Shafi'i",
+        maliki: 'Maliki',
+        hanbali: 'Hanbali',
     };
     return names[mode];
 }
@@ -153,8 +178,10 @@ export function getModeDisplayName(mode: CalculationMode): string {
 export function getModeDescription(mode: CalculationMode): string {
     const descriptions: Record<CalculationMode, string> = {
         bradford: '30% passive investments, retirement exempt under 59½',
-        hanafi: '100% all assets, personal jewelry included',
-        'maliki-shafii': '100% all assets, jewelry exempt, 12-month debts',
+        hanafi: '100% all assets, jewelry included, full debt deduction',
+        shafii: '100% all assets, jewelry exempt, no debt deduction',
+        maliki: '100% all assets, jewelry exempt, 12-month debts',
+        hanbali: '100% all assets, jewelry exempt, full debt deduction',
     };
     return descriptions[mode];
 }
@@ -167,7 +194,11 @@ export function getCalculationModeForMadhab(madhab: Madhab): CalculationMode {
         case 'hanafi':
             return 'hanafi';
         case 'shafii':
-            return 'maliki-shafii';
+            return 'shafii';
+        case 'maliki':
+            return 'maliki';
+        case 'hanbali':
+            return 'hanbali';
         default:
             return 'bradford'; // Safe default
     }

@@ -9,6 +9,7 @@ interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
     variant?: 'default' | 'muted' | 'small' | 'lead';
 }
 
+// Text component without ScrollReveal to avoid DOM nesting issues (<p> inside <div> inside <p>)
 export const Text: React.FC<TextProps> = ({ children, className, variant = 'default', ...props }) => {
     const variants = {
         default: "text-base text-muted-foreground leading-relaxed",
@@ -18,11 +19,9 @@ export const Text: React.FC<TextProps> = ({ children, className, variant = 'defa
     };
 
     return (
-        <ScrollReveal>
-            <p className={cn(variants[variant], className)} {...props}>
-                {children}
-            </p>
-        </ScrollReveal>
+        <p className={cn(variants[variant], className)} {...props}>
+            {children}
+        </p>
     );
 };
 

@@ -52,10 +52,11 @@ describe('Zakat Calculation Engine', () => {
             expect(assets).toBe(0); // Fully exempt due to lack of accessibility
         });
 
-        it('Hanafi Mode: Should apply full value', () => {
+        it('Hanafi Mode: Should apply net accessible value (after tax/penalty)', () => {
             const data = { ...retirementData, calculationMode: 'hanafi' as const };
             const assets = calculateTotalAssets(data);
-            expect(assets).toBe(100000);
+            // Net accessible = 100000 * (1 - 0.25 tax - 0.10 penalty) = 65000
+            expect(assets).toBe(65000);
         });
     });
 
@@ -65,16 +66,16 @@ describe('Zakat Calculation Engine', () => {
             passiveInvestmentsValue: 100000
         };
 
-        it('Bradford Mode: 100% Zakatable', () => {
+        it('Bradford Mode: 30% Zakatable (Proxy for underlying assets)', () => {
             const data = { ...investData, calculationMode: 'bradford' as const };
             const assets = calculateTotalAssets(data);
-            expect(assets).toBe(100000);
+            expect(assets).toBe(30000); // Bradford uses 30% rule
         });
 
-        it('Hanafi Mode: 30% Zakatable (Proxy for underlying assets)', () => {
+        it('Hanafi Mode: 100% Zakatable', () => {
             const data = { ...investData, calculationMode: 'hanafi' as const };
             const assets = calculateTotalAssets(data);
-            expect(assets).toBe(30000);
+            expect(assets).toBe(100000); // Hanafi uses 100%
         });
     });
 

@@ -23,8 +23,8 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
 | **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid Integrated) |
 | **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
-| **Scholarly Methodology** | Based on AMJA, AAOIFI guidelines, and Sheikh Joe Bradford's rulings |
-| **Madhab Support** | Configure calculations per Hanafi, Maliki, Shafi'i, Hanbali, or balanced approach |
+| **Scholarly Methodology** | Based on Sheikh Joe Bradford's rulings and AAOIFI guidelines |
+| **5 Madhab Modes** | Hanafi, Shafi'i, Maliki, Hanbali, or Balanced (Bradford) approach |
 | **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
 | **Export Options** | PDF report, CSV breakdown, or print-friendly web view |
 | **Privacy-First** | Local-first encryption for guests; cloud sync for signed-in users |

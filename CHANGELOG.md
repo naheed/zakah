@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🌟 Feature Highlights (Quick Look)
 | Version | Major Feature | Released |
 |---|---|---|
+| **v0.14.0** | 📚 **Jurisprudence Overhaul** (5 Distinct Madhabs) | Jan 11, 2026 |
 | **v0.13.0** | 🏦 **Plaid Bank Sync** (Connect Bank Accounts) | Jan 11, 2026 |
 | **v0.12.0** | ⚙️ **Settings Redesign** (Material 3 UI) | Jan 9, 2026 |
 | **v0.11.0** | 🧾 **Donation Tracking** (Receipt Scanning) | Jan 6, 2026 |
@@ -26,6 +27,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add user name, Hijri date, madhab settings to PDF
   - Add machine-readable QR for YoY scanning
   - Add referral metrics (privacy-safe)
+
+## [0.14.0] - 2026-01-11
+
+### Added
+- **5 Distinct Madhab Calculation Modes**
+  - Restored separate Shafi'i, Maliki, Hanbali options (previously merged)
+  - Each school now has accurate debt deduction logic:
+    - **Shafi'i**: No debt deduction (per Al-Nawawi's Al-Majmu')
+    - **Hanafi/Hanbali**: Full debt deduction
+    - **Maliki/Bradford**: 12-month rule (AAOIFI synthesis)
+- **Canonical Jurisprudence Documentation**
+  - Added `docs/ZAKAT_JURISPRUDENCE.md` with scholarly sources
+  - Added `docs/DONATION_BEST_PRACTICES.md` (Fi Sabil Allah, Forgiving Debt FAQ)
+- **Asset-Level Schema for Mudir/Muhtakir**
+  - Added `passiveInvestmentIntent` field for Maliki trading distinction (UI pending)
+
+### Changed
+- **Renamed "Balanced (AMJA)" → "Balanced (Bradford)"**
+  - Research confirmed AMJA and Sheikh Joe Bradford have **different** 401k positions
+  - AMJA: Zakatable annually (net withdrawable)
+  - Bradford: Exempt if under 59.5 (inaccessible wealth)
+  - Label now accurately reflects methodology source
+
+### Fixed
+- **SettingsRow forwardRef**: Fixed React warning for Radix trigger compatibility
+- **Text DOM nesting**: Fixed `<p>` inside `<div>` violations in typography component
+- **Test expectations**: Corrected reversed Bradford/Hanafi investment rate tests
 
 ## [0.13.0] - 2026-01-11
 

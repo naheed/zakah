@@ -1,7 +1,10 @@
 export type CalendarType = 'lunar' | 'solar';
 export type NisabStandard = 'silver' | 'gold';
-export type CalculationMode = 'bradford' | 'hanafi' | 'maliki-shafii';
-export type Madhab = 'hanafi' | 'shafii' | 'balanced';
+export type CalculationMode = 'bradford' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali';
+export type Madhab = 'balanced' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali';
+
+// Maliki distinction: Mudir (active trader) vs Muhtakir (long-term holder)
+export type InvestmentIntent = 'mudir' | 'muhtakir';
 
 export interface HouseholdMember {
     id: string;
@@ -57,7 +60,9 @@ export interface ZakatFormData {
     // Investments
     activeInvestments: number;
     passiveInvestmentsValue: number;
+    passiveInvestmentIntent: InvestmentIntent; // Mudir (trade) or Muhtakir (hold)
     dividends: number;
+
     dividendPurificationPercent: number; // % to purify from non-halal income
 
     // Retirement Accounts
