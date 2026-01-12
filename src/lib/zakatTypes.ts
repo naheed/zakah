@@ -1,0 +1,189 @@
+export type CalendarType = 'lunar' | 'solar';
+export type NisabStandard = 'silver' | 'gold';
+export type CalculationMode = 'bradford' | 'hanafi' | 'maliki-shafii';
+export type Madhab = 'hanafi' | 'shafii' | 'balanced';
+
+export interface HouseholdMember {
+    id: string;
+    name: string;
+    relationship: 'self' | 'spouse' | 'child' | 'other';
+}
+
+export interface ZakatFormData {
+    // Preferences
+    currency: string;
+    calendarType: CalendarType;
+    nisabStandard: NisabStandard;
+    calculationMode: CalculationMode;
+    madhab: Madhab; // User's preferred school of thought
+    isHousehold: boolean; // Whether calculating for household or just self
+    isSimpleMode: boolean; // Whether using simple 4-question mode
+    householdMembers: HouseholdMember[]; // Track family members for household mode
+
+    // Personal Info
+    email: string;
+    age: number;
+    estimatedTaxRate: number; // Combined federal + state rate as decimal
+
+    // Financial categories selected
+    hasPreciousMetals: boolean;
+    hasRealEstate: boolean;
+    hasBusiness: boolean;
+    hasIlliquidAssets: boolean;
+    hasDebtOwedToYou: boolean;
+    hasTaxPayments: boolean;
+    hasCrypto: boolean;
+    hasTrusts: boolean;
+
+    // Liquid Assets
+    checkingAccounts: number;
+    savingsAccounts: number;
+    cashOnHand: number;
+    digitalWallets: number; // PayPal, Venmo, CashApp, Zelle
+    foreignCurrency: number; // Converted to USD at spot rate
+    interestEarned: number; // For purification (not Zakatable)
+
+    // Precious Metals
+    goldValue: number;
+    silverValue: number;
+
+    // Crypto & Digital Assets
+    cryptoCurrency: number; // BTC, ETH treated as currency
+    cryptoTrading: number; // Altcoins, NFTs for trading
+    stakedAssets: number; // Principal only
+    stakedRewardsVested: number; // Vested staking rewards
+    liquidityPoolValue: number; // Current redeemable value
+
+    // Investments
+    activeInvestments: number;
+    passiveInvestmentsValue: number;
+    dividends: number;
+    dividendPurificationPercent: number; // % to purify from non-halal income
+
+    // Retirement Accounts
+    rothIRAContributions: number; // Principal only (always accessible)
+    rothIRAEarnings: number; // Subject to penalty if under 59.5
+    traditionalIRABalance: number; // Vested balance
+    fourOhOneKVestedBalance: number; // Vested balance
+    fourOhOneKUnvestedMatch: number; // Not Zakatable
+    iraWithdrawals: number;
+    esaWithdrawals: number;
+    fiveTwentyNineWithdrawals: number;
+    hsaBalance: number;
+    isOver59Half: boolean;
+
+    // Trusts
+    revocableTrustValue: number;
+    irrevocableTrustAccessible: boolean;
+    irrevocableTrustValue: number;
+    clatValue: number; // Not Zakatable during annuity term
+
+    // Real Estate
+    realEstateForSale: number; // Property for flipping - full value
+    rentalPropertyIncome: number; // Net rental income in bank
+
+    // Business
+    businessCashAndReceivables: number;
+    businessInventory: number;
+
+    // Illiquid Assets
+    illiquidAssetsValue: number;
+    livestockValue: number;
+
+    // Debt Owed To You
+    goodDebtOwedToYou: number; // Collectible - borrower willing/able
+    badDebtRecovered: number; // Bad debt recovered this year
+
+    // Liabilities
+    monthlyLivingExpenses: number;
+    insuranceExpenses: number;
+    creditCardBalance: number; // Due immediately
+    unpaidBills: number; // Due immediately
+    monthlyMortgage: number; // Only 12 months deductible
+    studentLoansDue: number; // Only current payments due
+    propertyTax: number;
+    lateTaxPayments: number;
+}
+
+export interface AssetBreakdown {
+    liquidAssets: number;
+    investments: number;
+    retirement: number;
+    realEstate: number;
+    business: number;
+    otherAssets: number;
+    exemptAssets: number;
+}
+
+// Enhanced Asset Breakdown for PDF Report v2
+export interface AssetItem {
+    name: string;
+    value: number;
+    zakatablePercent?: number;
+    zakatableAmount?: number;
+}
+
+export interface AssetCategory {
+    label: string;
+    color: string;
+    total: number;
+    zakatableAmount: number;
+    zakatablePercent: number;
+    percentOfNetZakatable: number;
+    items: AssetItem[];
+}
+
+export interface LiabilityItem {
+    name: string;
+    value: number;
+}
+
+export interface EnhancedAssetBreakdown {
+    liquidAssets: AssetCategory;
+    preciousMetals: AssetCategory;
+    crypto: AssetCategory;
+    investments: AssetCategory;
+    retirement: AssetCategory;
+    trusts: AssetCategory;
+    realEstate: AssetCategory;
+    business: AssetCategory;
+    debtOwedToYou: AssetCategory;
+    illiquidAssets: AssetCategory;
+    liabilities: {
+        label: string;
+        color: string;
+        total: number;
+        items: LiabilityItem[];
+    };
+    exempt: {
+        label: string;
+        color: string;
+        total: number;
+        items: AssetItem[];
+    };
+}
+
+export interface ZakatCalculationResult {
+    totalAssets: number;
+    totalLiabilities: number;
+    netZakatableWealth: number;
+    nisab: number;
+    isAboveNisab: boolean;
+    zakatDue: number;
+    zakatRate: number;
+    interestToPurify: number;
+    dividendsToPurify: number;
+    assetBreakdown: AssetBreakdown;
+    enhancedBreakdown: EnhancedAssetBreakdown;
+}
+
+export interface ZakatReport {
+    meta: {
+        timestamp: string;
+        reportId: string;
+        version: string;
+        referralCode?: string;
+    };
+    input: ZakatFormData;
+    output: ZakatCalculationResult;
+}

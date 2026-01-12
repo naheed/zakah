@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { CalculationMode } from '@/lib/zakatCalculations';
 import { getModeDisplayName, getModeDescription } from '@/lib/madhahRules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MODE_RULES } from '@/lib/zakatCalculations';
 
 interface MethodologySelectorProps {
     value: CalculationMode;
@@ -19,7 +20,7 @@ interface MethodologySelectorProps {
     className?: string;
 }
 
-const MODES: CalculationMode[] = ['bradford', 'hanafi', 'maliki-shafii', 'hanbali'];
+const MODES = Object.keys(MODE_RULES) as CalculationMode[];
 
 export function MethodologySelector({
     value,

@@ -12,6 +12,9 @@ import {
   NisabStandard,
   CalendarType,
   Madhab,
+  MADHAB_RULES,
+  MadhahRules,
+  getCalculationModeForMadhab
 } from "@/lib/zakatCalculations";
 import { getMadhahDisplayName } from "@/lib/madhahRules";
 import { Helmet } from "react-helmet-async";
@@ -222,13 +225,27 @@ export default function Settings() {
                       Different schools have varying rulings on certain assets.
                     </SheetDescription>
                   </SheetHeader>
-                  <RadioGroup value={formData.madhab} onValueChange={(v) => updateFormData({ madhab: v as Madhab })} className="gap-4">
-                    {['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'].map((m) => (
-                      <div key={m} className="flex items-center space-x-2">
-                        <RadioGroupItem value={m} id={m} />
-                        <label htmlFor={m} className="flex-1 cursor-pointer font-medium p-2">{getMadhahDisplayName(m as Madhab)}</label>
+                  <RadioGroup
+                    value={formData.madhab}
+                    onValueChange={(v) => {
+                      const newMadhab = v as Madhab;
+                      const newMode = getCalculationModeForMadhab(newMadhab);
+                      updateFormData({
+                        madhab: newMadhab,
+                        calculationMode: newMode
+                      });
+                    }}
+                    className="gap-4"
+                  >
+                    {(Object.values(MADHAB_RULES) as MadhahRules[]).map((rule) => (
+                      <div key={rule.name} className="flex items-center space-x-2">
+                        <RadioGroupItem value={rule.name} id={rule.name} />
+                        <label htmlFor={rule.name} className="flex-1 cursor-pointer font-medium p-2">
+                          {rule.displayName}
+                        </label>
                       </div>
                     ))}
+
                   </RadioGroup>
                 </SheetContent>
               </Sheet>

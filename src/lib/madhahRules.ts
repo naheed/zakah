@@ -1,7 +1,7 @@
 // Madhab-specific rules and scholarly differences detection
 // Each madhab has specific rulings that may differ from the optimized/bradford modes
 
-import { Madhab, CalculationMode } from './zakatCalculations';
+import { Madhab, CalculationMode } from './zakatTypes';
 
 // Madhab-specific rules configuration
 export interface MadhahRules {
@@ -13,6 +13,13 @@ export interface MadhahRules {
 }
 
 export const MADHAB_RULES: Record<Madhab, MadhahRules> = {
+    balanced: {
+        name: 'balanced',
+        displayName: 'Balanced (AMJA)',
+        jewelryZakatable: true, // Conservative default for generic "Balanced" (Hanafi overlap)
+        debtDeductionMethod: 'twelve_month',
+        retirementMethod: 'net_accessible',
+    },
     hanafi: {
         name: 'hanafi',
         displayName: 'Hanafi',
@@ -20,32 +27,11 @@ export const MADHAB_RULES: Record<Madhab, MadhahRules> = {
         debtDeductionMethod: 'full',
         retirementMethod: 'net_accessible',
     },
-    maliki: {
-        name: 'maliki',
-        displayName: 'Maliki',
-        jewelryZakatable: false,
-        debtDeductionMethod: 'twelve_month',
-        retirementMethod: 'net_accessible',
-    },
     shafii: {
         name: 'shafii',
-        displayName: "Shafi'i",
-        jewelryZakatable: false,
-        debtDeductionMethod: 'twelve_month',
-        retirementMethod: 'net_accessible',
-    },
-    hanbali: {
-        name: 'hanbali',
-        displayName: 'Hanbali',
-        jewelryZakatable: false,
-        debtDeductionMethod: 'full',
-        retirementMethod: 'net_accessible',
-    },
-    balanced: {
-        name: 'balanced',
-        displayName: 'Balanced (AMJA)',
-        jewelryZakatable: true, // Conservative default
-        debtDeductionMethod: 'twelve_month',
+        displayName: "Shafi'i / Maliki / Hanbali",
+        jewelryZakatable: false, // Personal use exempt
+        debtDeductionMethod: 'twelve_month', // Common modern fatwa across these schools
         retirementMethod: 'net_accessible',
     },
 };
@@ -59,6 +45,10 @@ export interface ModeRules {
 
 export const MODE_RULES: Record<CalculationMode, ModeRules> = {
     bradford: {
+        // Sheikh Joe Bradford's specific methodology
+        // 1. Personal Jewelry is Exempt (majority view)
+        // 2. 401k/IRA exempt if under 59.5 (inaccessible/lack of complete ownership)
+        // 3. Passive investments calculated at 30% of market value (proxy for Zakatable assets)
         jewelryZakatable: false,
         retirementMethod: 'bradford_exempt',
         passiveInvestmentRate: 0.30,
@@ -69,16 +59,13 @@ export const MODE_RULES: Record<CalculationMode, ModeRules> = {
         passiveInvestmentRate: 1.0,
     },
     'maliki-shafii': {
-        jewelryZakatable: false, // Personal jewelry exempt
-        retirementMethod: 'net_accessible',
-        passiveInvestmentRate: 1.0,
-    },
-    hanbali: {
+        // Consolidated: Shafi'i, Maliki, Hanbali all use these same rules in our implementation
         jewelryZakatable: false, // Personal jewelry exempt
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
     },
 };
+
 
 // Scholarly difference detection
 export interface ScholarlyDifference {
@@ -107,7 +94,7 @@ export function getScholarlyDifferences(
             madhahOpinion: madhahRules.jewelryZakatable ? 'Zakatable' : 'Exempt',
             supportingScholars: modeRules.jewelryZakatable
                 ? ['Hanafi scholars']
-                : ["Shafi'i scholars", 'Hanbali scholars', 'Sheikh Bradford'],
+                : ["Shafi'i scholars", 'Hanbali scholars', 'Sheikh Joe Bradford'],
             methodologyLink: '/methodology#metals',
             basis: modeRules.jewelryZakatable
                 ? 'Gold and silver retain monetary nature regardless of form'
@@ -121,7 +108,7 @@ export function getScholarlyDifferences(
             topic: 'Retirement Accounts (401k/IRA)',
             appliedOpinion: 'Exempt under 59½',
             madhahOpinion: 'Net accessible value zakatable',
-            supportingScholars: ['Sheikh Joe Bradford', 'Modern ijtihad'],
+            supportingScholars: ['Sheikh Joe Bradford'],
             methodologyLink: '/methodology#retirement',
             basis: 'Māl ḍimār (inaccessible wealth) - lacks milk tām and qudrah',
         });
@@ -133,7 +120,7 @@ export function getScholarlyDifferences(
             topic: 'Passive Investments (ETFs/Index Funds)',
             appliedOpinion: '30% of value (underlying assets proxy)',
             madhahOpinion: '100% of market value',
-            supportingScholars: ['Sheikh Joe Bradford', 'AMJA guidance'],
+            supportingScholars: ['Sheikh Joe Bradford'],
             methodologyLink: '/methodology#investments',
             basis: 'Only zakatable underlying assets count, not fund structure premium',
         });
@@ -155,10 +142,9 @@ export function getMadhahDisplayName(madhab: Madhab): string {
 // Get display name for calculation mode
 export function getModeDisplayName(mode: CalculationMode): string {
     const names: Record<CalculationMode, string> = {
-        bradford: 'Bradford (Balanced)',
+        bradford: 'Balanced (Sheikh Joe Bradford)',
         hanafi: 'Hanafi',
-        'maliki-shafii': 'Maliki/Shafi\'i',
-        hanbali: 'Hanbali',
+        'maliki-shafii': "Shafi'i / Maliki / Hanbali",
     };
     return names[mode];
 }
@@ -169,7 +155,20 @@ export function getModeDescription(mode: CalculationMode): string {
         bradford: '30% passive investments, retirement exempt under 59½',
         hanafi: '100% all assets, personal jewelry included',
         'maliki-shafii': '100% all assets, jewelry exempt, 12-month debts',
-        hanbali: '100% all assets, jewelry exempt, full debt deduction',
     };
     return descriptions[mode];
+}
+
+// Map user-selected Madhab to the correct Calculation Engine Mode
+export function getCalculationModeForMadhab(madhab: Madhab): CalculationMode {
+    switch (madhab) {
+        case 'balanced':
+            return 'bradford';
+        case 'hanafi':
+            return 'hanafi';
+        case 'shafii':
+            return 'maliki-shafii';
+        default:
+            return 'bradford'; // Safe default
+    }
 }

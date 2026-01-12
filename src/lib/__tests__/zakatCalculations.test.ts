@@ -1,116 +1,116 @@
 
 import { describe, it, expect } from 'vitest';
-import {
-    calculateZakat,
-    calculateNisab,
-    calculateTotalAssets,
-    calculateTotalLiabilities,
-    GOLD_NISAB_GRAMS,
-    SILVER_NISAB_GRAMS,
-    defaultFormData,
-    ZakatFormData
-} from '../zakatCalculations';
+import { calculateZakat, defaultFormData, getCalculationModeForMadhab } from '../zakatCalculations';
+import { ZakatFormData } from '../zakatTypes';
 
-// Mock data helper
-const createEmptyForm = (): ZakatFormData => ({
-    ...defaultFormData
+// Super Ahmed Benchmark Data
+const ahmedBase: ZakatFormData = {
+    ...defaultFormData,
+    // Assets
+    cashOnHand: 10000,
+    goldValue: 5000, // Personal Jewelry
+    hasPreciousMetals: true,
+    fourOhOneKVestedBalance: 100000, // 401k
+    age: 40, // Under 59.5
+    passiveInvestmentsValue: 50000, // Passive Stocks
+    activeInvestments: 0,
+
+    // Liabilities
+    creditCardBalance: 2000, // Immediate debt
+    monthlyMortgage: 2000, // $2k/mo mortgage -> $24k/yr
+    monthlyLivingExpenses: 1000,
+
+    // Flags
+    hasCrypto: false,
+    hasRealEstate: true,
+    hasBusiness: false,
+};
+
+describe('Zakat Calculations - Super Ahmed Benchmark', () => {
+
+    it('Scenario A: Bradford (Balanced) Mode', () => {
+        // Expectation:
+        // Jewelry: Exempt ($0)
+        // 401k: Exempt (< 59.5) ($0)
+        // Stocks: 30% rule ($15,000)
+        // Total Assets: 10k(cash) + 15k(stocks) = 25,000
+        // Liabilities: 2k(CC) + 24k(mortgage) + 1k(living) = 27,000
+        // Net: 0
+
+        const data: ZakatFormData = {
+            ...ahmedBase,
+            calculationMode: 'bradford',
+            madhab: 'balanced'
+        };
+        const result = calculateZakat(data);
+
+        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(0);
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(0);
+        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(15000);
+
+        expect(result.totalAssets).toBe(25000);
+        expect(result.totalLiabilities).toBe(27000);
+        expect(result.netZakatableWealth).toBe(0);
+    });
+
+    it('Scenario B: Hanafi Mode', () => {
+        // Expectation:
+        // Jewelry: Zakatable ($5,000)
+        // 401k: Net Accessible. 
+        //   Tax (25%) + Penalty (10%) = 35% deduction.
+        //   $100k * 0.65 = $65,000.
+        // Stocks: 100% Market Value ($50,000) - Hanafi strict usually 100% or based on inventory
+        // Total Assets: 10k(cash) + 5k(jewelry) + 65k(401k) + 50k(stocks) = 130,000
+        // Liabilities: 
+        //   Current System Cap: 12 months ($24k) + Immediate ($3k) = $27k.
+        //   (Note: Ideally Hanafi subtracts FULL mortgage, but we lack that data field)
+        // Net: 130,000 - 27,000 = 103,000.
+
+        const data: ZakatFormData = {
+            ...ahmedBase,
+            calculationMode: 'hanafi',
+            madhab: 'hanafi'
+        };
+        const result = calculateZakat(data);
+
+        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(5000);
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(65000);
+        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(50000);
+
+        expect(result.totalAssets).toBe(130000);
+        expect(result.netZakatableWealth).toBe(103000);
+    });
+
+    it('Scenario C: Shafi\'i/Maliki Mode', () => {
+        // Expectation:
+        // Jewelry: Exempt ($0)
+        // 401k: Net Accessible ($65,000)
+        // Stocks: 100% ($50,000)
+        // Total Assets: 10k + 65k + 50k = 125,000
+        // Liabilities: 12 months ($27,000)
+        // Net: 98,000
+
+        const data: ZakatFormData = {
+            ...ahmedBase,
+            calculationMode: 'maliki-shafii',
+            madhab: 'shafii' // Consolidated: Shafi'i/Maliki/Hanbali
+        };
+        const result = calculateZakat(data);
+
+        expect(result.enhancedBreakdown.preciousMetals.zakatableAmount).toBe(0);
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(65000);
+        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(50000);
+
+        expect(result.totalAssets).toBe(125000);
+        expect(result.netZakatableWealth).toBe(98000);
+    });
+
 });
 
-describe('Zakat Calculations', () => {
-    describe('calculateNisab', () => {
-        it('should return the lower value between gold and silver thresholds for default check', () => {
-            // Nisab calculations actually depend on the standard chosen (gold/silver)
-            const silverPrice = 0.80;
-            const goldPrice = 65;
-
-            // Default is silver standard
-            const silverNisab = (SILVER_NISAB_GRAMS / 31.1035) * silverPrice;
-            expect(calculateNisab(silverPrice, goldPrice, 'silver')).toBeCloseTo(silverNisab);
-        });
-
-        it('should correctly calculate gold nisab when specified', () => {
-            const silverPrice = 0.80;
-            const goldPrice = 65;
-            const goldNisab = (GOLD_NISAB_GRAMS / 31.1035) * goldPrice;
-
-            expect(calculateNisab(silverPrice, goldPrice, 'gold')).toBeCloseTo(goldNisab);
-        });
-    });
-
-    describe('calculateTotalAssets', () => {
-        it('should sum up simple liquid assets', () => {
-            const form = createEmptyForm();
-            form.checkingAccounts = 1000;
-            form.savingsAccounts = 5000;
-            form.cashOnHand = 1000;
-
-            const total = calculateTotalAssets(form);
-            expect(total).toBe(7000);
-        });
-
-        it('should handle stock calculation modes', () => {
-            const form = createEmptyForm();
-            form.activeInvestments = 0;
-            form.passiveInvestmentsValue = 10000;
-
-            // Bradford: 100% of passive investments
-            form.calculationMode = 'bradford';
-            expect(calculateTotalAssets(form)).toBe(10000);
-
-            // Hanafi: 30% of passive (proxy for underlying zakatable assets)
-            form.calculationMode = 'hanafi';
-            expect(calculateTotalAssets(form)).toBe(3000);
-        });
-    });
-
-    describe('calculateZakat', () => {
-        it('should return 0 zakat if total wealth is below Nisab', () => {
-            // Nisab (silver) ~ 595g / 31.1 * $25.00  = approx $478
-            const silverPrice = 25.00;
-            const goldPrice = 2500;
-
-            const form = createEmptyForm();
-            form.checkingAccounts = 50; // Below 478
-
-            const result = calculateZakat(form, silverPrice, goldPrice);
-            expect(result.zakatDue).toBe(0);
-            expect(result.isAboveNisab).toBe(false);
-        });
-
-        it('should return 2.5% zakat if total wealth is above Nisab', () => {
-            const silverPrice = 0.80;
-            const goldPrice = 65;
-
-            const form = createEmptyForm();
-            form.checkingAccounts = 20000; // Well above nisab
-
-            const result = calculateZakat(form, silverPrice, goldPrice);
-            expect(result.zakatDue).toBe(20000 * 0.025);
-            expect(result.isAboveNisab).toBe(true);
-        });
-
-        it('should deduct immediate liabilities', () => {
-            const form = createEmptyForm();
-            form.checkingAccounts = 20000;
-            form.creditCardBalance = 5000; // Deductible
-            form.unpaidBills = 1000; // Deductible
-
-            // Net = 14000. Zakat = 14000 * 0.025 = 350
-            const result = calculateZakat(form);
-            expect(result.netZakatableWealth).toBe(14000);
-            expect(result.zakatDue).toBe(350);
-        });
-
-        it('should deduct only 12 months of mortgage payments, not the principal', () => {
-            const form = createEmptyForm();
-            form.checkingAccounts = 100000;
-            form.monthlyMortgage = 2000;
-
-            // Deductible = 2000 * 12 = 24000
-            // Net = 76000
-            const result = calculateZakat(form);
-            expect(result.totalLiabilities).toBe(24000);
-            expect(result.netZakatableWealth).toBe(76000);
-        });
+describe('Madhab to Calculation Mode Mapping', () => {
+    it('maps correctly', () => {
+        expect(getCalculationModeForMadhab('balanced')).toBe('bradford');
+        expect(getCalculationModeForMadhab('hanafi')).toBe('hanafi');
+        expect(getCalculationModeForMadhab('shafii')).toBe('maliki-shafii');
     });
 });

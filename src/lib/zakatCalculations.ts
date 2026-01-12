@@ -1,6 +1,23 @@
 // Zakat Calculation Logic based on Sheikh Joe Bradford's methodology
 
-import { MODE_RULES } from './madhahRules';
+import { MODE_RULES, MADHAB_RULES, getCalculationModeForMadhab } from './madhahRules';
+import {
+  ZakatFormData,
+  ZakatCalculationResult,
+  AssetBreakdown,
+  EnhancedAssetBreakdown,
+  AssetItem,
+  AssetCategory,
+  LiabilityItem,
+  CalendarType,
+  NisabStandard,
+  CalculationMode,
+  Madhab,
+  ZakatReport
+} from './zakatTypes';
+
+export * from './zakatTypes';
+export * from './madhahRules';
 
 export const SILVER_NISAB_GRAMS = 595;
 export const GOLD_NISAB_GRAMS = 85;
@@ -11,146 +28,48 @@ export const GRAMS_PER_OUNCE = 31.1035;
 export const ZAKAT_RATE = 0.025; // 2.5% for lunar year
 export const SOLAR_ZAKAT_RATE = 0.02577; // Adjusted for solar year (2.5% * 365.25/354.37)
 
-export type CalendarType = 'lunar' | 'solar';
-export type NisabStandard = 'silver' | 'gold';
-export type CalculationMode = 'bradford' | 'hanafi' | 'maliki-shafii' | 'hanbali';
-export type Madhab = 'hanafi' | 'maliki' | 'shafii' | 'hanbali' | 'balanced';
-
-export interface HouseholdMember {
-  id: string;
-  name: string;
-  relationship: 'self' | 'spouse' | 'child' | 'other';
+export function formatCurrency(amount: number, currency: string = 'USD', fractionDigits: number = 0): string {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(amount);
+  } catch (e) {
+    return `${currency} ${amount.toFixed(fractionDigits)}`;
+  }
 }
 
-export interface ZakatFormData {
-  // Preferences
-  currency: string;
-  calendarType: CalendarType;
-  nisabStandard: NisabStandard;
-  calculationMode: CalculationMode;
-  madhab: Madhab; // User's preferred school of thought
-  isHousehold: boolean; // Whether calculating for household or just self
-  isSimpleMode: boolean; // Whether using simple 4-question mode
-  householdMembers: HouseholdMember[]; // Track family members for household mode
+import { Parser } from 'expr-eval';
 
-  // Personal Info
-  email: string;
-  age: number;
-  estimatedTaxRate: number; // Combined federal + state rate as decimal
+const mathParser = new Parser();
 
-  // Financial categories selected
-  hasPreciousMetals: boolean;
-  hasRealEstate: boolean;
-  hasBusiness: boolean;
-  hasIlliquidAssets: boolean;
-  hasDebtOwedToYou: boolean;
-  hasTaxPayments: boolean;
-  hasCrypto: boolean;
-  hasTrusts: boolean;
-
-  // Liquid Assets
-  checkingAccounts: number;
-  savingsAccounts: number;
-  cashOnHand: number;
-  digitalWallets: number; // PayPal, Venmo, CashApp, Zelle
-  foreignCurrency: number; // Converted to USD at spot rate
-  interestEarned: number; // For purification (not Zakatable)
-
-  // Precious Metals
-  goldValue: number;
-  silverValue: number;
-
-  // Crypto & Digital Assets
-  cryptoCurrency: number; // BTC, ETH treated as currency
-  cryptoTrading: number; // Altcoins, NFTs for trading
-  stakedAssets: number; // Principal only
-  stakedRewardsVested: number; // Vested staking rewards
-  liquidityPoolValue: number; // Current redeemable value
-
-  // Investments
-  activeInvestments: number;
-  passiveInvestmentsValue: number;
-  dividends: number;
-  dividendPurificationPercent: number; // % to purify from non-halal income
-
-  // Retirement Accounts
-  rothIRAContributions: number; // Principal only (always accessible)
-  rothIRAEarnings: number; // Subject to penalty if under 59.5
-  traditionalIRABalance: number; // Vested balance
-  fourOhOneKVestedBalance: number; // Vested balance
-  fourOhOneKUnvestedMatch: number; // Not Zakatable
-  iraWithdrawals: number;
-  esaWithdrawals: number;
-  fiveTwentyNineWithdrawals: number;
-  hsaBalance: number;
-  isOver59Half: boolean;
-
-  // Trusts
-  revocableTrustValue: number;
-  irrevocableTrustAccessible: boolean;
-  irrevocableTrustValue: number;
-  clatValue: number; // Not Zakatable during annuity term
-
-  // Real Estate
-  realEstateForSale: number; // Property for flipping - full value
-  rentalPropertyIncome: number; // Net rental income in bank
-
-  // Business
-  businessCashAndReceivables: number;
-  businessInventory: number;
-
-  // Illiquid Assets
-  illiquidAssetsValue: number;
-  livestockValue: number;
-
-  // Debt Owed To You
-  goodDebtOwedToYou: number; // Collectible - borrower willing/able
-  badDebtRecovered: number; // Bad debt recovered this year
-
-  // Liabilities
-  monthlyLivingExpenses: number;
-  insuranceExpenses: number;
-  creditCardBalance: number; // Due immediately
-  unpaidBills: number; // Due immediately
-  monthlyMortgage: number; // Only 12 months deductible
-  studentLoansDue: number; // Only current payments due
-  propertyTax: number;
-  lateTaxPayments: number;
+export function parseMathExpression(expression: string): number {
+  if (!expression || expression.trim() === '') return 0;
+  try {
+    // Use expr-eval for safe math expression parsing (no code execution risk)
+    const result = mathParser.evaluate(expression);
+    return typeof result === 'number' && !isNaN(result) ? result : 0;
+  } catch {
+    return 0;
+  }
 }
 
-export interface AssetBreakdown {
-  liquidAssets: number;
-  investments: number;
-  retirement: number;
-  realEstate: number;
-  business: number;
-  otherAssets: number;
-  exemptAssets: number;
+export function formatCompactCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(amount);
 }
 
-export interface ZakatCalculationResult {
-  totalAssets: number;
-  totalLiabilities: number;
-  netZakatableWealth: number;
-  nisab: number;
-  isAboveNisab: boolean;
-  zakatDue: number;
-  zakatRate: number;
-  interestToPurify: number;
-  dividendsToPurify: number;
-  assetBreakdown: AssetBreakdown;
-  enhancedBreakdown: EnhancedAssetBreakdown;
-}
-
-export interface ZakatReport {
-  meta: {
-    timestamp: string;
-    reportId: string;
-    version: string;
-    referralCode?: string;
-  };
-  input: ZakatFormData;
-  output: ZakatCalculationResult;
+export function formatPercent(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'percent',
+    maximumFractionDigits: 1
+  }).format(value);
 }
 
 export function createZakatReport(data: ZakatFormData, calculations: ZakatCalculationResult, referralCode?: string): ZakatReport {
@@ -469,61 +388,18 @@ export function calculateZakat(
   };
 }
 
-export interface AssetBreakdown {
-  liquidAssets: number;
-  investments: number;
-  retirement: number;
-  realEstate: number;
-  business: number;
-  otherAssets: number;
-  exemptAssets: number;
-}
-
-// Enhanced Asset Breakdown for PDF Report v2
-export interface AssetItem {
-  name: string;
-  value: number;
-  zakatablePercent?: number;
-  zakatableAmount?: number;
-}
-
-export interface AssetCategory {
-  label: string;
-  color: string;
-  total: number;
-  zakatableAmount: number;
-  zakatablePercent: number;
-  percentOfNetZakatable: number;
-  items: AssetItem[];
-}
-
-export interface LiabilityItem {
-  name: string;
-  value: number;
-}
-
-export interface EnhancedAssetBreakdown {
-  liquidAssets: AssetCategory;
-  preciousMetals: AssetCategory;
-  crypto: AssetCategory;
-  investments: AssetCategory;
-  retirement: AssetCategory;
-  trusts: AssetCategory;
-  realEstate: AssetCategory;
-  business: AssetCategory;
-  debtOwedToYou: AssetCategory;
-  illiquidAssets: AssetCategory;
-  liabilities: {
-    label: string;
-    color: string;
-    total: number;
-    items: LiabilityItem[];
-  };
-  exempt: {
-    label: string;
-    color: string;
-    total: number;
-    items: AssetItem[];
+// Deprecated in favor of enhanced breakdown but kept for backward compatibility if needed
+export function calculateAssetBreakdown(data: ZakatFormData): AssetBreakdown {
+  // Re-implemented to use the logic, though mostly redundant with enhanced
+  const enhanced = calculateEnhancedAssetBreakdown(data, 100); // dummy net wealth
+  return {
+    liquidAssets: enhanced.liquidAssets.total + enhanced.preciousMetals.total + enhanced.crypto.total,
+    investments: enhanced.investments.total,
+    retirement: enhanced.retirement.total,
+    realEstate: enhanced.realEstate.total,
+    business: enhanced.business.total,
+    otherAssets: enhanced.trusts.total + enhanced.illiquidAssets.total + enhanced.debtOwedToYou.total,
+    exemptAssets: enhanced.exempt.total
   };
 }
 
@@ -809,104 +685,4 @@ export function calculateEnhancedAssetBreakdown(
       items: exemptItems,
     },
   };
-}
-
-function calculateAssetBreakdown(data: ZakatFormData): AssetBreakdown {
-  const liquidAssets =
-    data.checkingAccounts +
-    data.savingsAccounts +
-    data.cashOnHand +
-    data.digitalWallets +
-    data.foreignCurrency +
-    (data.hasPreciousMetals ? data.goldValue + data.silverValue : 0) +
-    (data.hasCrypto ? data.cryptoCurrency + data.cryptoTrading + data.stakedAssets + data.stakedRewardsVested + data.liquidityPoolValue : 0);
-
-  const investments =
-    data.activeInvestments +
-    (data.calculationMode === 'bradford' ? data.passiveInvestmentsValue : data.passiveInvestmentsValue * 0.30) +
-    data.dividends;
-
-  const retirement =
-    data.rothIRAContributions +
-    data.rothIRAEarnings +
-    calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.calculationMode) +
-    calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.calculationMode) +
-    data.iraWithdrawals +
-    data.esaWithdrawals +
-    data.fiveTwentyNineWithdrawals +
-    data.hsaBalance;
-
-  const realEstate = data.hasRealEstate ? data.realEstateForSale + data.rentalPropertyIncome : 0;
-
-  const business = data.hasBusiness ? data.businessCashAndReceivables + data.businessInventory : 0;
-
-  const otherAssets =
-    (data.hasIlliquidAssets ? data.illiquidAssetsValue + data.livestockValue : 0) +
-    (data.hasDebtOwedToYou ? data.goodDebtOwedToYou + data.badDebtRecovered : 0) +
-    (data.hasTrusts ? data.revocableTrustValue + (data.irrevocableTrustAccessible ? data.irrevocableTrustValue : 0) : 0);
-
-  // Exempt assets (for display purposes)
-  const exemptAssets =
-    data.fourOhOneKUnvestedMatch +
-    data.clatValue +
-    (data.hasTrusts && !data.irrevocableTrustAccessible ? data.irrevocableTrustValue : 0);
-
-  return {
-    liquidAssets,
-    investments,
-    retirement,
-    realEstate,
-    business,
-    otherAssets,
-    exemptAssets,
-  };
-}
-
-export function formatCurrency(amount: number, currency: string = 'USD', fractionDigits: number = 2): string {
-  // Use a fallback for tests environment if Intl is not available (common in some Jest configs)
-  // But for browser it should be fine.
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: fractionDigits,
-      maximumFractionDigits: fractionDigits,
-    }).format(amount);
-  } catch (e) {
-    return `${currency} ${amount.toFixed(fractionDigits)}`;
-  }
-}
-
-export function formatCompactCurrency(amount: number, currency: string = 'USD'): string {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(amount);
-  } catch (e) {
-    // Fallback for older environments
-    return formatCurrency(amount, currency, 0);
-  }
-}
-
-export function formatPercent(rate: number): string {
-  return `${(rate * 100).toFixed(3)}%`;
-}
-
-import { Parser } from 'expr-eval';
-
-const mathParser = new Parser();
-
-export function parseMathExpression(expression: string): number {
-  if (!expression || expression.trim() === '') return 0;
-
-  try {
-    // Use expr-eval for safe math expression parsing (no code execution risk)
-    const result = mathParser.evaluate(expression);
-    return typeof result === 'number' && !isNaN(result) ? result : 0;
-  } catch {
-    return 0;
-  }
 }
