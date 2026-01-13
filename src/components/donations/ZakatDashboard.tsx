@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/zakatCalculations';
+import { content as c } from '@/content';
 
 interface ZakatDashboardProps {
     /** Total Zakat calculated for current Hawl year */
@@ -63,7 +64,7 @@ export function ZakatDashboard({
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                             <HandHeart className="w-4 h-4 text-primary" weight="duotone" />
                         </div>
-                        <h3 className="font-semibold text-foreground">Your Zakat</h3>
+                        <h3 className="font-semibold text-foreground">{c.dashboard.zakatProgress.sectionTitle}</h3>
                     </div>
                     {hawlStart && hawlEnd && (
                         <Badge variant="secondary" className="text-[10px] gap-1">
@@ -80,7 +81,7 @@ export function ZakatDashboard({
                             {formatCurrency(remaining)}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                            remaining of {formatCurrency(calculatedAmount)}
+                            {c.dashboard.zakatProgress.remainingOf(formatCurrency(calculatedAmount))}
                         </span>
                     </div>
 
@@ -103,16 +104,16 @@ export function ZakatDashboard({
                             {isComplete ? (
                                 <>
                                     <CheckCircle weight="fill" className="w-3 h-3" />
-                                    Fully distributed!
+                                    {c.dashboard.zakatProgress.fullyDistributed}
                                 </>
                             ) : (
-                                `${percentComplete}% distributed`
+                                c.dashboard.zakatProgress.percentDistributed(percentComplete)
                             )}
                         </span>
                         {daysRemaining > 0 && (
                             <span className="flex items-center gap-1 text-muted-foreground">
                                 <Clock className="w-3 h-3" />
-                                {daysRemaining} days left
+                                {c.dashboard.zakatProgress.daysLeft(daysRemaining)}
                             </span>
                         )}
                     </div>
@@ -126,14 +127,14 @@ export function ZakatDashboard({
                         className="flex-1"
                         onClick={() => navigate('/donations')}
                     >
-                        {donationCount > 0 ? `${donationCount} Donations` : 'Track Donations'}
+                        {donationCount > 0 ? c.dashboard.donations.donationsCount(donationCount) : c.dashboard.donations.trackDonations}
                     </Button>
                     <Button
                         size="sm"
                         className="flex-1"
                         onClick={() => navigate('/donations')}
                     >
-                        Add Donation
+                        {c.dashboard.donations.addDonation}
                         <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                 </div>

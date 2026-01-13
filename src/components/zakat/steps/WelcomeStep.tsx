@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { content as c } from "@/content";
 import {
   ArrowRight,
   BookOpen,
@@ -47,8 +48,8 @@ interface WelcomeStepProps {
   onViewResults?: () => void;
 }
 
-// Asset coverage badges
-const assetTypes = ["401(k) / IRA", "Crypto & NFTs", "Real Estate", "Stocks & RSUs"];
+// Asset coverage badges - now sourced from content system
+import { assetBadges } from "@/content/marketing";
 
 export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
@@ -202,7 +203,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 transition={{ duration: 0.5 }}
               >
                 <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground mb-4">
-                  Welcome back{firstName ? `, ${firstName}` : ''}
+                  {c.wizard.welcome.headlineReturning(firstName)}
                 </h1>
               </motion.div>
             </div>
@@ -222,7 +223,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4 px-1">
-                      <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">In Progress</h2>
+                      <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{c.common.labels.inProgress}</h2>
                     </div>
                     <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group shadow-lg shadow-primary/5" onClick={onNext}>
                       <CardContent className="p-6 md:p-8 flex items-center justify-between">
@@ -231,7 +232,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                             <Play weight="fill" className="w-6 h-6 ml-0.5" />
                           </div>
                           <div>
-                            <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">Continue where you left off</p>
+                            <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{c.wizard.welcome.continueCard.title}</p>
                             <p className="text-muted-foreground">Step {stepIndex + 1} • Saved {getRelativeTime()}</p>
                           </div>
                         </div>
@@ -240,7 +241,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                     </Card>
                     <div className="text-center mt-3">
                       <Button variant="link" size="sm" onClick={() => { startFresh(); onNext(); }} className="text-muted-foreground hover:text-destructive text-xs">
-                        Discard and start over
+                        {c.wizard.welcome.discardPrompt}
                       </Button>
                     </div>
                   </div>
@@ -249,8 +250,8 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                   {latestCalculation && !savedLoading && (
                     <div className="pt-2 border-t border-dashed border-border/50">
                       <div className="flex items-center justify-between mb-3 px-1 mt-4">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Past Reports</h2>
-                        <Link to="/calculations" className="text-xs text-primary hover:underline">View All</Link>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{c.common.labels.pastReports}</h2>
+                        <Link to="/calculations" className="text-xs text-primary hover:underline">{c.common.buttons.viewAll}</Link>
                       </div>
                       <MiniReportWidget calculation={latestCalculation} onLoad={handleLoadCalculation} />
                     </div>
@@ -305,23 +306,21 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 </motion.div>
               )}
 
-              {/* C. Empty State (Start New) - Only if NOTHING else matches */}
-              {(!latestCalculation || !user) && !hasLocalSession && !reportReady && (
+              {/* D. Start New Calculation - Always visible when user has history */}
+              {(latestCalculation || reportReady) && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex justify-center py-12"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex justify-center pt-4"
                 >
                   <Button
-                    onClick={onNext}
-                    size="lg"
-                    className="h-16 px-10 text-lg rounded-full shadow-2xl shadow-primary/20 hover:scale-105 transition-transform"
+                    variant="outline"
+                    onClick={() => { startFresh(); onNext(); }}
+                    className="gap-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <Calculator weight="fill" className="w-6 h-6" />
-                      <span>Start New Calculation</span>
-                    </div>
+                    <Calculator weight="duotone" className="w-4 h-4" />
+                    Start New Calculation
                   </Button>
                 </motion.div>
               )}
@@ -511,13 +510,13 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               variants={itemVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight leading-[1.1]"
             >
-              Zakat,<br />
-              <span className="text-primary">Clarified.</span>
+              {c.marketing.hero.headline}<br />
+              <span className="text-primary">{c.marketing.hero.headlineAccent}</span>
             </motion.h1>
 
             {/* Asset Types Badges */}
             <motion.div variants={itemVariants} className="flex flex-wrap gap-2 mb-8">
-              {assetTypes.map((asset, i) => (
+              {assetBadges.map((asset, i) => (
                 <span
                   key={i}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-sm font-medium border border-border"
@@ -533,7 +532,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               variants={itemVariants}
               className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
             >
-              Calculate your obligations with confidence. We help you navigate the complexity of modern assets—from RSUs to Crypto—so you can make informed choices.
+              {c.marketing.hero.subhead}
             </motion.p>
 
             {/* Primary CTA */}
@@ -543,7 +542,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                 size="lg"
                 className="gap-2 text-base h-12 px-8 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
               >
-                Start Calculating
+                {c.common.buttons.startCalculating}
                 <ArrowRight className="w-4 h-4" weight="bold" />
               </Button>
 
@@ -571,7 +570,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Sign in to Save
+                {c.common.buttons.signInToSave}
               </Button>
             </motion.div>
 
@@ -579,12 +578,12 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
             <motion.div variants={itemVariants} className="flex items-center gap-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
                 <Lock className="w-3.5 h-3.5" weight="duotone" />
-                Zero-Knowledge Encryption
+                {c.common.badges.zeroKnowledge}
               </div>
               <span className="hidden sm:inline">•</span>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
                 <Trash className="w-3.5 h-3.5" weight="duotone" />
-                Session-Only Storage
+                {c.common.badges.sessionOnly}
               </div>
             </motion.div>
           </motion.div>

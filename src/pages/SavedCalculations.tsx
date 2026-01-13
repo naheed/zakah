@@ -7,8 +7,9 @@ import { useSharedCalculations } from '@/hooks/useCalculationShares';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/zakatCalculations';
-import { ArrowLeft, Plus, Trash, Calendar, CheckCircle, XCircle, Spinner, Users } from '@phosphor-icons/react';
+import { ArrowLeft, Plus, Trash, Calendar, CheckCircle, XCircle, Spinner, Users, Calculator } from '@phosphor-icons/react';
 import { Footer } from '@/components/zakat/Footer';
+import { useZakatPersistence } from '@/hooks/useZakatPersistence';
 import { getPrimaryUrl } from '@/lib/domainConfig';
 import {
   AlertDialog,
@@ -28,6 +29,7 @@ export default function SavedCalculations() {
   const { user, loading: authLoading } = useAuth();
   const { calculations, loading, deleteCalculation } = useSavedCalculations();
   const { calculations: sharedCalculations, loading: sharedLoading } = useSharedCalculations();
+  const { startFresh } = useZakatPersistence();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -70,10 +72,6 @@ export default function SavedCalculations() {
               <p className="text-sm text-muted-foreground">View and manage your Zakat records</p>
             </div>
           </div>
-          <Button onClick={() => navigate('/')}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Calculation
-          </Button>
         </div>
       </header>
 
@@ -109,7 +107,12 @@ export default function SavedCalculations() {
                       : "Completed guest calculations will appear here. Sign in to save them to the cloud."}
                   </p>
                   <div className="flex flex-col gap-3 items-center">
-                    <Button onClick={() => navigate('/')}>
+                    <Button
+                      variant="outline"
+                      onClick={() => { startFresh(); navigate('/?step=1'); }}
+                      className="gap-2"
+                    >
+                      <Calculator className="w-4 h-4" weight="duotone" />
                       Start New Calculation
                     </Button>
                     {!user && (

@@ -18,6 +18,7 @@ import { formatCurrency } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { getInstitutionLogoUrl, getInstitutionDisplayName } from "@/lib/institutionLogos";
+import { content as c } from "@/content";
 
 interface AccountCardProps {
     account: AssetAccount;
@@ -59,21 +60,8 @@ const accountTypeBadgeColors: Record<AccountType, string> = {
     OTHER: "bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
 };
 
-// Human readable account type names
-const accountTypeLabels: Record<AccountType, string> = {
-    CHECKING: "Checking",
-    SAVINGS: "Savings",
-    BROKERAGE: "Brokerage",
-    RETIREMENT_401K: "401(k)",
-    RETIREMENT_IRA: "IRA",
-    ROTH_IRA: "Roth IRA",
-    CRYPTO_WALLET: "Crypto",
-    REAL_ESTATE: "Real Estate",
-    TRUST: "Trust",
-    METALS: "Precious Metals",
-    BUSINESS: "Business",
-    OTHER: "Other",
-};
+// Human readable account type names - now sourced from content system
+const accountTypeLabels = c.assets.accountTypeLabels;
 
 /**
  * AccountCard - Material 3 Expressive "Hero Balance" Layout
@@ -210,9 +198,9 @@ export function AccountCard({ account, latestValue, lastUpdated, onClick, compac
                                 <Warning weight="fill" className="w-3 h-3" />
                             )}
                             <span>
-                                {daysSinceUpdate === 0 ? 'Today' :
-                                    daysSinceUpdate === 1 ? 'Yesterday' :
-                                        `${daysSinceUpdate}d ago`}
+                                {daysSinceUpdate === 0 ? c.assets.freshness.today :
+                                    daysSinceUpdate === 1 ? c.assets.freshness.yesterday :
+                                        c.assets.freshness.daysAgo(daysSinceUpdate)}
                             </span>
                         </div>
                     )}
