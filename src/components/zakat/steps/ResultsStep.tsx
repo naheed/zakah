@@ -322,7 +322,6 @@ export function ResultsStep({
           currency={currency}
           isAboveNisab={isAboveNisab}
           madhab={data.madhab || 'balanced'}
-          calculationMode={data.madhab || 'balanced'}
         />
 
         {/* Methodology Selector - Toggle to see different calculations */}

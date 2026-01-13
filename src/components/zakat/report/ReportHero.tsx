@@ -1,6 +1,5 @@
 import { formatCurrency, Madhab } from "@/lib/zakatCalculations";
-import { getModeDisplayName } from "@/lib/madhahRules";
-import { SealCheck, Minus, Equals, ShieldCheck, BookOpen } from "@phosphor-icons/react";
+import { SealCheck, Minus, Equals, BookOpen } from "@phosphor-icons/react";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -13,7 +12,6 @@ interface ReportHeroProps {
     currency: string;
     isAboveNisab: boolean;
     madhab: string;
-    calculationMode: Madhab;
 }
 
 export function ReportHero({
@@ -24,16 +22,11 @@ export function ReportHero({
     currency,
     isAboveNisab,
     madhab,
-    calculationMode,
     className
 }: ReportHeroProps & { className?: string }) {
     // Format helpers
     const wholeZakat = Math.floor(zakatDue);
     const decimalZakat = (zakatDue % 1).toFixed(2).substring(1); // .00
-
-    // Calculation Mode Label - using getModeDisplayName for new 4-mode system
-    // Modes: bradford, hanafi, maliki-shafii, hanbali
-    const modeLabel = getModeDisplayName(calculationMode);
 
     // Madhab Label
     const madhabLabel = madhab ? (madhab.charAt(0).toUpperCase() + madhab.slice(1) + " Madhab") : "Standard Madhab";
@@ -133,10 +126,6 @@ export function ReportHero({
                     {/* Trust Signals */}
                     <div className="mt-4 pt-4 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center text-xs text-muted-foreground gap-3 sm:gap-0">
                         <div className="flex flex-wrap justify-center sm:justify-start gap-4">
-                            <span className="flex items-center gap-1.5">
-                                <ShieldCheck weight="fill" className="text-primary w-4 h-4" />
-                                {modeLabel}
-                            </span>
                             <span className="flex items-center gap-1.5">
                                 <BookOpen weight="fill" className="text-primary w-4 h-4" />
                                 {madhabLabel}

@@ -25,7 +25,6 @@ export function generateCSV(report: ZakatReport, fileName: string = "zakat-repor
     rows.push(["ZakatFlow Calculation Report"]);
     rows.push(["Date Generated", safe(format(new Date(), "PPpp"))]);
     rows.push(["Currency", safe(currency)]);
-    rows.push(["Calculation Mode", safe(calculationMode)]);
     rows.push(["Madhab", safe(madhab || "Standard")]);
     if (report.meta.referralCode) {
         rows.push(["Referral Code", safe(report.meta.referralCode)]);

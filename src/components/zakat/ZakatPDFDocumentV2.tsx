@@ -569,14 +569,6 @@ export function ZakatPDFDocumentV2({
 
                         <View style={styles.trustRow}>
                             <View style={styles.trustBadge}>
-                                {/* Shield Icon */}
-                                <Svg width={8} height={8} viewBox="0 0 24 24" style={{ marginRight: 2 }}>
-                                    <Path d="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1z" fill={COLORS.primary} />
-                                </Svg>
-                                <Text>{data.madhabLabel} Mode</Text>
-
-                                <Text style={{ marginHorizontal: 4 }}>•</Text>
-
                                 {/* Book Icon */}
                                 <Svg width={8} height={8} viewBox="0 0 24 24" style={{ marginRight: 2 }}>
                                     <Path d="M18,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C20,2.9,19.1,2,18,2z M6,4h5v8l-2.5-1.5L6,12V4z" fill={COLORS.primary} />
