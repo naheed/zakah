@@ -8,10 +8,10 @@
 
 | Priority | Phase | Feature Area | Status | Goal |
 |---|---|---|---|---|
-| **P0** | **Phase 5** | **Reports & History** | ⬜ Planned | "Frozen" historical reports and PDF/CSV downloads |
-| **P1** | **Phase 6** | **Charity Portal** | ⬜ Planned | Charity directory and verified recipient discovery |
-| **P2** | **Phase 7** | **Feedback Loop** | ⬜ Planned | User feature voting and bug reporting |
-| **P3** | **Phase 8** | **Mobile Ready** | ⬜ Future | Apple Auth & Mobile App foundations |
+| **P0** | **Docs** | **Engineering Design** | 🏗️ In Progress | Comprehensive architectural documentation (Google-style EDD) |
+| **P1** | **Phase 5** | **Reports & History** | ⬜ Planned | "Frozen" historical reports and PDF/CSV downloads |
+| **P2** | **Phase 6** | **Charity Portal** | ⬜ Planned | Charity directory and verified recipient discovery |
+| **P3** | **Phase 7** | **Feedback Loop** | ⬜ Planned | User feature voting and bug reporting |
 
 ---
 
@@ -77,6 +77,12 @@
 ---
 
 ## ✅ Completed Milestones (History)
+
+### Phase 10: Stability & Polish ✅
+> **Released: v0.16.0 (Jan 2026)**
+- **Audit**: Comprehensive cleanup of Report UI redundancies.
+- **Accuracy**: Critical fix for retirement tax handling (25 vs 0.25).
+- **Visuals**: Responsive Sankey chart fixes for mobile & desktop.
 
 ### Phase 9: System Design & Accessibility ✅
 > **Released: v0.15.0 (Jan 2026)**

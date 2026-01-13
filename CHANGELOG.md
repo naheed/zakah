@@ -21,19 +21,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- **Critical Calculation Bug**: Monthly living expenses were not being properly annualized in liability calculations
-  - **Impact**: Users were overpaying zakat due to under-deduction of liabilities
-  - **Example**: User with $15K cash and $1K/month living expenses was paying $350 instead of $75 (saved $275!)
-  - **Fix**: Living expenses now correctly multiplied by 12 to match 12-month debt deduction methodology
-  - **Test Coverage**: Added comprehensive test suite covering all 13 asset categories across all 5 madhabs (83 tests)
-
 ### Planned
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug
-  - Add user name, Hijri date, madhab settings to PDF
   - Add machine-readable QR for YoY scanning
-  - Add referral metrics (privacy-safe)
+
+## [0.16.0] - 2026-01-12
+
+### Fixed
+- **Critical Calculation Bug (Retirement)**: Fixed tax deduction rate being treated as whole number (25) instead of decimal (0.25), which was zeroing out retirement assets.
+- **Critical Calculation Bug (Liabilities)**: Monthly living expenses were not being properly annualized (multiplied by 12), leading to under-deduction of liabilities.
+- **UI Redundancy**: Removed duplicate "Hanafi Mode" labels from Report UI, PDF, and CSV exports. Consolidated into single "School of Thought" badge.
+- **Sankey Chart Visuals**:
+  - **Mobile Layout**: Fixed "squished" chart by implementing dynamic margins.
+  - **Asset Visibility**: Fixed bug where non-zakatable Precious Metals were hidden from chart; now flow to "Not Zakatable".
+  - **Typography**: Unified footer font sizes.
+
+### Added
+- **AI Model Upgrade**: Upgraded document parsing engine to **Gemini 3.0 Flash** for improved accuracy and speed.
+- **Refined Madhab Selection**: Updates to Settings and Wizard to properly partial-match madhab keys.
 
 ## [0.15.0] - 2026-01-11
 

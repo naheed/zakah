@@ -34,6 +34,8 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 
 ## Architecture
 
+> **Deep Dive**: For a comprehensive technical breakdown, see the [Engineering Design Document](docs/ENGINEERING_DESIGN.md).
+
 ```
 │                        Frontend (React)                          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
@@ -59,7 +61,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 │                          │                │                      │
 │                          │         ┌──────┴──────┐               │
 │                          │         │  AI Parser  │               │
-│                          │         │  (Gemini)   │               │
+│                          │         │  (Gemini 3.0) │               │
 │                          │         └─────────────┘               │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -74,7 +76,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Styling** | Tailwind CSS, Shadcn UI (Radix primitives) |
 | **State** | TanStack Query, React Context |
 | **Backend** | Supabase (Postgres, Auth, Edge Functions) |
-| **AI** | Google Gemini 2.0 Flash (document parsing) |
+| **AI** | Google Gemini 3.0 Flash (document parsing) |
 | **Visualization** | Nivo (Sankey charts), Recharts |
 | **PDF** | @react-pdf/renderer |
 | **Icons** | Phosphor Icons |
