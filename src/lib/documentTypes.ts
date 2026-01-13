@@ -37,6 +37,7 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   // Investments
   activeInvestments: "investments",
   passiveInvestmentsValue: "investments",
+  passiveInvestmentIntent: "investments",
   dividends: "investments",
   dividendPurificationPercent: "investments",
 
@@ -99,7 +100,6 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   currency: "currency",
   calendarType: "nisab",
   nisabStandard: "nisab",
-  calculationMode: "nisab",
   madhab: "nisab",
   isHousehold: "family",
   householdMembers: "family",

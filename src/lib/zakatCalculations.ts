@@ -12,7 +12,6 @@ import {
   CalendarType,
   NisabStandard,
   Madhab,
-  Madhab,
   ZakatReport
 } from './zakatTypes';
 
@@ -56,10 +55,10 @@ export function parseMathExpression(expression: string): number {
   }
 }
 
-export function formatCompactCurrency(amount: number): string {
+export function formatCompactCurrency(amount: number, currency: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: currency,
     notation: 'compact',
     maximumFractionDigits: 1
   }).format(amount);

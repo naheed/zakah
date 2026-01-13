@@ -67,7 +67,7 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
         </div>
         <RadioGroup
           value={data.madhab}
-          onValueChange={(value) => updateData({ calculationMode: value as Madhab })}
+          onValueChange={(value) => updateData({ madhab: value as Madhab })}
           className="space-y-3"
         >
           {/* Bradford Mode */}
@@ -111,7 +111,7 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
 
           {/* Maliki/Shafi'i Mode */}
           <label
-            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'maliki-shafii'
+            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'maliki' || data.madhab === 'shafii'
               ? 'border-primary bg-primary/5'
               : 'border-border hover:border-primary/50'
               }`}

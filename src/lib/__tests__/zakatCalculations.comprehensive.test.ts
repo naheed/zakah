@@ -549,7 +549,7 @@ describe('10. Debt Owed To You', () => {
     it('Bad debt (uncollectible): Not zakatable', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            badDebtOwedToYou: 10000,
+            // badDebtOwedToYou doesn't exist in form - only goodDebtOwedToYou and badDebtRecovered
             hasDebtOwedToYou: true,
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
@@ -560,7 +560,7 @@ describe('10. Debt Owed To You', () => {
         const result = calculateZakat({
             ...defaultFormData,
             goodDebtOwedToYou: 8000,
-            badDebtOwedToYou: 2000, // Not counted
+            // badDebtOwedToYou doesn't exist - bad debt is tracked via badDebtRecovered
             hasDebtOwedToYou: true,
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
@@ -668,7 +668,7 @@ describe('12. Tax Payments', () => {
             ...defaultFormData,
             madhab: 'maliki',
             cashOnHand: 15000,
-            estimatedTaxPayment: 3000, // NOT a recurring 12-month debt
+            // estimatedTaxPayment doesn't exist - only estimatedTaxRate is in form
             hasTaxPayments: true,
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 

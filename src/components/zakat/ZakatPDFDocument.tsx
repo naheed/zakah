@@ -936,9 +936,9 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
               <View style={styles.ledgerRow}>
                 <Text style={styles.ledgerLabel}>Calculation Mode</Text>
                 <Text style={styles.ledgerValue}>
-                  {data.madhab === 'balanced'
+                  {data.calculationMode === 'conservative'
                     ? 'Conservative'
-                    : data.madhab === 'balanced'
+                    : data.calculationMode === 'bradford'
                       ? 'Bradford'
                       : 'Optimized'}
                 </Text>
