@@ -211,7 +211,7 @@ export default function Settings() {
                   <SettingsRow
                     icon={<ShieldCheck className="w-5 h-5 text-emerald-600" />}
                     label="School of Thought"
-                    value={getMadhahDisplayName(formData.madhab)}
+                    value={getMadhhabDisplayName(formData.madhab)}
                     description="Methodology for calculations"
                     onClick={() => { }}
                   />
