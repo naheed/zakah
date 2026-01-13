@@ -1,4 +1,4 @@
-import { StepContent } from "@/lib/zakatContent";
+import { StepContent } from "@/content/steps";
 import { LearnMoreMarkdown } from "./LearnMore";
 
 interface QuestionLayoutProps {

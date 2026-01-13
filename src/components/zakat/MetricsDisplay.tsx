@@ -1,5 +1,6 @@
 import { formatLargeNumber } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { content as c } from "@/content";
 
 interface MetricsDisplayProps {
     assets: number;
@@ -27,7 +28,7 @@ export function MetricsDisplay({
     if (variant === 'referral') {
         return (
             <p className={cn("text-sm text-muted-foreground", className)}>
-                Through your shares, people evaluated <span className="font-semibold text-foreground">{assetsStr}</span> in assets and calculated <span className="font-semibold text-foreground">{zakatStr}</span> in Zakat.
+                {c.settings.metrics.referral(assetsStr, zakatStr)}
             </p>
         );
     }
@@ -35,7 +36,8 @@ export function MetricsDisplay({
     // Default 'global' variant
     return (
         <p className={cn("text-center text-sm text-muted-foreground", className)}>
-            We've helped evaluate <span className="font-semibold text-foreground">{assetsStr}</span> in assets and calculate <span className="font-semibold text-foreground">{zakatStr}</span> in Zakat.
+            {c.settings.metrics.global(assetsStr, zakatStr)}
         </p>
     );
 }
+

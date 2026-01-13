@@ -1,5 +1,5 @@
 import { ZakatFormData, calculateNisab, formatCurrency, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, NisabStandard, Madhab } from "@/lib/zakatCalculations";
-import { nisabContent } from "@/lib/zakatContent";
+import { nisabContent } from "@/content/steps";
 import { QuestionLayout } from "../QuestionLayout";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";

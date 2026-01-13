@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ZakatFormData, GOLD_PRICE_PER_OUNCE, SILVER_PRICE_PER_OUNCE } from "@/lib/zakatCalculations";
-import { preciousMetalsContent } from "@/lib/zakatContent";
+import { preciousMetalsContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { WeightConverter } from "../WeightConverter";

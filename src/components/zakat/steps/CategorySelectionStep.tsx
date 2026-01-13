@@ -1,5 +1,5 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { categoriesContent } from "@/lib/zakatContent";
+import { categoriesContent } from "@/content/steps";
 import { cn } from "@/lib/utils";
 import { Check, Money, TrendUp, Bank, Diamond, CurrencyBtc, Scroll, Buildings, Storefront, PaintBrush, Handshake, Receipt, IconProps } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";

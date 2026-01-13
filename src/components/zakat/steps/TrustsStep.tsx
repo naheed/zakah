@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { trustsContent } from "@/lib/zakatContent";
+import { trustsContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";

@@ -1,6 +1,6 @@
 import { ZakatFormData, formatCurrency } from "@/lib/zakatCalculations";
 import { MADHAB_RULES } from "@/lib/madhahRules";
-import { investmentsContent } from "@/lib/zakatContent";
+import { investmentsContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";

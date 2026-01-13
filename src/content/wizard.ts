@@ -31,22 +31,22 @@ export const assets = {
     moreAccounts: (count: number) => `+${count} more accounts`,
 } as const;
 
-// Step titles (for navigation)
+// Step titles (for navigation) - aligned with ZakatWizard.tsx allSteps
 export const stepTitles = {
     welcome: 'Welcome',
     categories: 'Asset Types',
-    simpleMode: 'Quick Estimate',
-    liquidAssets: 'Cash & Savings',
-    preciousMetals: 'Gold & Silver',
-    crypto: 'Cryptocurrency',
+    simpleMode: 'Quick Calculate',
+    liquidAssets: 'Cash & Bank',
     investments: 'Investments',
-    retirement: 'Retirement Accounts',
+    retirement: 'Retirement',
+    preciousMetals: 'Precious Metals',
+    crypto: 'Crypto',
     trusts: 'Trusts',
     realEstate: 'Real Estate',
-    business: 'Business Assets',
+    business: 'Business',
     illiquidAssets: 'Other Assets',
-    debtOwedToYou: 'Loans to Others',
-    liabilities: 'Debts & Liabilities',
-    tax: 'Tax Obligations',
-    results: 'Your Zakat Report',
+    debtOwedToYou: 'Receivables',
+    liabilities: 'Deductions',
+    tax: 'Taxes',
+    results: 'Your Zakat',
 } as const;

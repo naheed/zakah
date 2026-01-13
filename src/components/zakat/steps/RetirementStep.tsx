@@ -1,5 +1,5 @@
 import { ZakatFormData, formatCurrency, calculateRetirementAccessible } from "@/lib/zakatCalculations";
-import { retirementContent } from "@/lib/zakatContent";
+import { retirementContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";

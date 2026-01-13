@@ -1,5 +1,5 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { debtOwedContent } from "@/lib/zakatContent";
+import { debtOwedContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";

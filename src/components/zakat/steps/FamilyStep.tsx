@@ -1,5 +1,5 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { familyContent } from "@/lib/zakatContent";
+import { familyContent } from "@/content/steps";
 import { QuestionLayout } from "../QuestionLayout";
 import { Users, User, CheckCircle } from "@phosphor-icons/react";
 import { HouseholdMemberInput } from "../HouseholdMemberInput";

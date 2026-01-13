@@ -20,6 +20,8 @@ export * from './marketing';
 export * from './report';
 export * from './assets';
 export * from './dashboard';
+export * from './settings';
+export * from './steps';
 
 // Unified content object for convenience
 import * as common from './common';
@@ -28,6 +30,7 @@ import * as marketing from './marketing';
 import * as report from './report';
 import * as assets from './assets';
 import * as dashboard from './dashboard';
+import * as settings from './settings';
 
 export const content = {
     common,
@@ -36,4 +39,5 @@ export const content = {
     report,
     assets,
     dashboard,
+    settings,
 } as const;

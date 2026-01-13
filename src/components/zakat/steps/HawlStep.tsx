@@ -1,5 +1,5 @@
 import { ZakatFormData, CalendarType } from "@/lib/zakatCalculations";
-import { hawlContent } from "@/lib/zakatContent";
+import { hawlContent } from "@/content/steps";
 import { QuestionLayout } from "../QuestionLayout";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";

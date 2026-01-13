@@ -4,6 +4,7 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useTheme } from "next-themes";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
+import { content as c } from "@/content";
 import { usePresence } from "@/hooks/usePresence";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { CategorySelectionStep } from "./steps/CategorySelectionStep";
@@ -95,27 +96,27 @@ interface Step {
 
 // Simplified steps: Settings are now in a separate /settings page
 const allSteps: Step[] = [
-  { id: 'welcome', title: 'Welcome', section: 'intro' },
-  { id: 'categories', title: 'Asset Types', section: 'intro' },
+  { id: 'welcome', title: c.wizard.stepTitles.welcome, section: 'intro' },
+  { id: 'categories', title: c.wizard.stepTitles.categories, section: 'intro' },
   // Simple mode step (replaces detailed steps when active)
-  { id: 'simple-mode', title: 'Quick Calculate', section: 'assets', condition: (data) => data.isSimpleMode },
+  { id: 'simple-mode', title: c.wizard.stepTitles.simpleMode, section: 'assets', condition: (data) => data.isSimpleMode },
   // Core assets - get to the "aha moment" fast (hidden in simple mode)
-  { id: 'liquid-assets', title: 'Cash & Bank', section: 'assets', condition: (data) => !data.isSimpleMode },
-  { id: 'investments', title: 'Investments', section: 'assets', condition: (data) => !data.isSimpleMode },
-  { id: 'retirement', title: 'Retirement', section: 'assets', condition: (data) => !data.isSimpleMode },
+  { id: 'liquid-assets', title: c.wizard.stepTitles.liquidAssets, section: 'assets', condition: (data) => !data.isSimpleMode },
+  { id: 'investments', title: c.wizard.stepTitles.investments, section: 'assets', condition: (data) => !data.isSimpleMode },
+  { id: 'retirement', title: c.wizard.stepTitles.retirement, section: 'assets', condition: (data) => !data.isSimpleMode },
   // Conditional assets (hidden in simple mode)
-  { id: 'precious-metals', title: 'Precious Metals', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasPreciousMetals },
-  { id: 'crypto', title: 'Crypto', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasCrypto },
-  { id: 'trusts', title: 'Trusts', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasTrusts },
-  { id: 'real-estate', title: 'Real Estate', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasRealEstate },
-  { id: 'business', title: 'Business', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasBusiness },
-  { id: 'illiquid-assets', title: 'Other Assets', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasIlliquidAssets },
-  { id: 'debt-owed-to-you', title: 'Receivables', section: 'assets', condition: (data) => !data.isSimpleMode && data.hasDebtOwedToYou },
+  { id: 'precious-metals', title: c.wizard.stepTitles.preciousMetals, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasPreciousMetals },
+  { id: 'crypto', title: c.wizard.stepTitles.crypto, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasCrypto },
+  { id: 'trusts', title: c.wizard.stepTitles.trusts, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasTrusts },
+  { id: 'real-estate', title: c.wizard.stepTitles.realEstate, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasRealEstate },
+  { id: 'business', title: c.wizard.stepTitles.business, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasBusiness },
+  { id: 'illiquid-assets', title: c.wizard.stepTitles.illiquidAssets, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasIlliquidAssets },
+  { id: 'debt-owed-to-you', title: c.wizard.stepTitles.debtOwedToYou, section: 'assets', condition: (data) => !data.isSimpleMode && data.hasDebtOwedToYou },
   // Liabilities (hidden in simple mode)
-  { id: 'liabilities', title: 'Deductions', section: 'liabilities', condition: (data) => !data.isSimpleMode },
-  { id: 'tax', title: 'Taxes', section: 'liabilities', condition: (data) => !data.isSimpleMode && data.hasTaxPayments },
+  { id: 'liabilities', title: c.wizard.stepTitles.liabilities, section: 'liabilities', condition: (data) => !data.isSimpleMode },
+  { id: 'tax', title: c.wizard.stepTitles.tax, section: 'liabilities', condition: (data) => !data.isSimpleMode && data.hasTaxPayments },
   // Results - the aha moment!
-  { id: 'results', title: 'Your Zakat', section: 'results' },
+  { id: 'results', title: c.wizard.stepTitles.results, section: 'results' },
 ];
 
 export function ZakatWizard() {

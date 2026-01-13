@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useState, useEffect } from "react";
 import { ZakatFormData } from "@/lib/zakatCalculations";
-import { StepContent } from "@/lib/zakatContent";
+import { StepContent } from "@/content/steps";
 import { QuestionLayout } from "./QuestionLayout";
 import { DocumentUpload, AccountWithLineItems } from "./DocumentUpload";
 import { StepDocumentsDisplay } from "./DocumentsManager";
