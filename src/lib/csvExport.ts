@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 
 export function generateCSV(report: ZakatReport, fileName: string = "zakat-report.csv") {
     const { input: formData, output: calculations } = report;
-    const { currency, calculationMode, madhab } = formData;
+    const { currency, madhab } = formData;
     const {
         totalAssets,
         totalLiabilities,
