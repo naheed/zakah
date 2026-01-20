@@ -5,10 +5,10 @@ import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 
-export function LiquidAssetsStep({ 
-  data, 
-  updateData, 
-  uploadedDocuments, 
+export function LiquidAssetsStep({
+  data,
+  updateData,
+  uploadedDocuments,
   onDocumentAdded,
   onRemoveDocument,
   questionNumber,
@@ -37,8 +37,9 @@ export function LiquidAssetsStep({
         value={data.checkingAccounts}
         onChange={(value) => updateData({ checkingAccounts: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'checkingAccounts')}
+        testId="checking-accounts-input"
       />
-      
+
       <CurrencyInput
         label="Savings Accounts"
         description="Total balance (exclude interest earned)"
@@ -47,8 +48,9 @@ export function LiquidAssetsStep({
         value={data.savingsAccounts}
         onChange={(value) => updateData({ savingsAccounts: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'savingsAccounts')}
+        testId="savings-accounts-input"
       />
-      
+
       <CurrencyInput
         label="Cash on Hand"
         description="Physical cash in wallet or home"
@@ -57,8 +59,9 @@ export function LiquidAssetsStep({
         value={data.cashOnHand}
         onChange={(value) => updateData({ cashOnHand: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'cashOnHand')}
+        testId="cash-on-hand-input"
       />
-      
+
       <CurrencyInput
         label="Digital Wallets"
         description="PayPal, Venmo, CashApp, Zelle"
@@ -67,8 +70,9 @@ export function LiquidAssetsStep({
         value={data.digitalWallets}
         onChange={(value) => updateData({ digitalWallets: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'digitalWallets')}
+        testId="digital-wallets-input"
       />
-      
+
       <CurrencyInput
         label="Foreign Currency"
         description="Converted to USD at today's rate"
@@ -77,8 +81,9 @@ export function LiquidAssetsStep({
         value={data.foreignCurrency}
         onChange={(value) => updateData({ foreignCurrency: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'foreignCurrency')}
+        testId="foreign-currency-input"
       />
-      
+
       <div className="pt-4 border-t border-border">
         <CurrencyInput
           label="⚠️ Interest Earned (For Purification)"
@@ -86,6 +91,7 @@ export function LiquidAssetsStep({
           value={data.interestEarned}
           onChange={(value) => updateData({ interestEarned: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'interestEarned')}
+          testId="interest-earned-input"
         />
       </div>
     </AssetStepWrapper>

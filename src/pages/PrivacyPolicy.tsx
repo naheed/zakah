@@ -1,6 +1,6 @@
 
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { privacyHighlights, privacySections, HighlightItem, SectionContent } from "@/lib/content/privacy";
+import { content as c, HighlightItem, SectionContent } from "@/content";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text, Heading, List, ListItem } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
@@ -93,6 +93,8 @@ const SectionRenderer: React.FC<{ section: SectionContent; index: number }> = ({
 );
 
 const PrivacyPolicy = () => {
+  const { privacyHighlights, privacySections } = c.privacy;
+
   const header = {
     title: "Privacy Policy",
     lastUpdated: "December 30, 2024",

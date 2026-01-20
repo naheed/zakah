@@ -11,7 +11,8 @@
  */
 
 // Re-export all step content from zakatContent.ts
-export * from '@/lib/zakatContent';
+// Re-export all step content from zakatGuide.ts
+export * from './zakatGuide';
 
 // Type re-exports for convenience
-export type { StepContent, FieldContent } from '@/lib/zakatContent';
+export type { StepContent, FieldContent } from './zakatGuide';

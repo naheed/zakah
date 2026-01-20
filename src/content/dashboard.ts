@@ -4,7 +4,7 @@
  */
 
 export const zakatProgress = {
-    sectionTitle: 'Your Zakat',
+    sectionTitle: 'Your Obligation',
     remainingOf: (total: string) => `remaining of ${total}`,
     fullyDistributed: 'Fully distributed!',
     percentDistributed: (percent: number) => `${percent}% distributed`,

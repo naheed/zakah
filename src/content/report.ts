@@ -4,14 +4,15 @@
  */
 
 export const hero = {
-    zakatDueLabel: 'Zakat Due',
+    zakatDueLabel: 'Your Obligation',
     viewFullReport: 'View Full Report',
 } as const;
 
 export const summary = {
     totalAssets: 'Total Assets',
+    zakatableWealth: 'Zakatable Wealth',
     netWealth: 'Net Wealth',
-    deductions: 'Deductions',
+    deductions: 'Exempt Amounts',
 } as const;
 
 export const export_ = {

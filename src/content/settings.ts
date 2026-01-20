@@ -10,8 +10,8 @@ export const page = {
 
 export const sections = {
     appearance: 'Appearance',
-    calculationEngine: 'Calculation Engine',
-    dataManagement: 'Data Management',
+    calculationEngine: 'Methodology',
+    dataManagement: 'Data & Privacy',
 } as const;
 
 export const appearance = {
@@ -29,7 +29,7 @@ export const calculationEngine = {
     },
     nisab: {
         label: 'Nisab Standard',
-        description: 'Poverty threshold for Zakat eligibility',
+        description: 'Minimum threshold for Zakat eligibility',
         sheetTitle: 'Select Nisab Standard',
         silverOption: (amount: string) => `Silver — ${amount}`,
         goldOption: (amount: string) => `Gold — ${amount}`,
@@ -41,7 +41,7 @@ export const calculationEngine = {
     },
     hawlDate: {
         label: 'Hawl Anniversary',
-        description: 'Your annual Zakat due date',
+        description: 'Your annual Zakat date',
         sheetTitle: 'Set Your Hawl Date',
         sheetDescription: 'Select the date you first reached Nisab or the date you mark your annual Zakat.',
         notSet: 'Not set',

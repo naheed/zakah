@@ -46,6 +46,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           value={data.activeInvestments}
           onChange={(value) => updateData({ activeInvestments: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'activeInvestments')}
+          testId="active-investments-input"
         />
 
         {/* RSU/Stock Options Clarification */}
@@ -72,6 +73,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           value={data.passiveInvestmentsValue}
           onChange={(value) => updateData({ passiveInvestmentsValue: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'passiveInvestmentsValue')}
+          testId="passive-investments-value-input"
         />
 
         {data.passiveInvestmentsValue > 0 && (
@@ -97,6 +99,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
           value={data.dividends}
           onChange={(value) => updateData({ dividends: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'dividends')}
+          testId="dividends-input"
         />
 
         <div className="space-y-2">

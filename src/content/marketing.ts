@@ -6,7 +6,7 @@
 export const hero = {
     headline: 'Zakat,',
     headlineAccent: 'Clarified.',
-    subhead: 'Calculate your obligations with confidence. We help you navigate the complexity of modern assets—from RSUs to Crypto—so you can make informed choices.',
+    subhead: 'Fulfill your religious obligation with confidence. We guide you through the complexity of modern wealth—from RSUs to Crypto—so you can give with peace of mind.',
 } as const;
 
 export const assetBadges = [

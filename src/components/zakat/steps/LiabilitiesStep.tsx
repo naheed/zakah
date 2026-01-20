@@ -31,12 +31,13 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
             <WhyTooltip {...fiqhExplanations.monthlyLiving} />
           </span>
         }
-        description="Rent, utilities, groceries, transport"
+        description="Rent, utilities, groceries, transport — we multiply by 12"
         householdDescription="Combined living expenses for all family members"
         isHousehold={isHousehold}
         value={data.monthlyLivingExpenses}
         onChange={(value) => updateData({ monthlyLivingExpenses: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'monthlyLivingExpenses')}
+        testId="monthly-living-expenses-input"
       />
 
       <CurrencyInput
@@ -52,6 +53,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         value={data.monthlyMortgage}
         onChange={(value) => updateData({ monthlyMortgage: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'monthlyMortgage')}
+        testId="monthly-mortgage-input"
       />
       {data.monthlyMortgage > 20000 && (
         <div className="p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex gap-2 items-start animate-fade-in">
@@ -72,6 +74,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         value={data.insuranceExpenses}
         onChange={(value) => updateData({ insuranceExpenses: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'insuranceExpenses')}
+        testId="insurance-expenses-input"
       />
 
       <CurrencyInput
@@ -82,6 +85,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         value={data.creditCardBalance}
         onChange={(value) => updateData({ creditCardBalance: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'creditCardBalance')}
+        testId="credit-card-debt-input"
       />
 
       <CurrencyInput
@@ -92,6 +96,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         value={data.unpaidBills}
         onChange={(value) => updateData({ unpaidBills: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'unpaidBills')}
+        testId="unpaid-bills-input"
       />
 
       <CurrencyInput
@@ -107,6 +112,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         value={data.studentLoansDue}
         onChange={(value) => updateData({ studentLoansDue: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'studentLoansDue')}
+        testId="student-loans-due-input"
       />
     </AssetStepWrapper>
   );

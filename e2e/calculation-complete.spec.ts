@@ -176,6 +176,9 @@ test.describe('Calculation Flow - Complete Suite', () => {
         await page.waitForTimeout(1500);
 
         // Gold - $5K (exempt in Balanced)
+        // Switch to Value mode
+        await page.getByText('Enter USD Value').click();
+
         const goldInput = page.getByTestId('gold-value-input');
         await goldInput.waitFor({ state: 'visible', timeout: 5000 });
         await goldInput.fill('5000');

@@ -22,6 +22,8 @@ export * from './assets';
 export * from './dashboard';
 export * from './settings';
 export * from './steps';
+export * from './methodology';
+
 
 // Unified content object for convenience
 import * as common from './common';
@@ -31,6 +33,10 @@ import * as report from './report';
 import * as assets from './assets';
 import * as dashboard from './dashboard';
 import * as settings from './settings';
+import * as methodology from './methodology';
+import * as zakatGuide from './zakatGuide';
+import * as privacy from './privacy';
+import * as terms from './terms';
 
 export const content = {
     common,
@@ -40,4 +46,8 @@ export const content = {
     assets,
     dashboard,
     settings,
+    methodology,
+    zakatGuide,
+    privacy,
+    terms,
 } as const;

@@ -19,6 +19,11 @@ export interface StepContent {
     title?: string;
     content: string;
   }>;
+  items?: Array<{
+    id: string;
+    label: string;
+    description: string;
+  }>;
 }
 
 export interface FieldContent {
@@ -35,6 +40,7 @@ export interface FieldContent {
 // INTRO SECTION
 // =============================================================================
 
+// [REPLACEMENT_1]
 export const nisabContent: StepContent = {
   questionNumber: 1,
   title: "What is your Niṣāb standard?",
@@ -65,6 +71,7 @@ The gold standard remains valid for those holding wealth exclusively in gold bul
   ],
 };
 
+// [REPLACEMENT_2]
 export const hawlContent: StepContent = {
   questionNumber: 2,
   title: "Which calendar do you use?",
@@ -134,6 +141,48 @@ These are asked of everyone because most Americans have them.
 **Optional Categories:**
 The checkboxes below help us skip questions that don't apply to you. If you're unsure about a category, select it anyway—you can leave any question blank later.`,
   },
+  items: [
+    {
+      id: 'hasPreciousMetals',
+      label: 'Precious Metals',
+      description: 'Gold, silver, or jewelry',
+    },
+    {
+      id: 'hasCrypto',
+      label: 'Cryptocurrency',
+      description: 'Bitcoin, Ethereum, staking, DeFi',
+    },
+    {
+      id: 'hasTrusts',
+      label: 'Trusts & Estates',
+      description: 'Revocable or irrevocable trusts',
+    },
+    {
+      id: 'hasRealEstate',
+      label: 'Investment Property',
+      description: 'Real estate for sale or rental income',
+    },
+    {
+      id: 'hasBusiness',
+      label: 'Business Assets',
+      description: 'Inventory, receivables, business cash',
+    },
+    {
+      id: 'hasIlliquidAssets',
+      label: 'Collectibles',
+      description: 'Art, antiques, or livestock for sale',
+    },
+    {
+      id: 'hasDebtOwedToYou',
+      label: 'Loans Given',
+      description: 'Personal loans you expect to collect',
+    },
+    {
+      id: 'hasTaxPayments',
+      label: 'Outstanding Taxes',
+      description: 'Property tax or late payments due',
+    },
+  ]
 };
 
 export const emailContent: StepContent = {
@@ -144,16 +193,12 @@ export const emailContent: StepContent = {
     title: "Why Provide Email?",
     content: `Your email lets us send you a receipt of your calculation so you can:
 • Save this year's Zakat amount and date
-• Reference it when making your payment
+• Reference it when fulfilling your obligation
 • Compare with future years
 
 **Privacy:** Your data stays on your device. We never share or sell your information.`,
   },
 };
-
-// =============================================================================
-// ASSETS SECTION
-// =============================================================================
 
 export const liquidAssetsContent: StepContent = {
   questionNumber: 2,
@@ -207,6 +252,7 @@ export const liquidAssetsFields: Record<string, FieldContent> = {
   },
 };
 
+// [REPLACEMENT_4] - Investments: Mudir/Muhtakir & 30% Rule
 export const investmentsContent: StepContent = {
   questionNumber: 7,
   title: "What investments do you have?",
@@ -243,6 +289,7 @@ If a company derives <5% revenue from impermissible sources (interest, alcohol, 
   ],
 };
 
+// [RESTORED_MIDDLE_ASSETS]
 export const retirementContent: StepContent = {
   questionNumber: 8,
   title: "What retirement accounts do you have?",
@@ -377,7 +424,6 @@ If cash is tight, liquidate other assets to pay, or record as a debt to be paid 
 • Uber/Lyft vehicles are exempt (tool of trade)—Zakat is due on the earnings (cash), not the car`,
   },
 };
-
 export const businessContent: StepContent = {
   questionNumber: 13,
   title: "Do you own a business?",
@@ -426,8 +472,8 @@ Assets must have potential for growth to be Zakatable. Personal items lack Nama'
 
 export const debtOwedContent: StepContent = {
   questionNumber: 15,
-  title: "Is anyone owing you money?",
-  subtitle: "Personal loans you expect to collect.",
+  title: "Do others owe you money?",
+  subtitle: "Personal loans you gave to others that you expect to collect.",
   learnMore: {
     title: "Receivables: Good Debt vs Bad Debt",
     content: `**Good Debt (Dayn Qawiyy):**
@@ -443,10 +489,7 @@ If you forgive a debt as charity, it's no longer an asset and not Zakatable.`,
   },
 };
 
-// =============================================================================
-// LIABILITIES SECTION
-// =============================================================================
-
+// [REPLACEMENT_6] - Liabilities (Deductible logic)
 export const liabilitiesContent: StepContent = {
   questionNumber: 16,
   title: "What are your immediate expenses?",
@@ -485,6 +528,7 @@ This ensures the wealthy homeowner cannot escape Zakat through long-term leverag
   ],
 };
 
+// [REPLACEMENT_7] - Tax Content
 export const taxContent: StepContent = {
   questionNumber: 17,
   title: "Do you have outstanding taxes?",
@@ -509,6 +553,6 @@ Estimated future tax liability is not deductible—only amounts actually due tod
 
 export const resultsContent: StepContent = {
   questionNumber: 18,
-  title: "Your Zakat Calculation",
+  title: "Your Zakat Obligation",
   subtitle: "Based on your financial information.",
 };

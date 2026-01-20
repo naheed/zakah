@@ -96,8 +96,9 @@ test.describe('Calculation E2E Tests', () => {
         await page.waitForTimeout(3000);
 
         // Categories
+        const continueBtn = page.getByRole('button', { name: /Continue/i });
         await expect(continueBtn).toBeEnabled();
-        await page.getByRole('button', { name: /Continue/i }).click();
+        await continueBtn.click();
         await page.waitForTimeout(3000);
 
         // Liquid - $10K

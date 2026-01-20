@@ -35,7 +35,7 @@ export const assets = {
 export const stepTitles = {
     welcome: 'Welcome',
     categories: 'Asset Types',
-    simpleMode: 'Quick Calculate',
+    simpleMode: 'Quick Estimate',
     liquidAssets: 'Cash & Bank',
     investments: 'Investments',
     retirement: 'Retirement',
@@ -45,8 +45,8 @@ export const stepTitles = {
     realEstate: 'Real Estate',
     business: 'Business',
     illiquidAssets: 'Other Assets',
-    debtOwedToYou: 'Receivables',
-    liabilities: 'Deductions',
+    debtOwedToYou: 'Loans Given',
+    liabilities: 'Liabilities',
     tax: 'Taxes',
-    results: 'Your Zakat',
+    results: 'Your Obligation',
 } as const;

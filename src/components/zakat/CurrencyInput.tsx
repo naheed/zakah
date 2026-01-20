@@ -35,6 +35,7 @@ interface CurrencyInputProps {
   className?: string;
   fieldName?: string;
   documentContributions?: DocumentContribution[];
+  testId?: string;
 }
 
 export function CurrencyInput({
@@ -49,6 +50,7 @@ export function CurrencyInput({
   className,
   fieldName,
   documentContributions = [],
+  testId,
 }: CurrencyInputProps) {
   const [inputValue, setInputValue] = useState(value > 0 ? value.toString() : "");
   const [isFocused, setIsFocused] = useState(false);
@@ -180,9 +182,9 @@ export function CurrencyInput({
           placeholder={shouldFloat ? placeholder : undefined}
           aria-label={typeof label === 'string' ? label : fieldName || 'Currency input'}
           className={cn(
-            "pl-10 pt-6 pb-2 h-14 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0",
             "font-mono tabular-nums tracking-wide",
           )}
+          data-testid={testId}
         />
 
         {/* Active Indicator Line Animation */}

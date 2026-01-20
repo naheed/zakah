@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { methodologyContent } from '@/lib/content/methodology';
+import { content as c } from '@/content';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -10,68 +10,14 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal';
 
 import { Madhab } from '@/lib/zakatCalculations';
 
-const MODES: { id: Madhab; label: string; rules: any }[] = [
-    {
-        id: 'balanced',
-        label: 'Bradford (Balanced)',
-        rules: {
-            jewelry: 'Zakatable (Ahwat)',
-            retirement: 'Exempt (< 59½)',
-            passive: '30% Rule'
-        }
-    },
-    {
-        id: 'hanafi',
-        label: 'Hanafi',
-        rules: {
-            retirement: 'Tax/Penalty Deductible',
-            pension: 'Accessible Only',
-            gold: 'Zakatable',
-            jewelry: 'Zakatable (Silver/Gold)',
-            passive: '100% Market'
-        }
-    },
-    {
-        id: 'shafii',
-        label: 'Shafi\'i',
-        rules: {
-            retirement: 'Tax/Penalty Deductible',
-            pension: 'Accessible Only',
-            gold: 'Zakatable',
-            jewelry: 'Exempt (Permissible)',
-            passive: '100% Market'
-        }
-    },
-    {
-        id: 'maliki',
-        label: 'Maliki',
-        rules: {
-            retirement: 'Tax/Penalty Deductible',
-            pension: 'Accessible Only',
-            gold: 'Zakatable',
-            jewelry: 'Exempt (Permissible)',
-            passive: '100% Market'
-        }
-    },
-    {
-        id: 'hanbali',
-        label: 'Hanbali',
-        rules: {
-            retirement: 'Tax/Penalty Deductible',
-            pension: 'Accessible Only',
-            gold: 'Zakatable',
-            jewelry: 'Exempt (Permissible)',
-            passive: '100% Market'
-        }
-    }
-];
+const MODES = c.methodology.explorer.modes;
 
 const AHMED_IMPACT = {
-    balanced: { amount: 3025, label: "Lowest" },
-    hanafi: { amount: 5490, label: "Moderate" },
-    maliki: { amount: 10290, label: "Highest" },
-    shafii: { amount: 10290, label: "Highest" },
-    hanbali: { amount: 5290, label: "Moderate" }
+    balanced: { amount: 3025, label: c.methodology.explorer.impactLabels.lowest },
+    hanafi: { amount: 5490, label: c.methodology.explorer.impactLabels.moderate },
+    maliki: { amount: 10290, label: c.methodology.explorer.impactLabels.highest },
+    shafii: { amount: 10290, label: c.methodology.explorer.impactLabels.highest },
+    hanbali: { amount: 5290, label: c.methodology.explorer.impactLabels.moderate }
 };
 
 const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
@@ -84,13 +30,13 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
         let school;
         if (mode === 'hanafi') {
             school = content.schools.find((s: any) => s.name === 'Hanafi');
-            displayTitle = "Zakatable (Hanafi View)";
+            displayTitle = c.methodology.explorer.ruleHighlights.jewelry.hanafi;
         } else if (mode === 'balanced') {
             school = content.schools.find((s: any) => s.name === 'Bradford');
-            displayTitle = "Zakatable (Bradford View)";
+            displayTitle = c.methodology.explorer.ruleHighlights.jewelry.bradford;
         } else {
             school = content.schools.find((s: any) => s.name.includes('Shafi'));
-            displayTitle = "Exempt (Majority View)";
+            displayTitle = c.methodology.explorer.ruleHighlights.jewelry.majority;
         }
         displayText = school?.text;
         displayEvidence = school?.evidence;
@@ -109,11 +55,11 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
     } else if (title.includes("Stocks")) {
         if (mode === 'balanced') {
             displayText = content.rule30.description;
-            displayTitle = "30% Rule (Passive)";
+            displayTitle = c.methodology.explorer.ruleHighlights.stocks.passive.title;
             displayBasis = content.rule30.standard;
         } else {
-            displayText = "Holdings are valued at 100% of market value for passive investments, unless specific company financials allow for Net Current Asset calculation.";
-            displayTitle = "100% Market Value (Default)";
+            displayText = c.methodology.explorer.ruleHighlights.stocks.default.description;
+            displayTitle = c.methodology.explorer.ruleHighlights.stocks.default.title;
         }
     }
 
@@ -155,7 +101,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
 
 export const MethodologyExplorer = () => {
     const [selectedMode, setSelectedMode] = useState<Madhab>('balanced');
-    const content = methodologyContent;
+    const content = c.methodology;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">

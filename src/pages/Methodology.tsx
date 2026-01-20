@@ -1,6 +1,7 @@
 
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { methodologyContent } from "@/lib/content/methodology";
+import { content } from "@/content";
+const { methodology: methodologyContent } = content;
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text, Heading } from "@/components/ui/typography";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

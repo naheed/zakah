@@ -23,61 +23,23 @@ const defaultCategories = [
   { icon: Bank, label: 'Retirement' },
 ];
 
-const optionalCategories: {
-  id: keyof Pick<ZakatFormData, 'hasPreciousMetals' | 'hasCrypto' | 'hasTrusts' | 'hasRealEstate' | 'hasBusiness' | 'hasIlliquidAssets' | 'hasDebtOwedToYou' | 'hasTaxPayments'>;
-  icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
-  label: string;
-  description: string;
-}[] = [
-    {
-      id: 'hasPreciousMetals',
-      icon: Diamond,
-      label: 'Precious Metals',
-      description: 'Gold, silver, or jewelry',
-    },
-    {
-      id: 'hasCrypto',
-      icon: CurrencyBtc,
-      label: 'Cryptocurrency',
-      description: 'Bitcoin, Ethereum, staking, DeFi',
-    },
-    {
-      id: 'hasTrusts',
-      icon: Scroll,
-      label: 'Trusts & Estates',
-      description: 'Revocable or irrevocable trusts',
-    },
-    {
-      id: 'hasRealEstate',
-      icon: Buildings,
-      label: 'Investment Property',
-      description: 'Real estate for sale or rental income',
-    },
-    {
-      id: 'hasBusiness',
-      icon: Storefront,
-      label: 'Business Assets',
-      description: 'Inventory, receivables, business cash',
-    },
-    {
-      id: 'hasIlliquidAssets',
-      icon: PaintBrush,
-      label: 'Collectibles',
-      description: 'Art, antiques, or livestock for sale',
-    },
-    {
-      id: 'hasDebtOwedToYou',
-      icon: Handshake,
-      label: 'Money Owed',
-      description: 'Personal loans you expect to collect',
-    },
-    {
-      id: 'hasTaxPayments',
-      icon: Receipt,
-      label: 'Outstanding Taxes',
-      description: 'Property tax or late payments due',
-    },
-  ];
+// Map icon components to IDs for display
+const categoryIcons: Record<string, React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>> = {
+  hasPreciousMetals: Diamond,
+  hasCrypto: CurrencyBtc,
+  hasTrusts: Scroll,
+  hasRealEstate: Buildings,
+  hasBusiness: Storefront,
+  hasIlliquidAssets: PaintBrush,
+  hasDebtOwedToYou: Handshake,
+  hasTaxPayments: Receipt,
+};
+
+const optionalCategories = (categoriesContent.items || []).map(item => ({
+  ...item,
+  icon: categoryIcons[item.id] || Money,
+  id: item.id as keyof Pick<ZakatFormData, 'hasPreciousMetals' | 'hasCrypto' | 'hasTrusts' | 'hasRealEstate' | 'hasBusiness' | 'hasIlliquidAssets' | 'hasDebtOwedToYou' | 'hasTaxPayments'>
+}));
 
 // M3 spring animation config
 const springConfig = { type: "spring" as const, stiffness: 400, damping: 25 };

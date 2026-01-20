@@ -17,14 +17,14 @@ export const buttons = {
 } as const;
 
 export const labels = {
-    zakatDue: 'Zakat Due',
-    totalValue: 'Total Value',
+    zakatDue: 'Zakat Obligation',
+    totalValue: 'Zakatable Assets',
     inProgress: 'In Progress',
-    latestReport: 'Latest Report',
-    pastReports: 'Past Reports',
+    latestReport: 'Latest Summary',
+    pastReports: 'Past Cycles',
     assets: 'Assets',
     communityImpact: 'Community Impact',
-    yourImpact: 'Your Impact',
+    yourImpact: 'Your Purification',
 } as const;
 
 export const badges = {

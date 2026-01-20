@@ -193,8 +193,8 @@ export const fiqhExplanations = {
     explanation: "Overwhelming debt that consumes all assets. Classical scholars debated whether this eliminates Zakat—the modern synthesis limits deduction to current obligations.",
   },
   monthlyLiving: {
-    title: "Why one month's expenses?",
-    explanation: "Immediate living expenses (rent, food, utilities) are basic needs. Only the current month's obligations are deductible as ḥājiyyāt (necessities).",
+    title: "We multiply by 12",
+    explanation: "Enter your monthly amount only. We automatically annualize it (×12) since living expenses are an ongoing 12-month obligation. Don't multiply yourself—just enter one month.",
   },
   mortgageDeduction: {
     title: "Why 12 months of mortgage?",

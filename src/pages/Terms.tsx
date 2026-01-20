@@ -1,6 +1,6 @@
 
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { termsSections, TermSection } from "@/lib/content/terms";
+import { content as c, TermSection } from "@/content";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Heading, Text, List, ListItem } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
@@ -75,6 +75,7 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
 };
 
 const Terms = () => {
+  const { termsSections } = c.terms;
   const headerContent = (
     <Text className="text-sm">Last updated: December 28, 2025</Text>
   );

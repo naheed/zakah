@@ -43,8 +43,8 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
           />
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <Label 
-                htmlFor="exclude-worn-jewelry" 
+              <Label
+                htmlFor="exclude-worn-jewelry"
                 className="text-sm font-medium cursor-pointer"
               >
                 Exclude regularly worn jewelry
@@ -56,7 +56,7 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
             </p>
           </div>
         </div>
-        
+
         <AnimatePresence>
           {excludeWornJewelry && (
             <motion.div
@@ -92,7 +92,7 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
             Enter USD Value
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="weight" className="mt-6 space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
               isHousehold={isHousehold}
             />
           </div>
-          
+
           <WeightConverter
             label="Silver"
             pricePerOunce={SILVER_PRICE_PER_OUNCE}
@@ -115,12 +115,12 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
             onChange={(value) => updateData({ silverValue: value })}
             isHousehold={isHousehold}
           />
-          
+
           <p className="text-xs text-muted-foreground">
             Prices are approximate. For jewelry, use melt value only (exclude gemstones & craftsmanship).
           </p>
         </TabsContent>
-        
+
         <TabsContent value="value" className="mt-6 space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -135,9 +135,10 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
               value={data.goldValue}
               onChange={(value) => updateData({ goldValue: value })}
               documentContributions={getDocumentContributionsForField(uploadedDocuments, 'goldValue')}
+              testId="gold-value-input"
             />
           </div>
-          
+
           <CurrencyInput
             label="Silver Value"
             description="Melt value of silver items"
@@ -146,6 +147,7 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
             value={data.silverValue}
             onChange={(value) => updateData({ silverValue: value })}
             documentContributions={getDocumentContributionsForField(uploadedDocuments, 'silverValue')}
+            testId="silver-value-input"
           />
         </TabsContent>
       </Tabs>
