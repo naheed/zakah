@@ -1,29 +1,30 @@
 import { test, expect } from '@playwright/test';
+import {
+    clearAppState,
+    startWizard,
+    expectSetupStep,
+    clickNext
+} from './helpers/wizard-helpers';
 
 test.describe('Guest User Flow', () => {
-    test('should navigate from landing to calculation wizard', async ({ page }) => {
-        // Start at landing page
-        await page.goto('/');
+    test.beforeEach(async ({ page, context }) => {
+        await clearAppState(page, context);
+    });
 
+    test('should navigate from landing to calculation wizard', async ({ page }) => {
         // Verify landing page loads with key heading
         await expect(page.getByRole('heading', { name: /Zakat/i })).toBeVisible({ timeout: 10000 });
 
-        // Click "Start Calculating" button
-        const startButton = page.getByRole('button', { name: /Start Calculating/i });
-        await expect(startButton).toBeVisible();
-        await startButton.click();
+        // Start wizard
+        await startWizard(page);
 
-        // Should navigate to category selection
-        await expect(page.locator('text=What assets do you have')).toBeVisible({ timeout: 5000 });
+        // Should navigate to Setup (Preferences) step - NEW FLOW
+        await expectSetupStep(page);
     });
 
     test('should show Privacy Shield in wizard after starting calculation', async ({ page }) => {
-        await page.goto('/');
-
-        // Start calculation first
-        const startButton = page.getByRole('button', { name: /Start Calculating/i });
-        await expect(startButton).toBeVisible({ timeout: 10000 });
-        await startButton.click();
+        // Start calculation
+        await startWizard(page);
 
         // Wait for wizard to load
         await page.waitForTimeout(1000);
@@ -62,8 +63,8 @@ test.describe('Settings Page', () => {
     test('should display Privacy Shield in header', async ({ page }) => {
         await page.goto('/settings');
 
-        // Privacy Shield should be visible (look for the button with lock/cloud icon)
-        const privacyShield = page.locator('button').filter({ hasText: /Device Only|Local|Encrypted/i });
+        // Privacy Shield should be visible - use first() to avoid strict mode
+        const privacyShield = page.locator('button').filter({ hasText: /Device Only|Local|Encrypted/i }).first();
         await expect(privacyShield).toBeVisible({ timeout: 10000 });
     });
 
@@ -77,14 +78,13 @@ test.describe('Settings Page', () => {
 });
 
 test.describe('Calculation Wizard', () => {
-    test('should show Privacy Shield in wizard header', async ({ page }) => {
-        await page.goto('/');
+    test.beforeEach(async ({ page, context }) => {
+        await clearAppState(page, context);
+    });
 
+    test('should show Privacy Shield in wizard header', async ({ page }) => {
         // Start calculation
-        const startButton = page.getByRole('button', { name: /Start Calculating/i });
-        if (await startButton.isVisible()) {
-            await startButton.click();
-        }
+        await startWizard(page);
 
         // Privacy Shield should be visible in wizard
         await page.waitForTimeout(1000);

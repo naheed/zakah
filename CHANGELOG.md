@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🌟 Feature Highlights (Quick Look)
 | Version | Major Feature | Released |
 |---|---|---|
+| **v0.18.0** | ✨ **Product Reality** (Live Interactive Demo) | Jan 20, 2026 |
 | **v0.14.0** | 📚 **Jurisprudence Overhaul** (5 Distinct Madhabs) | Jan 11, 2026 |
 | **v0.13.0** | 🏦 **Plaid Bank Sync** (Connect Bank Accounts) | Jan 11, 2026 |
 | **v0.12.0** | ⚙️ **Settings Redesign** (Material 3 UI) | Jan 9, 2026 |
@@ -20,11 +21,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
-
 ### Planned
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug
   - Add machine-readable QR for YoY scanning
+
+## [0.18.0] - 2026-01-20 (Product Reality)
+
+### Added
+- **"Product Reality" Landing Page**
+  - **Interactive Demo**: A scripted, high-fidelity animation showcasing the app's capability to handle complex portfolios (e.g., "Ahmed's Data").
+  - **Live Visualization**: Animated Nivo Sankey chart integrated directly into the hero section loop.
+  - **Device Frame**: Custom Safari-style window (`DeviceFrame.tsx`) that adapts to theme while maintaining high contrast.
+- **Accessibility Hardening**
+  - **Dark Mode Support**: Landing page elements now pass `e2e/accessibility.spec.ts` in strictly emulated Dark Mode.
+  - **Contrast Fixes**: Forced "Light Mode" aesthetic for demo frames to ensure text readability (WCAG AA) against any background.
+- **Sample Data Downloads**: Direct links to `Preview PDF` and `Download CSV` on the landing page for immediate value proof.
+
+### Changed
+- **Design System Audit ("Pixel Style")**
+  - **Signal-to-Noise Ratio**: Removed redundant "Pill Badges" (PDF/CSV/Methodology) that competed with primary CTAs.
+  - **High-Signal Copy**: Replaced generic subheads with specific, professional value propositions ("Navigate your complex portfolio...").
+  - **Visual Hierarchy**: Relocated "Community Metrics" to the Trust Badge cluster for better social proof visibility.
+- **Sign-In UX**: Simplified "Sign in to Save" button to standard "Sign In" to reduce cognitive load.
+
+### Fixed
+- **Mobile Layout**: Fixed stacking order of Hero vs. Demo components on mobile viewports using `order-*` utilities.
+- **Metric Visibility**: Fixed issue where "Community Impact" stats were hidden on smaller screens or below the fold.
 
 ## [0.17.0] - 2026-01-16
 

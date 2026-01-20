@@ -1,6 +1,6 @@
 interface StepHeaderProps {
   questionNumber?: number;
-  emoji?: string;
+  emoji?: React.ReactNode;
   title: string;
   subtitle?: string;
 }

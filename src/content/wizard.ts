@@ -33,6 +33,7 @@ export const assets = {
 
 // Step titles (for navigation) - aligned with ZakatWizard.tsx allSteps
 export const stepTitles = {
+    setup: 'Preferences',
     welcome: 'Welcome',
     categories: 'Asset Types',
     simpleMode: 'Quick Estimate',
@@ -49,4 +50,27 @@ export const stepTitles = {
     liabilities: 'Liabilities',
     tax: 'Taxes',
     results: 'Your Obligation',
+} as const;
+
+export const preferences = {
+    title: 'Personalize Your Calculation',
+    calculationMode: {
+        title: 'Calculation Mode',
+        simple: {
+            title: 'Quick Estimate',
+            description: 'I just want to enter a total number.',
+        },
+        detailed: {
+            title: 'Detailed Breakdown',
+            description: 'Walk me through each asset class.',
+        },
+    },
+    methodology: {
+        title: 'School of Thought',
+        description: 'Scholarly methodology for specific asset rulings.',
+        balanced: {
+            title: 'Balanced (Standard)',
+            description: 'Recommended for most users.',
+        },
+    },
 } as const;

@@ -6,15 +6,10 @@
 export const hero = {
     headline: 'Zakat,',
     headlineAccent: 'Clarified.',
-    subhead: 'Fulfill your religious obligation with confidence. We guide you through the complexity of modern wealth—from RSUs to Crypto—so you can give with peace of mind.',
+    subhead: "Navigate your complex portfolio—from 401(k)s to RSUs—with a professional Zakat calculator. Choose your preferred scholarly methodology and generate a detailed PDF or CSV report in minutes. Private, secure, and accurate.",
 } as const;
 
-export const assetBadges = [
-    '401(k) / IRA',
-    'Crypto & NFTs',
-    'Real Estate',
-    'Stocks & RSUs',
-] as const;
+// REMOVED: valueBadges (Too noisy/redundant)
 
 export const trustBadges = {
     encryption: 'Zero-Knowledge Encryption',

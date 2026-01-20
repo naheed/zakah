@@ -8,6 +8,7 @@ import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { content as c } from "@/content";
 import { usePresence } from "@/hooks/usePresence";
 import { WelcomeStep } from "./steps/WelcomeStep";
+import { SetupStep } from "./steps/SetupStep";
 import { CategorySelectionStep } from "./steps/CategorySelectionStep";
 import { SimpleModeStep } from "./steps/SimpleModeStep";
 import { LiquidAssetsStep } from "./steps/LiquidAssetsStep";
@@ -71,6 +72,7 @@ const SWIPE_VELOCITY_THRESHOLD = 500; // Reduced (was 800)
 
 type StepId =
   | 'welcome'
+  | 'setup'
   | 'currency'
   | 'categories'
   | 'simple-mode'
@@ -98,7 +100,8 @@ interface Step {
 // Simplified steps: Settings are now in a separate /settings page
 const allSteps: Step[] = [
   { id: 'welcome', title: c.wizard.stepTitles.welcome, section: 'intro' },
-  { id: 'categories', title: c.wizard.stepTitles.categories, section: 'intro' },
+  { id: 'setup', title: c.wizard.stepTitles.setup, section: 'intro' },
+  { id: 'categories', title: c.wizard.stepTitles.categories, section: 'intro', condition: (data) => !data.isSimpleMode },
   // Simple mode step (replaces detailed steps when active)
   { id: 'simple-mode', title: c.wizard.stepTitles.simpleMode, section: 'assets', condition: (data) => data.isSimpleMode },
   // Core assets - get to the "aha moment" fast (hidden in simple mode)
@@ -365,22 +368,12 @@ export function ZakatWizard() {
     switch (currentStep.id) {
       case 'welcome':
         return <WelcomeStep onNext={goToNext} onLoadCalculation={handleLoadCalculation} onViewResults={handleViewResults} />;
+      case 'setup':
+        return <SetupStep />;
       case 'categories':
         return (
           <div className="space-y-6">
-            <SimpleModeToggle
-              isSimpleMode={formData.isSimpleMode}
-              onToggle={(value) => {
-                updateFormData({ isSimpleMode: value });
-                // Auto-advance if enabling simple mode (UX improvement)
-                if (value) {
-                  goToNext();
-                }
-              }}
-            />
-            {!formData.isSimpleMode && (
-              <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />
-            )}
+            <CategorySelectionStep data={formData} updateData={updateFormData} questionNumber={questionNumber} />
           </div>
         );
       case 'simple-mode':

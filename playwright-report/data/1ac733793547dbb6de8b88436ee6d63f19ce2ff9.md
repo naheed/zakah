@@ -1,0 +1,71 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e6]:
+      - button "Navigate steps" [ref=e7] [cursor=pointer]:
+        - img
+        - generic [ref=e8]: Navigate steps
+      - generic [ref=e9]:
+        - button "Device Only" [ref=e10] [cursor=pointer]:
+          - img
+          - generic [ref=e11]: Device Only
+        - button "Menu" [ref=e12] [cursor=pointer]:
+          - img
+          - generic [ref=e13]: Menu
+    - main [ref=e14]:
+      - generic [ref=e18]: Getting Started
+      - generic [ref=e23]:
+        - heading "Personalize Your Calculation" [level=1] [ref=e25]:
+          - img [ref=e27]
+          - text: Personalize Your Calculation
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - text: Calculation Mode
+            - generic [ref=e32]:
+              - generic [ref=e33] [cursor=pointer]:
+                - generic [ref=e34]:
+                  - img [ref=e35]
+                  - img [ref=e38]
+                - heading "Detailed Breakdown" [level=3] [ref=e40]
+                - paragraph [ref=e41]: Walk me through each asset class.
+              - generic [ref=e42] [cursor=pointer]:
+                - img [ref=e44]
+                - heading "Quick Estimate" [level=3] [ref=e47]
+                - paragraph [ref=e48]: I just want to enter a total number.
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - generic [ref=e51]: School of Thought
+              - img [ref=e52]
+            - paragraph [ref=e54]: Scholarly methodology for specific asset rulings.
+            - radiogroup [ref=e55]:
+              - generic [ref=e56]:
+                - radio "Balanced (Sheikh Joe Bradford)" [checked] [ref=e57] [cursor=pointer]:
+                  - img [ref=e59]
+                - generic [ref=e61] [cursor=pointer]:
+                  - generic [ref=e63]: Balanced (Sheikh Joe Bradford)
+                  - img [ref=e64]
+              - generic [ref=e66]:
+                - radio "Hanafi" [ref=e67] [cursor=pointer]
+                - generic [ref=e70] [cursor=pointer]: Hanafi
+              - generic [ref=e71]:
+                - radio "Shafi'i" [ref=e72] [cursor=pointer]
+                - generic [ref=e75] [cursor=pointer]: Shafi'i
+              - generic [ref=e76]:
+                - radio "Maliki" [ref=e77] [cursor=pointer]
+                - generic [ref=e80] [cursor=pointer]: Maliki
+              - generic [ref=e81]:
+                - radio "Hanbali" [ref=e82] [cursor=pointer]
+                - generic [ref=e85] [cursor=pointer]: Hanbali
+    - generic [ref=e88]:
+      - button "Previous" [ref=e90] [cursor=pointer]:
+        - img
+        - text: Previous
+      - button "Continue" [ref=e92] [cursor=pointer]:
+        - text: Continue
+        - img
+```

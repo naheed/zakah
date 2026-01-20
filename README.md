@@ -21,6 +21,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 |---------|-------------|
 | **Guided Wizard** | Simple mode for quick estimates, detailed mode for comprehensive analysis |
 | **Asset Intelligence** | Upload bank statements; AI extracts line items automatically |
+| **Interactive Demo** | Live "Product Reality" simulation on landing page showing complex flows |
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
 | **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid Integrated) |
 | **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |

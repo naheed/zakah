@@ -85,6 +85,13 @@
 
 ## ✅ Completed Milestones (History)
 
+### Phase 13: Product Reality & Design Polish ✅
+> **Released: v0.18.0 (Jan 2026)**
+- **Landing Page 2.0**: "Product Reality" demo with live animation and Sankey visualization.
+- **Design Audit**: "Pixel-style" decluttering (removed noisy badges, high-signal copy).
+- **Accessibility**: Dark Mode verification for marketing pages.
+- **Sample Data**: Integrated "Ahmed Family" methodology benchmark into public demo.
+
 ### Phase 11: Stability & Legal Compliance ✅
 > **Released: v0.17.0 (Jan 2026)**
 - **Legal Standardization**: Unified "Last Updated" dates across legal docs for single-source truth.

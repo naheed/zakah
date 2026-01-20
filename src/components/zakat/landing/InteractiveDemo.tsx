@@ -24,6 +24,7 @@ type AnimationPhase =
   | "sankey-reveal"
   | "zakat-reveal"
   | "celebrating"
+  | "report-preview"
   | "complete";
 
 // Mock data for the demo - updated with realistic 401(k) values
@@ -124,7 +125,7 @@ export function InteractiveDemo() {
   const [phase, setPhase] = useState<AnimationPhase>("complete");
   const [showReplayButton, setShowReplayButton] = useState(true);
   const [animationKey, setAnimationKey] = useState(0);
-  const [selectedMode, setSelectedMode] = useState<"conservative" | "optimized">("optimized");
+  // Removed: deprecated optimized/conservative toggle - using Balanced methodology
   const [scanProgress, setScanProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -200,6 +201,9 @@ export function InteractiveDemo() {
       timers.push(setTimeout(() => setPhase("celebrating"), 2000));
     }
     if (phase === "celebrating") {
+      timers.push(setTimeout(() => setPhase("report-preview"), 2000));
+    }
+    if (phase === "report-preview") {
       timers.push(setTimeout(() => {
         setPhase("complete");
         // Show replay button after a delay so users can appreciate the final state
@@ -222,10 +226,7 @@ export function InteractiveDemo() {
     }, 100);
   }, []);
 
-  // Toggle between conservative and optimized
-  const handleToggleMode = useCallback(() => {
-    setSelectedMode(prev => prev === "conservative" ? "optimized" : "conservative");
-  }, []);
+  // Methodology: Using Balanced approach (modern synthesis per MADHAB_RULES)
 
   const isAnimating = !["complete", "idle"].includes(phase);
   const showCashInput = phase !== "idle";
@@ -239,10 +240,9 @@ export function InteractiveDemo() {
   const isRetirementComplete = ["retirement-upload-complete", "aggregating", "sankey-reveal", "zakat-reveal", "celebrating", "complete"].includes(phase);
   const showCompletedCashValue = !["idle", "typing-cash"].includes(phase);
 
-  const currentZakat = selectedMode === "conservative" ? DEMO_DATA.conservativeZakat : DEMO_DATA.optimizedZakat;
-  const otherZakat = selectedMode === "conservative" ? DEMO_DATA.optimizedZakat : DEMO_DATA.conservativeZakat;
-  const otherModeLabel = selectedMode === "conservative" ? "Optimized" : "Conservative";
-  const currentNetZakatable = selectedMode === "conservative" ? DEMO_DATA.netZakatableConservative : DEMO_DATA.netZakatable;
+  // Single Balanced methodology values
+  const currentZakat = DEMO_DATA.optimizedZakat; // Balanced approach
+  const currentNetZakatable = DEMO_DATA.netZakatable;
 
   return (
     <div
@@ -349,17 +349,10 @@ export function InteractiveDemo() {
                     </div>
                   </motion.div>
 
-                  {/* Toggle Button */}
-                  <motion.button
-                    onClick={handleToggleMode}
-                    className="mt-0.5 flex items-center gap-1.5 text-[9px] text-muted-foreground hover:text-foreground transition-colors group"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <span className="capitalize font-medium text-primary">{selectedMode}</span>
-                    <span className="text-muted-foreground/60">·</span>
-                    <span className="group-hover:underline">{otherModeLabel}: {formatCurrency(otherZakat, "USD")}</span>
-                  </motion.button>
+                  {/* Methodology Badge */}
+                  <p className="mt-0.5 text-[9px] text-muted-foreground">
+                    Balanced Approach
+                  </p>
                 </motion.div>
               ) : showSankey ? (
                 <motion.p
@@ -585,7 +578,6 @@ export function InteractiveDemo() {
                     isAnimating={isAnimating && !["celebrating", "complete"].includes(phase)}
                     isCelebrating={isCelebrating}
                     isMobile={isMobile}
-                    selectedMode={selectedMode}
                   />
                 ) : (
                   <div className="flex justify-center py-3">
@@ -633,9 +625,41 @@ export function InteractiveDemo() {
           <span className="font-semibold text-foreground text-xs">
             {showSankey ? formatCurrency(currentNetZakatable, "USD") : "—"}
           </span>
+
         </motion.div>
+
+        {/* Report Preview Phase Overlay */}
+        <AnimatePresence>
+          {(phase === "report-preview" || phase === "complete") && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: M3_EASING.emphasizedDecelerate }}
+              className="absolute inset-x-4 bottom-4 bg-card/95 backdrop-blur-md border border-primary/20 shadow-xl rounded-xl p-3 z-20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5 text-primary" weight="duotone" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground">Your Report Ready</p>
+                  <p className="text-[10px] text-muted-foreground">Balanced Approach • PDF & CSV</p>
+                </div>
+                <div className="flex gap-1">
+                  <div className="h-7 w-7 rounded bg-muted flex items-center justify-center">
+                    <div className="w-3 h-0.5 bg-muted-foreground/30 rounded-full" />
+                  </div>
+                  <div className="h-7 w-7 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <ArrowCounterClockwise className="w-3.5 h-3.5 text-primary-foreground" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </div >
   );
 }
 
@@ -644,14 +668,12 @@ function AnimatedSankeyChart({
   showZakatValue,
   isAnimating,
   isCelebrating,
-  isMobile = false,
-  selectedMode
+  isMobile = false
 }: {
   showZakatValue: boolean;
   isAnimating: boolean;
   isCelebrating: boolean;
   isMobile?: boolean;
-  selectedMode: "conservative" | "optimized";
 }) {
   // Enlarged responsive dimensions
   const width = isMobile ? 280 : 340;
@@ -678,9 +700,7 @@ function AnimatedSankeyChart({
     {
       name: "401(k)",
       rawValue: DEMO_DATA.retirement401k, // Always show full vested value for bar
-      zakatableValue: selectedMode === "conservative"
-        ? DEMO_DATA.retirement401k // 100% in conservative
-        : DEMO_DATA.retirement401kZakatable, // 65% in optimized
+      zakatableValue: DEMO_DATA.retirement401kZakatable, // Balanced: 65% zakatable
       color: ASSET_COLORS.retirement
     },
     {
@@ -694,9 +714,7 @@ function AnimatedSankeyChart({
   // Total raw value for bar sizing, total zakatable for flow sizing
   const totalRawValue = assets.reduce((sum, a) => sum + a.rawValue, 0);
   const totalZakatableValue = assets.reduce((sum, a) => sum + a.zakatableValue, 0);
-  const currentZakat = selectedMode === "conservative"
-    ? DEMO_DATA.conservativeZakat
-    : DEMO_DATA.optimizedZakat;
+  const currentZakat = DEMO_DATA.optimizedZakat; // Balanced approach
 
   // Available height for the chart content
   const topMargin = 8;
@@ -931,7 +949,7 @@ function AnimatedSankeyChart({
               textAnchor="end"
               className="fill-foreground text-[7px] font-medium capitalize"
             >
-              {selectedMode}
+              Balanced
             </text>
             <text
               x={zakatX - 4}

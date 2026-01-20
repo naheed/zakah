@@ -1,0 +1,43 @@
+ZakatFlow Calculation Report
+Date Generated,"Jan 19, 2026, 5:54:56 PM"
+Currency,"USD"
+Madhab,"shafii"
+
+SUMMARY
+Total Zakatable Assets,"1162292.29"
+Total Liabilities,"0.00"
+Net Zakatable Wealth,"1162292.29"
+Zakat Due (2.5%),"29057.31"
+
+PURIFICATION REQUIRED
+Interest (Riba),"800.00"
+Impure Dividends,"19.96"
+Total Purification,"819.96"
+
+ASSET BREAKDOWN
+Category,Sub-Category,Gross Amount,Zakatable %,Zakatable Amount,Notes
+"Cash & Savings","Checking Accounts","9874.00","100%","9874.00",""
+"Cash & Savings","Savings Accounts","4945.00","100%","4945.00",""
+"Cash & Savings","Cash on Hand","959.00","100%","959.00",""
+"Cash & Savings","Digital Wallets","400.00","100%","400.00",""
+"Investments","Active Investments","77599.00","100%","77599.00",""
+"Investments","Passive Investments","89948.00","100%","89948.00",""
+"Investments","Dividends","998.00","98%","978.04",""
+"Retirement","Roth IRA Contributions","98849.00","100%","98849.00",""
+"Retirement","Roth IRA Earnings","9958.00","65%","6472.70",""
+"Retirement","401(k) Vested","88949.00","65%","57816.85",""
+"Retirement","Traditional IRA","894998.00","65%","581748.70",""
+"Retirement","HSA Balance","99849.00","100%","99849.00",""
+"Real Estate","Property for Sale","8859.00","100%","8859.00",""
+"Real Estate","Rental Income","990.00","100%","990.00",""
+"Business","Cash & Receivables","890.00","100%","890.00",""
+"Business","Inventory","8949.00","100%","8949.00",""
+"Precious Metals","Gold","7493.29","0%","0.00",""
+"Precious Metals","Silver","341.82","0%","0.00",""
+"Crypto & Digital","Bitcoin/Ethereum","2000.00","100%","2000.00",""
+"Crypto & Digital","Trading Altcoins","4000.00","100%","4000.00",""
+"Crypto & Digital","Staked Assets","499.00","100%","499.00",""
+"Crypto & Digital","Staking Rewards","900.00","100%","900.00",""
+"Crypto & Digital","Liquidity Pools","900.00","100%","900.00",""
+"Debt Owed to You","Collectible Loans","8849.00","100%","8849.00",""
+"Debt Owed to You","Recovered Bad Debt","94.00","100%","94.00",""
