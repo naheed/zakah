@@ -1,6 +1,7 @@
 
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { content as c, HighlightItem, SectionContent } from "@/content";
+import { content as c } from "@/content";
+import { HighlightItem, SectionContent } from "@/content/privacy";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text, Heading, List, ListItem } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
