@@ -132,30 +132,19 @@ export function CurrencyInput({
         animate={isFocused ? { scale: 1.005 } : { scale: 1 }}
         transition={{ type: "spring", stiffness: 400, damping: 25 }}
       >
-        {/* Floating Label */}
-        <motion.label
+        {/* Always-Floating Label (Stripe/Wise pattern) */}
+        <label
           htmlFor={typeof label === 'string' ? label : undefined}
           className={cn(
-            "absolute left-4 pointer-events-none transition-colors z-10",
-            shouldFloat
-              ? "text-xs font-medium"
-              : "text-base",
-            isFocused
-              ? "text-primary"
-              : "text-muted-foreground"
+            "absolute left-5 top-2 text-xs font-medium pointer-events-none z-10 transition-colors duration-200",
+            isFocused ? "text-primary" : "text-muted-foreground"
           )}
-          initial={false}
-          animate={{
-            top: shouldFloat ? 8 : 22,
-            fontSize: shouldFloat ? "0.75rem" : "1rem",
-          }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
           {label}
-        </motion.label>
+        </label>
 
         {/* Input Row: Flexbox with baseline alignment */}
-        <div className="flex items-baseline pt-8 pb-3 px-4">
+        <div className="flex items-baseline pt-8 pb-3 px-5">
           {/* Currency Symbol */}
           <span className={cn(
             "shrink-0 text-lg font-mono transition-colors mr-2",
@@ -179,7 +168,7 @@ export function CurrencyInput({
             autoComplete="off"
             className={cn(
               "flex-1 font-mono tabular-nums tracking-wide text-lg",
-              "h-auto p-0 bg-transparent border-none shadow-none focus-visible:ring-0",
+              "h-auto p-0 bg-transparent border-none rounded-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
               className
             )}
             data-testid={testId}
