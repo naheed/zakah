@@ -2,6 +2,8 @@ import { formatCurrency } from "@/lib/zakatCalculations";
 import { Sparkle, HandHeart, ArrowRight } from "@phosphor-icons/react";
 import { ReferralWidget } from "../ReferralWidget";
 import { Link } from "react-router-dom";
+import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
+import { useState } from "react";
 
 interface ReportFooterProps {
     interestToPurify: number;
@@ -17,6 +19,13 @@ export function ReportFooter({ interestToPurify, dividendsToPurify, currency, za
 
     // Build donations URL with Zakat amount
     const donationsUrl = zakatDue ? `/donations?zakatDue=${zakatDue}` : '/donations';
+
+    const [feedbackSent, setFeedbackSent] = useState(false);
+
+    const handleFeedback = (sentiment: string) => {
+        trackEvent('Feedback', AnalyticsEvents.FEEDBACK.REACTION, sentiment);
+        setFeedbackSent(true);
+    };
 
     return (
         <footer className="mt-12 space-y-8">
@@ -57,6 +66,54 @@ export function ReportFooter({ interestToPurify, dividendsToPurify, currency, za
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                 </div>
             </Link>
+
+            {/* Feedback Loop */}
+            <div className="bg-muted/50 rounded-xl p-6 text-center border border-border/50">
+                {!feedbackSent ? (
+                    <>
+                        <p className="text-sm font-medium text-foreground mb-4">How was your experience?</p>
+                        <div className="flex items-center justify-center gap-4 mb-4">
+                            <button
+                                onClick={() => handleFeedback('love')}
+                                className="text-2xl hover:scale-110 transition-transform cursor-pointer focus:outline-none"
+                                aria-label="Love it"
+                            >
+                                😍
+                            </button>
+                            <button
+                                onClick={() => handleFeedback('good')}
+                                className="text-2xl hover:scale-110 transition-transform cursor-pointer focus:outline-none"
+                                aria-label="Good"
+                            >
+                                🙂
+                            </button>
+                            <button
+                                onClick={() => handleFeedback('okay')}
+                                className="text-2xl hover:scale-110 transition-transform cursor-pointer focus:outline-none"
+                                aria-label="Okay"
+                            >
+                                😐
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <p className="text-sm font-medium text-primary mb-4 p-2 bg-primary/10 rounded-lg inline-block">
+                        Thank you for your feedback!
+                    </p>
+                )}
+
+                <Link
+                    to="https://forms.gle/PrsqKbRZpkJS4tyh7"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                    onClick={() => trackEvent('Feedback', AnalyticsEvents.FEEDBACK.SURVEY_CLICK)}
+                >
+                    <p className="text-xs text-primary hover:underline flex items-center justify-center gap-1">
+                        Take our 3-5 min survey <ArrowRight className="w-3 h-3" />
+                    </p>
+                </Link>
+            </div>
 
             {/* Impact (Enhanced Widget) - Full Width */}
             <div className="w-full">

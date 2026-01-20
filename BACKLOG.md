@@ -8,7 +8,8 @@
 
 | Priority | Phase | Feature Area | Status | Goal |
 |---|---|---|---|---|
-| **P0** | **Docs** | **Engineering Design** | 🏗️ In Progress | Comprehensive architectural documentation (Google-style EDD) |
+| **P0** | **Phase 12** | **Analytics & Feedback** | 🏗️ Planned | GA4 tracking of engagement funnels + User Feedback Survey (Emojis/Qualitative) |
+| **P1** | **Docs** | **Engineering Design** | 🏗️ In Progress | Comprehensive architectural documentation (Google-style EDD) |
 | **P1** | **Phase 5** | **Reports & History** | ⬜ Planned | "Frozen" historical reports and PDF/CSV downloads |
 | **P2** | **Phase 6** | **Charity Portal** | ⬜ Planned | Charity directory and verified recipient discovery |
 | **P3** | **Phase 7** | **Feedback Loop** | ⬜ Planned | User feature voting and bug reporting |
@@ -16,6 +17,12 @@
 ---
 
 ## 📅 Roadmap Breakdown
+
+### Phase 12: Analytics & Feedback (Top Priority)
+> **Goal:** Understand user behavior and collect qualitative feedback to improve conversion.
+- [ ] **Google Analytics 4**: Event tracking for Wizard Steps, Calculation Completion, and Errors.
+- [ ] **Feedback Loop**: "Recommend to Friend" expansion with Emoji Reactions + Google Form Link.
+- [ ] **Funnels**: Visualize drop-off rates from Landing -> Result.
 
 ### Phase 5: Reports & History
 > **Goal:** Create a permanent record of past Zakat obligations.

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useTheme } from "next-themes";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@/lib/zakatCalculations";
+import { trackEvent, setUserProperties, AnalyticsEvents } from "@/lib/analytics";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { content as c } from "@/content";
 import { usePresence } from "@/hooks/usePresence";
@@ -239,12 +240,67 @@ export function ZakatWizard() {
     }
   }, [savedCalculationId, currentStep, updatePresence]);
 
+  // Calculate Zakat (Moved up to be available for Analytics effect)
+  const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+
+
+
+  // Analytics Tracking
+  useEffect(() => {
+    if (currentStep) {
+      // 1. Track step view
+      trackEvent(
+        'Wizard',
+        AnalyticsEvents.WIZARD.STEP_VIEW,
+        currentStep.title
+      );
+
+      // 2. Update User Properties (Segmentation)
+      // We do this on every step to capture changes (e.g. toggling simple mode)
+      setUserProperties({
+        madhab: formData.madhab || 'unknown',
+        simple_mode: formData.isSimpleMode,
+        calendar: formData.calendarType,
+        nisab: formData.nisabStandard
+      });
+
+      // 3. Track completion if results
+      if (currentStep.id === 'results') {
+        try {
+          // PRIVACY-SAFE METRICS:
+          // We do NOT track raw financial values. We bucket into broad tiers.
+          // Tier 1: Micro (<$100)
+          // Tier 2: Low ($100-$1k)
+          // Tier 3: Medium ($1k-$5k)
+          // Tier 4: High ($5k-$10k)
+          // Tier 5: Very High (>$10k)
+          const due = calculations.zakatDue || 0;
+          let tier = 'Tier 1 (<$100)';
+          if (due >= 10000) tier = 'Tier 5 (>$10k)';
+          else if (due >= 5000) tier = 'Tier 4 ($5k-$10k)';
+          else if (due >= 1000) tier = 'Tier 3 ($1k-$5k)';
+          else if (due >= 100) tier = 'Tier 2 ($100-$1k)';
+
+          // Send the tier string, NOT the value.
+          trackEvent(
+            'Wizard',
+            AnalyticsEvents.WIZARD.COMPLETE,
+            tier
+          );
+        } catch (err) {
+          console.error(err);
+          trackEvent('Wizard', AnalyticsEvents.WIZARD.ERROR, 'Calculation Error');
+        }
+      }
+    }
+  }, [currentStep, formData.madhab, formData.isSimpleMode, formData.calendarType, formData.nisabStandard, calculations.zakatDue]);
+
   // Wrapper for adding documents that also updates form values
   const handleDocumentAdded = (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => {
     addDocument(doc);
   };
 
-  const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+
 
   // Don't render until we've loaded persisted data
   if (!isLoaded) {
