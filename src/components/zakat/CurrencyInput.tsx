@@ -2,14 +2,8 @@ import { useState, useEffect, useRef, ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { parseMathExpression } from "@/lib/zakatCalculations";
 import { cn } from "@/lib/utils";
-import { FileDoc, CaretDown, Calculator } from "@phosphor-icons/react";
+import { FileDoc, CaretDown } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Collapsible,
   CollapsibleContent,
@@ -55,6 +49,7 @@ export function CurrencyInput({
   const [inputValue, setInputValue] = useState(value > 0 ? value.toString() : "");
   const [isFocused, setIsFocused] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const lastExternalValue = useRef(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +61,7 @@ export function CurrencyInput({
     // Only update if the value was changed externally (not by user input)
     if (value !== lastExternalValue.current && !isFocused) {
       setInputValue(value > 0 ? value.toString() : "");
+      setError(null);
       lastExternalValue.current = value;
     }
   }, [value, isFocused]);
@@ -74,6 +70,22 @@ export function CurrencyInput({
     const newValue = e.target.value;
     setInputValue(newValue);
 
+    // Strict Validation: Allow only numbers, math operators, parens, decimal, and spaces
+    // Regex: Start to end must be valid chars
+    const isValid = /^[0-9+\-*/().\s]*$/.test(newValue);
+
+    if (!isValid) {
+      setError("Invalid character: Only numbers and math symbols allowed");
+      // Still allow typing so they can delete, but don't parse result yet or maybe handle gracefully?
+      // Actually, we usually want to let them type but show error.
+      // We do NOT update the parent with invalid data, or pass 0?
+      // Let's pass 0 if invalid to stay safe, or keep prior value?
+      // Passing 0 avoids breaking calculations downstream with NaNs
+      onChange(0);
+      return;
+    }
+
+    setError(null);
     const parsed = parseMathExpression(newValue);
     onChange(parsed);
     lastExternalValue.current = parsed;
@@ -109,9 +121,12 @@ export function CurrencyInput({
       <motion.div
         onClick={handleContainerClick}
         className={cn(
-          "relative bg-surface-container-high rounded-t-lg cursor-text transition-colors",
-          "border-b-2",
-          isFocused ? "border-primary bg-surface-container-highest" : "border-muted-foreground/30 hover:bg-surface-container-highest"
+          "relative bg-surface-container-high rounded-xl overflow-hidden cursor-text transition-all duration-200",
+          error
+            ? "ring-2 ring-destructive bg-destructive/5"
+            : isFocused
+              ? "ring-2 ring-ring bg-primary-container"
+              : "ring-1 ring-border hover:bg-surface-container-highest"
         )}
         initial={false}
         animate={isFocused ? { scale: 1.005 } : { scale: 1 }}
@@ -121,7 +136,7 @@ export function CurrencyInput({
         <motion.label
           htmlFor={typeof label === 'string' ? label : undefined}
           className={cn(
-            "absolute left-10 pointer-events-none transition-colors",
+            "absolute left-4 pointer-events-none transition-colors z-10",
             shouldFloat
               ? "text-xs font-medium"
               : "text-base",
@@ -131,7 +146,7 @@ export function CurrencyInput({
           )}
           initial={false}
           animate={{
-            top: shouldFloat ? 8 : 20,
+            top: shouldFloat ? 8 : 22,
             fontSize: shouldFloat ? "0.75rem" : "1rem",
           }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -139,65 +154,52 @@ export function CurrencyInput({
           {label}
         </motion.label>
 
-        {/* Currency Symbol */}
-        <span className={cn(
-          "absolute left-3 top-1/2 -translate-y-1/2 transition-colors",
-          isFocused ? "text-primary" : "text-muted-foreground"
-        )}>
-          {currency}
-        </span>
+        {/* Input Row: Flexbox with baseline alignment */}
+        <div className="flex items-baseline pt-8 pb-3 px-4">
+          {/* Currency Symbol */}
+          <span className={cn(
+            "shrink-0 text-lg font-mono transition-colors mr-2",
+            isFocused ? "text-primary" : "text-muted-foreground"
+          )}>
+            {currency}
+          </span>
 
-        {/* Math Hint Icon */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Calculator hint"
-                className={cn(
-                  "absolute right-3 top-1/2 -translate-y-1/2 transition-colors",
-                  "text-muted-foreground/50 hover:text-primary"
-                )}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Calculator className="w-4 h-4" weight="regular" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p className="text-xs">Supports math: e.g. 100 + 200</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Input */}
-        <Input
-          ref={inputRef}
-          id={typeof label === 'string' ? label : undefined}
-          type="text"
-          value={inputValue}
-          onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={handleBlur}
-          placeholder={shouldFloat ? placeholder : undefined}
-          aria-label={typeof label === 'string' ? label : fieldName || 'Currency input'}
-          className={cn(
-            "font-mono tabular-nums tracking-wide pl-8",
-          )}
-          data-testid={testId}
-        />
-
-        {/* Active Indicator Line Animation */}
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary origin-center"
-          initial={false}
-          animate={{
-            scaleX: isFocused ? 1 : 0,
-            opacity: isFocused ? 1 : 0
-          }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        />
+          {/* Input */}
+          <Input
+            ref={inputRef}
+            id={typeof label === 'string' ? label : undefined}
+            type="text"
+            value={inputValue}
+            onChange={handleChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={handleBlur}
+            placeholder={shouldFloat ? placeholder : undefined}
+            aria-label={typeof label === 'string' ? label : fieldName || 'Currency input'}
+            aria-invalid={!!error}
+            autoComplete="off"
+            className={cn(
+              "flex-1 font-mono tabular-nums tracking-wide text-lg",
+              "h-auto p-0 bg-transparent border-none shadow-none focus-visible:ring-0",
+              className
+            )}
+            data-testid={testId}
+          />
+        </div>
       </motion.div>
+
+      {/* Error Message */}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className="text-xs text-destructive font-medium ml-1"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {hasContributions && (
         <Collapsible open={showBreakdown} onOpenChange={setShowBreakdown}>
