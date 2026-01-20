@@ -41,3 +41,7 @@ export const a11y = {
     settings: 'Settings',
     viewSettings: 'View Settings',
 } as const;
+
+export const legal = {
+    lastUpdated: 'January 16, 2026',
+} as const;

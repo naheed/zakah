@@ -77,7 +77,7 @@ const TermRenderer = ({ section }: { section: TermSection }) => {
 const Terms = () => {
   const { termsSections } = c.terms;
   const headerContent = (
-    <Text className="text-sm">Last updated: December 28, 2025</Text>
+    <Text className="text-sm">Last updated: {c.common.legal.lastUpdated}</Text>
   );
 
   // Generate ToC items from sections

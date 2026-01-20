@@ -46,9 +46,7 @@ export const privacySections: SectionContent[] = [
     {
         id: "introduction",
         title: "Introduction",
-        content: `Last Updated: January 5, 2026
-
-This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), provided by vora.dev, collects, uses, and protects your information when you use our website and services. We are committed to protecting your privacy and ensuring the security of your financial data.`
+        content: `This Privacy Policy describes how ZakatFlow ("we," "our," or "the Service"), provided by vora.dev, collects, uses, and protects your information when you use our website and services. We are committed to protecting your privacy and ensuring the security of your financial data.`
     },
     {
         id: "collection",

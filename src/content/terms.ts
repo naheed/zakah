@@ -20,7 +20,7 @@ export const termsSections: TermSection[] = [
         number: 1,
         title: "Acceptance of Terms",
         icon: Scroll,
-        content: "Last Updated: January 5, 2026\n\nBy accessing or using the Zakat Calculator (\"the Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, you may not use the Service."
+        content: "By accessing or using the Zakat Calculator (\"the Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, you may not use the Service."
     },
     {
         id: "description",

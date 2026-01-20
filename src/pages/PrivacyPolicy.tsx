@@ -97,7 +97,7 @@ const PrivacyPolicy = () => {
 
   const header = {
     title: "Privacy Policy",
-    lastUpdated: "December 30, 2024",
+    lastUpdated: c.common.legal.lastUpdated,
     icon: ShieldCheck
   };
 
