@@ -1,6 +1,7 @@
 import { ZakatReport } from "./zakatCalculations";
 import { format } from "date-fns";
 import { saveAs } from "file-saver";
+import { MADHAB_RULES } from "./madhahRules";
 
 export function generateCSV(report: ZakatReport, fileName: string = "zakat-report.csv") {
     const { input: formData, output: calculations } = report;
@@ -15,54 +16,54 @@ export function generateCSV(report: ZakatReport, fileName: string = "zakat-repor
         enhancedBreakdown
     } = calculations;
 
+    // Get Rules for Methodology Column
+    const rules = MADHAB_RULES[madhab || 'balanced'] || MADHAB_RULES.balanced;
+
     // Helper to escape commas for CSV
     const safe = (str: string | number) => `"${String(str).replace(/"/g, '""')}"`;
     const money = (val: number | undefined | null) => safe(((val || 0)).toFixed(2));
 
     const rows: string[][] = [];
 
-    // 1. Header Info
-    rows.push(["ZakatFlow Calculation Report"]);
-    rows.push(["Date Generated", safe(format(new Date(), "PPpp"))]);
-    rows.push(["Currency", safe(currency)]);
-    rows.push(["Madhab", safe(madhab || "Standard")]);
-    if (report.meta.referralCode) {
-        rows.push(["Referral Code", safe(report.meta.referralCode)]);
-    }
+    // 1. Header Info & Instructions
+    rows.push(["ZAKATFLOW REPORT"]);
+    rows.push(["Generated", safe(format(new Date(), "PPpp"))]);
+    rows.push(["For Google Sheets", "Import this file via File > Import > Upload. Formulas are not embedded for security."]);
     rows.push([]);
 
-    // 2. Summary
-    rows.push(["SUMMARY"]);
-    rows.push(["Total Zakatable Assets", money(totalAssets)]);
-    rows.push(["Total Liabilities", money(totalLiabilities)]);
-    rows.push(["Net Zakatable Wealth", money(netZakatableWealth)]);
-    rows.push(["Zakat Due (2.5%)", money(zakatDue)]);
+    // 2. Summary Section
+    rows.push(["CALCULATION SUMMARY"]);
+    rows.push(["Metric", "Value", "Notes"]);
+    rows.push(["Total Gross Assets", money(totalAssets), "All assets before deductions/exemptions"]);
+    rows.push(["Total Liabilities", money(totalLiabilities), "Deductible debts/expenses"]);
+    rows.push(["Net Zakatable Wealth", money(netZakatableWealth), "Wealth subject to Zakat"]);
+    rows.push(["Zakat Due", money(zakatDue), "2.5% of Net Zakatable Wealth"]);
     rows.push([]);
 
-    // 3. Purification
-    if (interestToPurify > 0 || dividendsToPurify > 0) {
-        rows.push(["PURIFICATION REQUIRED"]);
-        rows.push(["Interest (Riba)", money(interestToPurify)]);
-        rows.push(["Impure Dividends", money(dividendsToPurify)]);
-        rows.push(["Total Purification", money(interestToPurify + dividendsToPurify)]);
-        rows.push([]);
-    }
-
-    // 4. Asset Breakdown
+    // 3. Asset Breakdown Table
     rows.push(["ASSET BREAKDOWN"]);
     rows.push([
         "Category",
-        "Sub-Category",
-        "Gross Amount",
+        "Item / Sub-Category",
+        "Gross Value",
         "Zakatable %",
         "Zakatable Amount",
-        "Notes"
+        "Methodology Rule"
     ]);
 
-    // Flatten EnhancedBreakdown
+    // Breakdown Logic
     const addCategory = (key: string, cat: any) => {
+        // Determine rule explanation based on key & madhab
+        let ruleNote = "Standard (100%)";
+        if (key === 'investments') {
+            ruleNote = rules.passiveInvestmentRate < 1 ? `Proxy Rule (${(rules.passiveInvestmentRate * 100).toFixed(0)}% of Value)` : "Market Value (100%)";
+        } else if (key === 'retirement') {
+            ruleNote = rules.retirementMethod === 'bradford_exempt' ? "Exempt (Inaccessible)" : "Net-Accessible (After Tax/Penalty)";
+        } else if (key === 'preciousMetals' && !rules.jewelryZakatable) {
+            ruleNote = "Bullion 100% (Jewelry Exempt)";
+        }
+
         if (cat.items && cat.items.length > 0) {
-            // Detailed items
             cat.items.forEach((item: any) => {
                 rows.push([
                     safe(cat.label),
@@ -70,13 +71,9 @@ export function generateCSV(report: ZakatReport, fileName: string = "zakat-repor
                     money(item.value),
                     safe((item.zakatablePercent * 100).toFixed(0) + "%"),
                     money(item.zakatableAmount),
-                    safe(item.meta?.description || "") // Assuming meta might store description
+                    safe(ruleNote)
                 ]);
             });
-            // Subtotal line? Maybe not needed for CSV import if we have details.
-            // But if items are generic, we might just list the category total if no items exist?
-            // The `enhancedBreakdown` mirrors the form inputs usually. 
-            // If `items` is empty but total > 0 (e.g. manual input), list it.
         } else if (cat.total > 0) {
             rows.push([
                 safe(cat.label),
@@ -84,12 +81,11 @@ export function generateCSV(report: ZakatReport, fileName: string = "zakat-repor
                 money(cat.total),
                 safe((cat.zakatablePercent * 100).toFixed(0) + "%"),
                 money(cat.zakatableAmount),
-                ""
+                safe(ruleNote)
             ]);
         }
     };
 
-    // Iterate known keys
     const keys = [
         'liquidAssets', 'investments', 'retirement', 'realEstate',
         'business', 'preciousMetals', 'crypto', 'debtOwedToYou', 'otherAssets'
@@ -103,28 +99,40 @@ export function generateCSV(report: ZakatReport, fileName: string = "zakat-repor
 
     rows.push([]);
 
-    // 5. Liabilities Breakdown
+    // 4. Liabilities Breakdown
     if (totalLiabilities > 0) {
         rows.push(["LIABILITIES DEDUCTED"]);
+        rows.push(["Type", "Description", "Amount", "Deductible %", "Deduction", "Rule"]);
 
         const liabilityFields = [
             { key: 'creditCardBalance', label: 'Credit Card Balance' },
             { key: 'unpaidBills', label: 'Unpaid Bills' },
-            { key: 'studentLoansDue', label: 'Student Loans (Due)' },
+            { key: 'studentLoansDue', label: 'Student Loans' },
             { key: 'lateTaxPayments', label: 'Late Tax Payments' },
-            { key: 'outstandingDebts', label: 'Other Debts' } // Assuming this exists or generic
+            { key: 'outstandingDebts', label: 'Other Debts' }
         ];
 
+        const debtRule = rules.debtDeductionMethod === 'twelve_month' ? "12-Month Living Expenses Cap" :
+            rules.debtDeductionMethod === 'none' ? "Not Deductible" : "Full Deduction";
+
         liabilityFields.forEach(l => {
-            // @ts-ignore - Dynamic access
+            // @ts-ignore
             const val = formData[l.key];
             if (val && val > 0) {
-                rows.push(["Liability", safe(l.label), money(val), "100%", money(val), "Deductible"]);
+                rows.push(["Liability", safe(l.label), money(val), "100%", money(val), safe(debtRule)]);
             }
         });
-        // Add total if no details found but total > 0 (fallback)
-        // rows.push(["Total Liabilities", "", money(totalLiabilities), "100%", money(totalLiabilities), ""]);
+        rows.push([]);
     }
+
+    // 5. Methodology Glossary (The "Depth Bar")
+    rows.push(["METHODOLOGY GLOSSARY"]);
+    rows.push(["Selected School", safe(rules.displayName)]);
+    rows.push(["Core Principle", safe(rules.description)]);
+    rows.push(["Jewelry Ruling", safe(rules.jewelryZakatable ? "Zakatable (Gold/Silver weight)" : "Exempt (Personal Use)")]);
+    rows.push(["Retirement Ruling", safe(rules.retirementMethod === 'bradford_exempt' ? "Exempt if under 59.5 (Inaccessible)" : "Zakatable on net accessible amount")]);
+    rows.push(["Investment Ruling", safe(rules.passiveInvestmentRate < 1 ? "30% Proxy Rule (Active Assets)" : "100% Market Value")]);
+    rows.push(["Ref", "https://zakatflow.org/methodology"]);
 
     // Convert to String
     const csvContent = rows.map(r => r.join(",")).join("\n");

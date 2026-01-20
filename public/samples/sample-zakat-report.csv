@@ -1,43 +1,27 @@
-ZakatFlow Calculation Report
-Date Generated,"Jan 19, 2026, 5:54:56 PM"
-Currency,"USD"
-Madhab,"shafii"
+ZAKATFLOW REPORT
+Generated,"Jan 20, 2026, 12:09:15 AM"
+For Google Sheets,Import this file via File > Import > Upload. Formulas are not embedded for security.
 
-SUMMARY
-Total Zakatable Assets,"1162292.29"
-Total Liabilities,"0.00"
-Net Zakatable Wealth,"1162292.29"
-Zakat Due (2.5%),"29057.31"
-
-PURIFICATION REQUIRED
-Interest (Riba),"800.00"
-Impure Dividends,"19.96"
-Total Purification,"819.96"
+CALCULATION SUMMARY
+Metric,Value,Notes
+Total Gross Assets,"13882.00",All assets before deductions/exemptions
+Total Liabilities,"24.00",Deductible debts/expenses
+Net Zakatable Wealth,"13858.00",Wealth subject to Zakat
+Zakat Due,"346.45",2.5% of Net Zakatable Wealth
 
 ASSET BREAKDOWN
-Category,Sub-Category,Gross Amount,Zakatable %,Zakatable Amount,Notes
-"Cash & Savings","Checking Accounts","9874.00","100%","9874.00",""
-"Cash & Savings","Savings Accounts","4945.00","100%","4945.00",""
-"Cash & Savings","Cash on Hand","959.00","100%","959.00",""
-"Cash & Savings","Digital Wallets","400.00","100%","400.00",""
-"Investments","Active Investments","77599.00","100%","77599.00",""
-"Investments","Passive Investments","89948.00","100%","89948.00",""
-"Investments","Dividends","998.00","98%","978.04",""
-"Retirement","Roth IRA Contributions","98849.00","100%","98849.00",""
-"Retirement","Roth IRA Earnings","9958.00","65%","6472.70",""
-"Retirement","401(k) Vested","88949.00","65%","57816.85",""
-"Retirement","Traditional IRA","894998.00","65%","581748.70",""
-"Retirement","HSA Balance","99849.00","100%","99849.00",""
-"Real Estate","Property for Sale","8859.00","100%","8859.00",""
-"Real Estate","Rental Income","990.00","100%","990.00",""
-"Business","Cash & Receivables","890.00","100%","890.00",""
-"Business","Inventory","8949.00","100%","8949.00",""
-"Precious Metals","Gold","7493.29","0%","0.00",""
-"Precious Metals","Silver","341.82","0%","0.00",""
-"Crypto & Digital","Bitcoin/Ethereum","2000.00","100%","2000.00",""
-"Crypto & Digital","Trading Altcoins","4000.00","100%","4000.00",""
-"Crypto & Digital","Staked Assets","499.00","100%","499.00",""
-"Crypto & Digital","Staking Rewards","900.00","100%","900.00",""
-"Crypto & Digital","Liquidity Pools","900.00","100%","900.00",""
-"Debt Owed to You","Collectible Loans","8849.00","100%","8849.00",""
-"Debt Owed to You","Recovered Bad Debt","94.00","100%","94.00",""
+Category,Item / Sub-Category,Gross Value,Zakatable %,Zakatable Amount,Methodology Rule
+"Cash & Savings","Checking Accounts","3934.00","100%","3934.00","Standard (100%)"
+"Investments","Active Investments","9948.00","100%","9948.00","Proxy Rule (30% of Value)"
+
+LIABILITIES DEDUCTED
+Type,Description,Amount,Deductible %,Deduction,Rule
+Liability,"Credit Card Balance","24.00",100%,"24.00","12-Month Living Expenses Cap"
+
+METHODOLOGY GLOSSARY
+Selected School,"Balanced (Sheikh Joe Bradford)"
+Core Principle,"30% passive investments, retirement exempt under 59½, jewelry exempt, 12-month debts"
+Jewelry Ruling,"Exempt (Personal Use)"
+Retirement Ruling,"Exempt if under 59.5 (Inaccessible)"
+Investment Ruling,"30% Proxy Rule (Active Assets)"
+Ref,https://zakatflow.org/methodology
