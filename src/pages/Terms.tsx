@@ -1,6 +1,7 @@
 
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { content as c, TermSection } from "@/content";
+import { content as c } from "@/content";
+import { TermSection } from "@/content/terms";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Heading, Text, List, ListItem } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
