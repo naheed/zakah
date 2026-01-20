@@ -182,7 +182,7 @@ export function CurrencyInput({
           placeholder={shouldFloat ? placeholder : undefined}
           aria-label={typeof label === 'string' ? label : fieldName || 'Currency input'}
           className={cn(
-            "font-mono tabular-nums tracking-wide",
+            "font-mono tabular-nums tracking-wide pl-8",
           )}
           data-testid={testId}
         />

@@ -143,6 +143,12 @@ export default {
 					'Liberation Mono',
 					'Courier New',
 					'monospace'
+				],
+				arabic: [
+					'Amiri',
+					'Traditional Arabic',
+					'Tahoma',
+					'sans-serif'
 				]
 			},
 			boxShadow: {
