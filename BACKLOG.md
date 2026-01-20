@@ -78,6 +78,12 @@
 
 ## ✅ Completed Milestones (History)
 
+### Phase 11: Stability & Legal Compliance ✅
+> **Released: v0.17.0 (Jan 2026)**
+- **Legal Standardization**: Unified "Last Updated" dates across legal docs for single-source truth.
+- **Robust Automation**: Added `data-testid` architecture to core inputs, enabling 100% E2E test reliability.
+- **Precision Audits**: Explicitly clarified annualization logic ("Multiply by 12") in UI and Tests to prevent user error.
+
 ### Phase 10: Stability & Polish ✅
 > **Released: v0.16.0 (Jan 2026)**
 - **Audit**: Comprehensive cleanup of Report UI redundancies.

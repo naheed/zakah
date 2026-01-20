@@ -3,7 +3,7 @@
 | **Author** | ZakatFlow Engineering Team |
 | :--- | :--- |
 | **Status** | Living Document |
-| **Last Updated** | Jan 12, 2026 (v0.16.0) |
+| **Last Updated** | Jan 19, 2026 (v0.17.0) |
 | **Audience** | Engineering, Product, Security |
 
 ## 1. Overview
@@ -145,7 +145,7 @@ We employ a "Testing Trophy" strategy, heavily weighted towards Integration and 
 | Layer | Tool | Coverage Goal | Focus |
 | :--- | :--- | :--- | :--- |
 | **Static** | TypeScript / ESLint | 100% | Type safety, strictly typed props. |
-| **Unit** | Vitest | 100% (Engine) | The `zakatCalculations.ts` file has **54+ comprehensive scenarios** covering every Fiqh permutation. |
+| **Unit** | Vitest | 100% (Engine) | The `zakatCalculations.ts` file has **168+ comprehensive scenarios** covering every Fiqh permutation. |
 | **Integration** | Vitest / Testing Library | Critical Paths | Wizard flows, Plaid hook logic, Document extraction mapping. |
 | **E2E** | Playwright | Key Flows | Smoke tests (Login -> Calc -> Report). **Accessibility Compliance**. |
 

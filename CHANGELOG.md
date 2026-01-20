@@ -26,7 +26,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix WorkSans italic font bug
   - Add machine-readable QR for YoY scanning
 
-## [0.16.0] - 2026-01-12
+## [0.17.0] - 2026-01-16
+
+### Added
+- **Legal Standardization**: Standardized "Last Updated" date across Privacy Policy and Terms of Service to a single source of truth (`January 16, 2026`).
+- **Test Infrastructure Hardening**: Added `data-testid` attributes to all Currency Inputs and Wizard Steps to support robust E2E automation.
+
+### Fixed
+- **Living Expenses Annualization**: Added "We multiply by 12" tooltip and explicit field description to prevent users from accidentally double-annualizing expenses.
+- **Unit Test Technical Debt**: Consolidated redundant test suites (`__tests__/zakatCalculations` integrated into main test file) and removed deprecated `calculationMode` logic.
+- **E2E Flakiness**: Fixed Precious Metals "Value Tab" selection logic in E2E tests to prevent timeout errors.
+
+
 
 ### Fixed
 - **Critical Calculation Bug (Retirement)**: Fixed tax deduction rate being treated as whole number (25) instead of decimal (0.25), which was zeroing out retirement assets.
