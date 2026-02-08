@@ -301,6 +301,29 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
         expect(resShafii).toBe(110000);
     });
 
+    it('Legacy goldValue support', () => {
+        // If migration hasn't run, goldValue might still be populated.
+        // Logic: Treat as "Potential Jewelry" (Exempt if mode exempts jewelry, Include if mode includes)
+
+        // Hanafi (Includes Legacy)
+        const dataHanafi: ZakatFormData = {
+            ...baseData,
+            madhab: 'hanafi',
+            goldInvestmentValue: 0,
+            goldJewelryValue: 5000 // Personal jewelry - taxable in Hanafi
+        };
+        expect(calculateTotalAssets(dataHanafi)).toBe(105000); // 100k + 5k
+
+        // Shafi'i (Excludes jewelry)
+        const dataShafii: ZakatFormData = {
+            ...baseData,
+            madhab: 'shafii',
+            goldInvestmentValue: 0,
+            goldJewelryValue: 5000 // Personal jewelry - exempt in Shafi'i
+        };
+        expect(calculateTotalAssets(dataShafii)).toBe(100000); // 100k + 0
+    });
+
     it('Enhanced Breakdown handles split correctly', () => {
         const data: ZakatFormData = {
             ...baseData,

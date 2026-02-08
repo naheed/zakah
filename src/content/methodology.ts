@@ -622,7 +622,7 @@ export const debts = {
     liabilities: {
         title: "Owed BY You",
         intro: "Deduct immediate debts (due within 12 months).",
-        views: [],
+        views: [] as string[],
         zakatFlowView: "ZakatFlow follows the Maliki/Bradford view: only immediate obligations (due within 12 months) reduce your Zakatable wealth. The Shafi'i mode applies no deduction at all."
     },
     deductible: {

@@ -1,5 +1,41 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getCorsHeaders } from "../_shared/domainConfig.ts";
+
+// --- Rate Limiting ---
+// Simple in-memory rate limiter (per-instance, resets on cold start)
+// For production scale, consider Upstash Redis
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 10; // requests per window
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function checkRateLimit(identifier: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(identifier);
+  
+  if (!record || now > record.resetTime) {
+    // New window
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+  
+  if (record.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0, resetIn: record.resetTime - now };
+  }
+  
+  record.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX - record.count, resetIn: record.resetTime - now };
+}
+
+// Clean up old entries periodically (prevent memory leak)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (now > value.resetTime) {
+      rateLimitMap.delete(key);
+    }
+  }
+}, 5 * 60 * 1000); // Clean every 5 minutes
 
 // --- Types & Interfaces ---
 
@@ -93,12 +129,39 @@ function aggregateLegacyData(lineItems: ExtractionLineItem[]): LegacyExtractedDa
   return legacyData;
 }
 
-serve(async (req: any) => {
+serve(async (req: Request) => {
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // --- Rate Limiting Check ---
+  // Use IP address or forwarded IP as identifier
+  const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+    || req.headers.get('cf-connecting-ip') 
+    || 'anonymous';
+  
+  const rateCheck = checkRateLimit(clientIP);
+  
+  if (!rateCheck.allowed) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP.substring(0, 8)}...`);
+    return new Response(
+      JSON.stringify({ 
+        error: "Rate limit exceeded. Please try again later.",
+        retryAfter: Math.ceil(rateCheck.resetIn / 1000)
+      }),
+      { 
+        status: 429, 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": String(Math.ceil(rateCheck.resetIn / 1000)),
+          "X-RateLimit-Remaining": "0"
+        } 
+      }
+    );
   }
 
   try {
