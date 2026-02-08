@@ -30,6 +30,8 @@ import DevTools from "./pages/DevTools";
 import SankeyTest from "./pages/SankeyTest";
 import AccountDeleted from "./pages/AccountDeleted";
 import Donations from "./pages/Donations";
+import Jurisprudence from "./pages/Jurisprudence";
+import Changelog from "./pages/Changelog";
 import { initAnalytics } from "./lib/analytics";
 import { usePageTracking } from "./hooks/usePageTracking";
 
@@ -53,6 +55,13 @@ function AppContent() {
         } />
 
         <Route path="/auth" element={<Auth />} />
+
+        {/* Public Content Pages */}
+        <Route path="/about" element={<About />} />
+        <Route path="/jurisprudence" element={<Jurisprudence />} />
+        <Route path="/changelog" element={<Changelog />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
 
         {/* Protected data routes - Vault required */}
         <Route path="/calculations" element={

@@ -38,6 +38,16 @@ Avoid cold, transactional language. Frame calculations as a spiritual duty.
 *   **Don't Say:** "Pay your bill", "Taxable Assets", "Penalty"
 *   **Do Say:** "Fulfill your obligation", "Zakatable Wealth", "Purification"
 
+### 2.4 Personal Story + Professional Credibility (Origin Stories)
+When introducing the creator or sharing origin stories, balance authenticity with authority:
+*   **Community Service** first (spiritual credibility)
+*   **Professional Role** second (technical credibility)
+*   **Intention** third (sincerity, not self-promotion)
+
+**Example:**
+*   **Good:** "Naheed serves on the Board of Trustees at WVMA... and works as a Product Lead at Google."
+*   **Bad:** "A Google Product Lead who also does some masjid volunteering."
+
 ---
 
 ## 3. Tactical Guidelines (The "How-To")
