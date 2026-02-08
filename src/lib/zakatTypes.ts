@@ -48,6 +48,12 @@ export interface ZakatFormData {
     interestEarned: number; // For purification (not Zakatable)
 
     // Precious Metals
+    goldInvestmentValue: number; // Coins, bars, bullion (Always Zakatable)
+    goldJewelryValue: number;    // Wearable jewelry (Zakatable based on Madhab)
+    silverInvestmentValue: number;
+    silverJewelryValue: number;
+
+    // Deprecated - kept for migration if needed
     goldValue: number;
     silverValue: number;
 

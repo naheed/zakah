@@ -99,8 +99,12 @@ const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
     );
 };
 
-export const MethodologyExplorer = () => {
-    const [selectedMode, setSelectedMode] = useState<Madhab>('balanced');
+interface MethodologyExplorerProps {
+    initialMode?: Madhab;
+}
+
+export const MethodologyExplorer = ({ initialMode = 'balanced' }: MethodologyExplorerProps) => {
+    const [selectedMode, setSelectedMode] = useState<Madhab>(initialMode);
     const content = c.methodology;
 
     return (

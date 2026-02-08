@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
   const [inputMode, setInputMode] = useState<'weight' | 'value'>('weight');
-  const [excludeWornJewelry, setExcludeWornJewelry] = useState(false);
 
   return (
     <AssetStepWrapper
@@ -32,54 +31,6 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
       showUpload={false}
       householdReminder="Include gold and silver owned by yourself, spouse, and children."
     >
-      {/* Jewelry Exemption Toggle */}
-      <div className="p-4 rounded-xl bg-surface-container border border-border mb-6">
-        <div className="flex items-start gap-3">
-          <Checkbox
-            id="exclude-worn-jewelry"
-            checked={excludeWornJewelry}
-            onCheckedChange={(checked) => setExcludeWornJewelry(checked === true)}
-            className="mt-0.5"
-          />
-          <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2">
-              <Label
-                htmlFor="exclude-worn-jewelry"
-                className="text-sm font-medium cursor-pointer"
-              >
-                Exclude regularly worn jewelry
-              </Label>
-              <WhyTooltip {...fiqhExplanations.jewelryExemption} />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Majority view (Shafi'i, Maliki, Hanbali): Jewelry worn regularly is exempt like clothing.
-            </p>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {excludeWornJewelry && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="flex gap-2">
-                  <Info weight="duotone" className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-muted-foreground">
-                    <p className="font-medium text-foreground mb-1">Only enter gold/silver NOT worn regularly</p>
-                    <p>Exclude: Daily-wear rings, bangles, necklaces you wear often.</p>
-                    <p>Include: Investment gold, bullion, jewelry kept in storage.</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
       {/* Input Mode Toggle */}
       <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as 'weight' | 'value')} className="mb-6">
         <TabsList className="grid w-full grid-cols-2 h-12">
@@ -93,62 +44,122 @@ export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocu
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="weight" className="mt-6 space-y-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">Gold</span>
+        <TabsContent value="weight" className="mt-8 space-y-8">
+          {/* Gold Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <span className="text-base font-semibold text-foreground">Gold</span>
               <WhyTooltip {...fiqhExplanations.goldSilver} />
             </div>
-            <WeightConverter
-              label="Gold Weight"
-              pricePerOunce={GOLD_PRICE_PER_OUNCE}
-              value={data.goldValue}
-              onChange={(value) => updateData({ goldValue: value })}
-              isHousehold={isHousehold}
-            />
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <WeightConverter
+                label="Investment Gold (Coins/Bars)"
+                pricePerOunce={GOLD_PRICE_PER_OUNCE}
+                value={data.goldInvestmentValue}
+                onChange={(value) => updateData({ goldInvestmentValue: value })}
+                isHousehold={isHousehold}
+              />
+              <WeightConverter
+                label="Gold Jewelry (Wearable)"
+                pricePerOunce={GOLD_PRICE_PER_OUNCE}
+                value={data.goldJewelryValue}
+                onChange={(value) => updateData({ goldJewelryValue: value })}
+                isHousehold={isHousehold}
+              />
+            </div>
           </div>
 
-          <WeightConverter
-            label="Silver"
-            pricePerOunce={SILVER_PRICE_PER_OUNCE}
-            value={data.silverValue}
-            onChange={(value) => updateData({ silverValue: value })}
-            isHousehold={isHousehold}
-          />
+          {/* Silver Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <span className="text-base font-semibold text-foreground">Silver</span>
+            </div>
 
-          <p className="text-xs text-muted-foreground">
-            Prices are approximate. For jewelry, use melt value only (exclude gemstones & craftsmanship).
+            <div className="grid md:grid-cols-2 gap-6">
+              <WeightConverter
+                label="Investment Silver"
+                pricePerOunce={SILVER_PRICE_PER_OUNCE}
+                value={data.silverInvestmentValue}
+                onChange={(value) => updateData({ silverInvestmentValue: value })}
+                isHousehold={isHousehold}
+              />
+              <WeightConverter
+                label="Silver Jewelry"
+                pricePerOunce={SILVER_PRICE_PER_OUNCE}
+                value={data.silverJewelryValue}
+                onChange={(value) => updateData({ silverJewelryValue: value })}
+                isHousehold={isHousehold}
+              />
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+            <strong>Note on Jewelry:</strong> Enter the full weight/value. If your selected methodology (e.g. Shafi'i) exempts jewelry, the calculator will automatically exclude it from your Zakat total.
           </p>
         </TabsContent>
 
-        <TabsContent value="value" className="mt-6 space-y-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">Gold Value</span>
+        <TabsContent value="value" className="mt-8 space-y-8">
+          {/* Gold Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <span className="text-base font-semibold text-foreground">Gold Value</span>
               <WhyTooltip {...fiqhExplanations.goldSilver} />
             </div>
-            <CurrencyInput
-              label="Gold Value"
-              description="Melt value of gold items (not gemstones or craftsmanship)"
-              householdDescription="Combined gold value for all family members"
-              isHousehold={isHousehold}
-              value={data.goldValue}
-              onChange={(value) => updateData({ goldValue: value })}
-              documentContributions={getDocumentContributionsForField(uploadedDocuments, 'goldValue')}
-              testId="gold-value-input"
-            />
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <CurrencyInput
+                label="Investment Gold"
+                description="Bullion, coins, bars"
+                householdDescription="Combined investment gold"
+                isHousehold={isHousehold}
+                value={data.goldInvestmentValue}
+                onChange={(value) => updateData({ goldInvestmentValue: value })}
+                documentContributions={getDocumentContributionsForField(uploadedDocuments, 'goldInvestmentValue')}
+                testId="gold-investment-input"
+              />
+              <CurrencyInput
+                label="Gold Jewelry"
+                description="Melt value of wearable items"
+                householdDescription="Combined gold jewelry"
+                isHousehold={isHousehold}
+                value={data.goldJewelryValue}
+                onChange={(value) => updateData({ goldJewelryValue: value })}
+                documentContributions={getDocumentContributionsForField(uploadedDocuments, 'goldJewelryValue')}
+                testId="gold-jewelry-input"
+              />
+            </div>
           </div>
 
-          <CurrencyInput
-            label="Silver Value"
-            description="Melt value of silver items"
-            householdDescription="Combined silver value for all family members"
-            isHousehold={isHousehold}
-            value={data.silverValue}
-            onChange={(value) => updateData({ silverValue: value })}
-            documentContributions={getDocumentContributionsForField(uploadedDocuments, 'silverValue')}
-            testId="silver-value-input"
-          />
+          {/* Silver Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <span className="text-base font-semibold text-foreground">Silver Value</span>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <CurrencyInput
+                label="Investment Silver"
+                description="Bullion, coins, bars"
+                householdDescription="Combined investment silver"
+                isHousehold={isHousehold}
+                value={data.silverInvestmentValue}
+                onChange={(value) => updateData({ silverInvestmentValue: value })}
+                documentContributions={getDocumentContributionsForField(uploadedDocuments, 'silverInvestmentValue')}
+                testId="silver-investment-input"
+              />
+              <CurrencyInput
+                label="Silver Jewelry"
+                description="Melt value of wearable items"
+                householdDescription="Combined silver jewelry"
+                isHousehold={isHousehold}
+                value={data.silverJewelryValue}
+                onChange={(value) => updateData({ silverJewelryValue: value })}
+                documentContributions={getDocumentContributionsForField(uploadedDocuments, 'silverJewelryValue')}
+                testId="silver-jewelry-input"
+              />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </AssetStepWrapper>

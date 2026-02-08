@@ -1,7 +1,7 @@
 import { ZakatFormData } from "@/lib/zakatCalculations";
 import { categoriesContent } from "@/content/steps";
 import { cn } from "@/lib/utils";
-import { Check, Money, TrendUp, Bank, Diamond, CurrencyBtc, Scroll, Buildings, Storefront, PaintBrush, Handshake, Receipt, IconProps } from "@phosphor-icons/react";
+import { Check, Money, TrendUp, Bank, Coins, CurrencyBtc, Vault, Buildings, Storefront, Package, HandCoins, Receipt, IconProps } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Tooltip,
@@ -25,14 +25,14 @@ const defaultCategories = [
 
 // Map icon components to IDs for display
 const categoryIcons: Record<string, React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>> = {
-  hasPreciousMetals: Diamond,
-  hasCrypto: CurrencyBtc,
-  hasTrusts: Scroll,
-  hasRealEstate: Buildings,
-  hasBusiness: Storefront,
-  hasIlliquidAssets: PaintBrush,
-  hasDebtOwedToYou: Handshake,
-  hasTaxPayments: Receipt,
+  hasPreciousMetals: Coins,       // Gold bars/coins - more intuitive than Diamond
+  hasCrypto: CurrencyBtc,         // Bitcoin - universally recognized
+  hasTrusts: Vault,               // Safe/vault - protection/trust concept
+  hasRealEstate: Buildings,       // Buildings - clear
+  hasBusiness: Storefront,        // Storefront - clear
+  hasIlliquidAssets: Package,     // Package/box - items stored for value
+  hasDebtOwedToYou: HandCoins,    // Hand with coins - giving/receiving money
+  hasTaxPayments: Receipt,        // Receipt - clear
 };
 
 const optionalCategories = (categoriesContent.items || []).map(item => ({
@@ -105,72 +105,78 @@ export function CategorySelectionStep({ data, updateData, questionNumber }: Cate
             </AnimatePresence>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {optionalCategories.map((category, index) => {
               const isSelected = data[category.id];
 
               return (
-                <Tooltip key={category.id}>
-                  <TooltipTrigger asChild>
-                    <motion.button
-                      type="button"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ ...springConfig, delay: index * 0.03 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => updateData({ [category.id]: !isSelected })}
+                <motion.button
+                  key={category.id}
+                  type="button"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...springConfig, delay: index * 0.03 }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => updateData({ [category.id]: !isSelected })}
+                  className={cn(
+                    "relative flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all",
+                    "min-h-[80px] touch-manipulation",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    isSelected
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:bg-accent/30 hover:border-primary/40"
+                  )}
+                >
+                  {/* Icon Container */}
+                  <div className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-lg shrink-0",
+                    isSelected ? "bg-primary/10" : "bg-muted"
+                  )}>
+                    <category.icon
+                      weight={isSelected ? "fill" : "duotone"}
                       className={cn(
-                        "relative flex flex-col items-center gap-2 p-3 rounded-xl border text-center transition-colors",
-                        "min-h-[80px] touch-manipulation", // 48px+ touch target
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        // M3 State layers via hover/focus
-                        isSelected
-                          ? "bg-secondary border-secondary text-secondary-foreground"
-                          : "bg-card border-border hover:bg-accent/50 hover:border-primary/30 text-neutral-900 dark:text-neutral-100"
+                        "w-5 h-5",
+                        isSelected ? "text-primary" : "text-primary"
                       )}
-                    >
-                      {/* Icon */}
-                      <category.icon
-                        weight={isSelected ? "fill" : "duotone"}
-                        className={cn(
-                          "w-7 h-7",
-                          isSelected ? "text-secondary-foreground" : "text-primary"
-                        )}
-                      />
+                    />
+                  </div>
 
-                      {/* Label */}
-                      <span className="text-xs font-medium leading-tight">
-                        {category.label}
-                      </span>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className={cn(
+                      "font-medium text-sm",
+                      isSelected ? "text-primary" : "text-foreground"
+                    )}>
+                      {category.label}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      {category.description}
+                    </p>
+                  </div>
 
-                      {/* Selected checkmark */}
-                      <AnimatePresence>
-                        {isSelected && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0 }}
-                            transition={springConfig}
-                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tertiary flex items-center justify-center shadow-sm"
-                          >
-                            <Check weight="bold" className="w-3 h-3 text-tertiary-foreground" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-[200px] text-center">
-                    <p>{category.description}</p>
-                  </TooltipContent>
-                </Tooltip>
+                  {/* Checkmark */}
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0 }}
+                        transition={springConfig}
+                        className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0"
+                      >
+                        <Check weight="bold" className="w-3 h-3 text-primary-foreground" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
               );
             })}
           </div>
         </div>
 
         {/* Helper text */}
-        <p className="text-sm text-neutral-900 dark:text-neutral-100 text-center">
+        <p className="text-sm text-muted-foreground text-center">
           Not sure? Select it anyway — you can skip any question later.
         </p>
       </div>

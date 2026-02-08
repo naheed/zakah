@@ -2,7 +2,7 @@ import { ZakatFormData, formatCurrency, formatPercent, Madhab, EnhancedAssetBrea
 import { StepHeader } from "../StepHeader";
 import { InfoCard } from "../InfoCard";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, WarningCircle, DownloadSimple, ArrowCounterClockwise, GearSix, FloppyDisk, SignIn, ShareNetwork, CaretDown, CaretUp, PencilSimple, EnvelopeSimple, WhatsappLogo, XLogo, FacebookLogo, Copy, Check, Heart, Sparkle, Users, Warning } from "@phosphor-icons/react";
+import { CheckCircle, WarningCircle, DownloadSimple, ArrowCounterClockwise, GearSix, SignIn, ShareNetwork, CaretDown, CaretUp, PencilSimple, EnvelopeSimple, WhatsappLogo, XLogo, FacebookLogo, Copy, Check, Heart, Sparkle, Users, Warning, FileText, Table } from "@phosphor-icons/react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { CharityRecommendations } from "../CharityRecommendations";
@@ -17,6 +17,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useReferral } from "@/hooks/useReferral";
 import { useSavedCalculations } from "@/hooks/useSavedCalculations";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
+import { useMetalPrices, formatMetalPrice } from "@/hooks/useMetalPrices";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Confetti, useConfetti } from "@/components/ui/confetti";
@@ -117,6 +118,8 @@ export function ResultsStep({
   } = calculations;
   // useReferral hook for stats
   const { stats, fetchStats, referralCode } = useReferral();
+  // Live metal prices
+  const metalPrices = useMetalPrices();
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
@@ -221,7 +224,11 @@ export function ResultsStep({
     // Create unified report object using imported factory
     const report = createZakatReport(data, calculations, referralCode || undefined);
 
-    generateCSV(report, `zakat-report-${new Date().toISOString().split('T')[0]}.csv`);
+    generateCSV(report, `zakat-report-${new Date().toISOString().split('T')[0]}.csv`, {
+      goldPrice: metalPrices.goldPrice,
+      silverPrice: metalPrices.silverPrice,
+      lastUpdated: metalPrices.lastUpdated,
+    });
     toast({
       title: "CSV Exported",
       description: "Your calculation data has been downloaded."
@@ -243,51 +250,53 @@ export function ResultsStep({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border">
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Zakat Calculation Results</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground bg-white dark:bg-card border border-border px-2 py-0.5 rounded shadow-sm">
               {getModeDisplayName(data.madhab)} Mode
             </span>
+            {metalPrices.lastUpdated && (
+              <span className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded">
+                Gold: {formatMetalPrice(metalPrices.goldPrice)}/oz • Silver: {formatMetalPrice(metalPrices.silverPrice)}/oz
+              </span>
+            )}
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <div className="flex items-center gap-2">
-            {/* Primary Action: Download PDF */}
-            <Button
-              onClick={handleDownload}
-              disabled={isGeneratingPDF}
-              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
-            >
-              {isGeneratingPDF ? (
-                <ArrowCounterClockwise className="w-4 h-4 animate-spin" />
-              ) : (
-                <DownloadSimple className="w-4 h-4" />
-              )}
-              {isGeneratingPDF ? 'Generating...' : 'Download Report'}
-            </Button>
+            {/* Unified Download Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  disabled={isGeneratingPDF}
+                  className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                >
+                  {isGeneratingPDF ? (
+                    <ArrowCounterClockwise className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <DownloadSimple className="w-4 h-4" />
+                  )}
+                  {isGeneratingPDF ? 'Generating...' : 'Download Report'}
+                  <CaretDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleDownload} disabled={isGeneratingPDF}>
+                  <FileText className="w-4 h-4 mr-2" weight="duotone" />
+                  PDF Report
+                  <span className="ml-auto text-xs text-muted-foreground">Recommended</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownloadCSV}>
+                  <Table className="w-4 h-4 mr-2" weight="duotone" />
+                  CSV Spreadsheet
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Secondary Actions: Dropdown */}
-            {/* Note: Dropdown components need to be imported correctly above from @/components/ui/dropdown-menu */}
-            {/* Assuming they are global or handled by the import fixes */}
-            {/* Re-adding dropped imports for UI components since I overwrote header */}
-            {/* Wait, the imports were combined in my write. Let's ensure correct structure. */}
-            {/* The previous import block was:
-                import {
-                  DropdownMenu, ...
-                } from "@/components/ui/dropdown-menu";
-                
-                My write block combined them into alert-dialog import which is WRONG.
-                I need to fix the imports in this write.
-             */}
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="w-10 px-0" onClick={handleDownloadCSV} title="Export CSV">
-                <FloppyDisk className="h-4 w-4" />
-              </Button>
-              {/* Simplified for robustness - if dropdown fails, basic buttons verify functionality */}
-              <Button variant="outline" size="icon" className="w-10 px-0" onClick={handleReset} title="Reset">
-                <ArrowCounterClockwise className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* Reset Button */}
+            <Button variant="outline" size="icon" className="w-10 px-0" onClick={handleReset} title="Start Over">
+              <ArrowCounterClockwise className="h-4 w-4" />
+            </Button>
 
             {/* Hidden Trigger for Save Dialog to integrate with Dropdown */}
             {user && (
@@ -390,6 +399,32 @@ export function ResultsStep({
           referralCode={referralCode || undefined}
         />
       </div>
+
+      {/* Sign In CTA for unauthenticated users */}
+      {!user && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-gradient-to-r from-primary/5 to-tertiary/5 rounded-2xl p-6 border border-primary/20"
+        >
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="font-semibold text-lg mb-1">Save Your Calculation</h3>
+              <p className="text-sm text-muted-foreground">
+                Sign in to save this report, track your Zakat history, and access it from any device.
+              </p>
+            </div>
+            <Button
+              onClick={() => navigate('/auth')}
+              className="gap-2 shadow-lg shadow-primary/20"
+            >
+              <SignIn className="w-4 h-4" />
+              Sign In to Save
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
     </div>
   );

@@ -35,11 +35,11 @@ export function SaveProgressPrompt({
     }
 
     // Show prompt after PROMPT_AFTER_STEPS questions (not on results)
+    // Show prompt ONLY after the report is generated (Results Step)
     const shouldShow =
       !loading &&
       !user &&
-      currentStepIndex >= PROMPT_AFTER_STEPS &&
-      currentStepIndex < totalSteps - 1 && // Not on results
+      currentStepIndex === totalSteps - 1 && // Only on results
       !hasBeenDismissed;
 
     if (shouldShow) {

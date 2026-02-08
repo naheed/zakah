@@ -25,6 +25,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug
   - Add machine-readable QR for YoY scanning
+  - Add machine-readable QR for YoY scanning
+
+## [0.19.0] - 2026-02-07 (Compliance & Clarity)
+
+### Added
+- **Jurisprudence Compliance Audit**
+  - **Jewelry Governance**: Explicit handling of "Excessive vs Personal" jewelry. Added warning logic to guide users to input excessive amounts as "Investment" for proper Shafii/Maliki calculation.
+  - **Precious Metals Split**: distinct input fields for "Investment Gold" vs "Jewelry Gold" to support granular zakatability rules.
+  - **References**: Added authoritative citations (Reliance of the Traveller, Mukhtasar Khalil) to methodology content.
+- **Content Strategy (3-Tier Model)**
+  - **Intro Bar**: Context-aware preamble for each question group.
+  - **Deep Links**: "Learn More" now links directly to specific referenced sections in the Methodology page.
+  - **Methodology Anchors**: Implemented scroll-on-load for methodology deep links.
+
+### Changed
+- **Hanafi Retirement Logic**: Updated documentation to match "Net Accessible" calculation logic, correcting previous claim of total exemption.
+- **Test Infrastructure**: Consolidated disjointed test files into `src/lib/__tests__` standard, fixing "0 tests found" error.
+
+### Fixed
+- **Precious Metals Bug**: Fixed critical logic error where `zakatableAmount` for metals was incorrectly summing gross value instead of zakatable portion (ignoring exemptions).
 
 ## [0.18.0] - 2026-01-20 (Product Reality)
 

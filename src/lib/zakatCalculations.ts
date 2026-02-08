@@ -109,8 +109,12 @@ export const defaultFormData: ZakatFormData = {
   digitalWallets: 0,
   foreignCurrency: 0,
   interestEarned: 0,
-  goldValue: 0,
-  silverValue: 0,
+  goldInvestmentValue: 0,
+  goldJewelryValue: 0,
+  silverInvestmentValue: 0,
+  silverJewelryValue: 0,
+  goldValue: 0, // Deprecated
+  silverValue: 0, // Deprecated
   cryptoCurrency: 0,
   cryptoTrading: 0,
   stakedAssets: 0,
@@ -199,19 +203,26 @@ export function calculateTotalAssets(data: ZakatFormData): number {
   // Note: interestEarned is NOT added - must be purified separately
 
   // Precious Metals - only include if jewelryZakatable for this mode
+  // Precious Metals - Split into Investment (Always Zakatable) vs Jewelry (Mode Dependent)
   if (data.hasPreciousMetals) {
     const jewelryZakatable = MODE_RULES[madhab].jewelryZakatable;
-    // Gold and silver coins/bars are always zakatable
-    // Personal jewelry is only zakatable in Hanafi mode
+
+    // Investment metals are always zakatable
+    total += data.goldInvestmentValue;
+    total += data.silverInvestmentValue;
+
+    // Jewelry is only zakatable if the school allows (Hanafi)
     if (jewelryZakatable) {
-      total += data.goldValue;
-      total += data.silverValue;
-    } else {
-      // Non-jewelry gold/silver should still be included
-      // For now, we treat goldValue/silverValue as potentially jewelry
-      // In the future, we may split this into jewelry vs coins/bars
-      // Conservative: if mode exempts jewelry, exclude gold/silver values
-      // (This is the Bradford/Maliki/Shafi'i/Hanbali approach)
+      total += data.goldJewelryValue;
+      total += data.silverJewelryValue;
+    }
+
+    // Legacy support: If goldValue/silverValue exist (migration not run), check if we should include them
+    if (data.goldValue > 0 || data.silverValue > 0) {
+      if (jewelryZakatable) {
+        total += data.goldValue;
+        total += data.silverValue;
+      }
     }
   }
 
@@ -464,9 +475,47 @@ export function calculateEnhancedAssetBreakdown(
   const jewelryZakatable = MODE_RULES[safeMadhab].jewelryZakatable;
 
   if (data.hasPreciousMetals) {
+    // Investment Gold
+    if (data.goldInvestmentValue > 0) {
+      metalsItems.push({
+        name: 'Gold Investment',
+        value: data.goldInvestmentValue,
+        zakatablePercent: 1.0,
+        zakatableAmount: data.goldInvestmentValue
+      });
+    }
+    // Jewelry Gold
+    if (data.goldJewelryValue > 0) {
+      metalsItems.push({
+        name: 'Gold Jewelry',
+        value: data.goldJewelryValue,
+        zakatablePercent: jewelryZakatable ? 1.0 : 0,
+        zakatableAmount: jewelryZakatable ? data.goldJewelryValue : 0
+      });
+    }
+    // Investment Silver
+    if (data.silverInvestmentValue > 0) {
+      metalsItems.push({
+        name: 'Silver Investment',
+        value: data.silverInvestmentValue,
+        zakatablePercent: 1.0,
+        zakatableAmount: data.silverInvestmentValue
+      });
+    }
+    // Jewelry Silver
+    if (data.silverJewelryValue > 0) {
+      metalsItems.push({
+        name: 'Silver Jewelry',
+        value: data.silverJewelryValue,
+        zakatablePercent: jewelryZakatable ? 1.0 : 0,
+        zakatableAmount: jewelryZakatable ? data.silverJewelryValue : 0
+      });
+    }
+
+    // Legacy support
     if (data.goldValue > 0) {
       metalsItems.push({
-        name: 'Gold',
+        name: 'Gold (Legacy)',
         value: data.goldValue,
         zakatablePercent: jewelryZakatable ? 1.0 : 0,
         zakatableAmount: jewelryZakatable ? data.goldValue : 0
@@ -474,7 +523,7 @@ export function calculateEnhancedAssetBreakdown(
     }
     if (data.silverValue > 0) {
       metalsItems.push({
-        name: 'Silver',
+        name: 'Silver (Legacy)',
         value: data.silverValue,
         zakatablePercent: jewelryZakatable ? 1.0 : 0,
         zakatableAmount: jewelryZakatable ? data.silverValue : 0
@@ -482,6 +531,7 @@ export function calculateEnhancedAssetBreakdown(
     }
   }
   const metalsTotal = metalsItems.reduce((s, i) => s + i.value, 0);
+  const metalsZakatable = metalsItems.reduce((s, i) => s + (i.zakatableAmount || 0), 0);
 
   // Crypto
   const cryptoItems: AssetItem[] = [];
@@ -630,8 +680,8 @@ export function calculateEnhancedAssetBreakdown(
       label: 'Precious Metals',
       color: ASSET_COLORS.metals,
       total: metalsTotal,
-      zakatableAmount: metalsTotal,
-      zakatablePercent: 1.0,
+      zakatableAmount: metalsZakatable,
+      zakatablePercent: metalsTotal > 0 ? metalsZakatable / metalsTotal : 1.0,
       percentOfNetZakatable: pctOfNet(metalsTotal),
       items: metalsItems,
     },

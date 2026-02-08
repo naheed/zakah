@@ -2,12 +2,13 @@ import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { content as c } from "@/content";
 import { cn } from "@/lib/utils";
 import { Madhab, MADHAB_RULES } from "@/lib/zakatCalculations";
-import { Check, Sparkle, ListChecks, ShieldCheck } from "@phosphor-icons/react";
+import { Check, Sparkle, ListChecks, ShieldCheck, BookOpen } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getMadhhabDisplayName, MadhhabRules } from "@/lib/madhahRules";
 import { StepHeader } from "../StepHeader";
+import { Link } from "react-router-dom";
 
 export function SetupStep() {
     const { formData, updateFormData } = useZakatPersistence();
@@ -110,9 +111,21 @@ export function SetupStep() {
                         </Label>
                         <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground -mt-2 mb-4">
+                    <p className="text-sm text-muted-foreground -mt-2 mb-2">
                         {c.wizard.preferences.methodology.description}
                     </p>
+
+                    {/* Methodology Link - Before choices */}
+                    <Link
+                        to="/methodology"
+                        className="flex items-center gap-3 mb-4 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
+                    >
+                        <BookOpen className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" weight="duotone" />
+                        <div className="flex-1">
+                            <p className="font-medium text-foreground text-sm">Learn about our methodology</p>
+                            <p className="text-xs text-muted-foreground">Based on AMJA, AAOIFI & Sheikh Joe Bradford</p>
+                        </div>
+                    </Link>
 
                     <RadioGroup
                         value={madhab}
@@ -141,9 +154,7 @@ export function SetupStep() {
                                             <div className={cn("font-medium", isSelected && "text-primary")}>
                                                 {rule.displayName}
                                             </div>
-                                            {rule.name === 'school_1' && ( // 'school_1' is typically the default/balanced one in this codebase, checking... actually need to verify logic. 
-                                                // Wait, I should double check MADHAB_RULES structure or just be generic.
-                                                // Let's rely on standard display for now.
+                                            {rule.name === 'school_1' && (
                                                 <span className="text-xs text-muted-foreground">Standard</span>
                                             )}
                                         </div>

@@ -522,12 +522,14 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
 
 
 
-            {/* Subhead */}
+            {/* Subhead with methodology link */}
             <motion.p
               variants={itemVariants}
               className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
             >
-              {c.marketing.hero.subhead}
+              Navigate your complex portfolio—from 401(k)s to RSUs—with a professional Zakat calculator. Choose your preferred{' '}
+              <Link to="/methodology" className="text-primary hover:underline">scholarly methodology</Link>
+              {' '}and generate a detailed PDF or CSV report in minutes. Private, secure, and accurate.
             </motion.p>
 
             {/* Primary CTA */}
@@ -540,16 +542,6 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               >
                 {c.common.buttons.startCalculating}
                 <ArrowRight className="w-4 h-4" weight="bold" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => signInWithGoogle()}
-                className="gap-2 h-12 px-6 bg-background hover:bg-muted/50 transition-colors"
-              >
-                <SignIn className="w-5 h-5" />
-                Sign In
               </Button>
             </motion.div>
 

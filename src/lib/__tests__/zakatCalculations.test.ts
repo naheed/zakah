@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from 'vitest';
-import { calculateZakat, defaultFormData, calculateNisab, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '../zakatCalculations';
+import { calculateZakat, defaultFormData, calculateNisab, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, calculateTotalAssets, calculateEnhancedAssetBreakdown } from '../zakatCalculations';
 import { ZakatFormData } from '../zakatTypes';
 
 // =============================================================================
@@ -253,6 +253,111 @@ describe('Zakat Calculations - Single Source of Truth', () => {
 
         // Gold nisab should be significantly higher than silver
         expect(goldNisab).toBeGreaterThan(silverNisab * 5);
+    });
+
+});
+
+describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
+
+    // Base data with NO metals
+    const baseData: ZakatFormData = {
+        ...defaultFormData,
+        hasPreciousMetals: true,
+        cashOnHand: 100000 // High enough to be above Nisab
+    };
+
+    it('Investment Gold should ALWAYS be zakatable (all schools)', () => {
+        // Balanced (Bradford)
+        const dataBalanced: ZakatFormData = {
+            ...baseData,
+            madhab: 'balanced',
+            goldInvestmentValue: 10000,
+            goldJewelryValue: 5000
+        };
+        const resBalanced = calculateTotalAssets(dataBalanced);
+        // Cash (100k) + Inv Gold (10k). Jewelry (5k) is exempt in Balanced
+        expect(resBalanced).toBe(110000);
+
+        // Hanafi
+        const dataHanafi: ZakatFormData = {
+            ...baseData,
+            madhab: 'hanafi',
+            goldInvestmentValue: 10000,
+            goldJewelryValue: 5000
+        };
+        const resHanafi = calculateTotalAssets(dataHanafi);
+        // Cash (100k) + Inv Gold (10k) + Jewelry (5k) is Zakatable in Hanafi
+        expect(resHanafi).toBe(115000);
+
+        // Shafi'i
+        const dataShafii: ZakatFormData = {
+            ...baseData,
+            madhab: 'shafii',
+            goldInvestmentValue: 10000,
+            goldJewelryValue: 5000
+        };
+        const resShafii = calculateTotalAssets(dataShafii);
+        // Cash (100k) + Inv Gold (10k). Jewelry (5k) is exempt in Shafi'i
+        expect(resShafii).toBe(110000);
+    });
+
+    it('Legacy goldValue support', () => {
+        // If migration hasn't run, goldValue might still be populated.
+        // Logic: Treat as "Potential Jewelry" (Exempt if mode exempts jewelry, Include if mode includes)
+
+        // Hanafi (Includes Legacy)
+        const dataHanafi: ZakatFormData = {
+            ...baseData,
+            madhab: 'hanafi',
+            goldValue: 5000, // Legacy field
+            goldInvestmentValue: 0,
+            goldJewelryValue: 0
+        };
+        expect(calculateTotalAssets(dataHanafi)).toBe(105000); // 100k + 5k
+
+        // Shafi'i (Excludes Legacy - assumed properly as jewelry-like if not specified)
+        const dataShafii: ZakatFormData = {
+            ...baseData,
+            madhab: 'shafii',
+            goldValue: 5000,
+            goldInvestmentValue: 0,
+            goldJewelryValue: 0
+        };
+        expect(calculateTotalAssets(dataShafii)).toBe(100000); // 100k + 0
+    });
+
+    it('Enhanced Breakdown handles split correctly', () => {
+        const data: ZakatFormData = {
+            ...baseData,
+            madhab: 'shafii',
+            goldInvestmentValue: 10000, // Zakatable
+            goldJewelryValue: 5000,    // Exempt
+            silverInvestmentValue: 2000, // Zakatable
+            silverJewelryValue: 1000     // Exempt
+        };
+
+        const breakdown = calculateEnhancedAssetBreakdown(data, 100000);
+        const metals = breakdown.preciousMetals;
+
+        // Total should be sum of all (for Sankey visual)
+        expect(metals.total).toBe(18000); // 10+5+2+1
+
+        // Zakatable Amount should obey rules
+        expect(metals.zakatableAmount).toBe(12000); // 10 (Inv Gold) + 2 (Inv Silver)
+
+        // Ensure distinct items exist
+        const itemNames = metals.items.map(i => i.name);
+        expect(itemNames).toContain('Gold Investment');
+        expect(itemNames).toContain('Gold Jewelry');
+        expect(itemNames).toContain('Silver Investment');
+        expect(itemNames).toContain('Silver Jewelry');
+
+        // Check percentages
+        const goldJewelryItem = metals.items.find(i => i.name === 'Gold Jewelry');
+        expect(goldJewelryItem?.zakatablePercent).toBe(0);
+
+        const goldInvItem = metals.items.find(i => i.name === 'Gold Investment');
+        expect(goldInvItem?.zakatablePercent).toBe(1);
     });
 
 });

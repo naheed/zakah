@@ -15,9 +15,43 @@ export interface StepContent {
     title: string;
     content: string;
   };
+  /** Methodology-specific intro shown immediately below header */
+  introByMethodology?: {
+    balanced?: {
+      summary: string;
+      deepLink?: string;
+    };
+    hanafi?: {
+      summary: string;
+      deepLink?: string;
+    };
+    shafii?: {
+      summary: string;
+      deepLink?: string;
+    };
+    maliki?: {
+      summary: string;
+      deepLink?: string;
+    };
+    hanbali?: {
+      summary: string;
+      deepLink?: string;
+    };
+  };
+  /** Tips shown with the question. Use 'summary' for always-visible text, 'details' for expandable content */
   tips?: Array<{
+    /** Short text always visible (required) */
+    summary: string;
+    /** Detailed explanation shown when expanded (optional) */
+    details?: string;
+    /** Fiqh source citation (optional) */
+    source?: string;
+    /** Visual variant: 'tip' (amber), 'info' (blue), 'warning' (orange) */
+    variant?: 'tip' | 'info' | 'warning';
+    /** @deprecated Use summary instead */
     title?: string;
-    content: string;
+    /** @deprecated Use summary/details instead */
+    content?: string;
   }>;
   items?: Array<{
     id: string;
@@ -45,6 +79,20 @@ export const nisabContent: StepContent = {
   questionNumber: 1,
   title: "What is your Niṣāb standard?",
   subtitle: "This determines the minimum threshold for Zakat obligation.",
+  introByMethodology: {
+    balanced: {
+      summary: "We recommend silver standard (~$550 USD) to ensure no eligible Zakat is missed. This follows the precautionary principle (aḥwaṭ) used by most relief organizations.",
+      deepLink: "/methodology#nisab",
+    },
+    hanafi: {
+      summary: "The Hanafi school uses silver standard for cash/mixed assets and gold standard for gold holdings only. This ensures Zakat benefits more recipients.",
+      deepLink: "/methodology#nisab",
+    },
+    shafii: {
+      summary: "Shafi'i view uses silver standard (~$550 USD) for all assets, maximizing charity following the majority scholarly opinion.",
+      deepLink: "/methodology#nisab",
+    },
+  },
   learnMore: {
     title: "Understanding the Niṣāb Threshold",
     content: `The niṣāb acts as the "poverty line in reverse"—it is the threshold of sufficiency. Wealth below this limit is exempt, while wealth above it triggers the Zakat obligation.
@@ -63,12 +111,8 @@ The majority of scholars, relief organizations, and researchers advocate for the
 
 The gold standard remains valid for those holding wealth exclusively in gold bullion.`,
   },
-  tips: [
-    {
-      title: "Why Silver is Recommended",
-      content: "If one possesses wealth exceeding the silver niṣāb, they are undoubtedly wealthy enough to contribute. This ensures no eligible Zakat is missed.",
-    },
-  ],
+  // Tips removed: Redundant with Intro
+  tips: [],
 };
 
 // [REPLACEMENT_2]
@@ -98,8 +142,8 @@ This ensures your charity is precise regardless of which calendar you use.`,
   },
   tips: [
     {
-      title: "Choosing Your Zakat Date",
-      content: "Pick a date that's easy to remember—Ramadan, January 1st, or the anniversary of when you first exceeded the niṣāb. Consistency matters more than the specific date.",
+      summary: "Pick a date that's easy to remember—Ramadan, January 1st, or when you first exceeded niṣāb.",
+      details: "Consistency matters more than the specific date. Many Muslims align Zakat with Ramadan for extra blessings.",
     },
   ],
 };
@@ -144,43 +188,43 @@ The checkboxes below help us skip questions that don't apply to you. If you're u
   items: [
     {
       id: 'hasPreciousMetals',
-      label: 'Precious Metals',
-      description: 'Gold, silver, or jewelry',
+      label: 'Gold & Silver',
+      description: 'e.g., jewelry, coins, bullion, bars',
     },
     {
       id: 'hasCrypto',
       label: 'Cryptocurrency',
-      description: 'Bitcoin, Ethereum, staking, DeFi',
+      description: 'e.g., Bitcoin, Ethereum, staking rewards',
     },
     {
       id: 'hasTrusts',
       label: 'Trusts & Estates',
-      description: 'Revocable or irrevocable trusts',
+      description: 'e.g., revocable trust, family trust',
     },
     {
       id: 'hasRealEstate',
-      label: 'Investment Property',
-      description: 'Real estate for sale or rental income',
+      label: 'Rental or Flip Property',
+      description: 'e.g., rental income, property for sale',
     },
     {
       id: 'hasBusiness',
       label: 'Business Assets',
-      description: 'Inventory, receivables, business cash',
+      description: 'e.g., inventory, receivables, business cash',
     },
     {
       id: 'hasIlliquidAssets',
-      label: 'Collectibles',
-      description: 'Art, antiques, or livestock for sale',
+      label: 'Collectibles for Sale',
+      description: 'e.g., art, antiques, livestock to sell',
     },
     {
       id: 'hasDebtOwedToYou',
-      label: 'Loans Given',
-      description: 'Personal loans you expect to collect',
+      label: 'Money Owed to You',
+      description: 'e.g., personal loans you expect to collect',
     },
     {
       id: 'hasTaxPayments',
       label: 'Outstanding Taxes',
-      description: 'Property tax or late payments due',
+      description: 'e.g., property tax, late payments due',
     },
   ]
 };
@@ -204,6 +248,20 @@ export const liquidAssetsContent: StepContent = {
   questionNumber: 2,
   title: "What are your liquid assets?",
   subtitle: "Cash and money you can access immediately.",
+  introByMethodology: {
+    balanced: {
+      summary: "All cash and bank balances are fully Zakatable. Interest earned is 'impure' money—donate it separately without counting as Zakat.",
+      deepLink: "/methodology#liquid",
+    },
+    hanafi: {
+      summary: "Fiat currency takes the ruling of gold/silver. Your entire closing balance is Zakatable. Interest must be purified and donated separately.",
+      deepLink: "/methodology#liquid",
+    },
+    shafii: {
+      summary: "Shafi'i view: All liquid assets are fully Zakatable. Interest is impure and must be donated separately to charity.",
+      deepLink: "/methodology#liquid",
+    },
+  },
   learnMore: {
     title: "Liquid Assets & The Fiat Economy",
     content: `The consensus among contemporary scholars is that **fiat currency (USD) takes the ruling of gold and silver** as a store of value. Therefore, the entire closing balance of all liquid accounts on your Zakat date is liable.
@@ -217,12 +275,8 @@ export const liquidAssetsContent: StepContent = {
 **Interest (Riba) Separation:**
 According to Islamic law, interest is not considered owned wealth—it is "impure" money that does not belong to you. You **cannot pay Zakat on interest, nor with interest**. This amount must be purified (donated to charity without reward expectation) and is tracked separately.`,
   },
-  tips: [
-    {
-      title: "Interest Purification",
-      content: "Year-to-date interest must be donated to general charity. It is not Zakat and carries no spiritual reward—it is simply returning impure money.",
-    },
-  ],
+  // Tips removed: Redundant with Intro
+  tips: [],
 };
 
 export const liquidAssetsFields: Record<string, FieldContent> = {
@@ -257,6 +311,20 @@ export const investmentsContent: StepContent = {
   questionNumber: 7,
   title: "What investments do you have?",
   subtitle: "Stocks, funds, and brokerage accounts.",
+  introByMethodology: {
+    balanced: {
+      summary: "Long-term investments use the 30% rule (effective 0.75% rate). Only company's liquid assets are Zakatable, not full market cap. Active traders pay on full value.",
+      deepLink: "/methodology#investments",
+    },
+    hanafi: {
+      summary: "All investments are valued at 100% market value. Unvested RSUs and stock options are exempt until they vest (you don't own them yet).",
+      deepLink: "/methodology#investments",
+    },
+    shafii: {
+      summary: "Shafi'i/Maliki view: Pay Zakat on 100% of market value for all investments, not the 30% proxy.",
+      deepLink: "/methodology#investments",
+    },
+  },
   learnMore: {
     title: "Stocks & The Mudir/Muḥtakir Distinction",
     content: `The treatment of stocks depends on your **intent and trading behavior**. Classical scholars distinguished between two types of investors:
@@ -277,16 +345,8 @@ This proxy gives an effective rate of **0.75% of market value** (30% × 2.5%).
 **Dividend Purification:**
 If a company derives <5% revenue from impermissible sources (interest, alcohol, gambling), that portion of dividends must be donated to charity—separate from Zakat.`,
   },
-  tips: [
-    {
-      title: "Which Category Are You?",
-      content: "Mudir: trades frequently, holds < 1 year, intent is capital gain. Muḥtakir: buy-and-hold, holds > 1 year, intent is dividends/long-term growth.",
-    },
-    {
-      title: "The 30% Rule",
-      content: "For long-term investments (Muḥtakir), we apply the AAOIFI 30% proxy—only the company's liquid assets are Zakatable, not the full market cap.",
-    },
-  ],
+  // Tips removed: Redundant with Intro
+  tips: [],
 };
 
 // [RESTORED_MIDDLE_ASSETS]
@@ -294,6 +354,20 @@ export const retirementContent: StepContent = {
   questionNumber: 8,
   title: "What retirement accounts do you have?",
   subtitle: "401(k), IRA, Roth, HSA, and other tax-advantaged accounts.",
+  introByMethodology: {
+    balanced: {
+      summary: "Traditional 401(k)/IRA under 59½ are exempt—early withdrawal penalties make them inaccessible wealth (māl ḍimār). Roth contributions are Zakatable since they're accessible.",
+      deepLink: "/methodology#retirement",
+    },
+    hanafi: {
+      summary: "The Hanafi school views retirement accounts as Zakatable on the net accessible amount. Zakat is due on what you could withdraw today (balance minus taxes and penalties).",
+      deepLink: "/methodology#retirement",
+    },
+    shafii: {
+      summary: "Shafi'i/Maliki/Hanbali view: Zakat is due on the net accessible amount (balance minus taxes/penalties). This differs from the Bradford exemption.",
+      deepLink: "/methodology#retirement",
+    },
+  },
   learnMore: {
     title: "Retirement Accounts & Complete Ownership",
     content: `Retirement accounts present a unique Zakat challenge due to access restrictions and deferred taxes. The key principle is **Milk Tām** (complete ownership).
@@ -314,12 +388,8 @@ Sheikh Joe Bradford argues that Traditional 401(k)/IRA accounts under age 59½ *
   },
   tips: [
     {
-      title: "Why This Approach?",
-      content: "We follow the principle that you should not pay Zakat on wealth you cannot truly access. This is the ruling of Sheikh Joe Bradford based on classical fiqh principles.",
-    },
-    {
-      title: "401(k) Loans",
-      content: "If you have taken a 401(k) loan, that money is now cash in hand (Zakatable). The loan is NOT a deductible liability—you owe it to yourself.",
+      summary: "401(k) loan? That money is now cash in hand and Zakatable. The loan is NOT deductible—you owe it to yourself.",
+      variant: "warning",
     },
   ],
 };
@@ -333,26 +403,55 @@ export const preciousMetalsContent: StepContent = {
     content: `Gold and silver have special significance—they were the original basis for the niṣāb measurement.
 
 **What to Include:**
-• Gold and silver bullion and coins
+• Gold and silver bullion and coins (Always Zakatable)
 • Gold/silver in investment accounts
-• Jewelry (see debate below)
+• Excessive or Hoarded Jewelry (see below)
 
 **The Jewelry Controversy:**
-• **Majority View (Shafi'i, Maliki, Hanbali):** Permissible jewelry worn regularly is exempt—treated like clothing
-• **Hanafi View:** Gold and silver are inherently "growing wealth" (Nami). Zakat is due on the melt value.
+• **Majority View (Shafi'i, Maliki, Hanbali):** Jewelry is **exempt** if it is for:
+  1. Personal adornment (permissible usage)
+  2. Not excessive in amount (defined by custom/'urf')
+  3. Not held for investment/hoarding
+• **Hanafi View:** Gold and silver are inherently "growing wealth" (Nami). Zakat is due on the melt value regardless of usage.
 
 **US Contextual Ruling (Bradford):**
-Daily-wear jewelry may be exempt under the majority view. However, "excessive" amounts (heavy gold sets kept in safety deposit boxes, never worn) should follow the Hanafi view to avoid hoarding (Kanz).
+Standard, daily-wear jewelry is exempt (Majority view). However, **excessive amounts** (e.g., heavy gold sets kept in safes, never worn) or jewelry held as a store of value should follow the Hanafi view to avoid hoarding (Kanz).
+
+**How to Enter:**
+• **Investment Gold:** Enter coins, bars, and **excessive/investment jewelry** here to ensure Zakat is calculated.
+• **Jewelry Gold:** Enter strictly personal, wearable jewelry here. The calculator will exempt this for Balanced/Shafi'i modes.
 
 **Valuation:**
-If paying Zakat, value only the **melt value** (scrap value) of the metal content. Gemstones and craftsmanship are not Zakatable unless the jewelry is trade inventory.`,
+Value only the **melt value** (scrap value) of the metal content. Gemstones and craftsmanship are not Zakatable.`,
   },
+  tips: [
+    {
+      summary: "If your jewelry is 'excessive' (beyond custom) or held for investment, enter it as Investment Gold.",
+      details: "The exemption only applies to customary personal adornment. Hoarded wealth disguised as jewelry is Zakatable (Shafi'i/Maliki/Hanbali).",
+      source: "Reliance of the Traveller f1.3 / Mukhtasar Khalil",
+      variant: "warning",
+    },
+  ],
 };
 
 export const cryptoContent: StepContent = {
   questionNumber: 10,
   title: "What cryptocurrency do you own?",
   subtitle: "Bitcoin, Ethereum, staking, DeFi, and digital assets.",
+  introByMethodology: {
+    balanced: {
+      summary: "We distinguish between 'Currency' coins (BTC/ETH) and 'Utility' tokens. Zakat is due on the market value of currency-like assets and trade positions.",
+      deepLink: "/methodology#crypto",
+    },
+    hanafi: {
+      summary: "Any crypto asset with market value that can be exchanged is generally considered 'Māl' (wealth) and is Zakatable at market value.",
+      deepLink: "/methodology#crypto",
+    },
+    shafii: {
+      summary: "Crypto usually judged as 'Thaman' (Currency) or Trade Goods. If held for appreciation/trade, Zakat is due on market value.",
+      deepLink: "/methodology#crypto",
+    },
+  },
   learnMore: {
     title: "Cryptocurrency & Digital Assets",
     content: `Cryptocurrency spans the line between **currency (thaman)** and **speculative trade goods (urud al-tijarah)**. The distinction is driven by usage and intent.
@@ -377,6 +476,20 @@ export const trustsContent: StepContent = {
   questionNumber: 11,
   title: "Do you have any trusts?",
   subtitle: "Revocable trusts, irrevocable trusts, and CLATs.",
+  introByMethodology: {
+    balanced: {
+      summary: "Revocable trusts are fully Zakatable (you own the assets). Irrevocable trusts are only Zakatable if you have access to the principal.",
+      deepLink: "/methodology#trusts",
+    },
+    hanafi: {
+      summary: "Ownership (Milk) is the key. If you control the trust assets, Zakat is due. If ownership is transferred completely to beneficiaries, they pay Zakat.",
+      deepLink: "/methodology#trusts",
+    },
+    shafii: {
+      summary: "Zakat follows ownership. If the trust assets are technically yours to access/revoke, Zakat is mandatory on them.",
+      deepLink: "/methodology#trusts",
+    },
+  },
   learnMore: {
     title: "Trusts & The Question of Ownership",
     content: `Trusts require analyzing who holds **Milk** (ownership)—specifically **Raqabah** (legal title) and **Yad** (ability to access).
@@ -403,6 +516,20 @@ export const realEstateContent: StepContent = {
   questionNumber: 12,
   title: "Do you have investment real estate?",
   subtitle: "Property for sale or generating rental income.",
+  introByMethodology: {
+    balanced: {
+      summary: "Rental properties: Pay Zakat on net rental income, not property value. Flipping properties: Pay Zakat on full market value (trade goods).",
+      deepLink: "/methodology#realestate",
+    },
+    hanafi: {
+      summary: "Hanafi view: Rental property itself is exempt (productive asset). Only the accumulated rental income is Zakatable.",
+      deepLink: "/methodology#realestate",
+    },
+    shafii: {
+      summary: "Shafi'i/Majority view: No Zakat on the value of rental property. Zakat is only due on the rental income designated for savings.",
+      deepLink: "/methodology#realestate",
+    },
+  },
   learnMore: {
     title: "Real Estate Zakat Rules",
     content: `Real estate treatment depends entirely on **intent**.
@@ -428,6 +555,20 @@ export const businessContent: StepContent = {
   questionNumber: 13,
   title: "Do you own a business?",
   subtitle: "Business cash, inventory, and receivables.",
+  introByMethodology: {
+    balanced: {
+      summary: "Zakat is due on current assets (Cash + Inventory + Receivables) minus short-term liabilities. Fixed assets (machines, furniture) are exempt.",
+      deepLink: "/methodology#business",
+    },
+    hanafi: {
+      summary: "Trade goods (Urud al-Tijarah) are Zakatable at current market value. Raw materials and finished goods are included; equipment is exempt.",
+      deepLink: "/methodology#business",
+    },
+    shafii: {
+      summary: "Business assets held for trade are Zakatable. Calculate: (Liquid Assets + Inventory) - Immediate Debts.",
+      deepLink: "/methodology#business",
+    },
+  },
   learnMore: {
     title: "Business Zakat",
     content: `**What's Zakatable:**
@@ -494,6 +635,20 @@ export const liabilitiesContent: StepContent = {
   questionNumber: 16,
   title: "What are your immediate expenses?",
   subtitle: "Debts and expenses that reduce your Zakatable amount.",
+  introByMethodology: {
+    balanced: {
+      summary: "Only immediate debts due within 12 months are deductible. Long-term mortgage principal and deferred loans don't reduce your Zakatable wealth.",
+      deepLink: "/methodology#debts",
+    },
+    hanafi: {
+      summary: "Hanafi view: All debts are fully deductible from Zakatable wealth. Include mortgage principal, student loans, and all outstanding obligations.",
+      deepLink: "/methodology#debts",
+    },
+    shafii: {
+      summary: "Shafi'i view: Debts do not reduce Zakatable wealth. Pay Zakat on what you possess, regardless of outstanding obligations.",
+      deepLink: "/methodology#debts",
+    },
+  },
   learnMore: {
     title: "The Maliki Middle Path on Debt Deduction",
     content: `Debt deductibility is one of the most contentious issues in modern Zakat jurisprudence. The classical schools held opposing views:
@@ -520,12 +675,8 @@ This prevents *dayn al-mustaghriq* (overwhelming debt) from eliminating Zakat ob
 
 This ensures the wealthy homeowner cannot escape Zakat through long-term leverage, while renters with modest savings are not unfairly burdened.`,
   },
-  tips: [
-    {
-      title: "Why 12 Months?",
-      content: "The 12-month rule for mortgages comes from AMJA guidance—it represents the immediate portion of a long-term obligation that affects your current liquidity.",
-    },
-  ],
+  // Tips removed: Redundant with Intro
+  tips: [],
 };
 
 // [REPLACEMENT_7] - Tax Content

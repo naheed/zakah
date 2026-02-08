@@ -1,4 +1,6 @@
-
+import { useEffect } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
+import { Madhab } from "@/lib/zakatCalculations";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { content } from "@/content";
 const { methodology: methodologyContent } = content;
@@ -15,16 +17,39 @@ const tocItems = [
   { id: "nisab", number: 3, label: "The Niṣāb Threshold" },
   { id: "hawl", number: 4, label: "The Ḥawl (Zakat Year)" },
   { id: "liquid", number: 5, label: "Liquid Assets & Cash" },
-  { id: "crypto", number: 6, label: "Cryptocurrency" },
-  { id: "realestate", number: 7, label: "Real Estate" },
-  { id: "business", number: 8, label: "Business Assets" },
-  { id: "debts", number: 9, label: "Debts & Liabilities" },
-  { id: "trusts", number: 10, label: "Trusts" },
-  { id: "references", number: 11, label: "References" },
+  { id: "retirement", number: 6, label: "Retirement Accounts" },
+  { id: "investments", number: 7, label: "Stocks & Investments" },
+  { id: "crypto", number: 8, label: "Cryptocurrency" },
+  { id: "realestate", number: 9, label: "Real Estate" },
+  { id: "business", number: 10, label: "Business Assets" },
+  { id: "debts", number: 11, label: "Debts & Liabilities" },
+  { id: "trusts", number: 12, label: "Trusts" },
+  { id: "references", number: 13, label: "References" },
 ];
 
 const Methodology = () => {
+  const [searchParams] = useSearchParams();
+  const { hash } = useLocation();
   const content = methodologyContent;
+
+  const methodologyParam = searchParams.get('methodology');
+  const validMadhabs = ['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+  const initialMode = (methodologyParam && validMadhabs.includes(methodologyParam))
+    ? (methodologyParam as Madhab)
+    : 'balanced';
+
+  // Handle scroll to hash with a small delay to allow for rendering
+  useEffect(() => {
+    if (hash) {
+      setTimeout(() => {
+        const id = hash.replace('#', '');
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+    }
+  }, [hash]);
 
   const headerContent = (
     <div>
@@ -56,7 +81,7 @@ const Methodology = () => {
             Watch the "Ahmed Family" demo on the right to see the financial impact.
           </Text>
         </div>
-        <MethodologyExplorer />
+        <MethodologyExplorer initialMode={initialMode} key={initialMode} />
       </section>
 
       {/* Principles */}
@@ -230,6 +255,115 @@ const Methodology = () => {
                   <Heading level={4} className="mt-0 text-destructive mb-3">{content.liquid.interest.title}</Heading>
                   <p className="text-sm text-muted-foreground mb-3">{content.liquid.interest.text1}</p>
                   <p className="text-xs font-semibold text-destructive">{content.liquid.interest.text2}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
+      </section>
+
+      {/* Retirement */}
+      <section id="retirement" className="scroll-mt-24">
+        <ScrollReveal>
+          <Card>
+            <CardHeader>
+              <CardTitle>{content.retirement.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Text>{content.retirement.intro}</Text>
+              <Text className="text-sm text-muted-foreground">{content.retirement.approachesIntro}</Text>
+
+              <div className="space-y-6">
+                {content.retirement.approaches.map((approach, i) => (
+                  <div key={i} className="p-5 rounded-xl bg-muted/30 border border-border">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Heading level={4} className="mt-0">{approach.title}</Heading>
+                      {approach.tag && <Badge variant="secondary" className="text-xs">{approach.tag}</Badge>}
+                    </div>
+                    <Text className="text-sm mb-3">{approach.description}</Text>
+                    <p className="text-xs text-muted-foreground mb-3 italic">{approach.basis}</p>
+                    <div className="grid md:grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <p className="text-xs font-semibold mb-2">Calculation Steps:</p>
+                        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                          {approach.steps.map((step, j) => <li key={j}>{step}</li>)}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold mb-2">Principles Applied:</p>
+                        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                          {approach.principles.map((p, j) => <li key={j}>{p}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 pt-4 border-t border-border/50">
+                <div className="p-4 bg-muted/20 rounded border border-border/50">
+                  <p className="font-semibold text-sm mb-1">{content.retirement.roth.title}</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    {content.retirement.roth.points.map((p, i) => (
+                      <li key={i}><strong className="text-foreground">{p.label}:</strong> {p.text}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="p-4 bg-muted/20 rounded border border-border/50">
+                  <p className="font-semibold text-sm mb-1">{content.retirement.hsa.title}</p>
+                  <p className="text-xs text-muted-foreground">{content.retirement.hsa.text}</p>
+                </div>
+                <div className="p-4 bg-destructive/5 rounded border border-destructive/20">
+                  <p className="font-semibold text-sm mb-1 text-destructive">{content.retirement.loans.title}</p>
+                  <p className="text-xs text-muted-foreground">{content.retirement.loans.text}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
+      </section>
+
+      {/* Investments */}
+      <section id="investments" className="scroll-mt-24">
+        <ScrollReveal>
+          <Card>
+            <CardHeader>
+              <CardTitle>{content.stocks.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Text>{content.stocks.intro}</Text>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="p-5 rounded-xl bg-muted/30 border border-border">
+                  <Heading level={4} className="mt-0">{content.stocks.mudir.title}</Heading>
+                  <Text className="text-sm">{content.stocks.mudir.text}</Text>
+                  <p className="text-xs font-medium text-primary mt-2">{content.stocks.mudir.calculation}</p>
+                </div>
+                <div className="p-5 rounded-xl bg-muted/30 border border-border">
+                  <Heading level={4} className="mt-0">{content.stocks.muhtakir.title}</Heading>
+                  <Text className="text-sm">{content.stocks.muhtakir.text}</Text>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
+                <Heading level={4} className="mt-0 text-primary">{content.stocks.rule30.title}</Heading>
+                <p className="text-sm text-muted-foreground mb-2">{content.stocks.rule30.description}</p>
+                <code className="px-2 py-1 rounded bg-background border border-primary/20 text-foreground text-sm font-mono block w-fit mb-2">{content.stocks.rule30.formula}</code>
+                <p className="text-xs font-semibold text-primary">{content.stocks.rule30.effectiveRate}</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-border/50">
+                <div className="p-4 bg-muted/20 rounded border border-border/50">
+                  <p className="font-semibold text-sm mb-2">{content.stocks.exclusions.title}</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    {content.stocks.exclusions.list.map((item, i) => (
+                      <li key={i}><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="p-4 bg-muted/20 rounded border border-border/50">
+                  <p className="font-semibold text-sm mb-1">{content.stocks.purification.title}</p>
+                  <p className="text-xs text-muted-foreground">{content.stocks.purification.text}</p>
                 </div>
               </div>
             </CardContent>

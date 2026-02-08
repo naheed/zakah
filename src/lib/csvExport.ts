@@ -3,7 +3,17 @@ import { format } from "date-fns";
 import { saveAs } from "file-saver";
 import { MADHAB_RULES } from "./madhahRules";
 
-export function generateCSV(report: ZakatReport, fileName: string = "zakat-report.csv") {
+export interface MetalPricesForExport {
+    goldPrice: number;
+    silverPrice: number;
+    lastUpdated?: Date | null;
+}
+
+export function generateCSV(
+    report: ZakatReport,
+    fileName: string = "zakat-report.csv",
+    metalPrices?: MetalPricesForExport
+) {
     const { input: formData, output: calculations } = report;
     const { currency, madhab } = formData;
     const {
@@ -39,6 +49,15 @@ export function generateCSV(report: ZakatReport, fileName: string = "zakat-repor
     rows.push(["Net Zakatable Wealth", money(netZakatableWealth), "Wealth subject to Zakat"]);
     rows.push(["Zakat Due", money(zakatDue), "2.5% of Net Zakatable Wealth"]);
     rows.push([]);
+
+    // 2.5. Market Prices (if available)
+    if (metalPrices) {
+        rows.push(["MARKET PRICES USED"]);
+        rows.push(["Metal", "Price per Troy Ounce (USD)", "Last Updated"]);
+        rows.push(["Gold", money(metalPrices.goldPrice), safe(metalPrices.lastUpdated ? format(metalPrices.lastUpdated, "PPpp") : "Default")]);
+        rows.push(["Silver", money(metalPrices.silverPrice), safe(metalPrices.lastUpdated ? format(metalPrices.lastUpdated, "PPpp") : "Default")]);
+        rows.push([]);
+    }
 
     // 3. Asset Breakdown Table
     rows.push(["ASSET BREAKDOWN"]);
