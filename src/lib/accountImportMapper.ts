@@ -65,11 +65,11 @@ const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData> = {
     'NFT': 'cryptoTrading',
 
     // Precious metals
-    'GOLD': 'goldValue',
-    'SILVER': 'silverValue',
-    'METALS': 'goldValue',
-    'GOLD_FULL': 'goldValue',
-    'SILVER_FULL': 'silverValue',
+    'GOLD': 'goldInvestmentValue',
+    'SILVER': 'silverInvestmentValue',
+    'METALS': 'goldInvestmentValue',
+    'GOLD_FULL': 'goldInvestmentValue',
+    'SILVER_FULL': 'silverInvestmentValue',
 
     // Real estate - map to rental income (net cash received)
     'REAL_ESTATE': 'rentalPropertyIncome',

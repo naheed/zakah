@@ -19,7 +19,7 @@ import type { Madhab } from '../zakatTypes';
 const ahmedBase: Partial<ZakatFormData> = {
     age: 40,
     cashOnHand: 10000,
-    goldValue: 5000,
+    goldJewelryValue: 5000,
     hasPreciousMetals: true,
     fourOhOneKVestedBalance: 100000,
     passiveInvestmentsValue: 50000,

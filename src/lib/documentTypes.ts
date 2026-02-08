@@ -54,8 +54,10 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   isOver59Half: "retirement",
 
   // Precious Metals
-  goldValue: "precious-metals",
-  silverValue: "precious-metals",
+  goldInvestmentValue: "precious-metals",
+  goldJewelryValue: "precious-metals",
+  silverInvestmentValue: "precious-metals",
+  silverJewelryValue: "precious-metals",
 
   // Crypto
   cryptoCurrency: "crypto",
@@ -115,6 +117,7 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   hasCrypto: "category-selection",
   hasTrusts: "category-selection",
   isSimpleMode: "category-selection",
+  entryMethod: "setup",
 };
 
 // Get documents that have data relevant to a specific step

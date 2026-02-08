@@ -71,7 +71,7 @@ export function ZakatSankeyChart({
 
     // If no data, return empty
     if (totalAssetsVal === 0) return {
-      formattedData: { nodes: [], links: [] },
+      formattedData: { nodes: [] as any[], links: [] as any[] },
       totalLiabilities: 0,
       netZakatableWealth: 0,
       hasExemptions: false,
@@ -375,6 +375,6 @@ export function ZakatSankeyChart({
   );
 }
 
-export function ZakatSankeyMock() {
+export function ZakatSankeyMock(): React.ReactElement | null {
   return null;
 }
