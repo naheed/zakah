@@ -40,7 +40,7 @@ describe('Document Parser Logic', () => {
         });
 
         it('should filter out null/undefined/0 values', () => {
-            const legacy = {
+            const legacy: Record<string, number | null | undefined> = {
                 cashOnHand: 100,
                 cryptoCurrency: 0,
                 activeInvestments: null,

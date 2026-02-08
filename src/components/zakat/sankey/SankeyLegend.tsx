@@ -51,7 +51,7 @@ export const SankeyLegend: React.FC<SankeyLegendProps> = ({ data, enhancedData, 
                 Object.keys(ASSET_COLORS).filter(k =>
                     !["Gross Zakatable Wealth", "Liabilities", "Net Zakatable Wealth", "Zakat Due", "Investment Portfolio", "Retirement Accounts", "Business Assets", "Other Assets"]
                         .includes(k) && ASSET_COLORS[k] !== undefined
-                ).map(k => (null)) // Logic was messy in original, simplified here or rebuilt if needed
+                ).map((k): null => (null)) // Logic was messy in original, simplified here or rebuilt if needed
             )}
             {/* Fallback for simple data if enhanced missing */}
             {!enhancedData && data.liquidAssets > 0 && <LegendCard name="Cash & Savings" value={data.liquidAssets} currency={currency} description="" color={ASSET_COLORS["Cash & Savings"]} />}

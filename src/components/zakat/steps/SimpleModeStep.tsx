@@ -30,7 +30,7 @@ const simpleSections = [
     icon: Diamond,
     title: 'Gold & Silver',
     description: 'Jewelry, bullion, coins (melt value)',
-    fields: ['goldValue', 'silverValue'] as const,
+    fields: ['goldInvestmentValue', 'goldJewelryValue', 'silverInvestmentValue', 'silverJewelryValue'] as const,
   },
   {
     id: 'debts',

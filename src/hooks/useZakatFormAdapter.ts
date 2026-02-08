@@ -44,7 +44,7 @@ export function useZakatFormAdapter() {
             // 3. Fetch Latest Confirmed Snapshot for each account
             // Note: In a real app we might want to let user select date. For now, get latest confirmed.
             // We do this by fetching all snapshots and filtering in JS for simplicity in this V1 adapter
-            const accountIds = accounts.map((a: any) => a.id);
+            const accountIds = (accounts as AssetAccount[]).map((a: AssetAccount) => a.id);
             const { data: snapshots, error: snapError } = await supabase
                 .from('asset_snapshots' as any)
                 .select('*')
@@ -56,8 +56,8 @@ export function useZakatFormAdapter() {
 
             // Map accountId -> latest snapshot
             const latestSnapshots = new Map<string, AssetSnapshot>();
-            accounts.forEach(acc => {
-                const snap = snapshots?.find(s => s.account_id === acc.id);
+            (accounts as AssetAccount[]).forEach((acc: AssetAccount) => {
+                const snap = (snapshots as AssetSnapshot[])?.find((s: AssetSnapshot) => s.account_id === acc.id);
                 if (snap) latestSnapshots.set(acc.id, snap);
             });
 
@@ -79,18 +79,18 @@ export function useZakatFormAdapter() {
             const formData: ZakatFormData = { ...defaultFormData };
 
             // Helper to find items for a specific account type
-            const getItemsForAccountType = (type: string) => {
-                const targetAccountIds = accounts.filter(a => a.type === type).map(a => a.id);
-                const targetSnapshotIds = targetAccountIds.map(id => latestSnapshots.get(id)?.id).filter(Boolean) as string[];
-                return lineItems?.filter(item => targetSnapshotIds.includes(item.snapshot_id)) || [];
+            const getItemsForAccountType = (type: string): AssetLineItem[] => {
+                const targetAccountIds = (accounts as AssetAccount[]).filter((a: AssetAccount) => a.type === type).map((a: AssetAccount) => a.id);
+                const targetSnapshotIds = targetAccountIds.map((id: string) => latestSnapshots.get(id)?.id).filter(Boolean) as string[];
+                return (lineItems as AssetLineItem[])?.filter((item: AssetLineItem) => targetSnapshotIds.includes(item.snapshot_id)) || [];
             };
 
             // --- Liquid Assets ---
             const checkingItems = getItemsForAccountType('CHECKING');
-            formData.checkingAccounts = checkingItems.reduce((sum, i) => sum + Number(i.amount), 0);
+            formData.checkingAccounts = checkingItems.reduce((sum: number, i: AssetLineItem) => sum + Number(i.amount), 0);
 
             const savingsItems = getItemsForAccountType('SAVINGS');
-            formData.savingsAccounts = savingsItems.reduce((sum, i) => sum + Number(i.amount), 0);
+            formData.savingsAccounts = savingsItems.reduce((sum: number, i: AssetLineItem) => sum + Number(i.amount), 0);
 
             // --- Brokerage (Split by Zakat Category) ---
             const brokerageItems = getItemsForAccountType('BROKERAGE');
@@ -126,15 +126,15 @@ export function useZakatFormAdapter() {
             // For V1 adapter, map to earnings (conservative) or split 50/50?
             // Ideally LineItem 'raw_category' would be 'CONTRIBUTION' vs 'EARNINGS'.
             // For now, map all to Earnings to be safe (calculated logic allows deductions).
-            formData.rothIRAEarnings += rothItems.reduce((sum, i) => sum + Number(i.amount), 0);
+            formData.rothIRAEarnings += rothItems.reduce((sum: number, i: AssetLineItem) => sum + Number(i.amount), 0);
 
             // --- Crypto ---
             const cryptoItems = getItemsForAccountType('CRYPTO_WALLET');
-            formData.cryptoCurrency += cryptoItems.reduce((sum, i) => sum + Number(i.amount), 0);
+            formData.cryptoCurrency += cryptoItems.reduce((sum: number, i: AssetLineItem) => sum + Number(i.amount), 0);
 
             // --- Metals ---
             const metalItems = getItemsForAccountType('METALS');
-            formData.goldValue += metalItems.reduce((sum, i) => sum + Number(i.amount), 0);
+            formData.goldInvestmentValue += metalItems.reduce((sum: number, i: AssetLineItem) => sum + Number(i.amount), 0);
 
             setLoading(false);
             return formData;

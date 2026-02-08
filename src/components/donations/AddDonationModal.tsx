@@ -93,7 +93,7 @@ export function AddDonationModal({ open, onClose, onSave, zakatYearId }: AddDona
                 setCategory(inferredCat);
 
                 // Add note with extra details
-                const extraDetails = [];
+                const extraDetails: string[] = [];
                 if (extracted.taxId) extraDetails.push(`Tax ID: ${extracted.taxId}`);
                 if (extracted.address) extraDetails.push(`Address: ${extracted.address}`);
                 if (extracted.campaign) extraDetails.push(`Campaign: ${extracted.campaign}`);
