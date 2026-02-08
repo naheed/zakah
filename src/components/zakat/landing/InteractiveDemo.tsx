@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { FileText, Check, Spinner, Play, ArrowCounterClockwise, Bank, Wallet } from "@phosphor-icons/react";
 import { formatCurrency } from "@/lib/zakatCalculations";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { motion, AnimatePresence } from "framer-motion";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { ASSET_COLORS } from "@/components/zakat/sankey/constants";
+import { buildDemoSankeyData, generateSankeyPath, type DemoAsset } from "@/components/zakat/sankey/buildDemoSankeyData";
 
 // Animation phases - including retirement/401(k) upload step
 type AnimationPhase =
@@ -37,6 +39,7 @@ const DEMO_DATA = {
   retirement401kPenalty: 0.10,
   retirement401kZakatable: 316875, // $487,500 * (1 - 0.25 - 0.10) = $316,875
   retirement401kZakatablePercent: 65,
+  retirement401kExempt: 170625, // $487,500 - $316,875 (tax + penalty portion)
   otherAssets: 11850,
   liabilities: 8500,
   // Recalculated totals with 401(k)
@@ -46,16 +49,7 @@ const DEMO_DATA = {
   optimizedZakat: 10313, // 2.5% on optimized 401k ($412,525)
 };
 
-// Asset colors matching the Sankey chart
-const ASSET_COLORS = {
-  cash: "#22c55e",
-  investments: "#3b82f6",
-  retirement: "#8b5cf6",
-  other: "#06b6d4",
-  liabilities: "#ef4444",
-  net: "#64748b",
-  zakat: "#22c55e",
-};
+
 
 // Material 3 Expressive easing curves - using cubicBezier format for framer-motion
 const M3_EASING = {
@@ -663,7 +657,8 @@ export function InteractiveDemo() {
   );
 }
 
-// Proper Sankey chart with top-edge alignment and multi-colored Zakat flows
+// Proper Sankey chart with unified 3-destination flow model
+// Uses shared buildDemoSankeyData for consistency with Report Sankey
 function AnimatedSankeyChart({
   showZakatValue,
   isAnimating,
@@ -675,143 +670,73 @@ function AnimatedSankeyChart({
   isCelebrating: boolean;
   isMobile?: boolean;
 }) {
-  // Enlarged responsive dimensions
+  // Responsive dimensions
   const width = isMobile ? 280 : 340;
-  const height = isMobile ? 140 : 165;
+  const height = isMobile ? 160 : 180;
   const nodeWidth = isMobile ? 6 : 8;
   const leftPadding = isMobile ? 4 : 6;
   const rightPadding = isMobile ? 4 : 6;
 
-  // Assets with both raw value (for bar height) and zakatable value (for flow thickness)
-  // In optimized mode, 401(k) zakatable = 65% of vested value
-  const assets = [
+  // Build demo assets (4 simplified categories)
+  const demoAssets: DemoAsset[] = useMemo(() => [
     {
-      name: "Cash",
-      rawValue: DEMO_DATA.cashValue,
+      name: "cash",
+      displayName: "Cash",
+      grossValue: DEMO_DATA.cashValue,
       zakatableValue: DEMO_DATA.cashValue, // 100% zakatable
-      color: ASSET_COLORS.cash
+      color: ASSET_COLORS.cash,
     },
     {
-      name: "Investments",
-      rawValue: DEMO_DATA.investmentsExtracted,
+      name: "investments",
+      displayName: "Investments",
+      grossValue: DEMO_DATA.investmentsExtracted,
       zakatableValue: DEMO_DATA.investmentsExtracted, // 100% zakatable
-      color: ASSET_COLORS.investments
+      color: ASSET_COLORS.investments,
     },
     {
-      name: "401(k)",
-      rawValue: DEMO_DATA.retirement401k, // Always show full vested value for bar
-      zakatableValue: DEMO_DATA.retirement401kZakatable, // Balanced: 65% zakatable
-      color: ASSET_COLORS.retirement
+      name: "retirement",
+      displayName: "401(k)",
+      grossValue: DEMO_DATA.retirement401k,
+      zakatableValue: DEMO_DATA.retirement401kZakatable, // 65% zakatable
+      color: ASSET_COLORS.retirement,
     },
     {
-      name: "Other",
-      rawValue: DEMO_DATA.otherAssets,
+      name: "other",
+      displayName: "Other",
+      grossValue: DEMO_DATA.otherAssets,
       zakatableValue: DEMO_DATA.otherAssets, // 100% zakatable
-      color: ASSET_COLORS.other
+      color: ASSET_COLORS.other,
     },
-  ];
+  ], []);
 
-  // Total raw value for bar sizing, total zakatable for flow sizing
-  const totalRawValue = assets.reduce((sum, a) => sum + a.rawValue, 0);
-  const totalZakatableValue = assets.reduce((sum, a) => sum + a.zakatableValue, 0);
-  const currentZakat = DEMO_DATA.optimizedZakat; // Balanced approach
+  // Build Sankey data using shared utility
+  const sankeyData = useMemo(() =>
+    buildDemoSankeyData({
+      assets: demoAssets,
+      zakatRate: 0.025,
+      width,
+      height,
+      nodeWidth,
+      leftPadding,
+      rightPadding,
+      topMargin: 8,
+      bottomMargin: 20,
+      assetSpacing: 3,
+    }),
+    [demoAssets, width, height, nodeWidth, leftPadding, rightPadding]);
 
-  // Available height for the chart content
-  const topMargin = 8;
-  const bottomMargin = 16; // Space for label
-  const availableHeight = height - topMargin - bottomMargin;
+  const currentZakat = DEMO_DATA.optimizedZakat;
 
-  // Left side: Asset nodes - proportional heights based on RAW value (full bar)
-  const assetSpacing = 3;
-  const totalSpacing = assetSpacing * (assets.length - 1);
-  const leftNodeAreaHeight = availableHeight;
+  // Get destination nodes for rendering
+  const assetNodes = sankeyData.nodes.filter(n => n.isSource);
+  const zakatNode = sankeyData.nodes.find(n => n.isZakat);
+  const retainedNode = sankeyData.nodes.find(n => n.isRetained);
+  const exemptNode = sankeyData.nodes.find(n => n.isExempt);
 
-  let leftY = topMargin;
-  const assetNodes = assets.map((asset) => {
-    const rawProportion = asset.rawValue / totalRawValue;
-    const zakatableProportion = asset.zakatableValue / totalZakatableValue;
-    const nodeHeight = Math.max(10, rawProportion * (leftNodeAreaHeight - totalSpacing));
-    const node = {
-      ...asset,
-      y: leftY,
-      height: nodeHeight,
-      rawProportion,
-      zakatableProportion,
-    };
-    leftY += nodeHeight + assetSpacing;
-    return node;
-  });
-
-  // Center node (Net Zakatable) - spans the full height of incoming flows
-  const centerX = width * 0.48;
-  const centerY = topMargin;
-  const centerHeight = availableHeight;
-
-  // Calculate flow positions on center node
-  // Flow thickness is based on ZAKATABLE proportion (not raw)
-  // 401(k) flow should be smaller than its bar in optimized mode
-  let centerFlowY = centerY;
-  const flowPositions = assetNodes.map((asset) => {
-    // Flow thickness based on zakatable proportion of center height
-    const proportionalHeight = asset.zakatableProportion * centerHeight;
-    // Cap flow at asset bar height (can't be larger than source bar)
-    const flowThickness = Math.min(proportionalHeight, asset.height);
-
-    const position = {
-      asset,
-      sourceY: asset.y + asset.height / 2,
-      targetY: centerFlowY + proportionalHeight / 2,
-      thickness: flowThickness,
-      topY: centerFlowY, // Top edge of this flow on center node
-      proportionalHeight, // Full proportional height on center
-    };
-    centerFlowY += proportionalHeight;
-    return position;
-  });
-
-  // Zakat node - height proportional to zakat rate (2.5%)
-  const zakatX = width - rightPadding - nodeWidth;
-  const zakatProportion = currentZakat / totalZakatableValue;
-  const zakatHeight = Math.max(30, zakatProportion * centerHeight * 4); // Scale up for visibility
-  const zakatY = centerY; // Top-aligned
-
-  // Calculate each asset's contribution to Zakat (proportional to zakatable share)
-  // Right flows start from TOP edge of where left flow enters center (top-aligned)
-  let zakatFlowY = zakatY;
-  const zakatFlowPositions = flowPositions.map((flow) => {
-    const zakatContribution = flow.asset.zakatableProportion * zakatHeight;
-
-    // Right flow starts from TOP of where left flow enters center node
-    const rightFlowSourceY = flow.topY + zakatContribution / 2;
-
-    const position = {
-      ...flow,
-      rightSourceY: rightFlowSourceY,
-      zakatTargetY: zakatFlowY + zakatContribution / 2,
-      zakatThickness: zakatContribution,
-      zakatTopY: zakatFlowY,
-    };
-    zakatFlowY += zakatContribution;
-    return position;
-  });
-
-  // Generate curved path for Sankey flows
-  const generatePath = (
-    startX: number,
-    startY: number,
-    endX: number,
-    endY: number,
-    thickness: number
-  ) => {
-    const midX = (startX + endX) / 2;
-    return `
-      M ${startX} ${startY - thickness / 2}
-      C ${midX} ${startY - thickness / 2}, ${midX} ${endY - thickness / 2}, ${endX} ${endY - thickness / 2}
-      L ${endX} ${endY + thickness / 2}
-      C ${midX} ${endY + thickness / 2}, ${midX} ${startY + thickness / 2}, ${startX} ${startY + thickness / 2}
-      Z
-    `;
-  };
+  // Separate links by type
+  const zakatLinks = sankeyData.links.filter(l => l.type === "zakat");
+  const retainedLinks = sankeyData.links.filter(l => l.type === "retained");
+  const exemptLinks = sankeyData.links.filter(l => l.type === "exempt");
 
   return (
     <div className="flex justify-center py-0.5">
@@ -827,17 +752,17 @@ function AnimatedSankeyChart({
           </filter>
         </defs>
 
-        {/* Asset nodes (left) and flows to center - staggered animation */}
-        {flowPositions.map((flow, i) => (
-          <g key={flow.asset.name}>
-            {/* Asset node rect */}
+        {/* === LEFT: Asset Nodes === */}
+        {assetNodes.map((node, i) => (
+          <g key={node.id}>
+            {/* Asset bar */}
             <motion.rect
-              x={leftPadding}
-              y={flow.asset.y}
+              x={node.x}
+              y={node.y}
               width={nodeWidth}
-              height={flow.asset.height}
+              height={node.height}
               rx={2}
-              fill={flow.asset.color}
+              fill={node.color}
               initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
               animate={{ scaleY: 1, opacity: 1 }}
               transition={{
@@ -845,135 +770,196 @@ function AnimatedSankeyChart({
                 delay: i * 0.08,
                 ease: M3_EASING.emphasizedDecelerate
               }}
-              style={{ transformOrigin: `${leftPadding + nodeWidth / 2}px ${flow.asset.y + flow.asset.height / 2}px` }}
+              style={{ transformOrigin: `${node.x + nodeWidth / 2}px ${node.y + node.height / 2}px` }}
             />
-
-            {/* Flow from asset to center - maintaining asset color, stacked on center */}
-            <motion.path
-              d={generatePath(
-                leftPadding + nodeWidth,
-                flow.sourceY,
-                centerX,
-                flow.targetY,
-                flow.thickness
-              )}
-              fill={flow.asset.color}
-              fillOpacity={0.45}
-              initial={isAnimating ? { opacity: 0 } : false}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
-            />
-
             {/* Asset label */}
             <motion.text
-              x={leftPadding + nodeWidth + 4}
-              y={flow.asset.y + flow.asset.height / 2 + 3}
+              x={node.x + nodeWidth + 4}
+              y={node.y + node.height / 2 + 3}
               className="fill-muted-foreground text-[6px]"
               initial={isAnimating ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 + i * 0.08 }}
             >
-              {flow.asset.name}
+              {node.displayName}
             </motion.text>
           </g>
         ))}
 
-        {/* Center node (Net Zakatable) - spans full height */}
-        <motion.rect
-          x={centerX}
-          y={centerY}
-          width={nodeWidth}
-          height={centerHeight}
-          rx={2}
-          fill={ASSET_COLORS.net}
-          initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
-          animate={{ scaleY: 1, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.35, ease: M3_EASING.emphasizedDecelerate }}
-          style={{ transformOrigin: `${centerX + nodeWidth / 2}px ${centerY + centerHeight / 2}px` }}
-        />
-
-        {/* Multi-colored Zakat flows - each asset's color continues to Zakat node */}
-        {/* Right flows start from TOP edge of where left flow enters (top-aligned) */}
-        {zakatFlowPositions.map((flow, i) => (
+        {/* === FLOWS TO RETAINED (big gray flows - 97.5%) === */}
+        {retainedLinks.map((link, i) => (
           <motion.path
-            key={`zakat-flow-${flow.asset.name}`}
-            d={generatePath(
-              centerX + nodeWidth,
-              flow.rightSourceY, // Start from TOP edge alignment (not center)
-              zakatX,
-              flow.zakatTargetY, // End at stacked position on Zakat node
-              flow.zakatThickness
+            key={`retained-${link.source}`}
+            d={generateSankeyPath(
+              leftPadding + nodeWidth,
+              link.sourceY,
+              retainedNode!.x,
+              link.targetY,
+              link.thickness
             )}
-            fill={flow.asset.color}
-            fillOpacity={0.55}
+            fill={link.color}
+            fillOpacity={0.25}
+            initial={isAnimating ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
+          />
+        ))}
+
+        {/* === FLOWS TO EXEMPT (gray flows for non-zakatable) === */}
+        {exemptNode && exemptLinks.map((link, i) => (
+          <motion.path
+            key={`exempt-${link.source}`}
+            d={generateSankeyPath(
+              leftPadding + nodeWidth,
+              link.sourceY,
+              exemptNode.x,
+              link.targetY,
+              link.thickness
+            )}
+            fill={ASSET_COLORS.exempt}
+            fillOpacity={0.3}
+            initial={isAnimating ? { opacity: 0 } : false}
+            animate={{ opacity: showZakatValue ? 1 : 0 }}
+            transition={{ duration: 0.5, delay: 0.4 + i * 0.08 }}
+          />
+        ))}
+
+        {/* === FLOWS TO ZAKAT (colored flows - 2.5%) === */}
+        {zakatLinks.map((link, i) => (
+          <motion.path
+            key={`zakat-${link.source}`}
+            d={generateSankeyPath(
+              leftPadding + nodeWidth,
+              link.sourceY,
+              zakatNode!.x,
+              link.targetY,
+              link.thickness
+            )}
+            fill={link.color}
+            fillOpacity={0.6}
             initial={isAnimating ? { opacity: 0 } : false}
             animate={{ opacity: showZakatValue ? 1 : 0 }}
             transition={{ duration: 0.5, delay: 0.5 + i * 0.06 }}
           />
         ))}
 
-        {/* Zakat node with celebration animation - proportional height */}
-        <motion.rect
-          x={zakatX}
-          y={zakatY}
-          width={nodeWidth}
-          height={zakatHeight}
-          rx={2}
-          fill={ASSET_COLORS.zakat}
-          filter={isCelebrating ? "url(#zakatGlow)" : undefined}
-          initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
-          animate={{
-            scaleY: 1,
-            opacity: showZakatValue ? 1 : 0,
-            scale: isCelebrating ? [1, 1.1, 1] : 1,
-          }}
-          transition={{
-            duration: 0.5,
-            delay: 0.6,
-            ease: M3_EASING.emphasizedDecelerate,
-            scale: isCelebrating ? { duration: 1, repeat: Infinity, repeatType: "reverse" } : undefined
-          }}
-          style={{ transformOrigin: `${zakatX + nodeWidth / 2}px ${zakatY + zakatHeight / 2}px` }}
-        />
+        {/* === RIGHT: Destination Nodes === */}
 
-        {/* Zakat label with mode indicator */}
-        {showZakatValue && (
+        {/* Zakat Due Node */}
+        {zakatNode && (
+          <motion.rect
+            x={zakatNode.x}
+            y={zakatNode.y}
+            width={nodeWidth}
+            height={zakatNode.height}
+            rx={2}
+            fill={ASSET_COLORS.zakat}
+            filter={isCelebrating ? "url(#zakatGlow)" : undefined}
+            initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
+            animate={{
+              scaleY: 1,
+              opacity: showZakatValue ? 1 : 0,
+              scale: isCelebrating ? [1, 1.1, 1] : 1,
+            }}
+            transition={{
+              duration: 0.5,
+              delay: 0.6,
+              ease: M3_EASING.emphasizedDecelerate,
+              scale: isCelebrating ? { duration: 1, repeat: Infinity, repeatType: "reverse" } : undefined
+            }}
+            style={{ transformOrigin: `${zakatNode.x + nodeWidth / 2}px ${zakatNode.y + zakatNode.height / 2}px` }}
+          />
+        )}
+
+        {/* Retained Wealth Node */}
+        {retainedNode && (
+          <motion.rect
+            x={retainedNode.x}
+            y={retainedNode.y}
+            width={nodeWidth}
+            height={retainedNode.height}
+            rx={2}
+            fill={ASSET_COLORS.retained}
+            initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
+            animate={{ scaleY: 1, opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.35, ease: M3_EASING.emphasizedDecelerate }}
+            style={{ transformOrigin: `${retainedNode.x + nodeWidth / 2}px ${retainedNode.y + retainedNode.height / 2}px` }}
+          />
+        )}
+
+        {/* Exempt Node (only if exists) */}
+        {exemptNode && (
+          <motion.rect
+            x={exemptNode.x}
+            y={exemptNode.y}
+            width={nodeWidth}
+            height={exemptNode.height}
+            rx={2}
+            fill={ASSET_COLORS.exempt}
+            initial={isAnimating ? { scaleY: 0, opacity: 0 } : false}
+            animate={{ scaleY: 1, opacity: showZakatValue ? 1 : 0.5 }}
+            transition={{ duration: 0.4, delay: 0.45, ease: M3_EASING.emphasizedDecelerate }}
+            style={{ transformOrigin: `${exemptNode.x + nodeWidth / 2}px ${exemptNode.y + exemptNode.height / 2}px` }}
+          />
+        )}
+
+        {/* === LABELS === */}
+
+        {/* Zakat label */}
+        {showZakatValue && zakatNode && (
           <motion.g
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
             <text
-              x={zakatX - 4}
-              y={zakatY + zakatHeight / 2 - 4}
+              x={zakatNode.x - 4}
+              y={zakatNode.y + 8}
               textAnchor="end"
-              className="fill-foreground text-[7px] font-medium capitalize"
+              className="fill-foreground text-[7px] font-medium"
             >
-              Balanced
+              Zakat
             </text>
             <text
-              x={zakatX - 4}
-              y={zakatY + zakatHeight / 2 + 5}
+              x={zakatNode.x - 4}
+              y={zakatNode.y + 17}
               textAnchor="end"
               className="fill-muted-foreground text-[6px]"
             >
-              2.5% Zakat
+              2.5%
             </text>
           </motion.g>
         )}
 
-        {/* Center node label */}
-        <motion.text
-          x={centerX + nodeWidth / 2}
-          y={height - 3}
-          textAnchor="middle"
-          className="fill-muted-foreground text-[6px]"
-          initial={isAnimating ? { opacity: 0 } : false}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          Net Zakatable
-        </motion.text>
+        {/* Retained label */}
+        {retainedNode && (
+          <motion.text
+            x={retainedNode.x - 4}
+            y={retainedNode.y + retainedNode.height / 2 + 2}
+            textAnchor="end"
+            className="fill-muted-foreground text-[6px]"
+            initial={isAnimating ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Retained
+          </motion.text>
+        )}
+
+        {/* Exempt label */}
+        {exemptNode && showZakatValue && (
+          <motion.text
+            x={exemptNode.x - 4}
+            y={exemptNode.y + exemptNode.height / 2 + 2}
+            textAnchor="end"
+            className="fill-muted-foreground text-[6px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            Exempt
+          </motion.text>
+        )}
       </svg>
     </div>
   );

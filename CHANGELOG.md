@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🌟 Feature Highlights (Quick Look)
 | Version | Major Feature | Released |
 |---|---|---|
+| **v0.25.0** | 🧮 **Asset Class Expansion** (Service Business, Land Banking, REITs) | Feb 7, 2026 |
 | **v0.18.0** | ✨ **Product Reality** (Live Interactive Demo) | Jan 20, 2026 |
 | **v0.14.0** | 📚 **Jurisprudence Overhaul** (5 Distinct Madhabs) | Jan 11, 2026 |
 | **v0.13.0** | 🏦 **Plaid Bank Sync** (Connect Bank Accounts) | Jan 11, 2026 |
@@ -25,7 +26,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Phase 9: Download Report Redesign**
   - Fix WorkSans italic font bug
   - Add machine-readable QR for YoY scanning
-  - Add machine-readable QR for YoY scanning
+
+## [0.25.0] - 2026-02-07 (Asset Class Expansion)
+
+### Added
+- **3 New Asset Fields**
+  - **Service Business Toggle**: Consultants, freelancers, SaaS — hides inventory field and shows al-Qaradawi guidance for net profit calculation.
+  - **Land Banking**: New input for undeveloped land held for appreciation. Includes WhyTooltip explaining majority scholarly view (zakatable annually).
+  - **REITs**: Equity REITs input with Shariah compliance warning (avoid Mortgage REITs).
+- **Test Coverage**
+  - REITs madhab test: Balanced 30%, others 100% (follows passive investment rules)
+  - Land Banking: 100% across all madhabs (trade goods)
+  - Service Business: Confirms flag is UX-only, calculation unchanged
+- **Ahmed Example Enhancement**
+  - Added REITs ($30k) and Land Banking ($75k) to methodology example
+  - New Zakat range: $5,125 (Balanced) → $12,915 (Maliki/Shafi'i)
+  - Demonstrates 30%/100% rule for passive investments
+
+### Changed
+- `ZakatFormData` interface: Added `isServiceBusiness`, `landBankingValue`, `reitsValue`
+- `defaultFormData`: Added default values for new fields
+- `fieldToStepMapping`: Added mappings for document extraction
+- `calculateAssets()`: Updated to include new fields in calculations
+
+---
 
 ## [0.19.0] - 2026-02-07 (Compliance & Clarity)
 

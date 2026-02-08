@@ -14,6 +14,18 @@ export const ASSET_COLORS: Record<string, string> = {
     "Illiquid Assets": "#a855f7",     // Purple-500
     "Other Assets": "#a855f7",        // Alias
 
+    // Demo-specific (simplified 4-category view)
+    "cash": "#10b981",                // Emerald-500
+    "investments": "#3b82f6",         // Blue-500
+    "retirement": "#f43f5e",          // Rose-500
+    "other": "#a855f7",               // Purple-500
+
+    // Destination nodes
+    "zakat": "#16a34a",               // Green-600
+    "retained": "#64748b",            // Slate-500
+    "exempt": "#94a3b8",              // Slate-400
+    "net": "#1e293b",                 // Slate-800
+
     // Nodes
     "Gross Zakatable Wealth": "#f59e0b", // Amber-500
     "Liabilities": "#ef4444",         // Red-500
