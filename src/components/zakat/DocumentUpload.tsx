@@ -197,8 +197,8 @@ export function DocumentUpload({
         'RETIREMENT_HSA': 'hsaBalance',
         'CRYPTO': 'cryptoCurrency',
         'CRYPTO_STAKED': 'stakedAssets',
-        'COMMODITY_GOLD': 'goldValue',
-        'COMMODITY_SILVER': 'silverValue',
+        'COMMODITY_GOLD': 'goldInvestmentValue',
+        'COMMODITY_SILVER': 'silverInvestmentValue',
       };
 
       const field = mapping[item.inferredCategory];

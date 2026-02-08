@@ -62,6 +62,7 @@ export const defaultFormData: ZakatFormData = {
     activeInvestments: 0,
     passiveInvestmentsValue: 0,
     passiveInvestmentIntent: 'mudir', // Default: treat as active trading (Mudir)
+    reitsValue: 0,
     dividends: 0,
     dividendPurificationPercent: 0,
     rothIRAContributions: 0,
@@ -79,7 +80,9 @@ export const defaultFormData: ZakatFormData = {
     irrevocableTrustValue: 0,
     clatValue: 0,
     realEstateForSale: 0,
+    landBankingValue: 0,
     rentalPropertyIncome: 0,
+    isServiceBusiness: false,
     businessCashAndReceivables: 0,
     businessInventory: 0,
     illiquidAssetsValue: 0,

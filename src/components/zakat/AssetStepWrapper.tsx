@@ -231,6 +231,8 @@ export function AssetStepWrapper({
         onRemoveDocument={onRemoveDocument}
       />
 
+      {children}
+
       {/* Document upload with existing accounts selection */}
       {showUpload && (
         <DocumentUpload
@@ -243,8 +245,6 @@ export function AssetStepWrapper({
           description={uploadDescription}
         />
       )}
-
-      {children}
     </QuestionLayout>
   );
 }

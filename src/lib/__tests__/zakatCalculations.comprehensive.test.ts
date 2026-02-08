@@ -267,6 +267,23 @@ describe('4. Investments - Madhab Differences ⭐', () => {
         expect(result.zakatDue).toBe(75);
     });
 
+    it('REITs: Balanced 30%, others 100% (like passive stocks)', () => {
+        const baseData = {
+            ...defaultFormData,
+            reitsValue: 10000,
+        };
+
+        // Balanced: 30% proxy (same as passive stocks)
+        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(balancedResult.zakatDue).toBe(75); // $3K * 2.5%
+
+        // Others: 100%
+        for (const madhab of ['hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
+            const result = calculateZakat({ ...baseData, madhab }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+            expect(result.zakatDue).toBe(250); // $10K * 2.5%
+        }
+    });
+
     it('Mixed: Passive + active + dividends', () => {
         const balancedResult = calculateZakat({
             ...defaultFormData,
@@ -466,6 +483,16 @@ describe('7. Real Estate', () => {
         expect(result.zakatDue).toBe(300);
     });
 
+    it('Land Banking: All madhabs 100% (trade goods)', () => {
+        const result = calculateZakat({
+            ...defaultFormData,
+            landBankingValue: 150000,
+            hasRealEstate: true,
+        }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+
+        expect(result.zakatDue).toBe(3750); // $150K * 2.5%
+    });
+
     it('Mixed: Sale property + rental income', () => {
         const result = calculateZakat({
             ...defaultFormData,
@@ -513,6 +540,20 @@ describe('8. Business Assets', () => {
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
         expect(result.zakatDue).toBe(2500);
+    });
+
+    it('Service Business flag: UX only, calculation unchanged', () => {
+        // Service businesses just use cash/receivables (net profits)
+        // The isServiceBusiness flag is for UI, calculation is same
+        const result = calculateZakat({
+            ...defaultFormData,
+            isServiceBusiness: true,
+            businessCashAndReceivables: 40000, // includes net profits
+            businessInventory: 0, // no inventory for services
+            hasBusiness: true,
+        }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+
+        expect(result.zakatDue).toBe(1000); // $40K * 2.5%
     });
 });
 

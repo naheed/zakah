@@ -51,7 +51,7 @@ export function ProductDemo() {
 
     // --- Animation Loop ---
     useEffect(() => {
-        let timeout: NodeJS.Timeout;
+        let timeoutId: any = null;
 
         const runSequence = async () => {
             // PHASE 1: INPUT (0s)
@@ -91,12 +91,12 @@ export function ProductDemo() {
             await new Promise(r => setTimeout(r, 5000)); // 5s to see CTA
 
             // RESTART
-            runSequence();
+            timeoutId = setTimeout(runSequence, 100);
         };
 
         runSequence();
 
-        return () => clearTimeout(timeout); // Basic cleanup, though async loop is harder to cancel perfectly
+        return () => { if (timeoutId) clearTimeout(timeoutId); }; // Basic cleanup, though async loop is harder to cancel perfectly
     }, []);
 
     return (

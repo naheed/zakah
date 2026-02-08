@@ -86,6 +86,34 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
             </p>
           </div>
         )}
+
+        {/* REITs Section */}
+        <CurrencyInput
+          label={
+            <span className="flex items-center gap-2">
+              REITs (Real Estate Investment Trusts)
+              <WhyTooltip
+                title="REITs"
+                explanation="Equity REITs are zakatable like stocks. Avoid Mortgage REITs (interest-based)."
+              />
+            </span>
+          }
+          description="Market value of Equity REIT shares only"
+          householdDescription="Combined REITs for all family members"
+          isHousehold={isHousehold}
+          value={data.reitsValue}
+          onChange={(value) => updateData({ reitsValue: value })}
+          documentContributions={getDocumentContributionsForField(uploadedDocuments, 'reitsValue')}
+        />
+
+        {data.reitsValue > 0 && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <p className="text-xs text-muted-foreground">
+              <strong>⚠️ Shariah Note:</strong> Ensure your REITs are Equity REITs (property ownership).
+              Mortgage REITs are interest-based and should be avoided.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3 pt-4 border-t border-border">

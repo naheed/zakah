@@ -388,17 +388,17 @@ const Methodology = () => {
 
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
-                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.catA.title}</Heading>
+                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.classification.title}</Heading>
                   <ul className="space-y-2 text-sm">
-                    {content.crypto.catA.list.map((item, i) => (
+                    {content.crypto.classification.types.map((item: { label: string; text: string }, i: number) => (
                       <li key={i} className="text-muted-foreground"><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.catB.title}</Heading>
+                  <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.staking.title}</Heading>
                   <ul className="space-y-2 text-sm">
-                    {content.crypto.catB.list.map((item, i) => (
+                    {content.crypto.staking.types.map((item: { label: string; text: string }, i: number) => (
                       <li key={i} className="text-muted-foreground"><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
                     ))}
                   </ul>
@@ -406,7 +406,7 @@ const Methodology = () => {
                 <div>
                   <Heading level={4} className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-3">{content.crypto.nfts.title}</Heading>
                   <ul className="space-y-2 text-sm">
-                    {content.crypto.nfts.list.map((item, i) => (
+                    {content.crypto.nfts.types.map((item: { label: string; text: string }, i: number) => (
                       <li key={i} className="text-muted-foreground"><strong className="text-foreground">{item.label}:</strong> {item.text}</li>
                     ))}
                   </ul>

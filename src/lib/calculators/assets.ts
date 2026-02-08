@@ -76,6 +76,9 @@ export function calculateTotalAssets(data: ZakatFormData): number {
     const passiveRate = MODE_RULES[safeMadhab].passiveInvestmentRate;
     total += data.passiveInvestmentsValue * passiveRate;
 
+    // REITs: Treated like passive investments (2.5% on market value, or 30% proxy for holding)
+    total += data.reitsValue * passiveRate;
+
     // Dividends (after purification)
     const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
     total += data.dividends - purificationAmount;
@@ -136,6 +139,7 @@ export function calculateTotalAssets(data: ZakatFormData): number {
     // Real Estate (for business purposes)
     if (data.hasRealEstate) {
         total += data.realEstateForSale; // Full value for flipping
+        total += data.landBankingValue; // Full value for appreciation
         total += data.rentalPropertyIncome; // Net income in bank
     }
 
@@ -259,8 +263,16 @@ export function calculateEnhancedAssetBreakdown(
         zakatableAmount: purifiedDividends,
         zakatablePercent: Math.max(0, (100 - data.dividendPurificationPercent) / 100)
     });
-    const investmentGross = data.activeInvestments + data.passiveInvestmentsValue + data.dividends;
-    const investmentZakatable = data.activeInvestments + passiveZakatableAmount + purifiedDividends;
+    // REITs: Treated like passive investments
+    const reitsZakatableAmount = data.reitsValue * passiveZakatablePercent;
+    if (data.reitsValue > 0) investmentItems.push({
+        name: 'REITs (Equity)',
+        value: data.reitsValue,
+        zakatablePercent: passiveZakatablePercent,
+        zakatableAmount: reitsZakatableAmount
+    });
+    const investmentGross = data.activeInvestments + data.passiveInvestmentsValue + data.dividends + data.reitsValue;
+    const investmentZakatable = data.activeInvestments + passiveZakatableAmount + purifiedDividends + reitsZakatableAmount;
 
     // Retirement
     const retirementItems: AssetItem[] = [];
@@ -313,7 +325,8 @@ export function calculateEnhancedAssetBreakdown(
     // Real Estate
     const realEstateItems: AssetItem[] = [];
     if (data.hasRealEstate) {
-        if (data.realEstateForSale > 0) realEstateItems.push({ name: 'Property for Sale', value: data.realEstateForSale, zakatablePercent: 1.0, zakatableAmount: data.realEstateForSale });
+        if (data.realEstateForSale > 0) realEstateItems.push({ name: 'Property for Sale (Flipping)', value: data.realEstateForSale, zakatablePercent: 1.0, zakatableAmount: data.realEstateForSale });
+        if (data.landBankingValue > 0) realEstateItems.push({ name: 'Land Banking / Appreciation', value: data.landBankingValue, zakatablePercent: 1.0, zakatableAmount: data.landBankingValue });
         if (data.rentalPropertyIncome > 0) realEstateItems.push({ name: 'Rental Income', value: data.rentalPropertyIncome, zakatablePercent: 1.0, zakatableAmount: data.rentalPropertyIncome });
     }
     const realEstateTotal = realEstateItems.reduce((s, i) => s + i.value, 0);

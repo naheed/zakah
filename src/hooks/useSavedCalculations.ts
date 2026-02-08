@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { useAuth } from './useAuth';
 import { useEncryptionKeys } from './useEncryptionKeys';
-import { ZakatFormData, calculateZakat } from '@/lib/zakatCalculations';
+import { ZakatFormData, Madhab, defaultFormData, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '@/lib/zakatCalculations';
 import { useToast } from './use-toast';
 import { encryptSession, decryptSession } from '@/lib/sessionEncryption';
 import { v4 as uuidv4 } from 'uuid';
@@ -307,11 +307,25 @@ export function useSavedCalculations() {
         // Encrypt all
         updatedHistory = await Promise.all(cleanItems.map(i => encryptSession(i)));
 
+        const savedRecord: SavedCalculation = {
+          id,
+          name,
+          year_type: yearType,
+          year_value: yearValue,
+          form_data: formData,
+          zakat_due: result.zakatDue,
+          is_above_nisab: result.isAboveNisab,
+          created_at: now,
+          updated_at: now,
+          version: 1,
+          encryption_version: 3
+        };
+
         localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
 
         await fetchCalculations(); // Refresh state
 
-        return { id, ...payload };
+        return savedRecord;
 
       } catch (e) {
         console.error("Local save failed", e);

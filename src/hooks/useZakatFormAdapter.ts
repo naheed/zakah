@@ -14,6 +14,7 @@ export function useZakatFormAdapter() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+
     const fetchAssetsAsFormData = useCallback(async (userId: string): Promise<ZakatFormData | null> => {
         setLoading(true);
         setError(null);
@@ -24,40 +25,45 @@ export function useZakatFormAdapter() {
                 .from('portfolios')
                 .select('id')
                 .eq('user_id', userId)
-                .limit(1) as any;
+                .limit(1);
 
             if (portError) throw portError;
             if (!portfolios || portfolios.length === 0) {
                 // No portfolio yet calculation, return default
                 return defaultFormData;
             }
-            const portfolioId = portfolios[0].id;
+            const portfolioId = (portfolios[0] as { id: string }).id;
 
             // 2. Fetch Accounts
             const { data: accounts, error: accError } = await supabase
-                .from('asset_accounts' as any)
+                .from('asset_accounts')
                 .select('*')
-                .eq('portfolio_id', portfolioId) as any;
+                .eq('portfolio_id', portfolioId);
 
             if (accError) throw accError;
+            if (!accounts) return defaultFormData;
+
+            const typedAccounts = accounts as AssetAccount[];
 
             // 3. Fetch Latest Confirmed Snapshot for each account
-            // Note: In a real app we might want to let user select date. For now, get latest confirmed.
-            // We do this by fetching all snapshots and filtering in JS for simplicity in this V1 adapter
-            const accountIds = accounts.map((a: any) => a.id);
+            const accountIds = typedAccounts.map(a => a.id);
+            if (accountIds.length === 0) return defaultFormData;
+
             const { data: snapshots, error: snapError } = await supabase
-                .from('asset_snapshots' as any)
+                .from('asset_snapshots')
                 .select('*')
                 .in('account_id', accountIds)
                 .eq('status', 'CONFIRMED')
-                .order('statement_date', { ascending: false }) as any;
+                .order('statement_date', { ascending: false });
 
             if (snapError) throw snapError;
 
+            const typedSnapshots = (snapshots || []) as AssetSnapshot[];
+
             // Map accountId -> latest snapshot
             const latestSnapshots = new Map<string, AssetSnapshot>();
-            accounts.forEach(acc => {
-                const snap = snapshots?.find(s => s.account_id === acc.id);
+            typedAccounts.forEach(acc => {
+                const snap = typedSnapshots.find(s => s.account_id === acc.id);
                 if (snap) latestSnapshots.set(acc.id, snap);
             });
 
@@ -69,20 +75,22 @@ export function useZakatFormAdapter() {
 
             // 4. Fetch Line Items
             const { data: lineItems, error: itemError } = await supabase
-                .from('asset_line_items' as any)
+                .from('asset_line_items')
                 .select('*')
-                .in('snapshot_id', snapshotIds) as any;
+                .in('snapshot_id', snapshotIds);
 
             if (itemError) throw itemError;
+
+            const typedLineItems = (lineItems || []) as AssetLineItem[];
 
             // 5. Aggregate into ZakatFormData
             const formData: ZakatFormData = { ...defaultFormData };
 
             // Helper to find items for a specific account type
             const getItemsForAccountType = (type: string) => {
-                const targetAccountIds = accounts.filter(a => a.type === type).map(a => a.id);
+                const targetAccountIds = typedAccounts.filter(a => a.type === type).map(a => a.id);
                 const targetSnapshotIds = targetAccountIds.map(id => latestSnapshots.get(id)?.id).filter(Boolean) as string[];
-                return lineItems?.filter(item => targetSnapshotIds.includes(item.snapshot_id)) || [];
+                return typedLineItems.filter(item => targetSnapshotIds.includes(item.snapshot_id));
             };
 
             // --- Liquid Assets ---
@@ -96,9 +104,6 @@ export function useZakatFormAdapter() {
             const brokerageItems = getItemsForAccountType('BROKERAGE');
 
             // Cash in Brokerage -> treated as Savings/Cash
-            // We'll map it to savingsAccounts or checkingAccounts? Or create a pseudo field?
-            // ZakatCalculations sums checking+savings+cash. So adding to 'cashOnHand' or 'savingsAccounts' is fine.
-            // Let's add to savingsAccounts for now as it's liquid cash.
             formData.savingsAccounts += sumByCategory(brokerageItems, 'LIQUID');
 
             // Stocks (30% Proxy) -> passiveInvestmentsValue
@@ -110,9 +115,8 @@ export function useZakatFormAdapter() {
             // --- Retirement ---
             // 401k
             const k401Items = getItemsForAccountType('RETIREMENT_401K');
-            formData.fourOhOneKVestedBalance += sumByCategory(k401Items, 'PROXY_100'); // Assuming normal treatment is full vest balance input
-            formData.fourOhOneKVestedBalance += sumByCategory(k401Items, 'PROXY_30'); // Treat same for now, usually 401k is just balance
-            // If we classified unvested as EXEMPT
+            formData.fourOhOneKVestedBalance += sumByCategory(k401Items, 'PROXY_100');
+            formData.fourOhOneKVestedBalance += sumByCategory(k401Items, 'PROXY_30');
             formData.fourOhOneKUnvestedMatch += sumByCategory(k401Items, 'EXEMPT');
 
             // IRA
@@ -122,10 +126,6 @@ export function useZakatFormAdapter() {
 
             // Roth
             const rothItems = getItemsForAccountType('ROTH_IRA');
-            // Distinction between contributions/earnings is hard if extraction didn't split them.
-            // For V1 adapter, map to earnings (conservative) or split 50/50?
-            // Ideally LineItem 'raw_category' would be 'CONTRIBUTION' vs 'EARNINGS'.
-            // For now, map all to Earnings to be safe (calculated logic allows deductions).
             formData.rothIRAEarnings += rothItems.reduce((sum, i) => sum + Number(i.amount), 0);
 
             // --- Crypto ---
@@ -134,7 +134,7 @@ export function useZakatFormAdapter() {
 
             // --- Metals ---
             const metalItems = getItemsForAccountType('METALS');
-            formData.goldValue += metalItems.reduce((sum, i) => sum + Number(i.amount), 0);
+            formData.goldInvestmentValue += metalItems.reduce((sum, i) => sum + Number(i.amount), 0);
 
             setLoading(false);
             return formData;

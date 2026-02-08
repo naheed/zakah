@@ -17,10 +17,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
     /* Linting */
-    "strict": false,
+    "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noImplicitAny": true,
     "noFallthroughCasesInSwitch": false,
     "baseUrl": ".",
     "paths": {

@@ -47,9 +47,12 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
     ] as const;
 
     const rows = assetKeys.map(key => {
-        const cat = enhancedBreakdown[key] as AssetCategory;
+        const cat = enhancedBreakdown[key as keyof EnhancedAssetBreakdown] as AssetCategory;
+        if (!cat) return null;
         return { key, cat, Icon: getAssetIcon(key), ruling: getRulingText(key, cat) };
-    }).filter(item => item.cat.total > 0);
+    }).filter((item): item is { key: typeof assetKeys[number], cat: AssetCategory, Icon: any, ruling: string } =>
+        item !== null && item.cat && item.cat.total > 0
+    );
 
     return (
         <section className="flex-grow mt-8">
@@ -84,25 +87,25 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                                 <div>
                                                     <div className="font-bold text-foreground">{item.name}</div>
                                                     <div className="text-[11px] text-muted-foreground mt-0.5">
-                                                        {item.zakatablePercent === 1 ? 'Fully Zakatable' : item.zakatablePercent === 0 ? 'Exempt' : `${formatPercent(item.zakatablePercent)} Zakatable`}
+                                                        {item.zakatablePercent === 1 ? 'Fully Zakatable' : item.zakatablePercent === 0 ? 'Exempt' : `${formatPercent(item.zakatablePercent ?? 0)} Zakatable`}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3.5 text-right font-mono text-muted-foreground">
-                                            {formatCurrency(item.value, currency, 0)}
+                                            {formatCurrency(item.value ?? 0, currency, 0)}
                                         </td>
                                         <td className="px-2 py-3.5 text-center">
                                             {item.zakatablePercent === 1 ? (
                                                 <span className="font-bold text-muted-foreground text-xs">100%</span>
                                             ) : (
                                                 <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
-                                                    {formatPercent(item.zakatablePercent)}
+                                                    {formatPercent(item.zakatablePercent ?? 0)}
                                                 </span>
                                             )}
                                         </td>
                                         <td className="px-4 py-3.5 text-right font-bold text-foreground">
-                                            {formatCurrency(item.zakatableAmount || 0, currency, 0)}
+                                            {formatCurrency(item.zakatableAmount ?? 0, currency, 0)}
                                         </td>
                                     </tr>
                                 ));
@@ -134,7 +137,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                         )}
                                     </td>
                                     <td className="px-4 py-3.5 text-right font-bold text-foreground">
-                                        {formatCurrency(cat.zakatableAmount, currency, 0)}
+                                        {formatCurrency(cat.zakatableAmount ?? 0, currency, 0)}
                                     </td>
                                 </tr>
                             );
@@ -157,7 +160,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                     <div>
                                         <div className="font-bold text-foreground text-base">{item.name}</div>
                                         <div className="text-xs text-muted-foreground">
-                                            {item.zakatablePercent === 1 ? 'Fully Zakatable' : item.zakatablePercent === 0 ? 'Exempt' : `${formatPercent(item.zakatablePercent)} Zakatable`}
+                                            {item.zakatablePercent === 1 ? 'Fully Zakatable' : item.zakatablePercent === 0 ? 'Exempt' : `${formatPercent(item.zakatablePercent ?? 0)} Zakatable`}
                                         </div>
                                     </div>
                                 </div>
@@ -165,7 +168,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                 {/* Stats Grid */}
                                 <div className="grid grid-cols-2 gap-y-2 text-sm">
                                     <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Gross</div>
-                                    <div className="text-right font-mono text-muted-foreground">{formatCurrency(item.value, currency, 0)}</div>
+                                    <div className="text-right font-mono text-muted-foreground">{formatCurrency(item.value ?? 0, currency, 0)}</div>
 
                                     <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Weight</div>
                                     <div className="text-right">
@@ -173,16 +176,15 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                             <span className="font-bold text-muted-foreground text-xs">100%</span>
                                         ) : (
                                             <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
-                                                {formatPercent(item.zakatablePercent)}
+                                                {formatPercent(item.zakatablePercent ?? 0)}
                                             </span>
                                         )}
                                     </div>
 
                                     <div className="col-span-2 border-t border-border/50 my-1"></div>
 
-                                    <div className="text-foreground font-bold">Zakatable Portion</div>
                                     <div className="text-right font-bold text-primary text-base">
-                                        {formatCurrency(item.zakatableAmount || 0, currency, 0)}
+                                        {formatCurrency(item.zakatableAmount ?? 0, currency, 0)}
                                     </div>
                                 </div>
                             </div>
@@ -222,7 +224,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
 
                                 <div className="text-foreground font-bold">Zakatable Portion</div>
                                 <div className="text-right font-bold text-primary text-base">
-                                    {formatCurrency(cat.zakatableAmount, currency, 0)}
+                                    {formatCurrency(cat.zakatableAmount ?? 0, currency, 0)}
                                 </div>
                             </div>
                         </div>

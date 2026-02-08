@@ -20,7 +20,7 @@ const ahmedBase: ZakatFormData = {
     ...defaultFormData,
     // Assets
     cashOnHand: 10000,
-    goldValue: 5000, // Personal Jewelry
+    goldJewelryValue: 5000, // Personal Jewelry
     hasPreciousMetals: true,
     fourOhOneKVestedBalance: 100000, // 401k
     age: 40, // Under 59.5
@@ -299,31 +299,6 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
         const resShafii = calculateTotalAssets(dataShafii);
         // Cash (100k) + Inv Gold (10k). Jewelry (5k) is exempt in Shafi'i
         expect(resShafii).toBe(110000);
-    });
-
-    it('Legacy goldValue support', () => {
-        // If migration hasn't run, goldValue might still be populated.
-        // Logic: Treat as "Potential Jewelry" (Exempt if mode exempts jewelry, Include if mode includes)
-
-        // Hanafi (Includes Legacy)
-        const dataHanafi: ZakatFormData = {
-            ...baseData,
-            madhab: 'hanafi',
-            goldValue: 5000, // Legacy field
-            goldInvestmentValue: 0,
-            goldJewelryValue: 0
-        };
-        expect(calculateTotalAssets(dataHanafi)).toBe(105000); // 100k + 5k
-
-        // Shafi'i (Excludes Legacy - assumed properly as jewelry-like if not specified)
-        const dataShafii: ZakatFormData = {
-            ...baseData,
-            madhab: 'shafii',
-            goldValue: 5000,
-            goldInvestmentValue: 0,
-            goldJewelryValue: 0
-        };
-        expect(calculateTotalAssets(dataShafii)).toBe(100000); // 100k + 0
     });
 
     it('Enhanced Breakdown handles split correctly', () => {

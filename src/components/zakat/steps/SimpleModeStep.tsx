@@ -30,7 +30,7 @@ const simpleSections = [
     icon: Diamond,
     title: 'Gold & Silver',
     description: 'Jewelry, bullion, coins (melt value)',
-    fields: ['goldValue', 'silverValue'] as const,
+    fields: ['goldInvestmentValue', 'goldJewelryValue', 'silverInvestmentValue', 'silverJewelryValue'] as const,
   },
   {
     id: 'debts',
@@ -45,18 +45,21 @@ const simpleSections = [
 export function SimpleModeStep({ data, updateData, questionNumber }: SimpleModeStepProps) {
   // Calculate totals for each section
   const getSectionTotal = (fields: readonly (keyof ZakatFormData)[]) => {
-    return fields.reduce((sum, field) => sum + (Number(data[field]) || 0), 0);
+    return fields.reduce((sum, field) => {
+      const val = data[field];
+      return sum + (typeof val === 'number' ? val : 0);
+    }, 0);
   };
-  
+
   // For simple mode, we'll use combined totals
   const handleSectionChange = (sectionId: string, value: number) => {
     const section = simpleSections.find(s => s.id === sectionId);
     if (!section) return;
-    
+
     // Distribute to the first field in the section (simple approach)
     const primaryField = section.fields[0];
     updateData({ [primaryField]: value });
-    
+
     // Clear other fields in the section
     const otherFields = section.fields.slice(1);
     const clearUpdates: Partial<ZakatFormData> = {};
@@ -84,13 +87,13 @@ export function SimpleModeStep({ data, updateData, questionNumber }: SimpleModeS
           Enter your approximate totals for each category.
         </p>
       </div>
-      
+
       {/* Simple Input Cards */}
       <div className="space-y-4">
         {simpleSections.map((section, index) => {
           const total = getSectionTotal(section.fields);
           const Icon = section.icon;
-          
+
           return (
             <motion.div
               key={section.id}
@@ -99,8 +102,8 @@ export function SimpleModeStep({ data, updateData, questionNumber }: SimpleModeS
               transition={{ delay: index * 0.1 }}
               className={cn(
                 "p-4 rounded-xl border transition-colors",
-                section.isLiability 
-                  ? "bg-destructive/5 border-destructive/20" 
+                section.isLiability
+                  ? "bg-destructive/5 border-destructive/20"
                   : "bg-card border-border"
               )}
             >
@@ -109,12 +112,12 @@ export function SimpleModeStep({ data, updateData, questionNumber }: SimpleModeS
                   "p-2 rounded-lg",
                   section.isLiability ? "bg-destructive/10" : "bg-primary/10"
                 )}>
-                  <Icon 
-                    weight="duotone" 
+                  <Icon
+                    weight="duotone"
                     className={cn(
                       "w-5 h-5",
                       section.isLiability ? "text-destructive" : "text-primary"
-                    )} 
+                    )}
                   />
                 </div>
                 <div className="flex-1">
@@ -122,7 +125,7 @@ export function SimpleModeStep({ data, updateData, questionNumber }: SimpleModeS
                   <p className="text-sm text-muted-foreground">{section.description}</p>
                 </div>
               </div>
-              
+
               <CurrencyInput
                 label={section.isLiability ? "Total Debts Due Now" : `Total ${section.title}`}
                 value={total}
@@ -133,7 +136,7 @@ export function SimpleModeStep({ data, updateData, questionNumber }: SimpleModeS
           );
         })}
       </div>
-      
+
       {/* Summary */}
       <motion.div
         initial={{ opacity: 0 }}

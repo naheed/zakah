@@ -19,6 +19,27 @@ interface ZakatSankeyChartProps {
   showFullscreenButton?: boolean;
 }
 
+interface SankeyNode {
+  id: string;
+  displayName: string;
+  nodeColor: string;
+  isSource?: boolean;
+  isZakat?: boolean;
+  isRetained?: boolean;
+  isExempt?: boolean;
+  value?: number;
+}
+
+interface SankeyLink {
+  source: string;
+  target: string;
+  value: number;
+  startColor: string;
+  endColor: string;
+  assetName: string;
+  type: 'zakat' | 'retained' | 'exempt';
+}
+
 // Helper to sanitize IDs for Nivo
 const getSafeId = (id: string) => id.replace(/[^a-zA-Z0-9]/g, '_');
 
@@ -85,7 +106,7 @@ export function ZakatSankeyChart({
     const hasExemptionRules = totalExemptVal > 1;
 
     // --- NODE DEFINITIONS ---
-    const nodes: any[] = [];
+    const nodes: SankeyNode[] = [];
 
     // 1. Source Nodes (Left Column) - Individual Assets
     activeAssets.forEach((a) => {
@@ -127,7 +148,7 @@ export function ZakatSankeyChart({
 
     // --- LINK DEFINITIONS ---
     // Strict flow conservation: Every dollar in Source must go to a Target
-    const links: any[] = [];
+    const links: SankeyLink[] = [];
 
     activeAssets.forEach((asset) => {
       // 1. Calculate Splits
@@ -218,7 +239,7 @@ export function ZakatSankeyChart({
   // Define sort order function
   // We want: Zakat (Top Right), Retained (Middle Right), Exempt (Bottom Right)
   // Assets (Left) sorted by value
-  const sortNodes = (a: any, b: any) => {
+  const sortNodes = (a: SankeyNode, b: SankeyNode) => {
     // 1. Zakat always first
     if (a.isZakat) return -1;
     if (b.isZakat) return 1;
@@ -258,7 +279,7 @@ export function ZakatSankeyChart({
           align="justify"
           // @ts-ignore - Nivo types can be strict about sort function signature
           sort={sortNodes}
-          colors={(node: any) => node.nodeColor || "#999"}
+          colors={(node: SankeyNode) => node.nodeColor || "#999"}
           nodeOpacity={1}
           nodeHoverOthersOpacity={0.35}
           nodeThickness={isSmallScreen ? 12 : 18}
@@ -276,11 +297,11 @@ export function ZakatSankeyChart({
           labelTextColor={{ from: 'theme', theme: 'text.fill' }}
 
           // --- TOOLTIPS ---
-          nodeTooltip={({ node }: any) => (
+          nodeTooltip={({ node }: { node: SankeyNode }) => (
             <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-xl border border-border text-xs z-50 min-w-[160px]">
               <div className="font-bold mb-1 border-b border-border/50 pb-1">{node.displayName || node.id}</div>
               <div className="font-mono font-bold text-primary">
-                {formatCurrency(node.value, currency)}
+                {formatCurrency(node.value || 0, currency)}
               </div>
               {node.isZakat && <div className="text-[10px] text-muted-foreground mt-1">Total Zakat Due</div>}
               {node.isRetained && <div className="text-[10px] text-muted-foreground mt-1">Wealth retained after Zakat</div>}
@@ -289,7 +310,7 @@ export function ZakatSankeyChart({
             </div>
           )}
 
-          linkTooltip={({ link }: any) => (
+          linkTooltip={({ link }: { link: any }) => (
             <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-xl border border-border text-xs z-50 min-w-[180px]">
               <div className="text-muted-foreground mb-1">
                 {link.assetName} → {link.target.displayName || link.target.id}

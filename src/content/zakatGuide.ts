@@ -92,6 +92,14 @@ export const nisabContent: StepContent = {
       summary: "Shafi'i view uses silver standard (~$550 USD) for all assets, maximizing charity following the majority scholarly opinion.",
       deepLink: "/methodology#nisab",
     },
+    maliki: {
+      summary: "Maliki view uses silver standard for most wealth. This lower threshold ensures more people fulfill their Zakat obligation.",
+      deepLink: "/methodology#nisab",
+    },
+    hanbali: {
+      summary: "Hanbali view uses silver standard (~595g ≈ $550). Ensures the obligation is met using the more conservative threshold.",
+      deepLink: "/methodology#nisab",
+    },
   },
   learnMore: {
     title: "Understanding the Niṣāb Threshold",
@@ -261,6 +269,14 @@ export const liquidAssetsContent: StepContent = {
       summary: "Shafi'i view: All liquid assets are fully Zakatable. Interest is impure and must be donated separately to charity.",
       deepLink: "/methodology#liquid",
     },
+    maliki: {
+      summary: "Maliki view: Cash and equivalents are fully Zakatable. Interest (Riba) must be purified through charitable donation.",
+      deepLink: "/methodology#liquid",
+    },
+    hanbali: {
+      summary: "Hanbali view: All accessible cash is Zakatable. Interest earnings must be donated to charity (not as Zakat).",
+      deepLink: "/methodology#liquid",
+    },
   },
   learnMore: {
     title: "Liquid Assets & The Fiat Economy",
@@ -321,7 +337,15 @@ export const investmentsContent: StepContent = {
       deepLink: "/methodology#investments",
     },
     shafii: {
-      summary: "Shafi'i/Maliki view: Pay Zakat on 100% of market value for all investments, not the 30% proxy.",
+      summary: "Shafi'i view: Zakat on 100% of market value for all investments. The company's assets are valued through your share ownership.",
+      deepLink: "/methodology#investments",
+    },
+    maliki: {
+      summary: "Maliki view: Active trading (Mudir) = annual 100% valuation. Long-term (Muhtakir) = Zakat on underlying assets or upon sale.",
+      deepLink: "/methodology#investments",
+    },
+    hanbali: {
+      summary: "Hanbali view: Stocks are Zakatable at 100% market value. Intent (Niyyah) is key—trade stocks vs. investment stocks.",
       deepLink: "/methodology#investments",
     },
   },
@@ -364,7 +388,15 @@ export const retirementContent: StepContent = {
       deepLink: "/methodology#retirement",
     },
     shafii: {
-      summary: "Shafi'i/Maliki/Hanbali view: Zakat is due on the net accessible amount (balance minus taxes/penalties). This differs from the Bradford exemption.",
+      summary: "Shafi'i view: Zakat is due on the net accessible amount (balance minus taxes/penalties). Ownership exists despite restrictions.",
+      deepLink: "/methodology#retirement",
+    },
+    maliki: {
+      summary: "Maliki view: Retirement assets are Zakatable on the net accessible amount. The Muhtakir principle may apply to deferred accounts.",
+      deepLink: "/methodology#retirement",
+    },
+    hanbali: {
+      summary: "Hanbali view: Wealth is owned once vested. Calculate Zakat on net accessible value (after tax/penalty deductions).",
       deepLink: "/methodology#retirement",
     },
   },
@@ -398,6 +430,28 @@ export const preciousMetalsContent: StepContent = {
   questionNumber: 9,
   title: "What precious metals do you own?",
   subtitle: "Gold, silver, and other precious metals.",
+  introByMethodology: {
+    balanced: {
+      summary: "Investment bullion is always Zakatable at melt value. Personal jewelry follows the precautionary (Ahwat) approach—enter it separately and we'll include it to be safe.",
+      deepLink: "/methodology#metals",
+    },
+    hanafi: {
+      summary: "Hanafi view: All gold and silver is Zakatable at melt value—both investment bullion AND personal jewelry. Gold/silver are inherently 'growing wealth' (Nāmī) regardless of form.",
+      deepLink: "/methodology#metals",
+    },
+    shafii: {
+      summary: "Shafi'i view: Investment bullion is Zakatable. Personal jewelry for permissible adornment is EXEMPT—unless excessive (beyond local custom/'urf) or held for hoarding.",
+      deepLink: "/methodology#metals",
+    },
+    maliki: {
+      summary: "Maliki view: Investment bullion is Zakatable. Personal jewelry for adornment is EXEMPT. 'Excessive' jewelry (Isrāf) or investment jewelry is Zakatable.",
+      deepLink: "/methodology#metals",
+    },
+    hanbali: {
+      summary: "Hanbali view: Investment bullion is Zakatable. Personal jewelry for permissible use is EXEMPT. Jewelry held for investment or hoarding (Kanz) is Zakatable.",
+      deepLink: "/methodology#metals",
+    },
+  },
   learnMore: {
     title: "Gold, Silver & The Jewelry Debate",
     content: `Gold and silver have special significance—they were the original basis for the niṣāb measurement.
@@ -448,7 +502,15 @@ export const cryptoContent: StepContent = {
       deepLink: "/methodology#crypto",
     },
     shafii: {
-      summary: "Crypto usually judged as 'Thaman' (Currency) or Trade Goods. If held for appreciation/trade, Zakat is due on market value.",
+      summary: "Shafi'i view: Crypto is analogous to currency (thaman) or trade goods. Market value on your Zakat date is fully Zakatable.",
+      deepLink: "/methodology#crypto",
+    },
+    maliki: {
+      summary: "Maliki view: Crypto for trading is Mudir treatment (annual valuation). Long-term holds may follow Muhtakir rules (Zakat upon sale).",
+      deepLink: "/methodology#crypto",
+    },
+    hanbali: {
+      summary: "Hanbali view: Crypto is treated as trade goods if held for profit. Full market value is Zakatable. Staking rewards are Zakatable when vested.",
       deepLink: "/methodology#crypto",
     },
   },
@@ -486,7 +548,15 @@ export const trustsContent: StepContent = {
       deepLink: "/methodology#trusts",
     },
     shafii: {
-      summary: "Zakat follows ownership. If the trust assets are technically yours to access/revoke, Zakat is mandatory on them.",
+      summary: "Shafi'i view: Zakat follows ownership. If the trust assets are technically yours to access/revoke, Zakat is mandatory on them.",
+      deepLink: "/methodology#trusts",
+    },
+    maliki: {
+      summary: "Maliki view: Ownership (Milk) determines Zakat. Grantor trusts where you retain control are Zakatable.",
+      deepLink: "/methodology#trusts",
+    },
+    hanbali: {
+      summary: "Hanbali view: Emphasis on Niyyah (intent). If you can access/dispose of trust assets, they are Zakatable.",
       deepLink: "/methodology#trusts",
     },
   },
@@ -591,6 +661,28 @@ export const illiquidAssetsContent: StepContent = {
   questionNumber: 14,
   title: "Do you have illiquid assets for sale?",
   subtitle: "Art, collectibles, or livestock held for sale.",
+  introByMethodology: {
+    balanced: {
+      summary: "Assets held for sale are trade goods—Zakatable at current market value. Items kept for personal enjoyment are exempt.",
+      deepLink: "/methodology#business",
+    },
+    hanafi: {
+      summary: "Hanafi view: Trade goods (ʿurūḍ al-tijārah) are Zakatable at year-end market value. Personal collectibles are exempt.",
+      deepLink: "/methodology#business",
+    },
+    shafii: {
+      summary: "Shafi'i view: Trade goods are Zakatable annually at market value. Personal use items (qunya) are exempt.",
+      deepLink: "/methodology#business",
+    },
+    maliki: {
+      summary: "Maliki view: If you actively trade (Mudir), pay annually. If you hold for appreciation (Muhtakir), Zakat is due only upon sale.",
+      deepLink: "/methodology#business",
+    },
+    hanbali: {
+      summary: "Hanbali view: Trade goods are Zakatable at year-end market value. Intent to sell is key—changing intent to personal use breaks the cycle.",
+      deepLink: "/methodology#business",
+    },
+  },
   learnMore: {
     title: "Illiquid Assets & The Trade Goods Principle",
     content: `If you hold an asset **with the intention to sell for profit**, it's treated as trade goods and is Zakatable at market value.
@@ -615,6 +707,28 @@ export const debtOwedContent: StepContent = {
   questionNumber: 15,
   title: "Do others owe you money?",
   subtitle: "Personal loans you gave to others that you expect to collect.",
+  introByMethodology: {
+    balanced: {
+      summary: "Good debt (collectible) is Zakatable annually. Bad debt (unlikely to be collected) is only Zakatable when actually recovered—for one year only.",
+      deepLink: "/methodology#debts",
+    },
+    hanafi: {
+      summary: "Hanafi view: Good debt is Zakatable annually. Bad debt is Zakatable when recovered, but you must pay for all past years it was owed.",
+      deepLink: "/methodology#debts",
+    },
+    shafii: {
+      summary: "Shafi'i view: Good debt is Zakatable annually. Bad debt is Zakatable when recovered, for one year only (not retroactive).",
+      deepLink: "/methodology#debts",
+    },
+    maliki: {
+      summary: "Maliki view: Good debt is Zakatable annually. Bad debt is Zakatable when recovered, for one year only—same as Shafi'i.",
+      deepLink: "/methodology#debts",
+    },
+    hanbali: {
+      summary: "Hanbali view: Good debt is Zakatable annually. Bad debt follows the one-year-upon-recovery rule.",
+      deepLink: "/methodology#debts",
+    },
+  },
   learnMore: {
     title: "Receivables: Good Debt vs Bad Debt",
     content: `**Good Debt (Dayn Qawiyy):**
@@ -645,7 +759,15 @@ export const liabilitiesContent: StepContent = {
       deepLink: "/methodology#debts",
     },
     shafii: {
-      summary: "Shafi'i view: Debts do not reduce Zakatable wealth. Pay Zakat on what you possess, regardless of outstanding obligations.",
+      summary: "Shafi'i view: Debts do NOT reduce your Zakatable wealth. Zakat is attached to the asset itself, not your net worth.",
+      deepLink: "/methodology#debts",
+    },
+    maliki: {
+      summary: "Maliki view: Only immediate debts (12 months) are deductible—and only if you lack fixed assets to cover them.",
+      deepLink: "/methodology#debts",
+    },
+    hanbali: {
+      summary: "Hanbali view: Debts are fully deductible from Zakatable wealth (similar to Hanafi). Pay Zakat on net wealth.",
       deepLink: "/methodology#debts",
     },
   },

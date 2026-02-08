@@ -26,7 +26,7 @@ export type QuestionContext =
 /**
  * Mapping from Zakat categories to form fields
  */
-const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData> = {
+const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData | null> = {
     // Liquid assets
     'CHECKING': 'checkingAccounts',
     'SAVINGS': 'savingsAccounts',
@@ -65,11 +65,11 @@ const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData> = {
     'NFT': 'cryptoTrading',
 
     // Precious metals
-    'GOLD': 'goldValue',
-    'SILVER': 'silverValue',
-    'METALS': 'goldValue',
-    'GOLD_FULL': 'goldValue',
-    'SILVER_FULL': 'silverValue',
+    'GOLD': 'goldInvestmentValue',
+    'SILVER': 'silverInvestmentValue',
+    'METALS': 'goldInvestmentValue',
+    'GOLD_FULL': 'goldInvestmentValue',
+    'SILVER_FULL': 'silverInvestmentValue',
 
     // Real estate - map to rental income (net cash received)
     'REAL_ESTATE': 'rentalPropertyIncome',
@@ -206,7 +206,7 @@ export function mapLineItemsToFormData(
         if (!fieldName) continue; // Skip unmapped categories
 
         // Type-safe accumulation
-        const currentValue = (updates[fieldName] as number) || 0;
+        const currentValue = (updates[fieldName] as number | undefined) || 0;
         (updates as any)[fieldName] = currentValue + item.amount;
     }
 
@@ -270,7 +270,7 @@ export function getAffectedQuestionLabels(lineItems: AssetLineItem[]): string[] 
             labels.add('Retirement');
         } else if (['cryptoCurrency', 'cryptoTrading', 'stakedAssets'].includes(field)) {
             labels.add('Crypto');
-        } else if (['goldValue', 'silverValue'].includes(field)) {
+        } else if (['goldInvestmentValue', 'goldJewelryValue', 'silverInvestmentValue', 'silverJewelryValue'].includes(field)) {
             labels.add('Precious Metals');
         } else if (['creditCardDebt', 'personalLoans', 'otherShortTermDebt'].includes(field)) {
             labels.add('Debts');

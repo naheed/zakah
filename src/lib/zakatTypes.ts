@@ -66,6 +66,7 @@ export interface ZakatFormData {
     activeInvestments: number;
     passiveInvestmentsValue: number;
     passiveInvestmentIntent: InvestmentIntent; // Mudir (trade) or Muhtakir (hold)
+    reitsValue: number; // Equity REITs - market value (avoid Mortgage REITs)
     dividends: number;
 
     dividendPurificationPercent: number; // % to purify from non-halal income
@@ -90,9 +91,11 @@ export interface ZakatFormData {
 
     // Real Estate
     realEstateForSale: number; // Property for flipping - full value
+    landBankingValue: number; // Undeveloped land held for appreciation - full value
     rentalPropertyIncome: number; // Net rental income in bank
 
     // Business
+    isServiceBusiness: boolean; // Toggle for service businesses (no inventory)
     businessCashAndReceivables: number;
     businessInventory: number;
 

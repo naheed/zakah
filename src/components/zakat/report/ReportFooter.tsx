@@ -10,7 +10,7 @@ interface ReportFooterProps {
     dividendsToPurify: number;
     currency: string;
     zakatDue?: number; // Pass to donations page
-    referralStats?: { totalReferrals: number; totalAssetsCalculated: number; totalZakatCalculated: number };
+    referralStats?: { totalReferrals: number; totalAssetsCalculated: number | null; totalZakatCalculated: number | null };
     referralCode?: string;
 }
 

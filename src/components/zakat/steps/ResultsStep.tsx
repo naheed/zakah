@@ -395,7 +395,7 @@ export function ResultsStep({
           dividendsToPurify={dividendsToPurify}
           currency={currency}
           zakatDue={zakatDue} // Pass Zakat amount for donation tracking
-          referralStats={stats || undefined} // Pass stats from useReferral
+          referralStats={stats ?? undefined} // Pass stats from useReferral
           referralCode={referralCode || undefined}
         />
       </div>

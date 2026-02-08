@@ -74,8 +74,14 @@ export function AddDonationModal({ open, onClose, onSave, zakatYearId }: AddDona
             if (error) throw error;
 
             if (data?.success && data?.data) {
-                const extracted = data.data;
-                console.log("AI Receipt Extraction:", extracted);
+                const extracted = data.data as {
+                    donationAmount?: number | string;
+                    organizationName?: string;
+                    donationDate?: string;
+                    taxId?: string;
+                    address?: string;
+                    campaign?: string;
+                };
 
                 if (extracted.donationAmount) setAmount(extracted.donationAmount.toString());
                 if (extracted.organizationName) setRecipientName(extracted.organizationName);
@@ -93,7 +99,7 @@ export function AddDonationModal({ open, onClose, onSave, zakatYearId }: AddDona
                 setCategory(inferredCat);
 
                 // Add note with extra details
-                const extraDetails = [];
+                const extraDetails: string[] = [];
                 if (extracted.taxId) extraDetails.push(`Tax ID: ${extracted.taxId}`);
                 if (extracted.address) extraDetails.push(`Address: ${extracted.address}`);
                 if (extracted.campaign) extraDetails.push(`Campaign: ${extracted.campaign}`);

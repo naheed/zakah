@@ -9,7 +9,7 @@ const mockUsePlaidLink = vi.fn(() => ({
     openPlaidLink: mockOpenPlaidLink,
     reset: mockReset,
     isLoading: false,
-    error: null,
+    error: null as string | null,
     status: 'idle'
 }));
 
@@ -20,7 +20,12 @@ vi.mock('@/hooks/usePlaidLink', () => ({
 // Mock react-router
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
-    useNavigate: () => mockNavigate
+    useNavigate: () => mockNavigate,
+    onDataExtracted: (data: any) => {
+        // This is an example of how onDataExtracted might be used
+        // In a real scenario, this would likely be part of the Plaid hook mock
+        console.log('Data extracted:', data);
+    }
 }));
 
 describe('PlaidMethod', () => {

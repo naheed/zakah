@@ -38,6 +38,7 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   activeInvestments: "investments",
   passiveInvestmentsValue: "investments",
   passiveInvestmentIntent: "investments",
+  reitsValue: "investments",
   dividends: "investments",
   dividendPurificationPercent: "investments",
 
@@ -54,8 +55,10 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   isOver59Half: "retirement",
 
   // Precious Metals
-  goldValue: "precious-metals",
-  silverValue: "precious-metals",
+  goldInvestmentValue: "precious-metals",
+  goldJewelryValue: "precious-metals",
+  silverInvestmentValue: "precious-metals",
+  silverJewelryValue: "precious-metals",
 
   // Crypto
   cryptoCurrency: "crypto",
@@ -72,9 +75,11 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
 
   // Real Estate
   realEstateForSale: "real-estate",
+  landBankingValue: "real-estate",
   rentalPropertyIncome: "real-estate",
 
   // Business
+  isServiceBusiness: "business",
   businessCashAndReceivables: "business",
   businessInventory: "business",
 
@@ -100,8 +105,9 @@ export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
   currency: "currency",
   calendarType: "nisab",
   nisabStandard: "nisab",
-  madhab: "nisab",
-  isHousehold: "family",
+  madhab: "setup",
+  entryMethod: "setup",
+  isHousehold: "setup",
   householdMembers: "family",
   email: "email",
   age: "tax",

@@ -8,9 +8,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateZakat, defaultFormData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '../zakatCalculations';
-import { ZakatFormData } from '../zakatTypes';
-import type { Madhab } from '../zakatTypes';
+import { calculateZakat, defaultFormData } from '../zakatCalculations';
+import { ZakatFormData, Madhab } from '../zakatTypes';
 
 // ============================================================================
 // Ahmed's Base Profile (from existing passing tests)
@@ -19,7 +18,7 @@ import type { Madhab } from '../zakatTypes';
 const ahmedBase: Partial<ZakatFormData> = {
     age: 40,
     cashOnHand: 10000,
-    goldValue: 5000,
+    goldJewelryValue: 5000,
     hasPreciousMetals: true,
     fourOhOneKVestedBalance: 100000,
     passiveInvestmentsValue: 50000,
@@ -37,7 +36,7 @@ describe('Ahmed Benchmark - Madhab Comparisons', () => {
             madhab: 'balanced',
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
 
         // From existing test: expectedNet = 0 (liabilities exceed zakatable assets)
         expect(result.zakatDue).toBe(0);
@@ -51,7 +50,7 @@ describe('Ahmed Benchmark - Madhab Comparisons', () => {
             madhab: 'hanafi',
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
 
         // Updated after living expenses bug fix: $38K liabilities (was $27K)
         // Assets $130K - Liabilities $38K = $92K
@@ -66,7 +65,7 @@ describe('Ahmed Benchmark - Madhab Comparisons', () => {
             madhab: 'shafii',
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
 
         // From existing test: expectedNet = 125,000 (no debt deduction)
         expect(result.netZakatableWealth).toBe(125000);
@@ -80,7 +79,7 @@ describe('Ahmed Benchmark - Madhab Comparisons', () => {
             madhab: 'maliki',
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
 
         // Updated after living expenses bug fix: $38K liabilities (was $27K)
         // Assets $125K - Liabilities $38K = $87K
@@ -99,7 +98,7 @@ describe('Simple Scenarios - All Madhabs Agree', () => {
                 cashOnHand: 10000,
             };
 
-            const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+            const result = calculateZakat(formData);
 
             // $10K * 2.5% = $250
             expect(result.zakatDue).toBe(250);
@@ -115,7 +114,7 @@ describe('Simple Scenarios - All Madhabs Agree', () => {
                 hasCrypto: true,
             };
 
-            const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+            const result = calculateZakat(formData);
 
             // $20K * 2.5% = $500
             expect(result.zakatDue).toBe(500);
@@ -129,16 +128,16 @@ describe('Focused Variations - Testing Specific Rules', () => {
         const baseData = {
             ...defaultFormData,
             cashOnHand: 5000,
-            goldValue: 5000,
+            goldJewelryValue: 5000,
             hasPreciousMetals: true,
         };
 
         // Hanafi: Includes jewelry
-        const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' });
         expect(hanafiResult.zakatDue).toBe(250); // ($5K + $5K) * 2.5%
 
         // Balanced: Exempts jewelry
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' });
         expect(balancedResult.zakatDue).toBe(125); // $5K * 2.5%
     });
 
@@ -150,11 +149,11 @@ describe('Focused Variations - Testing Specific Rules', () => {
         };
 
         // Balanced: 30% of stocks
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' });
         expect(balancedResult.zakatDue).toBe(400); // ($10K + $6K) * 2.5%
 
         // Hanafi: 100% of stocks
-        const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' });
         expect(hanafiResult.zakatDue).toBe(750); // ($10K + $20K) * 2.5%
     });
 
@@ -166,11 +165,11 @@ describe('Focused Variations - Testing Specific Rules', () => {
         };
 
         // Shafii: No deduction
-        const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' });
         expect(shafiiResult.zakatDue).toBe(250); // $10K * 2.5%
 
         // Balanced: Deducts 12-month debts
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' });
         expect(balancedResult.zakatDue).toBe(125); // ($10K - $5K) * 2.5%
     });
 });
@@ -183,7 +182,7 @@ describe('Edge Cases', () => {
             cashOnHand: 400, // Below ~$514 nisab
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
         expect(result.zakatDue).toBe(0);
     });
 
@@ -193,7 +192,7 @@ describe('Edge Cases', () => {
             cashOnHand: 600,
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
         expect(result.zakatDue).toBe(15); // $600 * 2.5%
     });
 
@@ -205,7 +204,7 @@ describe('Edge Cases', () => {
             creditCardBalance: 10000, // Debt > Assets
         };
 
-        const result = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        const result = calculateZakat(formData);
         expect(result.zakatDue).toBe(0);
     });
 });
