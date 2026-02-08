@@ -30,6 +30,78 @@ export function SetupStep() {
             />
 
             <div className="space-y-8">
+                {/* Section 0: Entry Method (New v0.20.0) */}
+                <div className="space-y-4">
+                    <Label className="text-base font-semibold text-foreground">
+                        {c.wizard.preferences.entryMethod.title}
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Manual Entry */}
+                        <div
+                            className={cn(
+                                "relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer hover:border-primary/50",
+                                !formData.entryMethod || formData.entryMethod === 'manual'
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border bg-card"
+                            )}
+                            onClick={() => updateFormData({ entryMethod: 'manual' })}
+                        >
+                            <div className="flex items-start justify-between mb-2">
+                                <ListChecks
+                                    className={cn(
+                                        "w-6 h-6",
+                                        !formData.entryMethod || formData.entryMethod === 'manual' ? "text-primary" : "text-muted-foreground"
+                                    )}
+                                    weight={!formData.entryMethod || formData.entryMethod === 'manual' ? "fill" : "duotone"}
+                                />
+                                {(!formData.entryMethod || formData.entryMethod === 'manual') && (
+                                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                        <Check className="w-3 h-3 text-primary-foreground" weight="bold" />
+                                    </div>
+                                )}
+                            </div>
+                            <h3 className={cn("font-bold mb-1", !formData.entryMethod || formData.entryMethod === 'manual' ? "text-primary" : "text-foreground")}>
+                                {c.wizard.preferences.entryMethod.manual.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                {c.wizard.preferences.entryMethod.manual.description}
+                            </p>
+                        </div>
+
+                        {/* Batch Upload */}
+                        <div
+                            className={cn(
+                                "relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer hover:border-primary/50",
+                                formData.entryMethod === 'upload'
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border bg-card"
+                            )}
+                            onClick={() => updateFormData({ entryMethod: 'upload' })}
+                        >
+                            <div className="flex items-start justify-between mb-2">
+                                <Sparkle
+                                    className={cn(
+                                        "w-6 h-6",
+                                        formData.entryMethod === 'upload' ? "text-primary" : "text-muted-foreground"
+                                    )}
+                                    weight={formData.entryMethod === 'upload' ? "fill" : "duotone"}
+                                />
+                                {formData.entryMethod === 'upload' && (
+                                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                        <Check className="w-3 h-3 text-primary-foreground" weight="bold" />
+                                    </div>
+                                )}
+                            </div>
+                            <h3 className={cn("font-bold mb-1", formData.entryMethod === 'upload' ? "text-primary" : "text-foreground")}>
+                                {c.wizard.preferences.entryMethod.upload.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                {c.wizard.preferences.entryMethod.upload.description}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Section 1: Calculation Mode */}
                 <div className="space-y-4">
                     <Label className="text-base font-semibold text-foreground">

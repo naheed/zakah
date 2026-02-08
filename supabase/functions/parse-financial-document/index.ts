@@ -128,6 +128,31 @@ serve(async (req: any) => {
       );
     }
 
+
+    // --- SECURITY: File Type Validation ---
+    function validateFileType(base64: string, expectedMime: string): boolean {
+      // Magic number checks (Base64 prefixes)
+      const signatures: Record<string, string[]> = {
+        'application/pdf': ['JVBERi'], // %PDF
+        'image/jpeg': ['/9j/'], // FF D8 FF
+        'image/png': ['iVBORw0KGgo'], // 89 50 4E 47
+        'image/webp': ['UklGR'] // RIFF
+      };
+
+      const validSignatures = signatures[expectedMime];
+      if (!validSignatures) return false; // MIME type not allowed
+
+      return validSignatures.some(sig => base64.startsWith(sig));
+    }
+
+    if (!validateFileType(documentBase64, mimeType)) {
+      console.error(`Security Alert: Mime type ${mimeType} does not match file signature.`);
+      return new Response(
+        JSON.stringify({ error: "Invalid file type. File signature does not match declared type." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log(`Processing ${documentType} document (${mimeType}), extractionType: ${extractionType}`);
 
     // --- PROMPT REGISTRY ---

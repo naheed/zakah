@@ -72,23 +72,143 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
-                        {rows.map(({ key, cat, Icon, ruling }) => (
-                            <tr key={key} className="hover:bg-muted/5 transition-colors">
-                                <td className="px-4 py-3.5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted text-muted-foreground">
-                                            <Icon weight="duotone" className="text-lg" />
+                        {rows.flatMap(({ key, cat, Icon, ruling }) => {
+                            if (key === 'preciousMetals' && cat.items && cat.items.length > 0) {
+                                return cat.items.map((item, idx) => (
+                                    <tr key={`${key}-${idx}`} className="hover:bg-muted/5 transition-colors">
+                                        <td className="px-4 py-3.5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted text-muted-foreground">
+                                                    <Icon weight="duotone" className="text-lg" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-foreground">{item.name}</div>
+                                                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                                                        {item.zakatablePercent === 1 ? 'Fully Zakatable' : item.zakatablePercent === 0 ? 'Exempt' : `${formatPercent(item.zakatablePercent)} Zakatable`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3.5 text-right font-mono text-muted-foreground">
+                                            {formatCurrency(item.value, currency, 0)}
+                                        </td>
+                                        <td className="px-2 py-3.5 text-center">
+                                            {item.zakatablePercent === 1 ? (
+                                                <span className="font-bold text-muted-foreground text-xs">100%</span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
+                                                    {formatPercent(item.zakatablePercent)}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3.5 text-right font-bold text-foreground">
+                                            {formatCurrency(item.zakatableAmount || 0, currency, 0)}
+                                        </td>
+                                    </tr>
+                                ));
+                            }
+
+                            return (
+                                <tr key={key} className="hover:bg-muted/5 transition-colors">
+                                    <td className="px-4 py-3.5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted text-muted-foreground">
+                                                <Icon weight="duotone" className="text-lg" />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-foreground">{cat.label}</div>
+                                                <div className="text-[11px] text-muted-foreground mt-0.5">{ruling}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="font-bold text-foreground">{cat.label}</div>
-                                            <div className="text-[11px] text-muted-foreground mt-0.5">{ruling}</div>
+                                    </td>
+                                    <td className="px-4 py-3.5 text-right font-mono text-muted-foreground">
+                                        {formatCurrency(cat.total, currency, 0)}
+                                    </td>
+                                    <td className="px-2 py-3.5 text-center">
+                                        {cat.zakatablePercent === 1 ? (
+                                            <span className="font-bold text-muted-foreground text-xs">100%</span>
+                                        ) : (
+                                            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
+                                                {formatPercent(cat.zakatablePercent)}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3.5 text-right font-bold text-foreground">
+                                        {formatCurrency(cat.zakatableAmount, currency, 0)}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {rows.flatMap(({ key, cat, Icon, ruling }) => {
+                    if (key === 'preciousMetals' && cat.items && cat.items.length > 0) {
+                        return cat.items.map((item, idx) => (
+                            <div key={`${key}-${idx}`} className="bg-card border border-border rounded-xl p-4 flex flex-col gap-4 shadow-sm">
+                                {/* Header */}
+                                <div className="flex items-center gap-3 border-b border-border/50 pb-3">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
+                                        <Icon weight="duotone" className="text-xl" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-foreground text-base">{item.name}</div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {item.zakatablePercent === 1 ? 'Fully Zakatable' : item.zakatablePercent === 0 ? 'Exempt' : `${formatPercent(item.zakatablePercent)} Zakatable`}
                                         </div>
                                     </div>
-                                </td>
-                                <td className="px-4 py-3.5 text-right font-mono text-muted-foreground">
-                                    {formatCurrency(cat.total, currency, 0)}
-                                </td>
-                                <td className="px-2 py-3.5 text-center">
+                                </div>
+
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 gap-y-2 text-sm">
+                                    <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Gross</div>
+                                    <div className="text-right font-mono text-muted-foreground">{formatCurrency(item.value, currency, 0)}</div>
+
+                                    <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Weight</div>
+                                    <div className="text-right">
+                                        {item.zakatablePercent === 1 ? (
+                                            <span className="font-bold text-muted-foreground text-xs">100%</span>
+                                        ) : (
+                                            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
+                                                {formatPercent(item.zakatablePercent)}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-2 border-t border-border/50 my-1"></div>
+
+                                    <div className="text-foreground font-bold">Zakatable Portion</div>
+                                    <div className="text-right font-bold text-primary text-base">
+                                        {formatCurrency(item.zakatableAmount || 0, currency, 0)}
+                                    </div>
+                                </div>
+                            </div>
+                        ));
+                    }
+
+                    return (
+                        <div key={key} className="bg-card border border-border rounded-xl p-4 flex flex-col gap-4 shadow-sm">
+                            {/* Header */}
+                            <div className="flex items-center gap-3 border-b border-border/50 pb-3">
+                                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
+                                    <Icon weight="duotone" className="text-xl" />
+                                </div>
+                                <div>
+                                    <div className="font-bold text-foreground text-base">{cat.label}</div>
+                                    <div className="text-xs text-muted-foreground">{ruling}</div>
+                                </div>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 gap-y-2 text-sm">
+                                <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Gross</div>
+                                <div className="text-right font-mono text-muted-foreground">{formatCurrency(cat.total, currency, 0)}</div>
+
+                                <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Weight</div>
+                                <div className="text-right">
                                     {cat.zakatablePercent === 1 ? (
                                         <span className="font-bold text-muted-foreground text-xs">100%</span>
                                     ) : (
@@ -96,56 +216,18 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
                                             {formatPercent(cat.zakatablePercent)}
                                         </span>
                                     )}
-                                </td>
-                                <td className="px-4 py-3.5 text-right font-bold text-foreground">
+                                </div>
+
+                                <div className="col-span-2 border-t border-border/50 my-1"></div>
+
+                                <div className="text-foreground font-bold">Zakatable Portion</div>
+                                <div className="text-right font-bold text-primary text-base">
                                     {formatCurrency(cat.zakatableAmount, currency, 0)}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
-                {rows.map(({ key, cat, Icon, ruling }) => (
-                    <div key={key} className="bg-card border border-border rounded-xl p-4 flex flex-col gap-4 shadow-sm">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 border-b border-border/50 pb-3">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
-                                <Icon weight="duotone" className="text-xl" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-foreground text-base">{cat.label}</div>
-                                <div className="text-xs text-muted-foreground">{ruling}</div>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 gap-y-2 text-sm">
-                            <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Gross</div>
-                            <div className="text-right font-mono text-muted-foreground">{formatCurrency(cat.total, currency, 0)}</div>
-
-                            <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Weight</div>
-                            <div className="text-right">
-                                {cat.zakatablePercent === 1 ? (
-                                    <span className="font-bold text-muted-foreground text-xs">100%</span>
-                                ) : (
-                                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold">
-                                        {formatPercent(cat.zakatablePercent)}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="col-span-2 border-t border-border/50 my-1"></div>
-
-                            <div className="text-foreground font-bold">Zakatable Portion</div>
-                            <div className="text-right font-bold text-primary text-base">
-                                {formatCurrency(cat.zakatableAmount, currency, 0)}
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {rows.length === 0 && (

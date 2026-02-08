@@ -9,6 +9,7 @@ import { content as c } from "@/content";
 import { usePresence } from "@/hooks/usePresence";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { SetupStep } from "./steps/SetupStep";
+import { UploadFirstStep } from "./steps/UploadFirstStep";
 import { CategorySelectionStep } from "./steps/CategorySelectionStep";
 import { SimpleModeStep } from "./steps/SimpleModeStep";
 import { LiquidAssetsStep } from "./steps/LiquidAssetsStep";
@@ -73,6 +74,7 @@ const SWIPE_VELOCITY_THRESHOLD = 500; // Reduced (was 800)
 type StepId =
   | 'welcome'
   | 'setup'
+  | 'upload-first'
   | 'currency'
   | 'categories'
   | 'simple-mode'
@@ -101,6 +103,7 @@ interface Step {
 const allSteps: Step[] = [
   { id: 'welcome', title: c.wizard.stepTitles.welcome, section: 'intro' },
   { id: 'setup', title: c.wizard.stepTitles.setup, section: 'intro' },
+  { id: 'upload-first', title: c.wizard.stepTitles.uploadFirst, section: 'intro', condition: (data) => data.entryMethod === 'upload' },
   { id: 'categories', title: c.wizard.stepTitles.categories, section: 'intro', condition: (data) => !data.isSimpleMode },
   // Simple mode step (replaces detailed steps when active)
   { id: 'simple-mode', title: c.wizard.stepTitles.simpleMode, section: 'assets', condition: (data) => data.isSimpleMode },
@@ -370,6 +373,8 @@ export function ZakatWizard() {
         return <WelcomeStep onNext={goToNext} onLoadCalculation={handleLoadCalculation} onViewResults={handleViewResults} />;
       case 'setup':
         return <SetupStep />;
+      case 'upload-first':
+        return <UploadFirstStep onNext={goToNext} />;
       case 'categories':
         return (
           <div className="space-y-6">

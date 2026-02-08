@@ -82,7 +82,7 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
     it('Gold jewelry: Hanafi INCLUDES, all others EXEMPT', () => {
         const baseData = {
             ...defaultFormData,
-            goldValue: 5000,
+            goldJewelryValue: 5000,
             hasPreciousMetals: true,
         };
 
@@ -100,7 +100,7 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
     it('Silver jewelry: Same rule as gold', () => {
         const baseData = {
             ...defaultFormData,
-            silverValue: 2000,
+            silverJewelryValue: 2000,
             hasPreciousMetals: true,
         };
 
@@ -115,7 +115,7 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
         const baseData = {
             ...defaultFormData,
             cashOnHand: 5000,
-            goldValue: 5000,
+            goldJewelryValue: 5000,
             hasPreciousMetals: true,
         };
 
@@ -124,6 +124,30 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
 
         const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(balancedResult.zakatDue).toBe(125); // $5K * 2.5%
+    });
+
+    it('Breakdown: Itemizes Gold Investment vs Jewelry', () => {
+        const result = calculateZakat({
+            ...defaultFormData,
+            goldInvestmentValue: 1000,
+            goldJewelryValue: 2000,
+            hasPreciousMetals: true,
+            madhab: 'balanced' // Jewelry exempt
+        }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+
+        const metals = result.enhancedBreakdown?.preciousMetals?.items;
+        expect(metals).toBeDefined();
+        expect(metals).toHaveLength(2);
+
+        // Investment: Full 100%
+        const investment = metals?.find(m => m.name === 'Gold Investment');
+        expect(investment?.value).toBe(1000);
+        expect(investment?.zakatableAmount).toBe(1000);
+
+        // Jewelry: Exempt (0%)
+        const jewelry = metals?.find(m => m.name === 'Gold Jewelry');
+        expect(jewelry?.value).toBe(2000);
+        expect(jewelry?.zakatableAmount).toBe(0);
     });
 });
 

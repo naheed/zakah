@@ -20,6 +20,7 @@ export interface ZakatFormData {
     calendarType: CalendarType;
     nisabStandard: NisabStandard;
     madhab: Madhab; // User's preferred school of thought (determines all calculation rules)
+    entryMethod?: 'manual' | 'upload'; // v0.20.0: Manual entry vs Batch Upload
     isHousehold: boolean; // Whether calculating for household or just self
     isSimpleMode: boolean; // Whether using simple 4-question mode
     householdMembers: HouseholdMember[]; // Track family members for household mode
@@ -53,9 +54,6 @@ export interface ZakatFormData {
     silverInvestmentValue: number;
     silverJewelryValue: number;
 
-    // Deprecated - kept for migration if needed
-    goldValue: number;
-    silverValue: number;
 
     // Crypto & Digital Assets
     cryptoCurrency: number; // BTC, ETH treated as currency

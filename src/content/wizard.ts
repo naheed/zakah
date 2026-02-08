@@ -34,6 +34,7 @@ export const assets = {
 // Step titles (for navigation) - aligned with ZakatWizard.tsx allSteps
 export const stepTitles = {
     setup: 'Preferences',
+    uploadFirst: 'Upload',
     welcome: 'Welcome',
     categories: 'Asset Types',
     simpleMode: 'Quick Estimate',
@@ -54,6 +55,17 @@ export const stepTitles = {
 
 export const preferences = {
     title: 'Personalize Your Calculation',
+    entryMethod: {
+        title: 'How do you want to enter data?',
+        manual: {
+            title: 'Manual Entry',
+            description: 'Go through the wizard step-by-step.',
+        },
+        upload: {
+            title: 'Auto-Fill (Beta)',
+            description: 'Upload bank statements to auto-populate.',
+        },
+    },
     calculationMode: {
         title: 'Calculation Mode',
         simple: {
