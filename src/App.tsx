@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SavedCalculations from "./pages/SavedCalculations";
 import Methodology from "./pages/Methodology";
+import { MethodologyZMCS } from "./pages/MethodologyZMCS";
 import Settings from "./pages/Settings";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
@@ -92,6 +93,7 @@ function AppContent() {
 
         {/* Public routes */}
         <Route path="/methodology" element={<Methodology />} />
+        <Route path="/methodology/zmcs" element={<MethodologyZMCS />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
