@@ -46,6 +46,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
         },
         retirement: {
             zakatability: 'net_accessible',
+            description: "Zakatable on net accessible amount.",
             pension_vested_rate: 1.0,
             penalty_rate: 0.10,
             tax_rate_source: 'user_input',
@@ -72,6 +73,14 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
         commercial_debt: 'none',
         personal_debt: {
             deductible: false,
+            // Even though not deductible, we set defaults
+            types: {
+                housing: 'none',
+                expense_period: 'monthly',
+                student_loans: 'none',
+                credit_cards: 'none',
+                living_expenses: 'none'
+            }
         },
     },
 };

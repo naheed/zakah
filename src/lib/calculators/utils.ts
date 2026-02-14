@@ -74,6 +74,8 @@ export const defaultFormData: ZakatFormData = {
     esaWithdrawals: 0,
     fiveTwentyNineWithdrawals: 0,
     hsaBalance: 0,
+    retirementWithdrawalAllowed: true, // Asset usually accessible by default (with penalty) unless restricted
+    retirementWithdrawalLimit: 1.0, // Default to 100% accessible
     isOver59Half: false,
     revocableTrustValue: 0,
     irrevocableTrustAccessible: false,

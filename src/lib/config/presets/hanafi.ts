@@ -45,7 +45,8 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             dividends: { zakatable: true, deduct_purification: true },
         },
         retirement: {
-            zakatability: 'net_accessible', // Treat as debt/trust
+            zakatability: 'net_accessible',
+            description: "Zakatable on net accessible amount (balance minus taxes and penalties).",
             pension_vested_rate: 1.0,
             penalty_rate: 0.10,
             tax_rate_source: 'user_input',
@@ -74,6 +75,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             deductible: true,
             types: {
                 housing: 'full', // Deferred debts are deductible
+                expense_period: 'annual', // Deduct full year for recurring
                 student_loans: 'full',
                 credit_cards: 'full',
                 living_expenses: 'full',

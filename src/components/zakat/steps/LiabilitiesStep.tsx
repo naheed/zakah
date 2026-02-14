@@ -6,12 +6,42 @@ import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 
+import { ZAKAT_PRESETS } from "@/lib/config/presets";
+
 export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
 
+  // Determine expense period from methodology
+  const methodId = data.methodology || 'balanced';
+  const config = ZAKAT_PRESETS[methodId] || ZAKAT_PRESETS['balanced'];
+  const expensePeriod = config.liabilities.personal_debt.types?.expense_period || 'annual';
+  const isAnnual = expensePeriod === 'annual';
+
+  // Dynamic Content for AssetStepWrapper
+  const dynamicContent = {
+    ...liabilitiesContent,
+    introByMethodology: {
+      ...liabilitiesContent.introByMethodology,
+      [methodId]: {
+        ...liabilitiesContent.introByMethodology?.[methodId as keyof typeof liabilitiesContent.introByMethodology],
+        summary: isAnnual
+          ? "Only immediate debts due within 12 months are deductible. Long-term mortgage principal and deferred loans don't reduce your Zakatable wealth."
+          : "Only debts due this month are deductible. Future obligations do not reduce your current Zakatable wealth."
+      }
+    }
+  };
+
+  const livingExpensesDesc = isAnnual
+    ? "Rent, utilities, groceries, transport — we multiply by 12"
+    : "Rent, utilities, groceries, transport — calculated for current month only";
+
+  const mortgageDesc = isAnnual
+    ? "12 months deductible per AMJA opinion"
+    : "Current month deductible only";
+
   return (
     <AssetStepWrapper
-      content={liabilitiesContent}
+      content={dynamicContent}
       stepId="liabilities"
       questionNumber={questionNumber}
       data={data}
@@ -31,7 +61,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
             <WhyTooltip {...fiqhExplanations.monthlyLiving} />
           </span>
         }
-        description="Rent, utilities, groceries, transport — we multiply by 12"
+        description={livingExpensesDesc}
         householdDescription="Combined living expenses for all family members"
         isHousehold={isHousehold}
         value={data.monthlyLivingExpenses}
@@ -47,7 +77,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
             <WhyTooltip {...fiqhExplanations.mortgageDeduction} />
           </span>
         }
-        description="12 months deductible per AMJA opinion"
+        description={mortgageDesc}
         householdDescription="Combined mortgage for your household"
         isHousehold={isHousehold}
         value={data.monthlyMortgage}
@@ -55,13 +85,21 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'monthlyMortgage')}
         testId="monthly-mortgage-input"
       />
-      {data.monthlyMortgage > 20000 && (
+      {isAnnual && data.monthlyMortgage > 20000 && (
         <div className="p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex gap-2 items-start animate-fade-in">
           <span className="text-xl">⚠️</span>
           <div>
             <strong>High Amount Detected:</strong> Are you entering your <em>total</em> mortgage balance?
             <br />
             Please only enter <strong>ONE month's payment</strong>. We automatically multiply this by 12 for the calculation.
+          </div>
+        </div>
+      )}
+      {!isAnnual && data.monthlyMortgage > 20000 && (
+        <div className="p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex gap-2 items-start animate-fade-in">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <strong>High Amount Detected:</strong> Are you entering your <em>total</em> mortgage balance?
           </div>
         </div>
       )}

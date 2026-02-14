@@ -46,6 +46,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
         },
         retirement: {
             zakatability: 'net_accessible',
+            description: "Zakatable on net accessible amount.",
             pension_vested_rate: 1.0,
             penalty_rate: 0.10,
             tax_rate_source: 'user_input',
@@ -74,6 +75,17 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             deductible: true, // Only if debts reduce net wealth below Nisab
             types: {
                 housing: '12_months', // Only current due
+                expense_period: 'annual', // Maliki typically deducts only immediate due, but '12_month' rule suggests annualizing? Wait, user request says "some methodology ... deduct this months due".
+                // Maliki deduction is usually "immediate needs". However, widely cited modern application for "12 month rule" often annualizes.
+                // Let's stick with 'annual' for 12_months rule context, or 'monthly' if it's strictly immediate. 
+                // Given "12_months" string in housing, likely 'annual' is the intended mapping for that specific field.
+                // But for general parameters:
+                // Reference: "some methodology all multiplying your monthly bills by 12... others just deduct this months due"
+                // Maliki: Deduct debts due *now*. Future debts not deductible unless due within the zakat year.
+                // So for monthly bills, it's just 1 month (or upcoming year?). 
+                // Let's check `defaults.ts` (Bradford) first. Bradford is usually conservative. 
+                // For Maliki, let's use 'monthly' as safer default for "immediate due", but housing says '12_months'. 
+                // Actually, if housing is '12_months', that implies annual. 
                 student_loans: 'current_due',
                 credit_cards: 'full',
                 living_expenses: 'none',

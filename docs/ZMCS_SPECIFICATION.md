@@ -37,10 +37,15 @@ Defines zaktability for each asset class.
     - `usage_exemption` (boolean): Is there an exemption for "permissible use"?
 
 #### Retirement (401k/IRA)
-- `zakatable` (boolean): Is the fund zakatable?
-- `valuation_method` ("accessible_value" | "total_value"):
-    - `total_value`: 100% of the balance.
-    - `accessible_value`: Balance minus taxes and penalties (Net withdrawal value).
+- `zakatability` ("full" | "net_accessible" | "conditional_age" | "deferred_upon_access" | "exempt"):
+    - `full`: 100% of vested balance.
+    - `net_accessible`: Balance minus taxes and penalties (standard AMJA view).
+    - `conditional_age`: Exempt if under a certain age (e.g., 59.5), otherwise net accessible (Bradford view).
+    - `deferred_upon_access`: Zakat due only when funds are withdrawn.
+    - `exempt`: Not zakatable.
+- `exemption_age` (number?): Age threshold for `conditional_age` (default 59.5).
+- `penalty_rate` (number?): Early withdrawal penalty rate (default 0.10).
+- `tax_rate_source` ("user_input" | "flat_rate" | "estimated"): How to determine tax deduction.
 
 #### Investments
 - `passive_investments`:
@@ -55,12 +60,14 @@ Defines zaktability for each asset class.
 
 ### 4. Liabilities (`liabilities`)
 Defines how debts are deducted from wealth.
-- `method`:
-    - `"no_deduction"`: Debts do not reduce Zakat liability (Shafi'i/Hanbali common view).
-    - `"deduct_all_debts"`: All debts reduce liability.
-    - `"deduct_commercial_only"`: Only business debts reduce liability.
-    - `"deduct_immediate_only"`: Only debts due immediately reduce liability.
-- `deferred_cap_months` (number): If deducting deferred debts (like mortgage), how many months are allowed? (e.g., 12 months).
+- `method` ("no_deduction" | "full_deduction" | "12_month_rule"):
+    - `"no_deduction"`: Debts do not reduce Zakat liability (Shafi'i).
+    - `"full_deduction"`: All debts reduce liability (Hanafi).
+    - `"12_month_rule"`: Only debts due within the coming year reduce liability (Maliki/Bradford).
+- `commercial_debt`: Treatment of business debts.
+- `personal_debt`:
+    - `deductible` (boolean): Are personal debts deductible?
+    - `types`: Granular control for `housing`, `student_loans`, etc. (e.g., "full", "12_months", "current_due", "none").
 
 ## Example Configuration (Hanafi)
 ```json
@@ -68,8 +75,8 @@ Defines how debts are deducted from wealth.
   "meta": { "id": "hanafi", "name": "Hanafi Standard" },
   "assets": {
     "gold_jewelry": { "zakatable": true },
-    "retirement": { "valuation_method": "accessible_value" }
+    "retirement": { "zakatability": "net_accessible" }
   },
-  "liabilities": { "method": "deduct_all_debts" }
+  "liabilities": { "method": "full_deduction" }
 }
 ```

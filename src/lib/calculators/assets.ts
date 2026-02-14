@@ -9,35 +9,72 @@ import { ZakatMethodologyConfig } from '../config/types';
 import { ASSET_COLORS } from './utils';
 import { DEFAULT_CONFIG } from '../config/defaults';
 
+// Enhanced Retirement Calculation Logic
 export function calculateRetirementAccessible(
     vestedBalance: number,
     age: number,
     taxRate: number,
-    config: ZakatMethodologyConfig
+    config: ZakatMethodologyConfig,
+    withdrawalAllowed: boolean = true, // Default true if not passed (backward compat)
+    withdrawalLimit: number = 1.0    // Default 100%
 ): number {
     const rules = config.assets.retirement;
 
-    // 1. Check Exclusion Age
-    if (rules.zakatability === 'conditional_age' && rules.exemption_age && age < rules.exemption_age) {
-        return 0; // Exempt
+    // 0. Base Check: If funds are fully inaccessible (e.g. company forbids withdrawal), 
+    // and methodology requires access (Net Accessible), then result is 0.
+    // However, some opinions (Full) might tax even inaccessible wealth? 
+    // Usually 'Full' implies ownership is strong regardless of access.
+    // 'Net Accessible' implies tax on what you can get.
+
+    // 1. Handle Exemptions
+    if (rules.zakatability === 'exempt') return 0;
+
+    // 2. Handle Deferred (Pay upon access)
+    // For current year calculation, if not accessing, Zakat is 0.
+    if (rules.zakatability === 'deferred_upon_access') return 0;
+
+    // 3. Handle Conditional Age (Bradford / 59.5 Rule)
+    if (rules.zakatability === 'conditional_age') {
+        const threshold = rules.exemption_age || 59.5;
+        if (age < threshold) {
+            return 0; // Exempt until age reached
+        }
+        // If age reached, fall through to Net Accessible logic below
     }
 
-    // 2. Calculate accessible value
-    // Default penalty rate is 0.10 if under 59.5, but config can override or we can infer "under age" logic
-    // For now, using config.penalty_rate or 0
-    let penalty = rules.penalty_rate || 0;
+    // 4. Handle Full Amount (Imam Tahir - Strong Ownership)
+    // "Full amount" usually means 100% of the vested balance, ignoring taxes/penalties/access limits.
+    if (rules.zakatability === 'full') {
+        return vestedBalance;
+    }
 
-    // If conditional_age is set, we assume penalty applies if under that age? 
-    // Or does penalty apply always? Ideally standard tax logic applies.
-    // Simplifying: If user is under 59.5 (Hardcoded US tax rule for now, or use config exemption_age)
-    // We will use the config's penalty rate if provided.
+    // 5. Handle Net Accessible (Standard / Majority / Bradford > 59.5)
+    // Zakat on what you can put in your pocket today.
 
-    // Logic: If zakatability is 'net_accessible', we deduct tax + penalty.
+    // If withdrawal is strictly forbidden by employer/plan
+    if (!withdrawalAllowed) {
+        // If strictly forbidden, you have no access. 
+        // For 'net_accessible' view, this is effectively 0.
+        return 0;
+    }
 
-    const effectiveTaxRate = rules.tax_rate_source === 'flat_rate' ? 0.30 : taxRate; // example flat rate
-    const accessFactor = Math.max(0, 1 - (effectiveTaxRate + penalty));
+    // Calculate effective access
+    // Apply Withdrawal Limit (e.g., only 50% can be withdrawn)
+    const accessiblePrincipal = vestedBalance * withdrawalLimit;
 
-    return vestedBalance * accessFactor;
+    // Apply Penalties & Taxes
+    // Default penalty is 10% (0.10) if under 59.5, else 0.
+    // Config can override, or we infer standard US rules.
+    const isUnderAge = age < 59.5;
+    const penalty = (isUnderAge ? (rules.penalty_rate ?? 0.10) : 0);
+
+    // Tax Rate: User provided or flat rate override
+    const effectiveTaxRate = rules.tax_rate_source === 'flat_rate' ? 0.30 : taxRate;
+
+    // Net Factor = 1 - (Tax + Penalty)
+    const netFactor = Math.max(0, 1 - (effectiveTaxRate + penalty));
+
+    return accessiblePrincipal * netFactor;
 }
 
 export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodologyConfig = DEFAULT_CONFIG): number {
@@ -110,13 +147,13 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
     if (data.isOver59Half) {
         total += data.rothIRAEarnings;
     } else {
-        // Use the shared helper
-        total += calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, config);
+        // Use the shared helper - Roth Earnings subject to penalty/tax if withdrawn early
+        total += calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
     }
 
     // Traditional 401k & IRA
-    total += calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, config);
-    total += calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, config);
+    total += calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
+    total += calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
 
     // Withdrawals (already net)
     total += data.iraWithdrawals;
@@ -297,7 +334,7 @@ export function calculateEnhancedAssetBreakdown(
     if (data.rothIRAContributions > 0) retirementItems.push({ name: 'Roth IRA Contributions', value: data.rothIRAContributions, zakatablePercent: 1.0, zakatableAmount: data.rothIRAContributions }); // Rule: Contributions always accessible
 
     // Earnings
-    const rothEarningsZakatable = data.isOver59Half ? data.rothIRAEarnings : calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, config);
+    const rothEarningsZakatable = data.isOver59Half ? data.rothIRAEarnings : calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
     if (data.rothIRAEarnings > 0) retirementItems.push({
         name: 'Roth IRA Earnings',
         value: data.rothIRAEarnings,
@@ -305,7 +342,7 @@ export function calculateEnhancedAssetBreakdown(
         zakatablePercent: rothEarningsZakatable / data.rothIRAEarnings
     });
 
-    const fourOhOneKZakatable = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, config);
+    const fourOhOneKZakatable = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
     if (data.fourOhOneKVestedBalance > 0) retirementItems.push({
         name: '401(k) Vested',
         value: data.fourOhOneKVestedBalance,
@@ -313,7 +350,7 @@ export function calculateEnhancedAssetBreakdown(
         zakatablePercent: fourOhOneKZakatable / data.fourOhOneKVestedBalance
     });
 
-    const iraZakatable = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, config);
+    const iraZakatable = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
     if (data.traditionalIRABalance > 0) retirementItems.push({
         name: 'Traditional IRA',
         value: data.traditionalIRABalance,

@@ -93,6 +93,7 @@ export const DEFAULT_CONFIG: ZakatMethodologyConfig = {
             deductible: true,
             types: {
                 housing: '12_months',
+                expense_period: 'annual', // Bradford synthesizes modern expenses as annual deductions
                 student_loans: 'current_due',
                 credit_cards: 'full',
                 living_expenses: '12_months',

@@ -46,9 +46,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
         },
         retirement: {
             zakatability: 'net_accessible',
-            pension_vested_rate: 1.0,
-            penalty_rate: 0.10,
-            tax_rate_source: 'user_input',
+            description: "Zakatable on net accessible amount.",
         },
         real_estate: {
             primary_residence: { zakatable: false },
@@ -74,6 +72,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
             deductible: true,
             types: {
                 housing: 'full',
+                expense_period: 'annual',
                 student_loans: 'full',
                 credit_cards: 'full',
                 living_expenses: 'full',

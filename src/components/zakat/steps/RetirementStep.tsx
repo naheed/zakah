@@ -10,12 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import { ShieldCheck } from "@phosphor-icons/react";
 
 export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const effectiveConfig = ZAKAT_PRESETS[data.madhab] || DEFAULT_CONFIG;
-  const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, effectiveConfig);
-  const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, effectiveConfig);
+  const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, effectiveConfig, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
+  const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, effectiveConfig, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
   const isHousehold = data.isHousehold;
   const isBalancedMode = data.madhab === 'balanced';
   const isUnder59Half = !data.isOver59Half;
@@ -53,16 +54,55 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         </div>
       )}
 
-      <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
-        <div>
-          <Label className="text-foreground">Are you over 59½?</Label>
-          <p className="text-sm text-muted-foreground">No early withdrawal penalty</p>
+      <div className="flex flex-col gap-4 p-4 bg-accent rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-foreground">Are you over 59½?</Label>
+            <p className="text-sm text-muted-foreground">No early withdrawal penalty</p>
+          </div>
+          <Switch
+            checked={data.isOver59Half}
+            onCheckedChange={(checked) => updateData({ isOver59Half: checked })}
+            aria-label="Are you over 59 and a half years old"
+          />
         </div>
-        <Switch
-          checked={data.isOver59Half}
-          onCheckedChange={(checked) => updateData({ isOver59Half: checked })}
-          aria-label="Are you over 59 and a half years old"
-        />
+
+        <div className="h-px bg-border/50" />
+
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-foreground">Does your employer allow early withdrawal?</Label>
+            <p className="text-sm text-muted-foreground">Even if there is a penalty</p>
+          </div>
+          <Switch
+            checked={data.retirementWithdrawalAllowed !== false} // Default to true if undefined
+            onCheckedChange={(checked) => updateData({ retirementWithdrawalAllowed: checked })}
+            aria-label="Does employer allow early withdrawal"
+          />
+        </div>
+
+        {data.retirementWithdrawalAllowed !== false && (
+          <div className="pt-2 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-foreground">Withdrawal Limit</Label>
+              <span className="text-sm font-mono bg-background px-2 py-0.5 rounded border">
+                {Math.round((data.retirementWithdrawalLimit ?? 1) * 100)}%
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Slider
+                value={[(data.retirementWithdrawalLimit ?? 1) * 100]}
+                onValueChange={(vals) => updateData({ retirementWithdrawalLimit: vals[0] / 100 })}
+                max={100}
+                step={5}
+                className="flex-1"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Percentage of vested balance you can access today
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">

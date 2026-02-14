@@ -69,7 +69,7 @@ export const AssetsSchema = z.object({
         }),
     }),
     retirement: z.object({
-        zakatability: z.enum(['full', 'net_accessible', 'conditional_age', 'exempt']).describe("Method for calculating zakatable amount"),
+        zakatability: z.enum(['full', 'net_accessible', 'deferred_upon_access', 'conditional_age', 'exempt']).describe("Method for calculating zakatable amount"),
         pension_vested_rate: z.number().min(0).max(1).optional(),
         exemption_age: z.number().optional().describe("Age below which funds are exempt (if method is conditional_age)"),
         penalty_rate: z.number().min(0).max(1).optional(),
@@ -112,6 +112,7 @@ export const LiabilitiesSchema = z.object({
         cap: z.enum(['none', 'total_assets', 'total_cash']).optional(),
         types: z.object({
             housing: z.enum(['full', '12_months', 'none']),
+            expense_period: z.enum(['monthly', 'annual']).default('annual').describe("Whether to deduct 1 month or 12 months of expenses"),
             student_loans: z.enum(['full', 'current_due', 'none']),
             credit_cards: z.enum(['full', 'none']),
             living_expenses: z.enum(['full', '12_months', 'none']),

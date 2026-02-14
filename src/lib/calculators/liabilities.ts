@@ -20,11 +20,13 @@ export function calculateTotalLiabilities(
 
     // 2. Personal Debts
     if (personalRules.deductible && personalRules.types) {
+        // Determine multiplier based on expense_period
+        // Default to 12 if 'annual' or undefined (legacy behavior), 1 if 'monthly'
+        const periodMultiplier = (personalRules.types.expense_period === 'monthly') ? 1 : 12;
+
         // Living Expenses
-        if (personalRules.types.living_expenses === 'full') {
-            total += data.monthlyLivingExpenses * 12; // annualized
-        } else if (personalRules.types.living_expenses === '12_months') {
-            total += data.monthlyLivingExpenses * 12;
+        if (personalRules.types.living_expenses === 'full' || personalRules.types.living_expenses === '12_months') {
+            total += data.monthlyLivingExpenses * periodMultiplier;
         }
 
         // Insurance? (Not explicitly in standard schema types yet, treat as living expense or immediate bill)
@@ -47,9 +49,9 @@ export function calculateTotalLiabilities(
             // Old code: if 'full' -> monthly * 12. 
             // IF we want TRUE full deduction we need the full balance field.
             // Sticking to 12 months * 1 for now to prevent massive jumps, or 12 months as annual.
-            total += data.monthlyMortgage * 12;
+            total += data.monthlyMortgage * periodMultiplier;
         } else if (personalRules.types.housing === '12_months') {
-            total += data.monthlyMortgage * 12;
+            total += data.monthlyMortgage * periodMultiplier;
         }
 
         // Student Loans

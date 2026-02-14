@@ -81,6 +81,10 @@ export interface ZakatFormData {
     esaWithdrawals: number;
     fiveTwentyNineWithdrawals: number;
     hsaBalance: number;
+    hsaBalance: number;
+    // Retirement Access Settings
+    retirementWithdrawalAllowed: boolean; // Does employer allow early withdrawal?
+    retirementWithdrawalLimit: number; // Max % allowed to withdraw (0-1)
     isOver59Half: boolean;
 
     // Trusts

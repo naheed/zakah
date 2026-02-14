@@ -158,8 +158,27 @@ export function MethodologyZMCS() {
                                 </Card>
                             ))}
                         </div>
-                    </section>
+                        {/* Section 4: Sample Configuration */}
+                        <section className="space-y-4">
+                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                <FileText className="w-6 h-6 text-primary" />
+                                Sample Configuration
+                            </h2>
+                            <p>Below is the actual JSON configuration for the <strong>Balanced (Sheikh Joe Bradford)</strong> methodology used in ZakatFlow.</p>
 
+                            <div className="relative">
+                                <div className="absolute right-4 top-4">
+                                    <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(JSON.stringify(ZAKAT_PRESETS['balanced'], null, 2))}>
+                                        Copy JSON
+                                    </Button>
+                                </div>
+                                <ScrollArea className="h-[500px] w-full rounded-md border bg-muted/50 p-4">
+                                    <pre className="text-xs font-mono leading-relaxed">
+                                        {JSON.stringify(ZAKAT_PRESETS['balanced'], null, 2)}
+                                    </pre>
+                                </ScrollArea>
+                            </div>
+                        </section>
                 </div>
 
                 {/* Sidebar */}
@@ -172,7 +191,7 @@ export function MethodologyZMCS() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <Link to="/docs/CONTRIBUTING_METHODOLOGY.md" target="_blank">
+                            <Link to="https://github.com/naheed/zakah/blob/main/docs/CONTRIBUTING_METHODOLOGY.md" target="_blank">
                                 <Button variant="outline" className="w-full justify-start">
                                     <Code className="w-4 h-4 mr-2" />
                                     Contributor Guide
