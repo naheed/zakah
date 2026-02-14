@@ -47,7 +47,7 @@ describe('ZMCS Compliance - Methodology Validation', () => {
             });
 
             // Specific Rule Checks based on Config
-            if (config.assets.jewelry.zakatable) {
+            if (config.assets.precious_metals.jewelry.zakatable) {
                 it('Should tax jewelry', () => {
                     const result = calculateZakat({
                         ...defaultFormData,
@@ -74,7 +74,7 @@ describe('ZMCS Compliance - Methodology Validation', () => {
                 });
             }
 
-            if (config.liabilities.method === 'deduct_all_debts') {
+            if (config.liabilities.method === 'full_deduction') {
                 it('Should deduct personal debts', () => {
                     const result = calculateZakat({
                         ...defaultFormData,

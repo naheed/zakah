@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MethodologyExplorer } from "@/components/zakat/MethodologyExplorer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom"; // Ensure Link is imported
-import { Button } from "@/components/ui/button"; // Ensure Button is imported
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Database } from "@phosphor-icons/react";
 import { HistoricalNisabLookup } from "@/components/tools/HistoricalNisabLookup";
 
 const tocItems = [

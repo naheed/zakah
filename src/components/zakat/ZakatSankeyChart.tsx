@@ -1,7 +1,7 @@
 import { ResponsiveSankey } from "@nivo/sankey";
 import { useMemo } from "react";
 import { useTheme } from "next-themes";
-import { formatCurrency, formatCompactCurrency, formatPercent } from "@/lib/zakatCalculations";
+import { formatCurrency, formatCompactCurrency } from "@/lib/zakatCalculations";
 import { ASSET_COLORS } from "./sankey/constants";
 import { SankeyChartData, EnhancedSankeyChartData } from "./sankey/types";
 import { ArrowDown, ShieldSlash, Wallet } from "@phosphor-icons/react";
@@ -279,7 +279,7 @@ export function ZakatSankeyChart({
           align="justify"
           // @ts-ignore - Nivo types can be strict about sort function signature
           sort={sortNodes}
-          colors={(node: SankeyNode) => node.nodeColor || "#999"}
+          colors={(node: any) => node.nodeColor || "#999"}
           nodeOpacity={1}
           nodeHoverOthersOpacity={0.35}
           nodeThickness={isSmallScreen ? 12 : 18}

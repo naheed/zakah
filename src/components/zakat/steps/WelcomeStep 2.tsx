@@ -48,8 +48,8 @@ interface WelcomeStepProps {
   onViewResults?: () => void;
 }
 
-// Asset coverage badges - now sourced from content system
-import { assetBadges } from "@/content/marketing";
+// Asset coverage badges
+const assetBadges: string[] = ["401(k) & IRA", "Stocks & ETFs", "Crypto", "Real Estate", "Gold & Silver", "Business Assets"];
 
 export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: WelcomeStepProps) {
   const { user, signInWithGoogle } = useAuth();
@@ -516,7 +516,7 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
 
             {/* Asset Types Badges */}
             <motion.div variants={itemVariants} className="flex flex-wrap gap-2 mb-8">
-              {assetBadges.map((asset, i) => (
+              {assetBadges.map((asset: string, i: number) => (
                 <span
                   key={i}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-sm font-medium border border-border"
