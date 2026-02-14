@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MethodologyExplorer } from "@/components/zakat/MethodologyExplorer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom"; // Ensure Link is imported
+import { Button } from "@/components/ui/button"; // Ensure Button is imported
 import { HistoricalNisabLookup } from "@/components/tools/HistoricalNisabLookup";
 
 const tocItems = [
@@ -55,6 +57,16 @@ const Methodology = () => {
   const headerContent = (
     <div>
       <Text variant="lead">{content.header.intro}</Text>
+
+      <div className="flex gap-4 pt-4">
+        <Link to="/methodology/zmcs">
+          <Button variant="outline" className="gap-2">
+            <Database className="w-4 h-4" />
+            View ZMCS Specification
+          </Button>
+        </Link>
+      </div>
+
       <Card className="bg-card border-border shadow-sm mt-4">
         <CardContent className="p-4 pt-4">
           <p className="text-sm text-muted-foreground">

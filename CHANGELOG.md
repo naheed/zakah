@@ -27,6 +27,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix WorkSans italic font bug
   - Add machine-readable QR for YoY scanning
 
+## [0.26.0] - 2026-02-14 (Methodology Engine)
+
+### Added
+- **Dynamic Nisab Calculation**
+  - **Live Gold/Silver Prices**: Automated daily fetching of precious metal prices via cron job.
+  - **Historical Lookup**: New tool on Methodology page to check Nisab thresholds for any past date.
+  - **Database Integration**: `nisab_values` table stores daily snapshots for immutable record-keeping.
+- **ZMCS (Zakat Methodology Configuration Standard)**
+  - **Schema-Driven Engine**: Replaced hardcoded logic with a flexible, data-driven calculation engine (`src/lib/config`).
+  - **Standard Presets**: Official configurations for Hanafi, Shafi'i, Maliki, Hanbali, and Balanced methodologies.
+  - **Specification Page**: New `/methodology/zmcs` route documenting the full configuration schema.
+  - **Compliance Suite**: Automated tests ensuring all methodologies produce valid results against canonical test cases.
+
+### Changed
+- **Methodology Page**: Added "View ZMCS Specification" button and integrated Historical Nisab Lookup tool.
+- **Deprecation**: Removed hardcoded `SILVER_PRICE_PER_OUNCE` constants in favor of dynamic fetching (with safe fallbacks).
+
+---
+
 ## [0.25.0] - 2026-02-07 (Asset Class Expansion)
 
 ### Added

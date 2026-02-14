@@ -106,6 +106,12 @@
 
 ## ✅ Completed Milestones
 
+### Phase 14: ZMCS & Nisab Engine ✅
+> **Released: v0.26.0 (Feb 14, 2026)**
+- **Dynamic Nisab**: Daily automated gold/silver price fetching and historical lookup.
+- **ZMCS Engine**: Schema-driven calculation engine with standard presets (Hanafi, Shafi'i, etc.).
+- **Transparency**: Public ZMCS specification page and compliance test suite.
+
 ### Phase 13B: Asset Class Expansion ✅
 > **Released: v0.25.0 (Feb 7, 2026)**
 - **Service Business Toggle**: Consultants, freelancers, SaaS — with al-Qaradawi guidance

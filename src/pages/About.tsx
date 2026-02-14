@@ -189,9 +189,19 @@ export default function About() {
           <StaggerItem variant="slide-up">
             <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-border before:to-transparent text-left">
 
-              {/* Item 1 */}
+              {/* Item 0 - NEW */}
               <div className="relative flex items-start group">
                 <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
+                <div className="ml-12">
+                  <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
+                  <h3 className="text-lg font-medium">Methodology Engine (ZMCS)</h3>
+                  <p className="text-muted-foreground mt-1 text-sm">A new open standard for Zakat calculation. Live Nisab fetching, schema-driven rules, and total transparency.</p>
+                </div>
+              </div>
+
+              {/* Item 1 */}
+              <div className="relative flex items-start group">
+                <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-muted rounded-full border-2 border-background" />
                 <div className="ml-12">
                   <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
                   <h3 className="text-lg font-medium">Extended Asset Support</h3>
