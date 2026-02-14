@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Code, FileText, Database, ShieldCheck } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { ZAKAT_PRESETS } from "@/lib/config/presets";
+import { ZMCS_DOCS } from "@/content/zmcs-docs";
 
 export function MethodologyZMCS() {
     return (
@@ -51,75 +52,99 @@ export function MethodologyZMCS() {
                     <section className="space-y-6">
                         <h2 className="text-2xl font-bold flex items-center gap-2">
                             <Code className="w-6 h-6 text-primary" />
-                            Schema Structure
+                            Configuration Reference
                         </h2>
+                        <p className="text-muted-foreground">
+                            Explore the complete list of parameters available in the ZMCS standard.
+                            These controls allow precise tuning of the engine to match any valid juristic opinion.
+                        </p>
+
                         <Tabs defaultValue="assets" className="w-full">
-                            <TabsList className="w-full justify-start">
-                                <TabsTrigger value="assets">Assets</TabsTrigger>
-                                <TabsTrigger value="liabilities">Liabilities</TabsTrigger>
-                                <TabsTrigger value="thresholds">Thresholds</TabsTrigger>
+                            <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-transparent p-0">
+                                {ZMCS_DOCS.map((section) => (
+                                    <TabsTrigger
+                                        key={section.id}
+                                        value={section.id}
+                                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background px-4 py-2"
+                                    >
+                                        {section.title}
+                                    </TabsTrigger>
+                                ))}
                             </TabsList>
 
-                            <TabsContent value="assets" className="mt-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Asset Rules</CardTitle>
-                                        <CardDescription>Defines zakatability for wealth categories.</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4 font-mono text-sm">
-                                        <div className="p-4 bg-muted/50 rounded-lg">
-                                            <div className="text-blue-500 font-bold">jewelry.zakatable <span className="text-muted-foreground font-normal">: boolean</span></div>
-                                            <p className="text-muted-foreground mt-1 mb-3">If true, personal gold/silver jewelry is included.</p>
+                            {ZMCS_DOCS.map((section) => (
+                                <TabsContent key={section.id} value={section.id} className="mt-6 animate-in fade-in slide-in-from-top-2">
+                                    <Card>
+                                        <CardHeader>
+                                            <div className="flex items-center gap-3">
+                                                {/* Requires Lucide icon component mapping or passing generic icon */}
+                                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                                    {/* We can dynamically render the icon if passed correctly, or skip for now */}
+                                                    <Database className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle>{section.title} Schema</CardTitle>
+                                                    <CardDescription>{section.description}</CardDescription>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="divide-y relative">
+                                            {section.fields.map((field, idx) => (
+                                                <div key={idx} className="py-6 first:pt-0 last:pb-0 grid md:grid-cols-[1fr_2fr] gap-4">
+                                                    {/* Left Column: Field Identity */}
+                                                    <div className="space-y-2">
+                                                        <div className="font-mono text-sm font-bold text-primary break-all">
+                                                            {field.path}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] uppercase tracking-wider font-semibold bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                                                                {field.type}
+                                                            </span>
+                                                            {field.required ? (
+                                                                <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                                                                    Required
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground/50 border px-1.5 py-0.5 rounded">
+                                                                    Optional
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {field.default && (
+                                                            <div className="text-xs text-muted-foreground">
+                                                                Default: <code className="bg-muted px-1 rounded">{field.default}</code>
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                                            <div className="text-blue-500 font-bold">retirement.valuation_method <span className="text-muted-foreground font-normal">: enum</span></div>
-                                            <p className="text-muted-foreground mt-1 mb-3">
-                                                <span className="text-foreground">"total_value"</span>: 100% of balance.<br />
-                                                <span className="text-foreground">"accessible_value"</span>: Balance minus taxes/penalties.
-                                            </p>
+                                                    {/* Right Column: Description & Options */}
+                                                    <div className="space-y-3">
+                                                        <p className="text-sm leading-relaxed text-foreground/90">
+                                                            {field.description}
+                                                        </p>
 
-                                            <div className="text-blue-500 font-bold">investments.passive.rate <span className="text-muted-foreground font-normal">: number (0-1)</span></div>
-                                            <p className="text-muted-foreground mt-1">Percentage of passive investments subject to Zakat (e.g., 0.3 for 30% rule).</p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-
-                            <TabsContent value="liabilities" className="mt-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Liability Rules</CardTitle>
-                                        <CardDescription>Defines how debts reduce Zakat.</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4 font-mono text-sm">
-                                        <div className="p-4 bg-muted/50 rounded-lg">
-                                            <div className="text-blue-500 font-bold">method <span className="text-muted-foreground font-normal">: enum</span></div>
-                                            <p className="text-muted-foreground mt-1">
-                                                <span className="text-foreground">"no_deduction"</span>: Debts do not reduce wealth (Shafi'i).<br />
-                                                <span className="text-foreground">"deduct_all_debts"</span>: All debts are deductible (Hanafi).<br />
-                                                <span className="text-foreground">"deduct_immediate_only"</span>: Only bills due now.
-                                            </p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-
-                            <TabsContent value="thresholds" className="mt-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Thresholds</CardTitle>
-                                        <CardDescription>Base constants for calculation.</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4 font-mono text-sm">
-                                        <div className="p-4 bg-muted/50 rounded-lg">
-                                            <div className="text-blue-500 font-bold">nisab.default_standard <span className="text-muted-foreground font-normal">: "gold" | "silver"</span></div>
-                                            <p className="text-muted-foreground mt-1 mb-3">Which metal sets the minimum threshold (Silver is safer/lower).</p>
-
-                                            <div className="text-blue-500 font-bold">zakat_rate.lunar <span className="text-muted-foreground font-normal">: number</span></div>
-                                            <p className="text-muted-foreground mt-1">Standard 0.025 (2.5%).</p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
+                                                        {field.options && (
+                                                            <div className="bg-muted/30 rounded-md border border-border/50 overflow-hidden">
+                                                                <div className="px-3 py-1.5 bg-muted/50 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b">
+                                                                    Valid Options
+                                                                </div>
+                                                                <div className="divide-y divide-border/30">
+                                                                    {field.options.map((opt) => (
+                                                                        <div key={opt.value} className="px-3 py-2 text-sm grid grid-cols-[auto_1fr] gap-3">
+                                                                            <code className="text-primary font-semibold whitespace-nowrap">"{opt.value}"</code>
+                                                                            <span className="text-muted-foreground">{opt.label}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
+                            ))}
                         </Tabs>
                     </section>
 
@@ -159,7 +184,7 @@ export function MethodologyZMCS() {
                             ))}
                         </div>
                         {/* Section 4: Sample Configuration */}
-                    <section className="space-y-4">
+                        <section className="space-y-4">
                             <h2 className="text-2xl font-bold flex items-center gap-2">
                                 <FileText className="w-6 h-6 text-primary" />
                                 Sample Configuration
@@ -178,7 +203,7 @@ export function MethodologyZMCS() {
                                     </pre>
                                 </ScrollArea>
                             </div>
-                    </section>
+                        </section>
                     </section>
                 </div>
 
