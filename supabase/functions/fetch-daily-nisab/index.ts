@@ -49,7 +49,8 @@ serve(async (req) => {
 
         const linesToProcess = mode === "backfill" ? relevantLines.slice(-1000) : [relevantLines[relevantLines.length - 1]];
 
-        const updates = [];
+        // Use a Map to deduplicate by date (last entry wins)
+        const updateMap = new Map();
 
         for (const line of linesToProcess) {
             if (!line) continue;
@@ -62,7 +63,7 @@ serve(async (req) => {
 
             const silverPrice = goldPrice / ratio;
 
-            updates.push({
+            updateMap.set(date, {
                 date,
                 gold_price: goldPrice,
                 silver_price: silverPrice,
@@ -70,6 +71,8 @@ serve(async (req) => {
                 meta: { source: 'freegoldapi', ratio }
             });
         }
+
+        const updates = Array.from(updateMap.values());
 
         if (updates.length > 0) {
             const { error } = await supabaseClient
