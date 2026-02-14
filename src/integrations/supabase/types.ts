@@ -211,6 +211,36 @@ export type Database = {
           },
         ]
       }
+      currency_rates: {
+        Row: {
+          base_currency: string
+          created_at: string
+          date: string
+          id: string
+          rate: number
+          source: string | null
+          target_currency: string
+        }
+        Insert: {
+          base_currency?: string
+          created_at?: string
+          date: string
+          id?: string
+          rate: number
+          source?: string | null
+          target_currency: string
+        }
+        Update: {
+          base_currency?: string
+          created_at?: string
+          date?: string
+          id?: string
+          rate?: number
+          source?: string | null
+          target_currency?: string
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           amount: number
@@ -288,6 +318,36 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      nisab_values: {
+        Row: {
+          created_at: string
+          currency: string
+          date: string
+          gold_price: number
+          meta: Json | null
+          silver_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          date: string
+          gold_price: number
+          meta?: Json | null
+          silver_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          date?: string
+          gold_price?: number
+          meta?: Json | null
+          silver_price?: number
+          updated_at?: string
         }
         Relationships: []
       }
