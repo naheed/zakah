@@ -12,10 +12,9 @@ dist
 dist-ssr
 *.local
 
-# Environment files
-# NOTE: .env is tracked for Lovable Cloud deployment
-# Do NOT commit sensitive secrets - use Supabase dashboard for service role keys
-!.env
+# Environment files — NEVER commit .env (contains credentials)
+# Copy .env.example to .env.local for local development
+.env
 .env.local
 .env.*.local
 
@@ -24,6 +23,11 @@ dist-ssr
 *.key
 *.p12
 *.pfx
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
 
 # Editor directories and files
 .vscode/*

@@ -26,8 +26,14 @@ interface MetalPricesResult {
 /**
  * Hook to fetch live gold and silver prices from Metals.dev API.
  * - Fetches once per session, caches in localStorage for 24 hours
- * - Falls back to default prices if API fails
+ * - Falls back to default prices if API fails or no key configured
  * - Free tier: 100 requests/month
+ *
+ * SECURITY NOTE: The metals.dev API only supports query-parameter authentication.
+ * VITE_METALS_API_KEY is a low-sensitivity, free-tier publishable key with no
+ * billing impact. It is intentionally optional — the app works without it using
+ * conservative fallback prices. For production deployments that need live prices,
+ * consider proxying through a server-side edge function to keep the key private.
  */
 export function useMetalPrices(): MetalPricesResult {
     const [goldPrice, setGoldPrice] = useState<number>(DEFAULT_GOLD_PRICE);

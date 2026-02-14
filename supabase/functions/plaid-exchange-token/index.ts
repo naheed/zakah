@@ -8,11 +8,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 // --- Encryption Helper (AES-GCM) ---
 // Securely encrypts token using a derived key from a random salt + Master Key
@@ -121,21 +117,17 @@ async function plaidRequest(baseUrl: string, endpoint: string, body: Record<stri
 }
 
 serve(async (req) => {
+    // Validate origin and generate CORS headers (no wildcard *)
+    const origin = req.headers.get("origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     if (req.method === "OPTIONS") {
         return new Response(null, { headers: corsHeaders });
     }
 
     try {
+        // Get auth header (do NOT log header values)
         const authHeader = req.headers.get("Authorization");
-        console.log("Authorization header present:", !!authHeader);
-        console.log(
-            "Authorization header format:",
-            authHeader
-                ? authHeader.startsWith("Bearer ")
-                    ? "Valid Bearer format"
-                    : "Invalid format"
-                : "Missing"
-        );
 
         if (!authHeader?.startsWith("Bearer ")) {
             console.error("Missing or invalid authorization header");
@@ -170,8 +162,7 @@ serve(async (req) => {
         const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
 
         if (authError || !user) {
-            console.error("Auth verification failed:", authError);
-            if (!user) console.error("No user found for token");
+            console.error("[plaid-exchange-token] Auth verification failed");
             return new Response(
                 JSON.stringify({ error: "Unauthorized - Please sign in to connect your bank" }),
                 { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -190,7 +181,7 @@ serve(async (req) => {
         const plaidBaseUrl = PLAID_URLS[plaidEnv] || PLAID_URLS.sandbox;
         const plaidAuth = { client_id: plaidClientId, secret: plaidSecret };
 
-        console.log(`Exchanging Plaid token for user ${user.id}`);
+        // Exchange public token for access token
 
         // Exchange public token for access token
         const exchangeData = await plaidRequest(plaidBaseUrl, "/item/public_token/exchange", {
@@ -201,7 +192,7 @@ serve(async (req) => {
         const accessToken = exchangeData.access_token;
         const itemId = exchangeData.item_id;
 
-        console.log(`Got access token for item ${itemId}`);
+        // Store the encrypted access token and item
 
         // Store Plaid item in database
         const { data: plaidItem, error: itemError } = await supabase

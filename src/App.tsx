@@ -104,11 +104,15 @@ function AppContent() {
         <Route path="/logout" element={<LogoutSuccess />} />
         <Route path="/account-deleted" element={<AccountDeleted />} />
 
-        {/* Dev routes */}
-        <Route path="/dev" element={<DevTools />} />
-        <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
-        <Route path="/extraction-test" element={<ExtractionTest />} />
-        <Route path="/sankey-test" element={<SankeyTest />} />
+        {/* Dev/debug routes — only accessible in development mode */}
+        {import.meta.env.DEV && (
+          <>
+            <Route path="/dev" element={<DevTools />} />
+            <Route path="/debug-adapter" element={<ZakatAdapterTest />} />
+            <Route path="/extraction-test" element={<ExtractionTest />} />
+            <Route path="/sankey-test" element={<SankeyTest />} />
+          </>
+        )}
 
         {/* Catch-all */}
         <Route path="*" element={<NotFound />} />

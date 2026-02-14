@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CaretDown, BookOpen, Lightbulb } from "@phosphor-icons/react";
+import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -82,8 +83,22 @@ interface LearnMoreMarkdownProps {
 }
 
 /**
- * LearnMore with markdown-like content support
- * Supports: **bold**, *italic*, bullet points, and paragraphs
+ * Sanitize HTML output to prevent XSS attacks.
+ * Only allows safe inline formatting tags (bold, italic, emphasis).
+ * All other HTML is stripped by DOMPurify.
+ */
+const sanitizeHtml = (html: string): string =>
+  DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['strong', 'em', 'b', 'i'],
+    ALLOWED_ATTR: ['class'],
+  });
+
+/**
+ * LearnMore with markdown-like content support.
+ * Supports: **bold**, *italic*, bullet points, and paragraphs.
+ *
+ * Security: All HTML output is sanitized via DOMPurify before rendering
+ * to prevent XSS. Only <strong>, <em>, <b>, <i> tags are allowed.
  */
 export function LearnMoreMarkdown({
   title,
@@ -91,7 +106,7 @@ export function LearnMoreMarkdown({
   defaultOpen = false,
   variant = "default"
 }: LearnMoreMarkdownProps) {
-  // Simple markdown parser
+  // Simple markdown parser (output sanitized via DOMPurify)
   const parseContent = (text: string) => {
     const lines = text.trim().split('\n');
     const elements: React.ReactNode[] = [];
@@ -102,7 +117,8 @@ export function LearnMoreMarkdown({
       line = line.replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>');
       // Italic
       line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      return line;
+      // Sanitize to prevent XSS — only allows safe inline tags
+      return sanitizeHtml(line);
     };
 
     const flushList = () => {

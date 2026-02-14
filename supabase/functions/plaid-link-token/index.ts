@@ -12,11 +12,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 // Map environment name to Plaid API base URL
 const PLAID_ENVIRONMENTS: Record<string, string> = {
@@ -26,18 +22,18 @@ const PLAID_ENVIRONMENTS: Record<string, string> = {
 };
 
 serve(async (req) => {
+    // Validate origin and generate CORS headers (no wildcard *)
+    const origin = req.headers.get("origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     // Handle CORS preflight
     if (req.method === "OPTIONS") {
         return new Response(null, { headers: corsHeaders });
     }
 
     try {
-        console.log("Starting Plaid Link Token creation...");
-
-        // Get auth header
+        // Get auth header (do NOT log header values)
         const authHeader = req.headers.get("Authorization");
-        console.log("Authorization header present:", !!authHeader);
-        console.log("Authorization header format:", authHeader ? (authHeader.startsWith("Bearer ") ? "Valid Bearer format" : "Invalid format") : "Missing");
         
         if (!authHeader?.startsWith("Bearer ")) {
             console.error("Missing or invalid Authorization header");
@@ -72,18 +68,11 @@ serve(async (req) => {
         }
 
         const userId = user.id;
-        console.log(`User authenticated: ${userId}`);
 
         // Check for secrets
         const clientId = Deno.env.get("PLAID_CLIENT_ID");
         const secret = Deno.env.get("PLAID_SECRET");
         const plaidEnv = Deno.env.get("PLAID_ENV") || "sandbox";
-
-        // Log configuration (masking secrets)
-        console.log("Configuration Check:");
-        console.log(`- PLAID_ENV: ${plaidEnv}`);
-        console.log(`- PLAID_CLIENT_ID: ${clientId ? "Set (ends with " + clientId.slice(-4) + ")" : "MISSING"}`);
-        console.log(`- PLAID_SECRET: ${secret ? "Set (starts with " + secret.slice(0, 4) + ")" : "MISSING"}`);
 
         if (!clientId || !secret) {
             throw new Error("Missing PLAID_CLIENT_ID or PLAID_SECRET environment variables. Please check your Supabase Secrets.");
@@ -91,7 +80,7 @@ serve(async (req) => {
 
         const baseUrl = PLAID_ENVIRONMENTS[plaidEnv] || PLAID_ENVIRONMENTS.sandbox;
 
-        console.log("Requesting Link Token from Plaid...");
+        // Request Link Token from Plaid API
 
         // Create Link token using fetch API
         const plaidResponse = await fetch(`${baseUrl}/link/token/create`, {
@@ -115,11 +104,9 @@ serve(async (req) => {
         const plaidData = await plaidResponse.json();
 
         if (!plaidResponse.ok) {
-            console.error("Plaid API Error:", JSON.stringify(plaidData));
+            console.error("[plaid-link-token] Plaid API error:", plaidData.error_code);
             throw new Error(plaidData.error_message || plaidData.error_code || "Plaid API error");
         }
-
-        console.log("Link Token received successfully");
 
         return new Response(
             JSON.stringify({
@@ -131,12 +118,8 @@ serve(async (req) => {
             }
         );
     } catch (error: any) {
-        console.error("Error creating Plaid Link token:");
-        console.error("Error Name:", error.name);
-        console.error("Error Message:", error.message);
-
         const errorMessage = error.message || "Unknown error";
-        console.error("Returning error to client:", errorMessage);
+        console.error("[plaid-link-token] Error:", errorMessage);
 
         return new Response(
             JSON.stringify({ error: errorMessage }),
