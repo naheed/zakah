@@ -1,11 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase'; // Assuming we have types, if not I'll use any for now or generate them
-// Since I don't have the generated types file handy in the file list (I see tsconfig but not types), I'll mock the return type for now.
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/integrations/supabase/client';
 
 interface NisabData {
     date: string;

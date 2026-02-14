@@ -1,16 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/domainConfig.ts";
 
 const GOLD_API_URL = "https://www.freegoldapi.com/data/gold_silver_ratio_enriched.csv";
 
 serve(async (req) => {
+    const origin = req.headers.get("origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     if (req.method === "OPTIONS") {
-        return new Response("ok", { headers: corsHeaders });
+        return new Response(null, { headers: corsHeaders });
     }
 
     try {
@@ -30,13 +29,10 @@ serve(async (req) => {
             csvText = await response.text();
         } else {
             console.log("Starting daily mode...");
-            // Fetch the last 2KB to ensure we get the latest line
             const response = await fetch(GOLD_API_URL, {
                 headers: { "Range": "bytes=-2048" }
             });
 
-            // If range request fails (e.g. server doesn't support it), fall back to full fetch?
-            // freegoldapi.com (GitHub Pages) supports Range.
             if (response.status === 206 || response.status === 200) {
                 csvText = await response.text();
             } else {
@@ -45,27 +41,15 @@ serve(async (req) => {
         }
 
         const lines = csvText.trim().split("\n");
-        // If we fetched tail, the first line might be incomplete. Skip it.
-        // If we fetched full, the first line is header. Skip it.
-        const startingIndex = mode === "backfill" ? 1 : 1;
-
-        // Parse lines
-        const updates = [];
-
-        // Process form end to start to find latest easier?
-        // For backfill, we want everything (or last 1000).
-        // For daily, we want the very last line.
-
-        // We filter valid lines (date, price, currency, ratio)
-        // Structure: date,price,currency,silver_oz_per_gold_oz
 
         const relevantLines = lines.filter(line => {
             const parts = line.split(",");
             return parts.length >= 4 && parts[0].match(/^\d{4}-\d{2}-\d{2}$/);
         });
 
-        // If backfill, take last 1000.
         const linesToProcess = mode === "backfill" ? relevantLines.slice(-1000) : [relevantLines[relevantLines.length - 1]];
+
+        const updates = [];
 
         for (const line of linesToProcess) {
             if (!line) continue;

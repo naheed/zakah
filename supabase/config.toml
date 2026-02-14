@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.plaid-exchange-token]
 verify_jwt = false
+
+[functions.fetch-daily-nisab]
+verify_jwt = false
