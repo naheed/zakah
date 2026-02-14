@@ -33,6 +33,7 @@ import AccountDeleted from "./pages/AccountDeleted";
 import Donations from "./pages/Donations";
 import Jurisprudence from "./pages/Jurisprudence";
 import Changelog from "./pages/Changelog";
+import { MethodologyContributing } from "./pages/MethodologyContributing";
 import { initAnalytics } from "./lib/analytics";
 import { usePageTracking } from "./hooks/usePageTracking";
 
@@ -94,6 +95,7 @@ function AppContent() {
         {/* Public routes */}
         <Route path="/methodology" element={<Methodology />} />
         <Route path="/methodology/zmcs" element={<MethodologyZMCS />} />
+        <Route path="/methodology/zmcs/contributing" element={<MethodologyContributing />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
