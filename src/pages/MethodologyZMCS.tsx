@@ -143,7 +143,7 @@ export function MethodologyZMCS() {
                                         <div className="text-xs space-y-1">
                                             <div className="flex justify-between">
                                                 <span>Jewelry:</span>
-                                                <span className="font-medium">{config.assets.jewelry.zakatable ? "Zakatable" : "Exempt"}</span>
+                                                <span className="font-medium">{config.assets.precious_metals.jewelry.zakatable ? "Zakatable" : "Exempt"}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Debt Deduction:</span>
@@ -151,7 +151,7 @@ export function MethodologyZMCS() {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>401k Val:</span>
-                                                <span className="font-medium">{config.assets.retirement.valuation_method === 'accessible_value' ? "Net Accessible" : "Full Value"}</span>
+                                                <span className="font-medium">{config.assets.retirement.zakatability === 'net_accessible' ? "Net Accessible" : config.assets.retirement.zakatability === 'exempt' ? "Exempt" : "Full Value"}</span>
                                             </div>
                                         </div>
                                     </CardContent>

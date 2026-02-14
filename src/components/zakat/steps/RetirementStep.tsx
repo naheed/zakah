@@ -1,4 +1,6 @@
 import { ZakatFormData, formatCurrency, calculateRetirementAccessible } from "@/lib/zakatCalculations";
+import { ZAKAT_PRESETS } from "@/lib/config/presets";
+import { DEFAULT_CONFIG } from "@/lib/config/defaults";
 import { retirementContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
@@ -11,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck } from "@phosphor-icons/react";
 
 export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
-  const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, data.madhab);
-  const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, data.madhab);
+  const effectiveConfig = ZAKAT_PRESETS[data.madhab] || DEFAULT_CONFIG;
+  const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, effectiveConfig);
+  const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, effectiveConfig);
   const isHousehold = data.isHousehold;
   const isBalancedMode = data.madhab === 'balanced';
   const isUnder59Half = !data.isOver59Half;

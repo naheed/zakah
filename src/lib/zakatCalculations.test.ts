@@ -215,7 +215,7 @@ describe('Zakat Calculations - Edge Cases', () => {
     const ahmedBase: ZakatFormData = {
         ...defaultFormData,
         cashOnHand: 10000,
-        goldValue: 5000, // Personal Jewelry
+        goldJewelryValue: 5000, // Personal Jewelry
         hasPreciousMetals: true,
         fourOhOneKVestedBalance: 100000, // 401k
         age: 40, // Under 59.5
