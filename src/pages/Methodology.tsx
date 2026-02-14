@@ -437,8 +437,7 @@ const Methodology = () => {
                     <Heading level={4} className="mt-0 text-base mb-2">{type.title}</Heading>
                     <p className="font-medium text-foreground text-sm">{type.ruling}</p>
                     <p className="text-sm text-muted-foreground mt-1">{type.text}</p>
-                    {type.text2 && <p className="text-sm font-medium mt-2 border-t pt-2 border-border/50">{type.text2}</p>}
-                    {type.desc2 && <p className="text-xs text-muted-foreground">{type.desc2}</p>}
+                    {/* Removed invalid text2/desc2 properties */}
                   </div>
                 ))}
               </div>
