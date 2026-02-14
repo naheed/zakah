@@ -1,53 +1,84 @@
-// Madhab-specific rules for Zakat calculation
-// Unified ruleset - no separate "modes" (legacy concept removed)
+// =============================================================================
+// Madhab Rules — UI Display Layer
+// =============================================================================
+//
+// PURPOSE:
+//   Provides human-readable display names, descriptions, and quick-reference
+//   properties for each supported methodology. This is the UI-facing layer;
+//   the actual calculation logic is driven by ZMCS configs in src/lib/config/.
+//
+// NOTE:
+//   MADHAB_RULES is a legacy compatibility layer. For calculation logic, always
+//   use the ZMCS presets from src/lib/config/presets/. The `jewelryZakatable`,
+//   `debtDeductionMethod`, etc. fields here are for UI display only and MUST
+//   stay in sync with the corresponding ZMCS config values.
+//
 
 import { Madhab } from './zakatTypes';
 
-// Unified Madhab rules configuration (merged from legacy MODE_RULES)
+/** UI-facing madhab rules (display only — calculation uses ZMCS configs). */
 export interface MadhhabRules {
     name: string;
     displayName: string;
     description: string;
     jewelryZakatable: boolean;
-    debtDeductionMethod: 'full' | 'none' | 'twelve_month';
-    retirementMethod: 'gross' | 'net_accessible' | 'bradford_exempt';
-    passiveInvestmentRate: number; // 1.0 = 100%, 0.30 = 30% (AAOIFI proxy)
+    debtDeductionMethod: 'full' | 'none' | 'twelve_month' | 'current_due';
+    retirementMethod: 'gross' | 'net_accessible' | 'bradford_exempt' | 'full';
+    passiveInvestmentRate: number;
 }
 
 export const MADHAB_RULES: Record<Madhab, MadhhabRules> = {
     balanced: {
         name: 'balanced',
         displayName: 'Balanced (Sheikh Joe Bradford)',
-        description: '30% passive investments, retirement exempt under 59½, jewelry exempt, 12-month debts',
-        jewelryZakatable: false, // Majority view (exempt)
-        debtDeductionMethod: 'twelve_month', // Modern synthesis
-        retirementMethod: 'bradford_exempt', // Traditional 401k/IRA exempt under 59.5
-        passiveInvestmentRate: 0.30, // AAOIFI 30% proxy
+        description: '30% passive investments, retirement exempt under 59½, jewelry zakatable, 12-month debts',
+        jewelryZakatable: true, // Bradford: all gold/silver jewelry is zakatable
+        debtDeductionMethod: 'twelve_month',
+        retirementMethod: 'bradford_exempt',
+        passiveInvestmentRate: 0.30,
+    },
+    amja: {
+        name: 'amja',
+        displayName: 'AMJA (Assembly of Muslim Jurists of America)',
+        description: 'Net-withdrawable retirement, stocks as exploited assets (dividends only), jewelry exempt, only currently-due debts deductible',
+        jewelryZakatable: false,
+        debtDeductionMethod: 'current_due',
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 0.0, // Only dividends, not market value
+    },
+    tahir_anwar: {
+        name: 'tahir_anwar',
+        displayName: 'Imam Tahir Anwar (Hanafi)',
+        description: 'Strong ownership: full retirement balance, jewelry zakatable, 100% investments, full debt deduction',
+        jewelryZakatable: true,
+        debtDeductionMethod: 'full',
+        retirementMethod: 'full',
+        passiveInvestmentRate: 1.0,
     },
     hanafi: {
         name: 'hanafi',
         displayName: 'Hanafi',
-        description: '100% all assets, jewelry included, full debt deduction',
-        jewelryZakatable: true, // Gold/silver taxed regardless of form
-        debtDeductionMethod: 'full', // All debts to humans deductible
+        description: '100% all assets, jewelry zakatable, full debt deduction, net accessible retirement',
+        jewelryZakatable: true,
+        debtDeductionMethod: 'full',
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
     },
     shafii: {
         name: 'shafii',
         displayName: "Shafi'i",
-        description: '100% all assets, jewelry exempt, no debt deduction',
-        jewelryZakatable: false, // Personal adornment exempt
-        debtDeductionMethod: 'none', // Debt does NOT prevent Zakat (Al-Nawawi)
+        description: '100% all assets, jewelry exempt, NO debt deduction',
+        jewelryZakatable: false,
+        debtDeductionMethod: 'none',
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
     },
     maliki: {
         name: 'maliki',
         displayName: 'Maliki',
-        description: '100% all assets, jewelry exempt, 12-month debts',
-        jewelryZakatable: false, // Personal adornment exempt
-        debtDeductionMethod: 'twelve_month', // Deductible only if no other assets
+        description: '100% all assets, jewelry exempt, 12-month debts, commercial debt ring-fenced',
+        jewelryZakatable: false,
+        debtDeductionMethod: 'twelve_month',
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
     },
@@ -55,18 +86,28 @@ export const MADHAB_RULES: Record<Madhab, MadhhabRules> = {
         name: 'hanbali',
         displayName: 'Hanbali',
         description: '100% all assets, jewelry exempt, full debt deduction',
-        jewelryZakatable: false, // Personal adornment exempt
-        debtDeductionMethod: 'full', // Full deduction (like Hanafi)
+        jewelryZakatable: false,
+        debtDeductionMethod: 'full',
         retirementMethod: 'net_accessible',
         passiveInvestmentRate: 1.0,
     },
+    qaradawi: {
+        name: 'qaradawi',
+        displayName: 'Dr. Al-Qaradawi (Fiqh al-Zakah)',
+        description: 'Jewelry exempt (paying recommended), 30% passive investments, 10% on rental income (agricultural analogy), net accessible retirement, 12-month debts, gold Nisab',
+        jewelryZakatable: false, // Exempt but paying recommended (Ahwat)
+        debtDeductionMethod: 'twelve_month',
+        retirementMethod: 'net_accessible',
+        passiveInvestmentRate: 0.30, // AAOIFI proxy (he accepts as valid alternative)
+    },
 };
 
-// Legacy compatibility: MODE_RULES is now just an alias to MADHAB_RULES
-// This allows gradual migration of consumers
+// Legacy compatibility aliases
 export const MODE_RULES = MADHAB_RULES;
 
-// Scholarly difference detection (simplified - no mode parameter needed)
+// ---------------------------------------------------------------------------
+// Scholarly Difference Detection (for UI display)
+// ---------------------------------------------------------------------------
 export interface ScholarlyDifference {
     topic: string;
     appliedOpinion: string;
@@ -83,7 +124,7 @@ export function getScholarlyDifferences(
     const differences: ScholarlyDifference[] = [];
     const rules = MADHAB_RULES[madhab];
 
-    // Highlight retirement exemption for balanced mode
+    // Retirement exemption for Bradford
     if (madhab === 'balanced' && !isOver59Half) {
         differences.push({
             topic: 'Retirement Accounts (401k/IRA)',
@@ -95,7 +136,7 @@ export function getScholarlyDifferences(
         });
     }
 
-    // Highlight 30% rule for balanced mode
+    // 30% rule for Bradford
     if (madhab === 'balanced' && rules.passiveInvestmentRate < 1.0) {
         differences.push({
             topic: 'Passive Investments (ETFs/Index Funds)',
@@ -107,13 +148,67 @@ export function getScholarlyDifferences(
         });
     }
 
-    // Jewelry: only Hanafi differs
-    if (madhab === 'hanafi') {
+    // AMJA exploited-asset view
+    if (madhab === 'amja') {
+        differences.push({
+            topic: 'Long-term Stock Investments',
+            appliedOpinion: 'Only dividends/income zakatable (not market value)',
+            madhhabOpinion: '100% of market value (other schools)',
+            supportingScholars: ['AMJA Fatwa Committee'],
+            methodologyLink: '/methodology#investments',
+            basis: 'Stocks treated as exploited assets (al-māl al-mustaghall) — like rental property, only income is zakatable',
+        });
+    }
+
+    // Strong ownership for Tahir Anwar
+    if (madhab === 'tahir_anwar') {
+        differences.push({
+            topic: 'Retirement Accounts (401k/IRA)',
+            appliedOpinion: 'Full vested balance zakatable (no deductions)',
+            madhhabOpinion: 'Net accessible (other schools deduct penalties/taxes)',
+            supportingScholars: ['Imam Tahir Anwar'],
+            methodologyLink: '/methodology#retirement',
+            basis: 'Strong ownership (milk tām): if legally yours, it is zakatable regardless of access restrictions',
+        });
+    }
+
+    // Qaradawi unique positions
+    if (madhab === 'qaradawi') {
+        differences.push({
+            topic: 'Passive Investments (Industrial Companies)',
+            appliedOpinion: '30% underlying-assets proxy (2.5% rate)',
+            madhhabOpinion: '10% on net profits for industrial companies (agricultural analogy)',
+            supportingScholars: ['Dr. Yusuf Al-Qaradawi'],
+            methodologyLink: '/methodology#investments',
+            basis: 'Fiqh al-Zakah: industrial companies (transport, hotels, manufacturing) should pay Zakat on net profits at 10%, analogous to agricultural produce. The 30% proxy is accepted as a practical simplification.',
+        });
+        differences.push({
+            topic: 'Rental Property Income',
+            appliedOpinion: '10% on net rental income (ZMCS income_rate override)',
+            madhhabOpinion: '2.5% on accumulated rental cash (other methodologies)',
+            supportingScholars: ['Dr. Yusuf Al-Qaradawi'],
+            methodologyLink: '/methodology#realestate',
+            basis: 'Fiqh al-Zakah: rental income analogized to agricultural produce — 10% on net rent (after deductions) or 5% on gross rent. Implemented via ZMCS v2.0.1 multi-rate calculation: rental income is separated from the standard 2.5% pool and taxed at 10%.',
+        });
+        differences.push({
+            topic: 'Professional Income (Zakat al-Mustafad)',
+            appliedOpinion: 'Year-end balance method (salary accumulated as cash)',
+            madhhabOpinion: 'Immediate Zakat on salary upon receipt at 2.5%',
+            supportingScholars: ['Dr. Yusuf Al-Qaradawi'],
+            methodologyLink: '/methodology#cash',
+            basis: 'Fiqh al-Zakah: strong proponent of Zakat al-Mustafad — paying Zakat on professional income immediately upon receipt without waiting for the Hawl. ZakatFlow uses a year-end balance model.',
+        });
+    }
+
+    // Jewelry: Hanafi/Bradford/Tahir differ from majority
+    if (rules.jewelryZakatable) {
         differences.push({
             topic: 'Personal Jewelry',
             appliedOpinion: 'Zakatable',
             madhhabOpinion: 'Exempt (majority view)',
-            supportingScholars: ['Hanafi scholars'],
+            supportingScholars: madhab === 'balanced' ? ['Sheikh Joe Bradford'] :
+                               madhab === 'tahir_anwar' ? ['Imam Tahir Anwar', 'Hanafi scholars'] :
+                               ['Hanafi scholars'],
             methodologyLink: '/methodology#metals',
             basis: 'Gold and silver retain monetary nature regardless of form',
         });
@@ -122,17 +217,17 @@ export function getScholarlyDifferences(
     return differences;
 }
 
-// Get the effective jewelry zakatable status
+// ---------------------------------------------------------------------------
+// Helper Functions
+// ---------------------------------------------------------------------------
 export function isJewelryZakatable(madhab: Madhab): boolean {
     return MADHAB_RULES[madhab].jewelryZakatable;
 }
 
-// Get human-readable madhab name
 export function getMadhhabDisplayName(madhab: Madhab): string {
     return MADHAB_RULES[madhab].displayName;
 }
 
-// Get description for madhab
 export function getMadhhabDescription(madhab: Madhab): string {
     return MADHAB_RULES[madhab].description;
 }

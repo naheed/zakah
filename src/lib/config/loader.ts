@@ -3,20 +3,48 @@ import { ZakatMethodologyConfig } from './types';
 import { DEFAULT_CONFIG } from './defaults';
 import { z } from 'zod';
 
+// =============================================================================
+// ZMCS Configuration Loader
+// =============================================================================
+//
+// Validates, loads, and merges ZMCS configuration objects. This module provides
+// the runtime entry point for consuming ZMCS configs — whether from presets,
+// user-uploaded JSON, or API responses.
+//
+
 export interface ConfigLoadResult {
+    /** The validated (or fallback) configuration. */
     config: ZakatMethodologyConfig;
+    /** Validation error messages (empty if valid). */
     errors: string[];
+    /** Whether the DEFAULT_CONFIG was used as a fallback due to validation failure. */
     isFallback: boolean;
 }
 
 /**
  * Validates and loads a configuration object.
- * Applies graceful degradation by falling back to DEFAULT_CONFIG if critical validation fails.
+ *
+ * If the input passes ZMCS schema validation, it is returned directly.
+ * If validation fails, the DEFAULT_CONFIG is returned as a safe fallback,
+ * and the specific validation errors are included for logging/display.
+ *
+ * @param input - Raw configuration object (e.g., from JSON.parse or an API response).
+ * @returns ConfigLoadResult with the validated config, any errors, and fallback status.
+ *
+ * @example
+ * ```typescript
+ * const raw = JSON.parse(userUploadedJson);
+ * const { config, errors, isFallback } = loadMethodologyConfig(raw);
+ * if (isFallback) {
+ *   console.warn('Invalid config, using defaults:', errors);
+ * }
+ * ```
  */
 export function loadMethodologyConfig(input: unknown): ConfigLoadResult {
     const result = ZakatMethodologySchema.safeParse(input);
 
     if (result.success) {
+        console.log(`[ZMCS Loader] Successfully loaded config: ${result.data.meta.id} v${result.data.meta.version}`);
         return {
             config: result.data,
             errors: [],
@@ -24,10 +52,9 @@ export function loadMethodologyConfig(input: unknown): ConfigLoadResult {
         };
     }
 
-    // If validation fails, strictly returning default for now.
-    // Future robustness: We could attempt to partial-merge valid sections.
+    // Validation failed — return safe fallback
     const errorMessages = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
-    console.warn("Zakat Config Validation Failed:", errorMessages);
+    console.warn('[ZMCS Loader] Validation failed, using DEFAULT_CONFIG fallback:', errorMessages);
 
     return {
         config: DEFAULT_CONFIG,
@@ -37,21 +64,58 @@ export function loadMethodologyConfig(input: unknown): ConfigLoadResult {
 }
 
 /**
- * Merges a base config with user overrides.
- * Overrides are validated loosely - if an override is invalid, it is ignored for that specific field.
- * (Note: Deep merge implementation would be ideal here, using Object.assign for shallow merge for now)
+ * Merges a base config with partial overrides.
+ *
+ * Performs a shallow merge at the top-level section level. For deep section
+ * overrides (e.g., changing a single asset rule), the override must include
+ * the complete section object.
+ *
+ * @param base - The complete base configuration.
+ * @param overrides - Partial overrides to apply on top of the base.
+ * @returns A new merged configuration object.
+ *
+ * @example
+ * ```typescript
+ * const custom = mergeConfig(ZAKAT_PRESETS['balanced'], {
+ *   assets: {
+ *     ...ZAKAT_PRESETS['balanced'].assets,
+ *     precious_metals: {
+ *       ...ZAKAT_PRESETS['balanced'].assets.precious_metals,
+ *       jewelry: { zakatable: false, rate: 1.0 },
+ *     },
+ *   },
+ * });
+ * ```
  */
-export function mergeConfig(base: ZakatMethodologyConfig, overrides: Partial<ZakatMethodologyConfig>): ZakatMethodologyConfig {
-    // TODO: Implement deep merge if needed. For now, we assume overrides replace top-level sections or strictly adhere to type if passed from UI.
-    // In a robust system, we would perform a deep merge of the JSON structure.
+export function mergeConfig(
+    base: ZakatMethodologyConfig,
+    overrides: Partial<ZakatMethodologyConfig>
+): ZakatMethodologyConfig {
+    const merged: ZakatMethodologyConfig = {
+        ...base,
+        meta: overrides.meta ? { ...base.meta, ...overrides.meta } : base.meta,
+        thresholds: overrides.thresholds ? { ...base.thresholds, ...overrides.thresholds } : base.thresholds,
+        assets: overrides.assets ? { ...base.assets, ...overrides.assets } : base.assets,
+        liabilities: overrides.liabilities ? { ...base.liabilities, ...overrides.liabilities } : base.liabilities,
+    };
 
-    // Simple shallow merge for top-level keys
-    const newConfig = { ...base };
+    return merged;
+}
 
-    if (overrides.meta) newConfig.meta = { ...newConfig.meta, ...overrides.meta };
-    if (overrides.thresholds) newConfig.thresholds = { ...newConfig.thresholds, ...overrides.thresholds };
-    // ... proceed for other sections if needed.
-    // Given the complexity of deep merging assets rules, for this phase we stick to "Load Whole Config".
-
-    return newConfig;
+/**
+ * Validates a configuration without loading it.
+ * Useful for validating user-authored configs before persisting.
+ *
+ * @param input - Raw configuration to validate.
+ * @returns Object with isValid flag and any error messages.
+ */
+export function validateConfig(input: unknown): { isValid: boolean; errors: string[] } {
+    const result = ZakatMethodologySchema.safeParse(input);
+    if (result.success) {
+        return { isValid: true, errors: [] };
+    }
+    return {
+        isValid: false,
+        errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+    };
 }

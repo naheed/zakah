@@ -222,7 +222,10 @@ ZakatFlow's calculation logic is based on scholarly methodology. When contributi
 ### Key Resources:
 - [Methodology page](https://zakatflow.org/methodology)
 - `docs/ZAKAT_JURISPRUDENCE.md` — Detailed fiqh documentation
-- `src/lib/madhahRules.ts` — School-specific rules
+- `docs/ZMCS_SPECIFICATION.md` — ZMCS v2.0 configuration standard
+- `docs/CONTRIBUTING_METHODOLOGY.md` — How to add a new methodology
+- `src/lib/config/presets/` — All methodology configurations
+- `src/lib/madhahRules.ts` — School-specific display rules
 
 ## Questions?
 

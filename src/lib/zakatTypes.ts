@@ -1,6 +1,21 @@
 export type CalendarType = 'lunar' | 'solar';
 export type NisabStandard = 'silver' | 'gold';
-export type Madhab = 'balanced' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali';
+/**
+ * Supported Zakat calculation methodologies.
+ *
+ * Classical madhabs:
+ *   - 'hanafi'    — Classical Hanafi (Abu Hanifa, Al-Kasani, Al-Marghinani)
+ *   - 'shafii'    — Classical Shafi'i (Al-Nawawi, Al-Shirazi)
+ *   - 'maliki'    — Classical Maliki (Khalil, Al-Dardir)
+ *   - 'hanbali'   — Classical Hanbali (Ibn Qudama, Al-Mardawi)
+ *
+ * Modern scholarly methodologies:
+ *   - 'balanced'      — Sheikh Joe Bradford's modern synthesis (30% proxy, age-conditional retirement)
+ *   - 'amja'          — AMJA (Assembly of Muslim Jurists of America) rulings
+ *   - 'tahir_anwar'   — Imam Tahir Anwar's Hanafi-leaning approach (strong ownership)
+ *   - 'qaradawi'      — Dr. Yusuf Al-Qaradawi's Fiqh al-Zakah (progressive ijtihād, most influential modern text)
+ */
+export type Madhab = 'balanced' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali' | 'amja' | 'tahir_anwar' | 'qaradawi';
 
 // Legacy alias for backward compatibility during migration
 // No alias needed, Madhab is the single source of truth
@@ -80,7 +95,6 @@ export interface ZakatFormData {
     iraWithdrawals: number;
     esaWithdrawals: number;
     fiveTwentyNineWithdrawals: number;
-    hsaBalance: number;
     hsaBalance: number;
     // Retirement Access Settings
     retirementWithdrawalAllowed: boolean; // Does employer allow early withdrawal?

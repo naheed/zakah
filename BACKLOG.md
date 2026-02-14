@@ -37,7 +37,7 @@
 - [ ] Create issue templates (bug, feature request)
 
 **References:**
-- Security docs: `docs/OPEN_SOURCE_SECURITY.md`
+- Security docs: `docs/SECURITY.md`
 
 ---
 
@@ -105,6 +105,13 @@
 ---
 
 ## ✅ Completed Milestones
+
+### Phase 14B: ZMCS v2.0 Foundational Standard ✅
+> **Released: v0.27.0 (Feb 14, 2026)**
+- **ZMCS v2.0**: Exhaustive 60+ parameter schema with documentation strings per field.
+- **3 Scholar Methodologies**: AMJA, Sheikh Joe Bradford (corrected), Imam Tahir Anwar.
+- **Bug Fixes**: Housing 360x multiplier, student loan double-add, uncontrolled deductions.
+- **Rich Documentation**: Scholarly basis citations, fatwa URLs, and cross-methodology comparison.
 
 ### Phase 14: ZMCS & Nisab Engine ✅
 > **Released: v0.26.0 (Feb 14, 2026)**

@@ -2,77 +2,159 @@ import { ZakatFormData } from '../zakatTypes';
 import { ZakatMethodologyConfig } from '../config/types';
 import { DEFAULT_CONFIG } from '../config/defaults';
 
+// =============================================================================
+// Liability Calculation Engine (ZMCS v2.0)
+// =============================================================================
+//
+// This function calculates total deductible liabilities based on the methodology
+// config. It supports 4 deduction methods:
+//
+//   1. 'no_deduction'     — Return 0 (Shafi'i: debts don't prevent Zakat)
+//   2. 'full_deduction'   — All debts fully deductible (Hanafi/Hanbali)
+//   3. '12_month_rule'    — Debts due within the coming year (Maliki/Bradford)
+//   4. 'current_due_only' — Only this month's payments (AMJA strict)
+//
+// Per-category debt types allow granular control:
+//   - 'full': Annual (12× monthly) approximation
+//   - '12_months': Same as full (12× monthly)
+//   - 'current_due': Monthly amount (1× monthly)
+//   - 'none': Not deductible
+//
+// BUGS FIXED (v2.0):
+//   - Removed accidental 360× multiplier on housing 'full' (was monthlyMortgage * 12 * 30)
+//   - Fixed double-addition of studentLoansDue for 'full' type
+//   - Insurance and unpaid bills now governed by per-category config rules
+//   - Tax liabilities now governed by config (were outside personal_debt.types check)
+//
+
 export function calculateTotalLiabilities(
     data: ZakatFormData,
     config: ZakatMethodologyConfig = DEFAULT_CONFIG
 ): number {
     let total = 0;
-
     const liabRules = config.liabilities;
     const personalRules = liabRules.personal_debt;
 
-    // 1. Check Global Method
-    // If method is 'no_deduction', we return 0 unless there are specific exceptions? 
-    // Usually Shafi'i is strict no deduction.
+    // ═══════════════════════════════════════════════════════════════════════
+    // 1. Global Method Check
+    // ═══════════════════════════════════════════════════════════════════════
     if (liabRules.method === 'no_deduction') {
+        console.log('[ZMCS Liabilities] Method: no_deduction → 0');
         return 0;
     }
 
+    // ═══════════════════════════════════════════════════════════════════════
     // 2. Personal Debts
+    // ═══════════════════════════════════════════════════════════════════════
     if (personalRules.deductible && personalRules.types) {
-        // Determine multiplier based on expense_period
-        // Default to 12 if 'annual' or undefined (legacy behavior), 1 if 'monthly'
-        const periodMultiplier = (personalRules.types.expense_period === 'monthly') ? 1 : 12;
+        const types = personalRules.types;
 
-        // Living Expenses
-        if (personalRules.types.living_expenses === 'full' || personalRules.types.living_expenses === '12_months') {
-            total += data.monthlyLivingExpenses * periodMultiplier;
+        // ── Helper: Calculate deduction amount for a monthly recurring expense ──
+        const calcRecurring = (monthlyAmount: number, rule: string | undefined): number => {
+            switch (rule) {
+                case 'full':
+                case '12_months':
+                    return monthlyAmount * 12; // Annual approximation
+                case 'current_due':
+                    return monthlyAmount * 1;  // Just this month
+                case 'none':
+                default:
+                    return 0;
+            }
+        };
+
+        // ── Helper: Calculate deduction for a lump-sum debt ──
+        const calcLumpSum = (amount: number, rule: string | undefined): number => {
+            switch (rule) {
+                case 'full':
+                case 'current_due':
+                    return amount; // Full outstanding balance
+                case 'none':
+                default:
+                    return 0;
+            }
+        };
+
+        // ── Living Expenses ──
+        const livingDeduction = calcRecurring(data.monthlyLivingExpenses, types.living_expenses);
+        total += livingDeduction;
+        if (livingDeduction > 0) {
+            console.log(`[ZMCS Liabilities] Living expenses: ${data.monthlyLivingExpenses}/mo × rule '${types.living_expenses}' = ${livingDeduction}`);
         }
 
-        // Insurance? (Not explicitly in standard schema types yet, treat as living expense or immediate bill)
-        // Check if unpaid bills covers it.
-        total += data.insuranceExpenses; // Assuming immediate due
-
-        // Credit Cards
-        if (personalRules.types.credit_cards === 'full') {
-            total += data.creditCardBalance;
+        // ── Insurance ──
+        const insuranceDeduction = calcLumpSum(data.insuranceExpenses, types.insurance);
+        total += insuranceDeduction;
+        if (insuranceDeduction > 0) {
+            console.log(`[ZMCS Liabilities] Insurance: ${data.insuranceExpenses} × rule '${types.insurance}' = ${insuranceDeduction}`);
         }
 
-        // Unpaid Bills (Utilities etc) - usually considered current due
+        // ── Credit Cards ──
+        const creditDeduction = calcLumpSum(data.creditCardBalance, types.credit_cards);
+        total += creditDeduction;
+        if (creditDeduction > 0) {
+            console.log(`[ZMCS Liabilities] Credit cards: ${data.creditCardBalance} × rule '${types.credit_cards}' = ${creditDeduction}`);
+        }
+
+        // ── Unpaid Bills ──
+        const billsDeduction = calcLumpSum(data.unpaidBills, types.unpaid_bills);
+        total += billsDeduction;
+        if (billsDeduction > 0) {
+            console.log(`[ZMCS Liabilities] Unpaid bills: ${data.unpaidBills} × rule '${types.unpaid_bills}' = ${billsDeduction}`);
+        }
+
+        // ── Housing / Mortgage ──
+        const housingDeduction = calcRecurring(data.monthlyMortgage, types.housing);
+        total += housingDeduction;
+        if (housingDeduction > 0) {
+            console.log(`[ZMCS Liabilities] Housing: ${data.monthlyMortgage}/mo × rule '${types.housing}' = ${housingDeduction}`);
+        }
+
+        // ── Student Loans ──
+        const studentDeduction = calcLumpSum(data.studentLoansDue, types.student_loans);
+        total += studentDeduction;
+        if (studentDeduction > 0) {
+            console.log(`[ZMCS Liabilities] Student loans: ${data.studentLoansDue} × rule '${types.student_loans}' = ${studentDeduction}`);
+        }
+
+        // ── Tax Payments ──
+        if (data.hasTaxPayments) {
+            const taxDeduction = calcLumpSum(data.propertyTax + data.lateTaxPayments, types.taxes);
+            total += taxDeduction;
+            if (taxDeduction > 0) {
+                console.log(`[ZMCS Liabilities] Taxes: ${data.propertyTax + data.lateTaxPayments} × rule '${types.taxes}' = ${taxDeduction}`);
+            }
+        }
+    } else if (personalRules.deductible && !personalRules.types) {
+        // If deductible but no per-type rules, fall back to global method
+        console.log('[ZMCS Liabilities] Deductible but no per-type rules; using global method fallback');
+        const isAnnual = liabRules.method === 'full_deduction' || liabRules.method === '12_month_rule';
+        const multiplier = isAnnual ? 12 : 1;
+
+        total += data.monthlyLivingExpenses * multiplier;
+        total += data.insuranceExpenses;
+        total += data.creditCardBalance;
         total += data.unpaidBills;
+        total += data.monthlyMortgage * multiplier;
+        total += data.studentLoansDue;
 
-        // Housing / Mortgage
-        if (personalRules.types.housing === 'full') {
-            total += data.monthlyMortgage * 12 * 30; // Approximation of full balance? 
-            // Ideally we need 'remainingMortgageBalance' in FormData. 
-            // For now, retaining existing behavior: 12 months as proxy if 'full' in old code?
-            // Old code: if 'full' -> monthly * 12. 
-            // IF we want TRUE full deduction we need the full balance field.
-            // Sticking to 12 months * 1 for now to prevent massive jumps, or 12 months as annual.
-            total += data.monthlyMortgage * periodMultiplier;
-        } else if (personalRules.types.housing === '12_months') {
-            total += data.monthlyMortgage * periodMultiplier;
-        }
-
-        // Student Loans
-        if (personalRules.types.student_loans === 'full') {
-            total += data.studentLoansDue; // This field name suggests "Due", not "Total Balance".
-            // If we want full, we need total balance.
-            // For now, adding what we have.
-            total += data.studentLoansDue;
-        } else if (personalRules.types.student_loans === 'current_due') {
-            total += data.studentLoansDue;
+        if (data.hasTaxPayments) {
+            total += data.propertyTax;
+            total += data.lateTaxPayments;
         }
     }
 
-    // Tax
-    if (data.hasTaxPayments) {
-        total += data.propertyTax;
-        total += data.lateTaxPayments;
+    // ═══════════════════════════════════════════════════════════════════════
+    // 3. Cap Check (if configured)
+    // ═══════════════════════════════════════════════════════════════════════
+    if (personalRules.cap && personalRules.cap !== 'none') {
+        // Future: Implement cap logic.
+        // 'total_assets': total liabilities cannot exceed total assets
+        // 'total_cash': total liabilities cannot exceed liquid cash
+        // For now, log a warning if cap is set but not yet enforced.
+        console.warn(`[ZMCS Liabilities] Cap '${personalRules.cap}' is configured but not yet enforced. Total deduction: ${total}`);
     }
 
-    // Cap Check? 
-    // Schema has 'cap'. Not implemented in logic yet to keep simple.
-
+    console.log(`[ZMCS Liabilities] Total deductible liabilities: ${total}`);
     return total;
 }

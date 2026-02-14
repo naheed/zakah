@@ -9,72 +9,105 @@ import { ZakatMethodologyConfig } from '../config/types';
 import { ASSET_COLORS } from './utils';
 import { DEFAULT_CONFIG } from '../config/defaults';
 
-// Enhanced Retirement Calculation Logic
+// =============================================================================
+// Enhanced Retirement Calculation Logic (ZMCS v2.0)
+// =============================================================================
+//
+// This function calculates the zakatable amount for a single retirement account
+// based on the methodology config. It handles 5 zakatability modes:
+//
+//   1. 'exempt'              — Always 0 (e.g., some opinions on restricted plans)
+//   2. 'deferred_upon_access' — 0 until funds are withdrawn (Māl ḍimār strict view)
+//   3. 'conditional_age'     — Exempt below threshold, then post_threshold_method applies
+//   4. 'full'                — 100% of vested balance (Imam Tahir Anwar / strong ownership)
+//   5. 'net_accessible'      — Balance minus taxes and penalties (AMJA / majority)
+//
+// For 'conditional_age' mode (Bradford), once age threshold is met:
+//   - 'net_accessible': Standard net-of-tax calculation
+//   - 'proxy_rate': Flat percentage of market value (Bradford's 30% rule)
+//   - 'full': Full balance
+//
 export function calculateRetirementAccessible(
     vestedBalance: number,
     age: number,
     taxRate: number,
     config: ZakatMethodologyConfig,
-    withdrawalAllowed: boolean = true, // Default true if not passed (backward compat)
-    withdrawalLimit: number = 1.0    // Default 100%
+    withdrawalAllowed: boolean = true,
+    withdrawalLimit: number = 1.0
 ): number {
     const rules = config.assets.retirement;
 
-    // 0. Base Check: If funds are fully inaccessible (e.g. company forbids withdrawal), 
-    // and methodology requires access (Net Accessible), then result is 0.
-    // However, some opinions (Full) might tax even inaccessible wealth? 
-    // Usually 'Full' implies ownership is strong regardless of access.
-    // 'Net Accessible' implies tax on what you can get.
-
-    // 1. Handle Exemptions
-    if (rules.zakatability === 'exempt') return 0;
-
-    // 2. Handle Deferred (Pay upon access)
-    // For current year calculation, if not accessing, Zakat is 0.
-    if (rules.zakatability === 'deferred_upon_access') return 0;
-
-    // 3. Handle Conditional Age (Bradford / 59.5 Rule)
-    if (rules.zakatability === 'conditional_age') {
-        const threshold = rules.exemption_age || 59.5;
-        if (age < threshold) {
-            return 0; // Exempt until age reached
-        }
-        // If age reached, fall through to Net Accessible logic below
-    }
-
-    // 4. Handle Full Amount (Imam Tahir - Strong Ownership)
-    // "Full amount" usually means 100% of the vested balance, ignoring taxes/penalties/access limits.
-    if (rules.zakatability === 'full') {
-        return vestedBalance;
-    }
-
-    // 5. Handle Net Accessible (Standard / Majority / Bradford > 59.5)
-    // Zakat on what you can put in your pocket today.
-
-    // If withdrawal is strictly forbidden by employer/plan
-    if (!withdrawalAllowed) {
-        // If strictly forbidden, you have no access. 
-        // For 'net_accessible' view, this is effectively 0.
+    // 1. Exempt — No Zakat on this account
+    if (rules.zakatability === 'exempt') {
+        console.log('[ZMCS Retirement] Method: exempt → 0');
         return 0;
     }
 
-    // Calculate effective access
-    // Apply Withdrawal Limit (e.g., only 50% can be withdrawn)
+    // 2. Deferred Upon Access — Zakat only when funds are withdrawn
+    if (rules.zakatability === 'deferred_upon_access') {
+        console.log('[ZMCS Retirement] Method: deferred_upon_access → 0');
+        return 0;
+    }
+
+    // 3. Conditional Age (Bradford) — Exempt below threshold age
+    if (rules.zakatability === 'conditional_age') {
+        const threshold = rules.exemption_age ?? 59.5;
+        if (age < threshold) {
+            console.log(`[ZMCS Retirement] Method: conditional_age, age ${age} < ${threshold} → exempt (0)`);
+            return 0;
+        }
+
+        // Age threshold met — apply post-threshold method
+        const postMethod = rules.post_threshold_method ?? 'net_accessible';
+
+        if (postMethod === 'proxy_rate') {
+            // Bradford post-59.5: (Market Value × proxy%) 
+            const proxyRate = rules.post_threshold_rate ?? 0.30;
+            const result = vestedBalance * proxyRate;
+            console.log(`[ZMCS Retirement] Method: conditional_age → proxy_rate (${proxyRate}), balance ${vestedBalance} → ${result}`);
+            return result;
+        }
+
+        if (postMethod === 'full') {
+            console.log(`[ZMCS Retirement] Method: conditional_age → full, balance ${vestedBalance}`);
+            return vestedBalance;
+        }
+
+        // Default: net_accessible (fall through to net_accessible logic below)
+        console.log(`[ZMCS Retirement] Method: conditional_age → net_accessible`);
+    }
+
+    // 4. Full Amount (Imam Tahir Anwar / Strong Ownership)
+    if (rules.zakatability === 'full') {
+        console.log(`[ZMCS Retirement] Method: full → ${vestedBalance}`);
+        return vestedBalance;
+    }
+
+    // 5. Net Accessible (AMJA / Majority / Fallthrough from conditional_age)
+    // Zakat on what you could put in your pocket today
+
+    // If withdrawal is strictly forbidden by employer/plan
+    if (!withdrawalAllowed) {
+        console.log('[ZMCS Retirement] Method: net_accessible, withdrawal forbidden → 0');
+        return 0;
+    }
+
+    // Apply withdrawal limit (e.g., employer caps early withdrawal at 50%)
     const accessiblePrincipal = vestedBalance * withdrawalLimit;
 
-    // Apply Penalties & Taxes
-    // Default penalty is 10% (0.10) if under 59.5, else 0.
-    // Config can override, or we infer standard US rules.
+    // Apply penalties (10% if under 59.5, 0% if over)
     const isUnderAge = age < 59.5;
-    const penalty = (isUnderAge ? (rules.penalty_rate ?? 0.10) : 0);
+    const penalty = isUnderAge ? (rules.penalty_rate ?? 0.10) : 0;
 
-    // Tax Rate: User provided or flat rate override
+    // Tax rate: user-provided or flat rate override
     const effectiveTaxRate = rules.tax_rate_source === 'flat_rate' ? 0.30 : taxRate;
 
-    // Net Factor = 1 - (Tax + Penalty)
+    // Net factor = 1 - (tax + penalty), floored at 0
     const netFactor = Math.max(0, 1 - (effectiveTaxRate + penalty));
+    const result = accessiblePrincipal * netFactor;
 
-    return accessiblePrincipal * netFactor;
+    console.log(`[ZMCS Retirement] Method: net_accessible, balance ${vestedBalance}, limit ${withdrawalLimit}, tax ${effectiveTaxRate}, penalty ${penalty} → ${result}`);
+    return result;
 }
 
 export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodologyConfig = DEFAULT_CONFIG): number {
@@ -140,15 +173,20 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
     }
 
     // Module C: Retirement Accounts
-    // Roth IRA Contributions
-    total += data.rothIRAContributions; // Always accessible tax-free
+    // ── Roth IRA Contributions ──
+    // Config-driven rate: Bradford uses 0.30 (30% proxy), most others use 1.0 (fully zakatable)
+    const rothContributionsRate = config.assets.retirement.roth_contributions_rate ?? 1.0;
+    total += data.rothIRAContributions * rothContributionsRate;
+    console.log(`[ZMCS Assets] Roth contributions: ${data.rothIRAContributions} × ${rothContributionsRate} = ${data.rothIRAContributions * rothContributionsRate}`);
 
-    // Roth IRA Earnings
-    if (data.isOver59Half) {
-        total += data.rothIRAEarnings;
-    } else {
-        // Use the shared helper - Roth Earnings subject to penalty/tax if withdrawn early
+    // ── Roth IRA Earnings ──
+    const rothFollowTraditional = config.assets.retirement.roth_earnings_follow_traditional ?? true;
+    if (rothFollowTraditional) {
+        // Roth earnings follow same rules as Traditional/401k retirement
         total += calculateRetirementAccessible(data.rothIRAEarnings, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
+    } else {
+        // Roth earnings are always fully zakatable (accessible wealth)
+        total += data.rothIRAEarnings;
     }
 
     // Traditional 401k & IRA
@@ -179,6 +217,9 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
             total += data.landBankingValue * reRules.land_banking.rate;
         }
         if (reRules.rental_property.income_zakatable) {
+            // If a rental income_rate override is configured, the rental income
+            // is STILL added to totalAssets (for reporting), but will be taxed
+            // at the override rate in calculateZakat() instead of the global rate.
             total += data.rentalPropertyIncome;
         }
     }
@@ -546,6 +587,70 @@ export function calculateEnhancedAssetBreakdown(
             items: exemptItems,
         },
     };
+}
+
+// =============================================================================
+// Rate Override Asset Extraction (ZMCS v2.0.1)
+// =============================================================================
+//
+// Some methodologies (e.g., Al-Qaradawi) apply a different Zakat rate to
+// specific asset classes. This function identifies assets with rate overrides
+// so the main calculation can apply multi-rate logic:
+//
+//   standardZakat = (netWealth - overrideAssets) × globalRate
+//   overrideZakat = Σ(overrideAsset × overrideRate)
+//   totalZakat    = standardZakat + overrideZakat
+//
+// Currently supported overrides:
+//   - rental_property.income_rate: Override rate for net rental income
+//     (Al-Qaradawi: 10% agricultural analogy)
+//
+
+/** Represents an asset pool with a rate override distinct from the global Zakat rate. */
+export interface RateOverridePool {
+    /** Human-readable label for logging and reporting. */
+    label: string;
+    /** The asset amount in this override pool. */
+    amount: number;
+    /** The Zakat rate to apply to this pool (e.g., 0.10 for 10%). */
+    rate: number;
+}
+
+/**
+ * Extracts asset amounts that have methodology-specific rate overrides.
+ * These amounts are included in totalAssets but should be taxed at their
+ * specific rate rather than the global Zakat rate.
+ *
+ * @returns Array of override pools. Empty array if no overrides are active.
+ */
+export function calculateRateOverrides(
+    data: ZakatFormData,
+    config: ZakatMethodologyConfig = DEFAULT_CONFIG
+): RateOverridePool[] {
+    const overrides: RateOverridePool[] = [];
+
+    // ── Rental Income Rate Override ──
+    // If the methodology specifies a different rate for rental income
+    // (e.g., Al-Qaradawi's 10% agricultural analogy), extract it.
+    const rentalRateOverride = config.assets.real_estate.rental_property.income_rate;
+    if (
+        rentalRateOverride !== undefined &&
+        data.hasRealEstate &&
+        config.assets.real_estate.rental_property.income_zakatable &&
+        data.rentalPropertyIncome > 0
+    ) {
+        overrides.push({
+            label: 'Rental Income (rate override)',
+            amount: data.rentalPropertyIncome,
+            rate: rentalRateOverride,
+        });
+        console.log(
+            `[ZMCS Rate Override] Rental income: $${data.rentalPropertyIncome} ` +
+            `at ${(rentalRateOverride * 100).toFixed(1)}% (instead of global rate)`
+        );
+    }
+
+    return overrides;
 }
 
 // Deprecated in favor of enhanced breakdown but kept for backward compatibility if needed

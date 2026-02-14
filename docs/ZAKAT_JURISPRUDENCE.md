@@ -208,11 +208,13 @@ Heavy emphasis on **Niyyah (Intention)**. An asset is only zakatable as trade go
 
 ### The Scholarly Debate
 
-Retirement accounts present a novel challenge: they represent wealth that is technically owned but practically inaccessible without significant legal and financial barriers.
+Retirement accounts present a novel challenge: they represent wealth that is technically owned but practically inaccessible without significant legal and financial barriers. ZakatFlow supports five distinct approaches via the ZMCS `retirement.zakatability` field.
 
-### The Bradford Exemption (Under 59½)
+### 7.5.1 Sheikh Joe Bradford — Conditional Age Exemption
 
-> **Position**: Traditional 401(k)/IRA assets are **EXEMPT** from Zakat for account holders under age 59½.
+> **Position**: Traditional 401(k)/IRA assets are **exempt** from Zakat for account holders under age 59½. Once the age threshold is reached, a **30% proxy rate** applies on market value.
+
+**ZMCS Config**: `zakatability: 'conditional_age'`, `exemption_age: 59.5`, `post_threshold_method: 'proxy_rate'`, `post_threshold_rate: 0.30`
 
 **Scholarly Basis (Sheikh Joe Bradford, "Simple Zakat Guide")**:
 
@@ -224,19 +226,21 @@ The argument rests on two classical principles:
 
 2. **Māl Ḍimār (Inaccessible Wealth)**
    - Classical jurists exempted wealth in the possession of an uncertain debtor
-   - The IRS functions as this "uncertain debtor"—you cannot freely access what is legally yours
+   - The IRS functions as this "uncertain debtor" — you cannot freely access what is legally yours
 
-**Practical Effect**: This exemption mirrors the treatment of unvested pensions in classical jurisprudence—where the mere *promise* of future wealth does not trigger Zakat until the promise is realized.
+**Roth IRA Treatment**: Contributions at 30% proxy rate (`roth_contributions_rate: 0.30`); earnings follow traditional retirement rules.
 
-### The AMJA Position (Annual Net Value)
+### 7.5.2 AMJA — Net Accessible Value
 
-> **Position**: Zakat is due annually on the **net accessible value** (balance minus taxes and penalties).
+> **Position**: Zakat is due annually on the **net accessible value** (vested balance minus taxes and penalties).
+
+**ZMCS Config**: `zakatability: 'net_accessible'`, `penalty_rate: 0.10`
 
 **Scholarly Basis (AMJA Fatwa #77832)**:
 
 1. **Ownership is Established**: The assets are legally owned once vested
 2. **Penalty is Merely a Cost**: The 10% penalty is a cost of liquidation, not a Shariah barrier to ownership
-3. **The Asset has Nama'**: The funds grow and are productive—a key condition for Zakat
+3. **The Asset has Nama'**: The funds grow and are productive — a key condition for Zakat
 
 **Formula**:
 ```
@@ -244,20 +248,60 @@ Net Accessible Value = Vested Balance × (1 - Tax Rate - Penalty Rate)
 Zakat Due = Net Accessible Value × 2.5%
 ```
 
-### ZakatFlow Implementation
+### 7.5.3 Imam Tahir Anwar — Full Balance (Strong Ownership / Hanafi)
 
-| Mode | Treatment |
-|------|-----------|
-| **Balanced (Bradford)** | Exempt under 59½; Zakatable at full value over 59½ |
-| **Hanafi/Maliki/Shafi'i/Hanbali** | Net accessible value annually |
+> **Position**: The **full vested balance** is zakatable regardless of age or penalties, based on the Hanafi principle of strong ownership (Milk Tām).
+
+**ZMCS Config**: `zakatability: 'full'`
+
+**Scholarly Basis (Hanafi / Zaytuna College)**:
+
+1. **Ownership is Complete**: The account holder is the legal owner of the full vested balance
+2. **Penalties are Irrelevant**: Government-imposed penalties do not negate the Shariah reality of ownership
+3. **Consistent Treatment**: Aligns with the Hanafi approach that all owned wealth (including jewelry, all investments) is zakatable
+
+**Formula**:
+```
+Zakat Due = Full Vested Balance × 2.5%
+```
+
+### 7.5.4 Dr. Al-Qaradawi — Net Accessible Value
+
+> **Position**: Zakat is due on the **net accessible value** of retirement accounts. Funds that are legally withdrawable (even with penalties) are zakatable. Defined benefit pensions not yet paid out are exempt until distribution.
+
+**ZMCS Config**: `zakatability: 'net_accessible'`
+
+**Scholarly Basis (Fiqh al-Zakah; fiqh.islamonline.net)**:
+
+1. **Accessible Funds Are Zakatable**: "Zakat applies to wealth one owns with freedom to use"
+2. **Pension Funds Not Yet Possessed**: Exempt until distribution — similar to a debt owed to you
+3. **Employer's Forced Contribution**: Treated as a bonus gift, not zakatable until accessible
+
+Al-Qaradawi explicitly rejects Bradford's total exemption for accessible defined-contribution plans (401k, IRA) where the owner CAN withdraw with penalties.
+
+### 7.5.5 Classical Madhabs — Net Accessible Value
+
+> The four classical madhabs generally follow the **net accessible value** approach, recognizing ownership but accounting for the practical costs of accessing retirement funds.
+
+**ZMCS Config**: `zakatability: 'net_accessible'`
+
+### ZakatFlow Implementation Summary
+
+| Methodology | ZMCS `zakatability` | Under 59½ | Over 59½ | Roth Contributions |
+| :--- | :--- | :--- | :--- | :--- |
+| **Bradford (Balanced)** | `conditional_age` | Exempt | 30% proxy on market value | 30% proxy |
+| **AMJA** | `net_accessible` | Net accessible (balance − taxes − 10% penalty) | Net accessible | 100% (accessible) |
+| **Al-Qaradawi** | `net_accessible` | Net accessible | Net accessible | 100% (accessible) |
+| **Imam Tahir Anwar** | `full` | 100% of vested balance | 100% of vested balance | 100% |
+| **Classical Madhabs** | `net_accessible` | Net accessible | Net accessible | 100% (accessible) |
 
 ### Account Type Nuances
 
 | Account | Notes |
-|---------|-------|
-| **Roth IRA/401k Contributions** | Always accessible without penalty → Always Zakatable |
-| **Roth Earnings** | Subject to penalty if under 59½ → Follows Bradford/AMJA split |
-| **HSA** | Accessible for medical expenses at any age → Always Zakatable |
+| :--- | :--- |
+| **Roth IRA/401k Contributions** | Always accessible without penalty. Bradford: 30% proxy. Others: 100% |
+| **Roth Earnings** | Subject to penalty if under 59½. Follows the methodology's retirement rules |
+| **HSA** | Accessible for medical expenses at any age → Always zakatable |
 | **457(b) Governmental** | No 10% penalty → May be more accessible |
 | **Defined Benefit Pension** | Apply vested amount; inaccessible until retirement triggers exemption |
 
@@ -559,7 +603,42 @@ Follows classical fiqh principles—settlor liable for revocable trusts, benefic
 
 ---
 
-## 8. Conclusion
+## 8. Zakat Distribution Best Practices
+
+> Based on Classical Jurisprudence and Modern Scholarship
+
+### 8.1 The Eight Categories of Recipients (Asnaf)
+
+The Quran (9:60) specifies eight categories of eligible Zakat recipients:
+
+1. **Al-Fuqara'** (The Poor) — Those whose needs exceed their means
+2. **Al-Masakin** (The Needy) — Those in hardship but not absolute poverty
+3. **Al-'Amilin** (Zakat Administrators) — Collectors and distributors
+4. **Al-Mu'allafah Qulubuhum** (Hearts to be Reconciled) — New Muslims or potential converts
+5. **Ar-Riqab** (Freeing of Bondage) — Historically for freeing slaves; today some scholars apply to human trafficking victims
+6. **Al-Gharimin** (The Debtors) — Those in debt who cannot repay
+7. **Fi Sabil Allah** (In the Cause of God) — See Section 5.2 for Hanbali/modern debate
+8. **Ibn as-Sabil** (The Wayfarer) — Travelers in need
+
+### 8.2 Forgiving Debt as Zakat
+
+| Position | Ruling | Reasoning |
+| :--- | :--- | :--- |
+| **Majority** (Hanafi, Hanbali, Maliki) | **No** | Zakat requires *Tamlik* (transfer of ownership); forgiving debt destroys a liability, doesn't transfer an asset |
+| **Minority** (Shafi'i, Hasan al-Basri) | **Yes, in certain cases** | Relieving a debtor (Al-Gharimin) is financial support explicitly mentioned in the Quran |
+
+**Recommendation**: If you wish to forgive a debt, calculate the amount, pay it as Zakat to a **separate** eligible recipient, then forgive the original debt as Sadaqah (voluntary charity). This satisfies the *Tamlik* requirement.
+
+### 8.3 Practical Distribution Tips
+
+- **Local vs. Global**: Most scholars permit sending Zakat to distant locations if greater need exists. Some Hanafi opinions prefer local distribution unless local needs are met
+- **Verification**: Verify the eligibility of recipients when possible. Use reputable Zakat organizations with scholarly oversight (e.g., Islamic Relief, Zakat Foundation)
+- **Timing**: Zakat can be paid early if need is urgent. Calculate annually on your Zakat anniversary (Hawl)
+- **Documentation**: Keep records of Zakat payments. Some scholars recommend obtaining receipts for accountability
+
+---
+
+## 9. Conclusion
 
 The analysis reveals Zakat jurisprudence is not monolithic but a vibrant conversation spanning centuries:
 
@@ -568,7 +647,16 @@ The analysis reveals Zakat jurisprudence is not monolithic but a vibrant convers
 - **Shafi'i (Al-Majmu')**: Rigorous theological attachment protecting rights of the poor
 - **Hanbali (Al-Mughni)**: Comparative synthesis balancing tradition with rational categorization
 
+Modern scholars build on these foundations to address contemporary instruments:
+
+- **Dr. Yusuf Al-Qaradawi**: The most comprehensive modern treatise (*Fiqh al-Zakah*), combining classical scholarship with progressive ijtihad
+- **Sheikh Joe Bradford**: Precautionary, balanced synthesis adapted for Western contexts
+- **AMJA**: Institutional standard balancing accessibility with practical barriers
+- **Imam Tahir Anwar**: Hanafi-leaning strong ownership approach
+
 These texts provide the **source code** for solving 21st-century economic dilemmas. The evolution from "debts to humans" in 12th-century Kufa to "12 months of mortgage payments" in 21st-century London demonstrates the dynamic resilience of Islamic jurisprudence.
+
+ZakatFlow implements all these positions through the **Zakat Methodology Configuration Standard (ZMCS)**, ensuring each calculation is traceable to a specific scholarly ruling. See [ZMCS_SPECIFICATION.md](ZMCS_SPECIFICATION.md) for the full technical specification.
 
 ---
 
@@ -582,9 +670,11 @@ These texts provide the **source code** for solving 21st-century economic dilemm
 
 ### Contemporary Scholarly Works
 - AAOIFI Shari'ah Standard No. 35: Zakat
+- AAOIFI Financial Accounting Standard (FAS) 39 (supersedes FAS 9, 2021)
 - Mufti Taqi Usmani, *Fatawa on Zakat and Modern Finance*
 - Sheikh Joe Bradford, *Simple Zakat Guide: Understand and Calculate Your Zakat*
 - AMJA (Assembly of Muslim Jurists of America), Fatwa #77832 on Retirement Accounts
+- Imam Tahir Anwar, Zaytuna College — Hanafi methodology lectures
 - National Zakat Foundation UK, *Zakat on Investments Guide*
 - Islamic Finance Guru, *Zakat on Stocks and Shares*
 
@@ -593,3 +683,11 @@ These texts provide the **source code** for solving 21st-century economic dilemm
 - Mufti Faraz Adam, *Cryptocurrency and Zakat: A Contemporary Analysis*
 - AAOIFI Shariah Standards Committee, Guidance on Digital Assets (2020)
 
+### Distribution and Recipient References
+- Ibn Qudamah, *Al-Mughni* — Fi Sabil Allah analysis
+- Al-Nawawi, *Al-Majmu'* — Forgiving debt as Zakat minority view
+- AMJA, IslamQA, Darul Uloom — Contemporary fatwas on distribution
+
+---
+
+*This document is for educational purposes. Consult a qualified scholar for specific rulings on your situation.*

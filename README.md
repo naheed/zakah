@@ -25,8 +25,8 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
 | **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid Integrated) |
 | **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
-| **Scholarly Methodology** | Based on Sheikh Joe Bradford's rulings and AAOIFI guidelines |
-| **5 Madhab Modes** | Hanafi, Shafi'i, Maliki, Hanbali, or Balanced (Bradford) approach |
+| **ZMCS Standard** | Open config standard — any scholar or institution can define their methodology |
+| **8 Methodologies** | Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Imam Tahir Anwar, Al-Qaradawi |
 | **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
 | **Export Options** | PDF report, CSV breakdown, or print-friendly web view |
 | **Privacy-First** | Local-first encryption for guests; cloud sync for signed-in users |
@@ -236,22 +236,38 @@ Unlike monthly expenses, Zakat is a **retrospective annual obligation**, similar
 
 The app tracks your **Active Zakat Year**. When you run a calculation, it defaults to assessing the **Year Just Completed**, linking the liability to that period. Donations made *after* the calculation date (or advance payments during the year) count toward satisfying this liability.
 
-### Calculation Modes
-Based on Sheikh Joe Bradford's methodology.
-- **Bradford (Default)**: Follows modern scholarly rulings adaptable for Western contexts.
-- **Madhab Specific**: Configuration options for Hanafi, Maliki, Shafi'i, and Hanbali schools.
+### ZMCS: Zakat Methodology Configuration Standard
+
+ZakatFlow's calculation engine is powered by **ZMCS v2.0** — a JSON-based standard with 60+ configurable parameters covering every Zakat calculation decision point. Each methodology is a validated configuration, not hardcoded logic.
+
+See [ZMCS Specification](docs/ZMCS_SPECIFICATION.md) for the full standard.
+
+### Supported Methodologies
+
+| Methodology | Key Position | Debt Approach |
+| :--- | :--- | :--- |
+| **Sheikh Joe Bradford** (Default) | Precautionary balanced synthesis | 12-month rule |
+| **AMJA** | Institutional standard, net-accessible retirement | Current due only |
+| **Imam Tahir Anwar** | Strong ownership (Hanafi), full retirement zakatable | Full deduction |
+| **Dr. Al-Qaradawi** | Most influential modern text, progressive ijtihad | 12-month rule |
+| **Hanafi** | Jewelry zakatable, net worth approach | Full deduction |
+| **Shafi'i** | No debt deduction, gross asset approach | No deduction |
+| **Maliki** | Exploited-asset view, velocity economics | 12-month rule |
+| **Hanbali** | Debt deductible, jewelry exempt | Full deduction |
 
 ### Supported Asset Classes
-- Cash & Bank Accounts
-- Stocks, ETFs, Mutual Funds
-- Retirement Accounts (401k, IRA, Roth)
-- Cryptocurrency
-- Gold & Silver
-- Business Inventory
-- Real Estate (for sale)
-- Trusts
 
-For detailed methodology, see [Methodology Documentation](https://zakatflow.org/methodology).
+- Cash & bank accounts
+- Stocks, ETFs, mutual funds (active & passive)
+- Retirement accounts (401k, IRA, Roth, pension)
+- Cryptocurrency & digital assets (including staking/DeFi)
+- Gold, silver & precious metals (investment & jewelry)
+- Business assets (inventory, receivables, fixed assets)
+- Real estate (rental income, property for sale, land banking)
+- Trusts (revocable & irrevocable)
+- Debts owed to you (good & bad debt)
+
+For detailed scholarly analysis, see [Zakat Jurisprudence](docs/ZAKAT_JURISPRUDENCE.md).
 
 ---
 
@@ -323,7 +339,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## Roadmap
 
 | Phase | Status | Description |
-|-------|--------|-------------|
+| :--- | :--- | :--- |
+| ZMCS v2.0 | Complete | Foundational standard with 8 methodologies, 60+ parameters |
 | Core Calculator | ✅ Complete | Guided wizard with all asset classes |
 | Asset Intelligence | ✅ Complete | Extract line items from PDFs/images |
 | Donation Tracking | ✅ Complete | Receipt scanning, Active Hawl, Cloud Sync |
@@ -345,9 +362,11 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ## Acknowledgments
 
-- **Sheikh Joe Bradford** — Primary methodology source
+- **Sheikh Joe Bradford** — Primary methodology source, "Simple Zakat Guide"
 - **AMJA** — Assembly of Muslim Jurists of America
-- **AAOIFI** — Accounting standards for Islamic finance
+- **Imam Tahir Anwar** — Hanafi methodology, Zaytuna College
+- **Dr. Yusuf Al-Qaradawi** — *Fiqh al-Zakah*, the most influential modern Zakat treatise
+- **AAOIFI** — Accounting and Auditing Organization for Islamic Financial Institutions
 - **Supabase** — Backend infrastructure
 - **Shadcn** — UI component system
 

@@ -80,7 +80,7 @@ export function MethodologyZMCS() {
                                                 {/* Requires Lucide icon component mapping or passing generic icon */}
                                                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                                     {/* We can dynamically render the icon if passed correctly, or skip for now */}
-                                                    <Database className="w-5 h-5" />
+                                                    {section.icon && <section.icon className="w-5 h-5" weight="fill" />}
                                                 </div>
                                                 <div>
                                                     <CardTitle>{section.title} Schema</CardTitle>

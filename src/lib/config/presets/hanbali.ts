@@ -1,82 +1,147 @@
 import { ZakatMethodologyConfig } from '../types';
 
+// =============================================================================
+// HANBALI CLASSICAL Configuration
+// =============================================================================
+//
+// OVERVIEW:
+//   The classical Hanbali position as codified by Ibn Qudama in Al-Mughni and
+//   Al-Mardawi in Al-Insaf. The Hanbali school shares many positions with the
+//   Hanafi school (particularly full debt deduction) but differs on jewelry
+//   (exempt, following the majority view).
+//
+// KEY DISTINGUISHING FEATURES:
+//   - Jewelry: EXEMPT (follows majority view, unlike Hanafi)
+//   - Debt: Full deduction (like Hanafi — all debts offset wealth)
+//   - Retirement: Net accessible
+//   - Investments: 100% market value
+//
+// =============================================================================
+
 export const HANBALI_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'hanbali-standard-v1',
+        id: 'hanbali-standard-v2',
         name: 'Hanbali',
-        version: '1.0.0',
+        version: '2.0.0',
+        zmcs_version: '2.0.0',
         author: 'ZakatFlow Official',
-        description: "Classical Hanbali opinion: Full debt deduction, similar to Hanafi but jewelry exempt.",
+        description: 'Classical Hanbali: jewelry exempt, full debt deduction, net accessible retirement, 100% investments.',
+        ui_label: 'Hanbali',
     },
+
     thresholds: {
         nisab: {
             default_standard: 'silver',
             gold_grams: 85.0,
             silver_grams: 595.0,
+            description: 'Hanbali standard: silver threshold (200 Dirhams = 595g).',
         },
         zakat_rate: {
             lunar: 0.025,
             solar: 0.02577,
         },
     },
+
     assets: {
-        cash: { zakatable: true, rate: 1.0 },
+        cash: {
+            zakatable: true,
+            rate: 1.0,
+            description: 'All cash holdings fully zakatable.',
+            scholarly_basis: 'Unanimous consensus.',
+        },
+
         precious_metals: {
             investment_gold_rate: 1.0,
             investment_silver_rate: 1.0,
             jewelry: {
-                zakatable: false, // Exempt (majority view in Hanbali)
+                zakatable: false,
                 rate: 1.0,
                 conditions: ['personal_use'],
+                description: 'Personal-use jewelry EXEMPT. Follows the majority scholarly view.',
+                scholarly_basis: 'Ibn Qudama in Al-Mughni: "There is no Zakat on jewelry that is used for permissible adornment." This is the position of the majority of companions and scholars.',
             },
+            description: 'Investment metals zakatable. Personal jewelry exempt (majority Hanbali view).',
         },
+
         crypto: {
             currency_rate: 1.0,
             trading_rate: 1.0,
-            staking: { principal_rate: 1.0, rewards_rate: 1.0, vested_only: true },
+            staking: {
+                principal_rate: 1.0,
+                rewards_rate: 1.0,
+                vested_only: true,
+            },
+            description: 'Crypto fully zakatable.',
         },
+
         investments: {
             active_trading_rate: 1.0,
             passive_investments: {
                 rate: 1.0,
-                description: "100% of market value is zakatable.",
+                treatment: 'market_value',
+                description: '100% of market value is zakatable.',
+                scholarly_basis: 'Stocks as trade goods at market value.',
             },
             reits_rate: 1.0,
-            dividends: { zakatable: true, deduct_purification: true },
+            dividends: {
+                zakatable: true,
+                deduct_purification: true,
+                description: 'Dividends zakatable.',
+            },
+            description: 'All investments at full market value.',
         },
+
         retirement: {
             zakatability: 'net_accessible',
-            description: "Zakatable on net accessible amount.",
+            pension_vested_rate: 1.0,
+            penalty_rate: 0.10,
+            tax_rate_source: 'user_input',
+            roth_contributions_rate: 1.0,
+            roth_earnings_follow_traditional: true,
+            distributions_always_zakatable: true,
+            description: 'Net accessible: balance minus taxes and penalties.',
+            scholarly_basis: 'Contemporary Hanbali application.',
         },
+
         real_estate: {
-            primary_residence: { zakatable: false },
-            rental_property: { zakatable: false, income_zakatable: true },
-            for_sale: { zakatable: true, rate: 1.0 },
-            land_banking: { zakatable: true, rate: 1.0 },
+            primary_residence: { zakatable: false, description: 'Exempt.' },
+            rental_property: { zakatable: false, income_zakatable: true, description: 'Value exempt; income zakatable.' },
+            for_sale: { zakatable: true, rate: 1.0, description: 'Trade goods.' },
+            land_banking: { zakatable: true, rate: 1.0, description: 'Trade goods by intent.' },
         },
+
         business: {
             cash_receivables_rate: 1.0,
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
+            description: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
         },
+
         debts_owed_to_user: {
             good_debt_rate: 1.0,
             bad_debt_rate: 0.0,
             bad_debt_on_recovery: true,
+            description: 'Good debts zakatable. Bad debts upon recovery.',
         },
     },
+
     liabilities: {
         method: 'full_deduction',
         commercial_debt: 'fully_deductible',
         personal_debt: {
             deductible: true,
             types: {
-                housing: 'full',
-                expense_period: 'annual',
+                housing: '12_months',
                 student_loans: 'full',
                 credit_cards: 'full',
-                living_expenses: 'full',
+                living_expenses: '12_months',
+                insurance: 'full',
+                unpaid_bills: 'full',
+                taxes: 'full',
             },
+            description: 'Full deduction: all debts offset zakatable wealth (similar to Hanafi).',
+            scholarly_basis: 'Ibn Qudama in Al-Mughni: debts prevent Zakat on the amount owed. The principle is that debts reduce the net zakatable wealth.',
         },
+        description: 'Hanbali: full debt deduction, similar to Hanafi position.',
     },
 };
