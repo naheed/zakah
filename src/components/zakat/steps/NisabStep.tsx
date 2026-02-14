@@ -1,9 +1,10 @@
-import { ZakatFormData, calculateNisab, formatCurrency, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, NisabStandard, Madhab } from "@/lib/zakatCalculations";
+import { ZakatFormData, calculateNisab, formatCurrency, NisabStandard, Madhab } from "@/lib/zakatCalculations"; // Removed hardcoded price imports
 import { nisabContent } from "@/content/steps";
 import { QuestionLayout } from "../QuestionLayout";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
-import { Scales, Calculator, ShieldCheck } from "@phosphor-icons/react";
+import { Scales, Calculator, ShieldCheck, Spinner } from "@phosphor-icons/react";
+import { useNisab } from "@/hooks/useNisab";
 
 interface NisabStepProps {
   data: ZakatFormData;
@@ -12,8 +13,19 @@ interface NisabStepProps {
 }
 
 export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) {
-  const silverNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
-  const goldNisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'gold');
+  const { data: nisabData, isLoading } = useNisab();
+
+  // Fallback to defaults if loading or error, but ideally show loading state
+  // Using 0 as fallback or keeping old constants as backup?
+  // Let's use the old constants as fallback to prevent UI breakage if API fails.
+  const SILVER_FALLBACK = 24.50;
+  const GOLD_FALLBACK = 2650;
+
+  const silverPrice = nisabData?.silver_price ?? SILVER_FALLBACK;
+  const goldPrice = nisabData?.gold_price ?? GOLD_FALLBACK;
+
+  const silverNisab = calculateNisab(silverPrice, goldPrice, 'silver');
+  const goldNisab = calculateNisab(silverPrice, goldPrice, 'gold');
   const currentNisab = data.nisabStandard === 'gold' ? goldNisab : silverNisab;
 
   return (
@@ -150,14 +162,25 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
       </div>
 
       {/* Current Nisab Display */}
-      <div className="text-center p-6 bg-card border border-border rounded-xl">
+      <div className="text-center p-6 bg-card border border-border rounded-xl relative overflow-hidden">
+        {isLoading && (
+          <div className="absolute inset-0 bg-background/50 flex items-center justify-center backdrop-blur-sm">
+            <Spinner className="animate-spin w-6 h-6 text-primary" />
+          </div>
+        )}
         <p className="text-sm text-muted-foreground mb-1">Your Niṣāb Threshold</p>
         <p className="text-4xl font-bold text-primary">
           {formatCurrency(currentNisab, data.currency)}
         </p>
         <p className="text-xs text-muted-foreground mt-2">
-          Based on current {data.nisabStandard} prices
+          Based on {nisabData ? 'live' : 'standard'} {data.nisabStandard} prices
+          {nisabData && ` (${formatCurrency(data.nisabStandard === 'gold' ? goldPrice : silverPrice, 'USD', 2)}/oz)`}
         </p>
+        {nisabData && (
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Updated: {nisabData.date}
+          </p>
+        )}
       </div>
     </QuestionLayout>
   );

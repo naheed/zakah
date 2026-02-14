@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MethodologyExplorer } from "@/components/zakat/MethodologyExplorer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { HistoricalNisabLookup } from "@/components/tools/HistoricalNisabLookup";
 
 const tocItems = [
   { id: "explorer", number: 1, label: "Interactive Guide" },
@@ -153,6 +154,10 @@ const Methodology = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <Text>{content.nisab.intro}</Text>
+
+              <div className="my-6">
+                <HistoricalNisabLookup />
+              </div>
 
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="history">
