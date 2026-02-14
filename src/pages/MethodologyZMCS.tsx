@@ -159,7 +159,7 @@ export function MethodologyZMCS() {
                             ))}
                         </div>
                         {/* Section 4: Sample Configuration */}
-                        <section className="space-y-4">
+                    <section className="space-y-4">
                             <h2 className="text-2xl font-bold flex items-center gap-2">
                                 <FileText className="w-6 h-6 text-primary" />
                                 Sample Configuration
@@ -178,7 +178,8 @@ export function MethodologyZMCS() {
                                     </pre>
                                 </ScrollArea>
                             </div>
-                        </section>
+                    </section>
+                    </section>
                 </div>
 
                 {/* Sidebar */}
@@ -191,7 +192,7 @@ export function MethodologyZMCS() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <Link to="https://github.com/naheed/zakah/blob/main/docs/CONTRIBUTING_METHODOLOGY.md" target="_blank">
+                            <Link to="/methodology/zmcs/contributing">
                                 <Button variant="outline" className="w-full justify-start">
                                     <Code className="w-4 h-4 mr-2" />
                                     Contributor Guide
