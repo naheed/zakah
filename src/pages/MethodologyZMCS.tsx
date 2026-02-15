@@ -103,6 +103,13 @@ function FieldRow({ field }: { field: ZMCSField }) {
                     ))}
                 </div>
             )}
+
+            {/* Row 5: Help text cross-reference */}
+            {field.helpText && (
+                <p className="text-xs text-muted-foreground/60 italic">
+                    💡 Calculator tooltip: <code className="bg-muted px-1 py-0.5 rounded text-[10px] not-italic">{field.helpText}</code>
+                </p>
+            )}
         </div>
     );
 }

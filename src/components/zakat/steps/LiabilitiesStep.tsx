@@ -4,7 +4,8 @@ import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
-import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { WhyTooltip } from "../WhyTooltip";
+import { getFiqhExplanations } from "@/content/fiqhExplanations";
 
 import { ZAKAT_PRESETS } from "@/lib/config/presets";
 
@@ -16,6 +17,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
   const config = ZAKAT_PRESETS[methodId] || ZAKAT_PRESETS['balanced'];
   const liabMethod = config.liabilities.method;
   const isAnnual = liabMethod === '12_month_rule' || liabMethod === 'full_deduction';
+  const fiqhExplanations = getFiqhExplanations(config);
 
   // Dynamic Content for AssetStepWrapper
   const dynamicContent = {
@@ -32,12 +34,16 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
   };
 
   const livingExpensesDesc = isAnnual
-    ? "Rent, utilities, groceries, transport — we multiply by 12"
-    : "Rent, utilities, groceries, transport — calculated for current month only";
+    ? "Rent, utilities, groceries, transport — annualized (×12)"
+    : liabMethod === 'no_deduction'
+      ? "Rent, utilities, groceries, transport — not deductible under this methodology"
+      : "Rent, utilities, groceries, transport — calculated for current month only";
 
   const mortgageDesc = isAnnual
-    ? "12 months deductible per AMJA opinion"
-    : "Current month deductible only";
+    ? "12 months deductible under this methodology"
+    : liabMethod === 'no_deduction'
+      ? "Not deductible under this methodology"
+      : "Current month deductible only";
 
   return (
     <AssetStepWrapper
@@ -91,7 +97,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
           <div>
             <strong>High Amount Detected:</strong> Are you entering your <em>total</em> mortgage balance?
             <br />
-            Please only enter <strong>ONE month's payment</strong>. We automatically multiply this by 12 for the calculation.
+            Please only enter <strong>ONE month's payment</strong>. The calculator automatically annualizes this for the calculation.
           </div>
         </div>
       )}

@@ -18,6 +18,8 @@ interface ArticleLayoutProps {
     children: React.ReactNode;
     headerContent?: React.ReactNode;
     showBackButton?: boolean;
+    backLink?: string;
+    backLabel?: string;
 }
 
 export const ArticleLayout: React.FC<ArticleLayoutProps> = ({
@@ -28,6 +30,8 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({
     children,
     headerContent,
     showBackButton = true,
+    backLink = "/",
+    backLabel = "Back to Calculator",
 }) => {
     const navigate = useNavigate();
 
@@ -50,11 +54,11 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({
                         <ScrollReveal>
                             <Button
                                 variant="ghost"
-                                onClick={() => navigate('/')}
+                                onClick={() => navigate(backLink)}
                                 className="mb-8 gap-2"
                             >
                                 <ArrowLeft className="w-4 h-4" weight="bold" />
-                                Back to Calculator
+                                {backLabel}
                             </Button>
                         </ScrollReveal>
                     )}

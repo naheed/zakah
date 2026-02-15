@@ -8,13 +8,15 @@ import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { WhyTooltip } from "../WhyTooltip";
+import { getFiqhExplanations } from "@/content/fiqhExplanations";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { ShieldCheck } from "@phosphor-icons/react";
 
 export function RetirementStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const effectiveConfig = ZAKAT_PRESETS[data.madhab] || DEFAULT_CONFIG;
+  const fiqhExplanations = getFiqhExplanations(effectiveConfig);
   const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, effectiveConfig, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
   const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, effectiveConfig, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
   const isHousehold = data.isHousehold;

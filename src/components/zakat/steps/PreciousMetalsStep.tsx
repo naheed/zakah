@@ -4,7 +4,9 @@ import { preciousMetalsContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
 import { WeightConverter } from "../WeightConverter";
-import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { WhyTooltip } from "../WhyTooltip";
+import { getFiqhExplanations } from "@/content/fiqhExplanations";
+import { ZAKAT_PRESETS } from "@/lib/config/presets";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +19,8 @@ import { cn } from "@/lib/utils";
 export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
   const [inputMode, setInputMode] = useState<'weight' | 'value'>('weight');
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const fiqhExplanations = getFiqhExplanations(config);
 
   return (
     <AssetStepWrapper

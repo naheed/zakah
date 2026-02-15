@@ -8,10 +8,14 @@ import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDoc
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { TrustAllocationDialog } from "../TrustAllocationDialog";
-import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { WhyTooltip } from "../WhyTooltip";
+import { getFiqhExplanations } from "@/content/fiqhExplanations";
+import { ZAKAT_PRESETS } from "@/lib/config/presets";
 
 export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const fiqhExplanations = getFiqhExplanations(config);
   const [allocationDialog, setAllocationDialog] = useState<{
     open: boolean;
     value: number;
@@ -27,14 +31,14 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
   // Custom handler for trust documents that need categorization
   const handleTrustDocumentAdded = (doc: Omit<UploadedDocument, 'id' | 'uploadedAt'>) => {
     const extractedData = doc.extractedData;
-    
+
     // Check if document has trust values that need categorization
     const hasTrustValue = (extractedData.revocableTrustValue && extractedData.revocableTrustValue > 0) ||
-                          (extractedData.irrevocableTrustValue && extractedData.irrevocableTrustValue > 0);
-    
+      (extractedData.irrevocableTrustValue && extractedData.irrevocableTrustValue > 0);
+
     // If document has a generic trust value, ask user to categorize
     const totalTrustValue = (extractedData.revocableTrustValue || 0) + (extractedData.irrevocableTrustValue || 0);
-    
+
     if (hasTrustValue && totalTrustValue > 0) {
       setAllocationDialog({
         open: true,
@@ -60,7 +64,7 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
         },
       };
       onDocumentAdded(updatedDoc);
-      
+
       // Update form data with new allocations
       updateData({
         revocableTrustValue: data.revocableTrustValue + allocation.revocable,
@@ -100,13 +104,13 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
           onChange={(value) => updateData({ revocableTrustValue: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'revocableTrustValue')}
         />
-        
+
         <div className="space-y-3 pt-4 border-t border-border">
           <div className="flex items-center gap-2">
             <h3 className="font-medium text-foreground">Irrevocable Trust</h3>
             <WhyTooltip {...fiqhExplanations.irrevocableTrust} />
           </div>
-          
+
           <CurrencyInput
             label="Irrevocable Trust Value"
             description="Trust value if accessible"
@@ -116,7 +120,7 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
             onChange={(value) => updateData({ irrevocableTrustValue: value })}
             documentContributions={getDocumentContributionsForField(uploadedDocuments, 'irrevocableTrustValue')}
           />
-          
+
           <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
             <div>
               <Label className="text-foreground">Can you access the principal?</Label>
@@ -127,17 +131,17 @@ export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdde
               onCheckedChange={(checked) => updateData({ irrevocableTrustAccessible: checked })}
             />
           </div>
-          
+
           {data.irrevocableTrustValue > 0 && (
             <div className={`p-3 rounded-lg text-sm ${data.irrevocableTrustAccessible ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-              {data.irrevocableTrustAccessible 
+              {data.irrevocableTrustAccessible
                 ? "✓ Zakatable — you can access the principal"
                 : "✗ Not Zakatable — you lack complete possession (Milk Tam)"
               }
             </div>
           )}
         </div>
-        
+
         <div className="space-y-3 pt-4 border-t border-border">
           <div className="flex items-center gap-2">
             <h3 className="font-medium text-foreground">CLAT (Charitable Lead Annuity Trust)</h3>

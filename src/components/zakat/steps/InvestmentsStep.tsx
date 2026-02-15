@@ -3,7 +3,9 @@ import { MADHAB_RULES } from "@/lib/madhahRules";
 import { investmentsContent } from "@/content/steps";
 import { AssetStepWrapper } from "../AssetStepWrapper";
 import { CurrencyInput } from "../CurrencyInput";
-import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { WhyTooltip } from "../WhyTooltip";
+import { getFiqhExplanations } from "@/content/fiqhExplanations";
+import { ZAKAT_PRESETS } from "@/lib/config/presets";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { AssetStepProps, getDocumentContributionsForField } from "@/hooks/useDocumentExtraction";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,8 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
 
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
   const isHousehold = data.isHousehold;
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const fiqhExplanations = getFiqhExplanations(config);
 
   return (
     <AssetStepWrapper

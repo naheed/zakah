@@ -23,6 +23,8 @@ export interface ZMCSField {
     required: boolean;
     group?: string;
     groupIcon?: Icon;
+    /** Key in fiqhExplanations linking this config field to its user-facing WhyTooltip. */
+    helpText?: string;
 }
 
 export interface ZMCSSection {
@@ -119,6 +121,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "gold", label: "Gold. Higher threshold (~$6,000), exempts more people from Zakat obligation." },
                 ],
                 required: true,
+                helpText: "silverNisab",
             },
             {
                 path: "thresholds.nisab.gold_grams",
@@ -169,6 +172,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Cash",
                 groupIcon: Wallet,
+                helpText: "checkingAccounts",
             },
 
             // ── Precious Metals / Jewelry ──
@@ -179,6 +183,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Precious Metals",
                 groupIcon: Coins,
+                helpText: "jewelryExemption",
             },
             {
                 path: "assets.precious_metals.jewelry.scholarly_basis",
@@ -197,6 +202,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Cryptocurrency",
                 groupIcon: CurrencyBtc,
+                helpText: "cryptoCurrency",
             },
             {
                 path: "assets.crypto.staking.vested_only",
@@ -205,6 +211,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 default: "true",
                 required: true,
                 group: "Cryptocurrency",
+                helpText: "stakedAssets",
             },
 
             // ── Investments ──
@@ -216,6 +223,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Investments",
                 groupIcon: ChartLineUp,
+                helpText: "activeInvestments",
             },
             {
                 path: "assets.investments.passive_investments.rate",
@@ -223,6 +231,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakatable portion of passive investment market value. MAJOR DIVERGENCE: 1.0 = classical, 0.30 = Bradford proxy, 0.0 = AMJA income-only.",
                 required: true,
                 group: "Investments",
+                helpText: "thirtyPercentRule",
             },
             {
                 path: "assets.investments.passive_investments.treatment",
@@ -268,6 +277,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Retirement",
                 groupIcon: PiggyBank,
+                helpText: "retirementAccounts",
             },
             {
                 path: "assets.retirement.exemption_age",
@@ -294,6 +304,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on Roth IRA contributions (always accessible tax-free). Bradford: 0.30 (proxy). Most others: 1.0 (fully zakatable).",
                 required: true,
                 group: "Retirement",
+                helpText: "rothContributions",
             },
             {
                 path: "assets.retirement.roth_earnings_follow_traditional",
@@ -301,6 +312,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "If true, Roth IRA earnings follow the same rules as Traditional/401k retirement. If false, earnings are always fully zakatable.",
                 required: true,
                 group: "Retirement",
+                helpText: "rothEarnings",
             },
             {
                 path: "assets.retirement.distributions_always_zakatable",
@@ -388,6 +400,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: false,
                 group: "Trusts",
                 groupIcon: Buildings,
+                helpText: "revocableTrust",
             },
             {
                 path: "assets.trusts.irrevocable_rate",
@@ -396,6 +409,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 default: "1.0",
                 required: false,
                 group: "Trusts",
+                helpText: "irrevocableTrust",
             },
         ],
     },
@@ -422,6 +436,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Deduction Method",
                 groupIcon: Gavel,
+                helpText: "deductibleDebts",
             },
             {
                 path: "liabilities.commercial_debt",
@@ -456,6 +471,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 ],
                 required: false,
                 group: "Personal Debt",
+                helpText: "mortgageDeduction",
             },
             {
                 path: "liabilities.personal_debt.types.student_loans",
@@ -468,6 +484,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 ],
                 required: false,
                 group: "Personal Debt",
+                helpText: "studentLoans",
             },
             {
                 path: "liabilities.personal_debt.types.credit_cards",
@@ -492,6 +509,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 ],
                 required: false,
                 group: "Personal Debt",
+                helpText: "monthlyLiving",
             },
             {
                 path: "liabilities.personal_debt.types.insurance",

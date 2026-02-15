@@ -2,7 +2,9 @@ import { ZakatFormData, calculateNisab, formatCurrency, NisabStandard, Madhab } 
 import { nisabContent } from "@/content/steps";
 import { QuestionLayout } from "../QuestionLayout";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { WhyTooltip, fiqhExplanations } from "../WhyTooltip";
+import { WhyTooltip } from "../WhyTooltip";
+import { getFiqhExplanations } from "@/content/fiqhExplanations";
+import { ZAKAT_PRESETS } from "@/lib/config/presets";
 import { Scales, Calculator, ShieldCheck, Spinner } from "@phosphor-icons/react";
 import { useNisab } from "@/hooks/useNisab";
 
@@ -14,6 +16,8 @@ interface NisabStepProps {
 
 export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) {
   const { data: nisabData, isLoading } = useNisab();
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const fiqhExplanations = getFiqhExplanations(config);
 
   // Fallback to defaults if loading or error, but ideally show loading state
   // Using 0 as fallback or keeping old constants as backup?
