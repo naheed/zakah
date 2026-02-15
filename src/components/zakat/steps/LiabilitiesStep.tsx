@@ -12,10 +12,10 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
   const isHousehold = data.isHousehold;
 
   // Determine expense period from methodology
-  const methodId = data.methodology || 'balanced';
+  const methodId = data.madhab || 'balanced';
   const config = ZAKAT_PRESETS[methodId] || ZAKAT_PRESETS['balanced'];
-  const expensePeriod = config.liabilities.personal_debt.types?.expense_period || 'annual';
-  const isAnnual = expensePeriod === 'annual';
+  const liabMethod = config.liabilities.method;
+  const isAnnual = liabMethod === '12_month_rule' || liabMethod === 'full_deduction';
 
   // Dynamic Content for AssetStepWrapper
   const dynamicContent = {

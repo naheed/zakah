@@ -181,7 +181,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // @ts-expect-error Deno global is available in Supabase Edge Functions runtime
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) {
       console.error("GEMINI_API_KEY not configured");

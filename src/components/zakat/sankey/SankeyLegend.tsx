@@ -28,7 +28,7 @@ export const SankeyLegend: React.FC<SankeyLegendProps> = ({ data, enhancedData, 
             {enhancedData?.enhancedBreakdown ? (
                 Object.entries(enhancedData.enhancedBreakdown).map(([key, cat]) => {
                     const c = cat as { total?: number; label?: string; color?: string } | undefined;
-                    if (c?.total <= 0) return null;
+                    if (!c || !c.total || c.total <= 0) return null;
                     if (key === 'liabilities' || key === 'exempt') return null; // Usually filtered out
 
                     // Or follow stricter typing
@@ -36,11 +36,11 @@ export const SankeyLegend: React.FC<SankeyLegendProps> = ({ data, enhancedData, 
                         return (
                             <LegendCard
                                 key={key}
-                                name={c.label}
+                                name={c.label || key}
                                 value={c.total}
                                 currency={currency}
                                 description=""
-                                color={c.color || ASSET_COLORS[c.label] || "#ccc"}
+                                color={c.color || ASSET_COLORS[c.label || ''] || "#ccc"}
                             />
                         );
                     }

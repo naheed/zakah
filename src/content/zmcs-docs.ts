@@ -1,5 +1,5 @@
 
-import { Coins, Bank, Gavel, Scales, Calculator, Scroll, Buildings, Wallet, UserMinus, Icon, CurrencyBtc, HouseLine, Briefcase, ChartLineUp, Piggybank, HandCoins } from "@phosphor-icons/react";
+import { Coins, Bank, Gavel, Scales, Calculator, Scroll, Buildings, Wallet, UserMinus, Icon, CurrencyBtc, HouseLine, Briefcase, ChartLineUp, PiggyBank, HandCoins } from "@phosphor-icons/react";
 
 // =============================================================================
 // ZMCS UI Documentation Content (v2.0)

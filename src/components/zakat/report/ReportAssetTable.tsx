@@ -51,9 +51,9 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
         const cat = enhancedBreakdown[key as keyof EnhancedAssetBreakdown] as AssetCategory;
         if (!cat) return null;
         return { key, cat, Icon: getAssetIcon(key), ruling: getRulingText(key, cat) };
-    }).filter((item): item is { key: typeof assetKeys[number], cat: AssetCategory, Icon: React.ComponentType<IconProps>, ruling: string } =>
+    }).filter((item): item is NonNullable<typeof item> =>
         item !== null && item.cat && item.cat.total > 0
-    );
+    ) as { key: string; cat: AssetCategory; Icon: React.ComponentType<any>; ruling: string }[];
 
     return (
         <section className="flex-grow mt-8">

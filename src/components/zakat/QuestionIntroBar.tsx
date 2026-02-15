@@ -15,7 +15,7 @@ interface QuestionIntroBarProps {
  * Part of the 3-tier content model: Intro Bar (Tier 1) → Contextual Tips (Tier 2) → Deep Dive (Tier 3)
  */
 export function QuestionIntroBar({ content, madhab, className }: QuestionIntroBarProps) {
-    const intro = content.introByMethodology?.[madhab];
+    const intro = content.introByMethodology?.[madhab as keyof typeof content.introByMethodology];
 
     // Fall back to balanced methodology if specific one not available
     const displayIntro = intro || content.introByMethodology?.balanced;
