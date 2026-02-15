@@ -103,7 +103,6 @@ describe('Document Extraction - Category Mapping', () => {
 describe('Document Extraction - End-to-End Calculation Flow', () => {
 
     it('bank statement extraction flows to correct calculation', () => {
-        // Simulate AI extracting $50,000 from a bank statement
         const extractedData: Partial<ZakatFormData> = {
             checkingAccounts: 30000,
             savingsAccounts: 20000,
@@ -111,96 +110,81 @@ describe('Document Extraction - End-to-End Calculation Flow', () => {
 
         const formData: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             ...extractedData,
         };
 
         const result = calculateZakat(formData);
-
-        // Verify liquid assets are calculated at 100%
         expect(result.enhancedBreakdown.liquidAssets.zakatableAmount).toBe(50000);
         expect(result.totalAssets).toBe(50000);
     });
 
     it('401k statement extraction flows to correct calculation (under 59.5)', () => {
-        // Simulate AI extracting $100,000 from a 401k statement
         const extractedData: Partial<ZakatFormData> = {
             fourOhOneKVestedBalance: 100000,
         };
 
         const formData: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
-            age: 40, // Under 59.5
+            madhab: 'bradford',
+            age: 40,
             ...extractedData,
         };
 
         const result = calculateZakat(formData);
-
-        // Balanced mode exempts 401k under 59.5
         expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(0);
     });
 
     it('brokerage statement extraction flows to correct calculation', () => {
-        // Simulate AI extracting $80,000 from a brokerage statement
         const extractedData: Partial<ZakatFormData> = {
             passiveInvestmentsValue: 80000,
         };
 
         const formData: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             ...extractedData,
         };
 
         const result = calculateZakat(formData);
-
-        // Balanced mode applies 30% rule to passive investments
-        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(24000); // 80k * 30%
+        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(24000);
     });
 
     it('credit card statement extraction flows to correct calculation', () => {
-        // Simulate AI extracting $5,000 credit card debt
         const extractedData: Partial<ZakatFormData> = {
             creditCardBalance: 5000,
-            cashOnHand: 50000, // Need assets to test deduction
+            cashOnHand: 50000,
         };
 
         const formData: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             ...extractedData,
         };
 
         const result = calculateZakat(formData);
-
-        // Credit card should be deducted from net zakatable wealth
         expect(result.totalAssets).toBe(50000);
         expect(result.totalLiabilities).toBe(5000);
         expect(result.netZakatableWealth).toBe(45000);
     });
 
     it('multiple document extractions aggregate correctly', () => {
-        // Simulate multiple documents uploaded
         const bankExtraction = { checkingAccounts: 20000 };
         const brokerageExtraction = { passiveInvestmentsValue: 50000 };
         const retirementExtraction = { rothIRAContributions: 15000 };
 
-        // These would be merged into formData by the UI
         const formData: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             ...bankExtraction,
             ...brokerageExtraction,
             ...retirementExtraction,
         };
 
         const result = calculateZakat(formData);
-
-        // Verify all sources are included
         expect(result.enhancedBreakdown.liquidAssets.zakatableAmount).toBe(20000);
-        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(15000); // 50k * 30%
-        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(15000); // Roth contributions always zakatable
+        expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(15000);
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(15000);
     });
 
 });
