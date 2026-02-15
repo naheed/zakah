@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2026 ZakatFlow
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { Link } from "react-router-dom";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
@@ -183,6 +200,16 @@ export default function About() {
               </div>
             </div>
 
+            {/* Item 0.5 - NEW */}
+            <div className="relative flex items-start group">
+              <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
+              <div className="ml-12">
+                <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
+                <h3 className="text-lg font-medium">Active Methodology Indicator</h3>
+                <p className="text-muted-foreground mt-1 text-sm">Always know which scholar's rules are active. Switch methodologies instantly from any screen.</p>
+              </div>
+            </div>
+
             {/* Item 1 */}
             <div className="relative flex items-start group">
               <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-muted rounded-full border-2 border-background" />
@@ -208,8 +235,8 @@ export default function About() {
               <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-muted rounded-full border-2 border-background" />
               <div className="ml-12">
                 <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-1 block">Jan 2026</span>
-                <h3 className="text-lg font-medium">5 Distinct Madhabs</h3>
-                <p className="text-muted-foreground mt-1 text-sm">Choose from Hanafi, Shafi'i, Maliki, Hanbali, or Balanced methodology with accurate debt rules.</p>
+                <h3 className="text-lg font-medium">8 Methodologies</h3>
+                <p className="text-muted-foreground mt-1 text-sm">Choose from Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Tahir Anwar, or Al-Qaradawi.</p>
               </div>
             </div>
 

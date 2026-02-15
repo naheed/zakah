@@ -1,6 +1,6 @@
 # ZakatFlow
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Status: Early Access](https://img.shields.io/badge/Status-Early%20Access-orange.svg)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![Accessibility: WCAG AA](https://img.shields.io/badge/Accessibility-WCAG%20AA-success.svg)](https://www.w3.org/WAI/WCAG2AA-Conformance)
@@ -17,19 +17,18 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 
 ### Key Capabilities
 
-| Feature | Description |
+|Feature | Description|
 |---------|-------------|
 | **Guided Wizard** | Simple mode for quick estimates, detailed mode for comprehensive analysis |
 | **Asset Intelligence** | Upload bank statements; AI extracts line items automatically |
-| **Interactive Demo** | Live "Product Reality" simulation on landing page showing complex flows |
+| **Methodology Engine** | **ZMCS v2.0** — 8 presets (Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Tahir Anwar, Qaradawi) |
+| **Active Indicator** | Always-visible methodology status with smart fallback and one-click switching |
+| **Privacy Shield** | One-click blur mode for privacy in public spaces |
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
 | **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid Integrated) |
-| **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
-| **ZMCS Standard** | Open config standard — any scholar or institution can define their methodology |
-| **8 Methodologies** | Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Tahir Anwar, Al-Qaradawi |
+| **Secure Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
 | **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
-| **Export Options** | PDF report, CSV breakdown, or print-friendly web view |
-| **Privacy-First** | Local-first encryption for guests; cloud sync for signed-in users |
+| **Export Options** | PDF report, CSV Baseline (Spreadsheet-ready), or print-friendly web view |
 
 ---
 
@@ -340,15 +339,16 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 | Phase | Status | Description |
 | :--- | :--- | :--- |
-| ZMCS v2.0 | Complete | Foundational standard with 8 methodologies, 60+ parameters |
+| ZMCS v2.0 | ✅ Complete | Foundational standard with 8 methodologies, 60+ parameters |
 | Core Calculator | ✅ Complete | Guided wizard with all asset classes |
 | Asset Intelligence | ✅ Complete | Extract line items from PDFs/images |
 | Donation Tracking | ✅ Complete | Receipt scanning, Active Hawl, Cloud Sync |
 | Asset Dashboard | ✅ Complete | Manage accounts and statements |
-| Export (PDF/CSV) | ✅ Complete | Download reports |
+| Export (PDF/CSV) | ✅ Complete | Download reports (PDF & Baseline CSV) |
 | Visualization | ✅ Complete | Sankey Chart visual asset flow |
-| Settings Redesign | ✅ Complete | Expressive Dashboard & Data Safety |
-| Plaid Integration | ✅ Complete | Bank account connection |
+| Settings & Vault | ✅ Complete | Expressive Dashboard & Data Safety (Privacy Shield) |
+| Bank Sync | ✅ Complete | Plaid Integration for real-time balances |
+| Methodology UX | ✅ Complete | Active Indicator & Context-Aware Switching |
 | Charity Directory | 📋 Planned | Search & filter vetted recipients |
 | Mobile App | 📋 Planned | React Native implementation |
 
@@ -356,7 +356,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for details.
 
 ---
 

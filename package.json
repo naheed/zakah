@@ -1,7 +1,8 @@
 {
-  "name": "vite_react_shadcn_ts",
-  "private": true,
-  "version": "0.26.0",
+  "name": "zakatflow",
+  "private": false,
+  "version": "0.26.1",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite",
