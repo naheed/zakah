@@ -15,8 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Re-export the auto-generated Supabase client.
-// Lovable Cloud manages client.ts with the correct credentials.
-// This file exists so open-source contributors can swap the import
-// to a custom client without touching every file in the codebase.
-export { supabase } from "./client";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./types";
+
+// Lovable Cloud injects these via Vite env vars at build time.
+// For open-source contributors: create a .env.local with your Supabase credentials.
+// See .env.example for required variables.
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.warn(
+    "Missing Supabase environment variables. " +
+    "Backend features will not work. " +
+    "Create a .env.local with your Supabase credentials (see .env.example)."
+  );
+}
+
+export const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  }
+);
