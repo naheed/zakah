@@ -171,7 +171,7 @@ function GroupedFields({ fields }: { fields: ZMCSField[] }) {
 }
 
 export function MethodologyZMCS() {
-    const [selectedPreset, setSelectedPreset] = useState<string>("balanced");
+    const [selectedPreset, setSelectedPreset] = useState<string>("bradford");
     const [copied, setCopied] = useState(false);
 
     const selectedConfig = ZAKAT_PRESETS[selectedPreset];

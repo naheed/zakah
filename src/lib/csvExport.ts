@@ -2,7 +2,7 @@ import { ZakatReport } from "./zakatCalculations";
 import type { AssetCategory, AssetItem } from "./zakatTypes";
 import { format } from "date-fns";
 import { saveAs } from "file-saver";
-import { MADHAB_RULES } from "./madhahRules";
+import { MADHAB_RULES, getAssetRuleExplanations, getMethodologyDisplayName } from "./madhahRules";
 
 export interface MetalPricesForExport {
     goldPrice: number;
@@ -28,7 +28,10 @@ export function generateCSV(
     } = calculations;
 
     // Get Rules for Methodology Column
-    const rules = MADHAB_RULES[madhab || 'balanced'] || MADHAB_RULES.balanced;
+    const rawRules = MADHAB_RULES[madhab || 'bradford'] || MADHAB_RULES.bradford;
+    const ruleExplanations = getAssetRuleExplanations(madhab || 'bradford');
+    const methodologyName = getMethodologyDisplayName(madhab || 'bradford');
+
 
     // Helper to escape commas for CSV
     const safe = (str: string | number) => `"${String(str).replace(/"/g, '""')}"`;
@@ -74,13 +77,11 @@ export function generateCSV(
     // Breakdown Logic
     const addCategory = (key: string, cat: AssetCategory) => {
         // Determine rule explanation based on key & madhab
+        // Now using centralized logic from madhahRules
         let ruleNote = "Standard (100%)";
-        if (key === 'investments') {
-            ruleNote = rules.passiveInvestmentRate < 1 ? `Proxy Rule (${(rules.passiveInvestmentRate * 100).toFixed(0)}% of Value)` : "Market Value (100%)";
-        } else if (key === 'retirement') {
-            ruleNote = rules.retirementMethod === 'bradford_exempt' ? "Exempt (Inaccessible)" : "Net-Accessible (After Tax/Penalty)";
-        } else if (key === 'preciousMetals' && !rules.jewelryZakatable) {
-            ruleNote = "Bullion 100% (Jewelry Exempt)";
+        if (key in ruleExplanations) {
+            // @ts-ignore
+            ruleNote = ruleExplanations[key].sub;
         }
 
         if (cat.items && cat.items.length > 0) {
@@ -131,8 +132,8 @@ export function generateCSV(
             { key: 'outstandingDebts', label: 'Other Debts' }
         ];
 
-        const debtRule = rules.debtDeductionMethod === 'twelve_month' ? "12-Month Living Expenses Cap" :
-            rules.debtDeductionMethod === 'none' ? "Not Deductible" : "Full Deduction";
+        const debtRule = rawRules.debtDeductionMethod === 'twelve_month' ? "12-Month Living Expenses Cap" :
+            rawRules.debtDeductionMethod === 'none' ? "Not Deductible" : "Full Deduction";
 
         liabilityFields.forEach(l => {
             const val = formData[l.key as keyof typeof formData] as number | undefined;
@@ -145,11 +146,11 @@ export function generateCSV(
 
     // 5. Methodology Glossary (The "Depth Bar")
     rows.push(["METHODOLOGY GLOSSARY"]);
-    rows.push(["Selected School", safe(rules.displayName)]);
-    rows.push(["Core Principle", safe(rules.description)]);
-    rows.push(["Jewelry Ruling", safe(rules.jewelryZakatable ? "Zakatable (Gold/Silver weight)" : "Exempt (Personal Use)")]);
-    rows.push(["Retirement Ruling", safe(rules.retirementMethod === 'bradford_exempt' ? "Exempt if under 59.5 (Inaccessible)" : "Zakatable on net accessible amount")]);
-    rows.push(["Investment Ruling", safe(rules.passiveInvestmentRate < 1 ? "30% Proxy Rule (Active Assets)" : "100% Market Value")]);
+    rows.push(["Selected School", safe(methodologyName)]);
+    rows.push(["Core Principle", safe("See Methodology page for details")]); // Rules object no longer has description directly
+    rows.push(["Jewelry Ruling", safe(ruleExplanations.preciousMetals.sub)]);
+    rows.push(["Retirement Ruling", safe(ruleExplanations.retirement.sub)]);
+    rows.push(["Investment Ruling", safe(ruleExplanations.investments.sub)]);
     rows.push(["Ref", "https://zakatflow.org/methodology"]);
 
     // Convert to String

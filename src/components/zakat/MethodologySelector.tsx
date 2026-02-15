@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Check, Info } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { Madhab } from '@/lib/zakatCalculations';
-import { getModeDisplayName, getModeDescription } from '@/lib/madhahRules';
+import { getMethodologyDisplayName, getMethodologyDescription } from '@/lib/madhahRules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MODE_RULES } from '@/lib/zakatCalculations';
 
@@ -71,8 +71,7 @@ export function MethodologySelector({
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-[250px]">
                             <p className="text-xs">
-                                Different scholars interpret Zakat rules differently.
-                                Select a methodology to see how it affects your calculation.
+                                Select a specific methodology now for tailored guidance. You can compare outputs from other scholars in the final report.
                             </p>
                         </TooltipContent>
                     </Tooltip>
@@ -107,11 +106,11 @@ export function MethodologySelector({
                                         {isSelected && (
                                             <Check weight="bold" className="w-4 h-4" />
                                         )}
-                                        <span>{getModeDisplayName(mode)}</span>
+                                        <span>{getMethodologyDisplayName(mode)}</span>
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom" className="max-w-[200px]">
-                                    <p className="text-xs">{getModeDescription(mode)}</p>
+                                    <p className="text-xs">{getMethodologyDescription(mode)}</p>
                                 </TooltipContent>
                             </Tooltip>
                         );
@@ -120,7 +119,7 @@ export function MethodologySelector({
 
                 {/* Description of selected mode */}
                 <p className="text-xs text-muted-foreground">
-                    {getModeDescription(value)}
+                    {getMethodologyDescription(value)}
                 </p>
             </div>
         </TooltipProvider>

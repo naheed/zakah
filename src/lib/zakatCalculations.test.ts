@@ -67,8 +67,8 @@ describe('Zakat Calculation Engine', () => {
             age: 30
         };
 
-        it('Calculates correctly for balanced', () => {
-            const data: ZakatFormData = { ...superAhmed, madhab: 'balanced' };
+        it('Calculates correctly for bradford', () => {
+            const data: ZakatFormData = { ...superAhmed, madhab: 'bradford' };
             const result = calculateZakat(data);
             // 100k + 0 + 30k = 130k
             expect(result.netZakatableWealth).toBe(130000);
@@ -110,7 +110,7 @@ describe('Zakat Calculation Engine', () => {
         };
 
         it('Bradford Mode: Should exempt 401k completely if < 59.5', () => {
-            const data: ZakatFormData = { ...retirementData, madhab: 'balanced' };
+            const data: ZakatFormData = { ...retirementData, madhab: 'bradford' };
             const assets = calculateTotalAssets(data);
             expect(assets).toBe(0); // Fully exempt due to lack of accessibility
         });
@@ -130,7 +130,7 @@ describe('Zakat Calculation Engine', () => {
         };
 
         it('Bradford Mode: 30% Zakatable (Proxy for underlying assets)', () => {
-            const data: ZakatFormData = { ...investData, madhab: 'balanced' };
+            const data: ZakatFormData = { ...investData, madhab: 'bradford' };
             const assets = calculateTotalAssets(data);
             expect(assets).toBe(30000); // Bradford uses 30% rule
         });
@@ -172,7 +172,7 @@ describe('Zakat Calculations - Edge Cases', () => {
         // Feature: CALC-08 (Zero State)
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced'
+            madhab: 'bradford'
         };
         const result = calculateZakat(data);
 
@@ -187,7 +187,7 @@ describe('Zakat Calculations - Edge Cases', () => {
 
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: Math.floor(nisab * 0.5) // Half of nisab
         };
         const result = calculateZakat(data);
@@ -202,7 +202,7 @@ describe('Zakat Calculations - Edge Cases', () => {
 
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: Math.ceil(nisab) // Exactly at nisab
         };
         const result = calculateZakat(data);
@@ -233,7 +233,7 @@ describe('Zakat Calculations - Edge Cases', () => {
         // Feature: CALC-09 (Retirement Age Threshold)
         const data: ZakatFormData = {
             ...ahmedBase,
-            madhab: 'balanced',
+            madhab: 'bradford',
             age: 60, // Over 59.5
             isOver59Half: true
         };
@@ -248,7 +248,7 @@ describe('Zakat Calculations - Edge Cases', () => {
         // Feature: CALC-10 (Roth IRA Rules)
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             age: 40,
             rothIRAContributions: 20000, // Contributions (always zakatable)
             rothIRAEarnings: 10000, // Earnings (exempt under 59.5 in Balanced)
@@ -262,7 +262,7 @@ describe('Zakat Calculations - Edge Cases', () => {
     it('Roth earnings are zakatable at age 59.5+', () => {
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             age: 60,
             isOver59Half: true,
             rothIRAContributions: 20000,
@@ -282,7 +282,7 @@ describe('Zakat Calculations - Single Source of Truth', () => {
         // Feature: CALC-11 (Calendar Types)
         const dataLunar: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             calendarType: 'lunar',
             cashOnHand: 100000
         };

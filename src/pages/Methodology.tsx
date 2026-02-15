@@ -40,14 +40,13 @@ const Methodology = () => {
   // Dynamic Content Generation
   const getContent = () => {
     const baseContent = { ...methodologyContent };
-    const balancedConfig = ZAKAT_PRESETS['balanced'];
+    const balancedConfig = ZAKAT_PRESETS['bradford'];
 
     // Update Debt Ruling "ZakatFlow Approach"
     const liabMethod = balancedConfig.liabilities.method;
     const periodText = (liabMethod === '12_month_rule' || liabMethod === 'full_deduction') ? '12-month' : 'current month';
 
-    baseContent.madhahSchools.debtRuling.zakatFlowApproach =
-      `ZakatFlow applies the Maliki/Bradford standard (${periodText} deduction) for the Balanced mode. The Shafi'i mode applies no deduction at all.`;
+    `ZakatFlow applies the Maliki/Bradford standard (${periodText} deduction) for the Sheikh Joe Bradford mode. The Shafi'i mode applies no deduction at all.`;
 
     // Update Liabilities Section "Owed By You"
     baseContent.debts.liabilities.intro = `Deduct immediate debts (due within ${periodText}).`;
@@ -67,10 +66,10 @@ const Methodology = () => {
   const content = getContent();
 
   const methodologyParam = searchParams.get('methodology');
-  const validMadhabs = ['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+  const validMadhabs = ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali'];
   const initialMode = (methodologyParam && validMadhabs.includes(methodologyParam))
     ? (methodologyParam as Madhab)
-    : 'balanced';
+    : 'bradford';
 
   // Handle scroll to hash with a small delay to allow for rendering
   useEffect(() => {

@@ -13,7 +13,7 @@ import { Madhab } from '@/lib/zakatCalculations';
 const MODES = c.methodology.explorer.modes;
 
 const AHMED_IMPACT = {
-    balanced: { amount: 3025, label: c.methodology.explorer.impactLabels.lowest },
+    bradford: { amount: 3025, label: c.methodology.explorer.impactLabels.lowest },
     hanafi: { amount: 5490, label: c.methodology.explorer.impactLabels.moderate },
     maliki: { amount: 10290, label: c.methodology.explorer.impactLabels.highest },
     shafii: { amount: 10290, label: c.methodology.explorer.impactLabels.highest },
@@ -56,7 +56,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: RuleCardProps) => {
         if (mode === 'hanafi') {
             school = content.schools?.find((s: MethodologySchool) => s.name === 'Hanafi');
             displayTitle = c.methodology.explorer.ruleHighlights.jewelry.hanafi;
-        } else if (mode === 'balanced') {
+        } else if (mode === 'bradford') {
             school = content.schools?.find((s: MethodologySchool) => s.name === 'Bradford');
             displayTitle = c.methodology.explorer.ruleHighlights.jewelry.bradford;
         } else {
@@ -68,7 +68,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: RuleCardProps) => {
 
     } else if (title.includes("Retirement")) {
         let approach;
-        if (mode === 'balanced') {
+        if (mode === 'bradford') {
             approach = content.approaches?.[0]; // Bradford is index 0
         } else {
             approach = content.approaches?.[1]; // Others are index 1
@@ -78,7 +78,7 @@ const RuleCard = ({ title, icon: Icon, mode, content }: RuleCardProps) => {
         displayBasis = approach?.basis ?? "";
 
     } else if (title.includes("Stocks")) {
-        if (mode === 'balanced') {
+        if (mode === 'bradford') {
             displayText = content.rule30?.description ?? "";
             displayTitle = c.methodology.explorer.ruleHighlights.stocks.passive.title;
             displayBasis = content.rule30?.standard ?? "";
@@ -128,7 +128,7 @@ interface MethodologyExplorerProps {
     initialMode?: Madhab;
 }
 
-export const MethodologyExplorer = ({ initialMode = 'balanced' }: MethodologyExplorerProps) => {
+export const MethodologyExplorer = ({ initialMode = 'bradford' }: MethodologyExplorerProps) => {
     const [selectedMode, setSelectedMode] = useState<Madhab>(initialMode);
     const content = c.methodology;
 
@@ -253,14 +253,14 @@ export const MethodologyExplorer = ({ initialMode = 'balanced' }: MethodologyExp
                                 <div className="pt-4 border-t border-slate-700 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-400">Jewelry</span>
-                                        <span className={['hanafi', 'balanced'].includes(selectedMode) ? "text-emerald-400" : "text-emerald-400"}>
-                                            {['hanafi', 'balanced'].includes(selectedMode) ? 'Included' : 'Exempt'}
+                                        <span className={['hanafi', 'bradford'].includes(selectedMode) ? "text-emerald-400" : "text-emerald-400"}>
+                                            {['hanafi', 'bradford'].includes(selectedMode) ? 'Included' : 'Exempt'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-400">401k</span>
-                                        <span className={selectedMode === 'balanced' ? "text-emerald-400" : "text-amber-400"}>
-                                            {selectedMode === 'balanced' ? 'Exempt' : 'Taxed'}
+                                        <span className={selectedMode === 'bradford' ? "text-emerald-400" : "text-amber-400"}>
+                                            {selectedMode === 'bradford' ? 'Exempt' : 'Taxed'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">

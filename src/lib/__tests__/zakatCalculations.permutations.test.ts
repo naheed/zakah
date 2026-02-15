@@ -33,12 +33,15 @@ describe('Ahmed Benchmark - Madhab Comparisons', () => {
         const formData: ZakatFormData = {
             ...defaultFormData,
             ...ahmedBase,
-            madhab: 'balanced',
+            madhab: 'bradford',
         };
 
         const result = calculateZakat(formData);
 
-        // From existing test: expectedNet = 0 (liabilities exceed zakatable assets)
+        // Bradford: Jewelry (5k) is Zakatable. But 401k (100k) is Excluded.
+        // Assets: 10k(Cash) + 5k(Jewelry) + 15k(Passive Stocks 30%) = 30k
+        // Liabil: 38k
+        // Net: 0
         expect(result.zakatDue).toBe(0);
         expect(result.netZakatableWealth).toBe(0);
     });
@@ -81,17 +84,46 @@ describe('Ahmed Benchmark - Madhab Comparisons', () => {
 
         const result = calculateZakat(formData);
 
-        // Updated after living expenses bug fix: $38K liabilities (was $27K)
-        // Assets $125K - Liabilities $38K = $87K
-        expect(result.netZakatableWealth).toBe(87000);
-        expect(result.zakatDue).toBeGreaterThan(2000); // Should be ~$2,175
+        // Updated after living expenses bug fix: $27K liabilities (CC + Mortgage + 1 mo Living)
+        // Assets $125K - Liabilities $27K = $98K
+        expect(result.netZakatableWealth).toBe(98000);
+        expect(result.zakatDue).toBeGreaterThan(2000); // Should be ~$2,450
+    });
+
+    it('Ahmed - Qaradawi: Net Access Ret (65k) + 30% Stocks (15k) - 12mo Liab (38k)', () => {
+        const formData: ZakatFormData = {
+            ...defaultFormData,
+            ...ahmedBase,
+            madhab: 'qaradawi',
+        };
+
+        const result = calculateZakat(formData);
+
+        // Assets Breakdown:
+        // Cash: 10k
+        // Jewelry: 0 (Exempt in Qardawi)
+        // 401k (Net Accessible): 100k * (1 - 0.25 tax - 0.10 penalty) = 65k
+        // Stocks (30% Proxy): 50k * 0.30 = 15k
+        // Total Assets: 10k + 0 + 65k + 15k = 90k
+
+        // Liabilities Breakdown (12-Month Rule):
+        // CC: 2k (Full)
+        // Mortgage: 2k * 12 = 24k
+        // Living: 1k * 12 = 12k
+        // Total Liabilities: 38k
+
+        // Net Zakatable Wealth: 90k - 38k = 52k
+        // Wait! Maliki living expenses are now "current_due" (1 month), but Qardawi is "12_months" in config?
+        // Let's verify via test execution. If config says '12_months', then 12k is correct.
+        expect(result.netZakatableWealth).toBe(52000);
+        expect(result.zakatDue).toBe(1300); // 52k * 0.025
     });
 });
 
 describe('Simple Scenarios - All Madhabs Agree', () => {
 
     it('$10K cash only - all madhabs calculate same', () => {
-        for (const madhab of ['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
+        for (const madhab of ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
             const formData: ZakatFormData = {
                 ...defaultFormData,
                 madhab,
@@ -106,7 +138,7 @@ describe('Simple Scenarios - All Madhabs Agree', () => {
     });
 
     it('$20K crypto only - all madhabs treat same', () => {
-        for (const madhab of ['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
+        for (const madhab of ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
             const formData: ZakatFormData = {
                 ...defaultFormData,
                 madhab,
@@ -124,7 +156,7 @@ describe('Simple Scenarios - All Madhabs Agree', () => {
 
 describe('Focused Variations - Testing Specific Rules', () => {
 
-    it('Gold Jewelry: Hanafi includes, others exempt', () => {
+    it('Gold Jewelry: Hanafi & Bradford include, others exempt', () => {
         const baseData = {
             ...defaultFormData,
             cashOnHand: 5000,
@@ -136,9 +168,9 @@ describe('Focused Variations - Testing Specific Rules', () => {
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' });
         expect(hanafiResult.zakatDue).toBe(250); // ($5K + $5K) * 2.5%
 
-        // Balanced: Exempts jewelry
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' });
-        expect(balancedResult.zakatDue).toBe(125); // $5K * 2.5%
+        // Bradford: Includes jewelry (changed from Balanced)
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' });
+        expect(bradfordResult.zakatDue).toBe(250); // ($5K + $5K) * 2.5%
     });
 
     it('Passive Stocks: Balanced 30%, others 100%', () => {
@@ -148,9 +180,9 @@ describe('Focused Variations - Testing Specific Rules', () => {
             passiveInvestmentsValue: 20000,
         };
 
-        // Balanced: 30% of stocks
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' });
-        expect(balancedResult.zakatDue).toBe(400); // ($10K + $6K) * 2.5%
+        // Bradford: 30% of stocks
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' });
+        expect(bradfordResult.zakatDue).toBe(400); // ($10K + $6K) * 2.5%
 
         // Hanafi: 100% of stocks
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' });
@@ -168,9 +200,9 @@ describe('Focused Variations - Testing Specific Rules', () => {
         const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' });
         expect(shafiiResult.zakatDue).toBe(250); // $10K * 2.5%
 
-        // Balanced: Deducts 12-month debts
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' });
-        expect(balancedResult.zakatDue).toBe(125); // ($10K - $5K) * 2.5%
+        // Bradford: Deducts 12-month debts
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' });
+        expect(bradfordResult.zakatDue).toBe(125); // ($10K - $5K) * 2.5%
     });
 });
 
@@ -199,7 +231,7 @@ describe('Edge Cases', () => {
     it('High debt wipes out assets: $0 zakat', () => {
         const formData: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: 5000,
             creditCardBalance: 10000, // Debt > Assets
         };

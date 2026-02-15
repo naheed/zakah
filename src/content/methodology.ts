@@ -4,7 +4,7 @@ import { Gavel, Scales, Calendar, Wallet, TrendUp, ShieldCheck, CurrencyBtc, Coi
 export const header = {
     title: "Methodology & References",
     intro: "Zakat rules are derived from the four Sunni schools of jurisprudence (Madhabs) and contemporary research. ZakatFlow empowers you to select the methodology that best aligns with your understanding, backed by clear evidence.",
-    primaryInfluences: "Influenced by the works of Sheikh Joe Bradford and AAOIFI Shariah Standards. Our 'Balanced (Bradford)' mode follows his published methodology.",
+    primaryInfluences: "Influenced by the works of Sheikh Joe Bradford and AAOIFI Shariah Standards. Our 'Sheikh Joe Bradford' mode follows his published methodology.",
     scholarsNote: "Note: AMJA (Assembly of Muslim Jurists of America) has distinct positions on retirement accounts. Their fatwa requires Zakat on the net withdrawable amount annually—differing from Sheikh Bradford's exemption for those under 59½. We plan to add AMJA as a separate option in a future update."
 };
 export const principles = {
@@ -68,7 +68,7 @@ export const madhahSchools = {
     overview: {
         title: "Supported Methodologies",
         text: "You can toggle between these modes at any time to see how they impact your calculation.",
-        note: "The 'Bradford (Balanced)' mode is the default, offering a contemporary synthesis of fiqh suited for modern financial assets."
+        note: "The 'Sheikh Joe Bradford' mode is the default, offering a contemporary synthesis of fiqh suited for modern financial assets."
     },
     jewelryRuling: {
         title: "Zakat on Personal Jewelry",
@@ -124,7 +124,7 @@ export const madhahSchools = {
                 evidence: "Settling debts takes precedence."
             }
         ],
-        zakatFlowApproach: "ZakatFlow applies the Maliki/Bradford standard (12-month deduction) for the Balanced mode. The Shafi'i position—that debt does not reduce Zakatable wealth—is implemented separately. Imam Al-Nawawi (Shafi'i school) argues that Zakat is a right attached to the specific asset, not a personal liability, so debts owed to others do not diminish it."
+        zakatFlowApproach: "ZakatFlow applies the Maliki/Bradford standard (12-month deduction) for the Sheikh Joe Bradford mode. The Shafi'i position—that debt does not reduce Zakatable wealth—is implemented separately. Imam Al-Nawawi (Shafi'i school) argues that Zakat is a right attached to the specific asset, not a personal liability, so debts owed to others do not diminish it."
     },
     practicalGuidance: {
         title: "Choosing Your Mode",
@@ -301,7 +301,7 @@ export const retirement = {
     approachesIntro: "ZakatFlow applies rules based on your selected methodology:",
     approaches: [
         {
-            title: "Bradford Mode (Balanced)",
+            title: "Sheikh Joe Bradford",
             tag: "Recommended",
             description: "Traditional retirement accounts (401(k), 403(b), 457(b), Traditional IRA) are EXEMPT from Zakat if you are under 59½.",
             basis: "Scholarly Basis: Sheikh Joe Bradford argues in his book \"Simple Zakat Guide\" that the combined effect of the 10% penalty + income taxes (often 30-40% total) creates a substantial barrier similar to māl ḍimār (inaccessible wealth). The penalty is a government-imposed legal barrier, not merely a cost of access.",
@@ -760,7 +760,7 @@ export const example = {
         title: "Results by Mode",
         modes: [
             {
-                title: "Bradford (Balanced)",
+                title: "Sheikh Joe Bradford",
                 details: [
                     "Cash: $57,000",
                     "401k: $0 (Exempt < 59½)",
@@ -932,8 +932,8 @@ export const references = {
 export const explorer = {
     modes: [
         {
-            id: 'balanced',
-            label: 'Bradford (Balanced)',
+            id: 'bradford',
+            label: 'Sheikh Joe Bradford',
             rules: {
                 jewelry: 'Zakatable (Ahwat)',
                 retirement: 'Exempt (< 59½)',

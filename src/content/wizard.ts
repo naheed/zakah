@@ -79,10 +79,10 @@ export const preferences = {
     },
     methodology: {
         title: 'School of Thought',
-        description: 'Scholarly methodology for specific asset rulings.',
-        balanced: {
-            title: 'Balanced (Standard)',
-            description: 'Recommended for most users.',
+        description: 'Select a specific methodology now for tailored guidance. You can compare outputs from other scholars in the final report.',
+        bradford: {
+            title: 'Sheikh Joe Bradford',
+            description: 'Contemporary rulings optimized for modern assets (401k, Crypto) where classical texts are silent.',
         },
     },
 } as const;

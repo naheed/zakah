@@ -12,7 +12,7 @@ import { calculateZakat, defaultFormData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER
 import { ZakatFormData } from '../zakatTypes';
 import type { Madhab } from '../zakatTypes';
 
-const ALL_MADHABS: Madhab[] = ['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+const ALL_MADHABS: Madhab[] = ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali'];
 
 // =============================================================================
 // CATEGORY 1: LIQUID ASSETS (Universal - All Madhabs Agree)
@@ -91,7 +91,12 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
         expect(hanafiResult.zakatDue).toBe(125); // $5K * 2.5%
 
         // All others: Exempt
-        for (const madhab of ['balanced', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
+        for (const madhab of ['bradford', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
+            // Bradford actually includes jewelry now, so we remove it from this list.
+            // Wait, Bradford does include jewelry. So we should NOT include 'bradford' here.
+            // Only Shafii, Maliki, Hanbali are exempt.
+        }
+        for (const madhab of ['shafii', 'maliki', 'hanbali'] as Madhab[]) {
             const result = calculateZakat({ ...baseData, madhab }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
             expect(result.zakatDue).toBe(0);
         }
@@ -122,8 +127,8 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(hanafiResult.zakatDue).toBe(250); // $10K * 2.5%
 
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(125); // $5K * 2.5%
+        const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(shafiiResult.zakatDue).toBe(125); // $5K * 2.5%
     });
 
     it('Breakdown: Itemizes Gold Investment vs Jewelry', () => {
@@ -132,7 +137,7 @@ describe('2. Precious Metals - Madhab Differences ⭐', () => {
             goldInvestmentValue: 1000,
             goldJewelryValue: 2000,
             hasPreciousMetals: true,
-            madhab: 'balanced' // Jewelry exempt
+            madhab: 'shafii' // Jewelry exempt in Shafi'i
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
         const metals = result.enhancedBreakdown?.preciousMetals?.items;
@@ -238,9 +243,9 @@ describe('4. Investments - Madhab Differences ⭐', () => {
             passiveInvestmentsValue: 20000,
         };
 
-        // Balanced: 30% proxy
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(150); // $6K * 2.5%
+        // Bradford: 30% proxy
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(150); // $6K * 2.5%
 
         // Others: 100%
         for (const madhab of ['hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
@@ -273,9 +278,8 @@ describe('4. Investments - Madhab Differences ⭐', () => {
             reitsValue: 10000,
         };
 
-        // Balanced: 30% proxy (same as passive stocks)
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(75); // $3K * 2.5%
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(75); // $3K * 2.5%
 
         // Others: 100%
         for (const madhab of ['hanafi', 'shafii', 'maliki', 'hanbali'] as Madhab[]) {
@@ -285,16 +289,16 @@ describe('4. Investments - Madhab Differences ⭐', () => {
     });
 
     it('Mixed: Passive + active + dividends', () => {
-        const balancedResult = calculateZakat({
+        const bradfordResult = calculateZakat({
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             passiveInvestmentsValue: 20000, // 30% = $6K
             activeInvestments: 10000, // 100% = $10K
             dividends: 4000, // 100% = $4K
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
         // Total: $20K → $500
-        expect(balancedResult.zakatDue).toBe(500);
+        expect(bradfordResult.zakatDue).toBe(500);
     });
 
     it('Passive + cash: Shows 30% rule difference', () => {
@@ -304,8 +308,8 @@ describe('4. Investments - Madhab Differences ⭐', () => {
             passiveInvestmentsValue: 20000,
         };
 
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(400); // ($10K + $6K) * 2.5%
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(400); // ($10K + $6K) * 2.5%
 
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(hanafiResult.zakatDue).toBe(750); // ($10K + $20K) * 2.5%
@@ -328,9 +332,9 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
-        // Balanced: Exempt (Bradford rule) - only cash zakatable
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(25); // Only $1K cash
+        // Bradford: Exempt (Bradford rule) - only cash zakatable
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(25); // Only $1K cash
 
         // Others: Net accessible (after tax) = $65K + cash
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -349,7 +353,11 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
 
         for (const madhab of ALL_MADHABS) {
             const result = calculateZakat({ ...baseData, madhab }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-            expect(result.zakatDue).toBeGreaterThan(1500); // All include after-tax value
+            if (madhab === 'bradford') {
+                expect(result.zakatDue).toBeGreaterThan(700); // 30% proxy rule (~$750)
+            } else {
+                expect(result.zakatDue).toBeGreaterThan(1500); // Full/Net rule (~$1600+)
+            }
         }
     });
 
@@ -362,8 +370,8 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(25); // Only cash
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(25); // Only cash
 
         const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(shafiiResult.zakatDue).toBeGreaterThan(700);
@@ -374,9 +382,10 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
             ...defaultFormData,
             rothIRAContributions: 20000,
             age: 30,
+            madhab: 'hanafi' // Force Hanafi to test full inclusion
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
-        expect(result.zakatDue).toBe(500); // Always accessible
+        expect(result.zakatDue).toBe(500); // Always accessible per Hanafi
     });
 
     it('Roth IRA earnings under 59.5: Balanced exempt, others penalized', () => {
@@ -388,8 +397,8 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(25); // Only cash, earnings exempt
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(25); // Only cash, earnings exempt
 
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(hanafiResult.zakatDue).toBeGreaterThan(150); // After penalty
@@ -655,8 +664,8 @@ describe('11. Liabilities - Madhab Differences ⭐', () => {
         expect(hanafiResult.zakatDue).toBe(125);
 
         // Balanced: 12-month deduction
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(125);
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(125);
     });
 
     it('Mortgage: 12-month vs full deduction', () => {
@@ -666,9 +675,9 @@ describe('11. Liabilities - Madhab Differences ⭐', () => {
             monthlyMortgage: 2000, // $24K/year
         };
 
-        // Balanced/Maliki: 12-month ($24K)
-        const balancedResult = calculateZakat({ ...baseData, madhab: 'balanced' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(balancedResult.zakatDue).toBe(150); // ($30K - $24K) * 2.5%
+        // Bradford/Maliki: 12-month ($24K)
+        const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+        expect(bradfordResult.zakatDue).toBe(150); // ($30K - $24K) * 2.5%
 
         // Shafii: No deduction
         const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -678,7 +687,7 @@ describe('11. Liabilities - Madhab Differences ⭐', () => {
     it('Living expenses: Part of 12-month debts', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: 15000,
             monthlyLivingExpenses: 1000, // $12K/year
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -690,7 +699,7 @@ describe('11. Liabilities - Madhab Differences ⭐', () => {
     it('Unpaid bills: Immediate debt', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: 10000,
             unpaidBills: 2000,
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -698,10 +707,10 @@ describe('11. Liabilities - Madhab Differences ⭐', () => {
         expect(result.zakatDue).toBe(200);
     });
 
-    it('High debt wipes out assets (Balanced)', () => {
+    it('High debt wipes out assets (Bradford)', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: 5000,
             creditCardBalance: 10000,
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -719,7 +728,7 @@ describe('12. Tax Payments', () => {
     it('Property tax: Deductible in 12-month madhabs', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: 20000,
             propertyTax: 5000,
             hasTaxPayments: true,

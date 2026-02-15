@@ -26,7 +26,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Multi-Source Tracking** | Manual entry, PDF upload, or bank connection (Plaid Integrated) |
 | **Local Vault** | Privacy-first mode storing data on-device with AES-256 encryption |
 | **ZMCS Standard** | Open config standard — any scholar or institution can define their methodology |
-| **8 Methodologies** | Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Imam Tahir Anwar, Al-Qaradawi |
+| **8 Methodologies** | Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Tahir Anwar, Al-Qaradawi |
 | **Visual Flow Chart** | Sankey diagram showing how assets flow to Zakat obligation |
 | **Export Options** | PDF report, CSV breakdown, or print-friendly web view |
 | **Privacy-First** | Local-first encryption for guests; cloud sync for signed-in users |

@@ -22,8 +22,9 @@ import {
     Path,
 } from "@react-pdf/renderer";
 import { DOMAIN_CONFIG } from "@/lib/domainConfig";
-import { EnhancedAssetBreakdown, AssetCategory, ZakatFormData, ZakatReport } from "@/lib/zakatCalculations";
+import { EnhancedAssetBreakdown, AssetCategory, ZakatFormData, ZakatReport, Madhab } from "@/lib/zakatCalculations";
 import QRCode from "qrcode";
+import { getAssetRuleExplanations, getMethodologyDisplayName } from "@/lib/madhahRules";
 
 // Font imports from assets
 import loraRegular from "@/assets/pdf-fonts/Lora-Regular.ttf?url";
@@ -490,15 +491,17 @@ export function ZakatPDFDocumentV2({
     // Let's assume I will do TWO edits. One for imports, one for usage.
     // THIS EDIT IS FOR USAGE.
 
+    const rules = getAssetRuleExplanations(data.madhab as Madhab || 'bradford');
+
     const categories = [
-        { key: 'liquidAssets', cat: data.enhancedBreakdown.liquidAssets, sub: "Fully accessible liquidity", ruling: "100%" },
-        { key: 'investments', cat: data.enhancedBreakdown.investments, sub: "Split Strategy (30% Passive)", ruling: "Mixed" },
-        { key: 'retirement', cat: data.enhancedBreakdown.retirement, sub: "Taxed on 30% Vested Balance", ruling: "30%" },
-        { key: 'preciousMetals', cat: data.enhancedBreakdown.preciousMetals, sub: "Gold & Silver Holdings", ruling: "100%" },
-        { key: 'crypto', cat: data.enhancedBreakdown.crypto, sub: "Digital Currency", ruling: "100%" },
-        { key: 'realEstate', cat: data.enhancedBreakdown.realEstate, sub: "Trade Goods & Inventory", ruling: "100%" },
-        { key: 'business', cat: data.enhancedBreakdown.business, sub: "Cash & Receivables", ruling: "100%" },
-        { key: 'debtOwedToYou', cat: data.enhancedBreakdown.debtOwedToYou, sub: "Strong/Collectible", ruling: "100%" },
+        { key: 'liquidAssets', cat: data.enhancedBreakdown.liquidAssets, sub: rules.liquidAssets.sub, ruling: rules.liquidAssets.ruling },
+        { key: 'investments', cat: data.enhancedBreakdown.investments, sub: rules.investments.sub, ruling: rules.investments.ruling },
+        { key: 'retirement', cat: data.enhancedBreakdown.retirement, sub: rules.retirement.sub, ruling: rules.retirement.ruling },
+        { key: 'preciousMetals', cat: data.enhancedBreakdown.preciousMetals, sub: rules.preciousMetals.sub, ruling: rules.preciousMetals.ruling },
+        { key: 'crypto', cat: data.enhancedBreakdown.crypto, sub: rules.crypto.sub, ruling: rules.crypto.ruling },
+        { key: 'realEstate', cat: data.enhancedBreakdown.realEstate, sub: rules.realEstate.sub, ruling: rules.realEstate.ruling },
+        { key: 'business', cat: data.enhancedBreakdown.business, sub: rules.business.sub, ruling: rules.business.ruling },
+        { key: 'debtOwedToYou', cat: data.enhancedBreakdown.debtOwedToYou, sub: rules.debtOwedToYou.sub, ruling: rules.debtOwedToYou.ruling },
     ].filter(c => c.cat.total > 0);
 
     const totalPurification = data.interestToPurify + data.dividendsToPurify;
@@ -701,7 +704,8 @@ export async function generateZakatPDFV2(
                 nisabLabel: data.nisabStandard === 'gold' ? 'Gold Standard' : 'Silver Standard',
                 nisabValue: calculations.nisab || 0,
                 calculationMode: data.madhab,
-                calculationModeLabel: data.madhab,
+                calculationModeLabel: getMethodologyDisplayName(data.madhab || 'bradford'),
+                madhabLabel: getMethodologyDisplayName(data.madhab || 'bradford'),
                 zakatRate: data.isSimpleMode ? 0.025 : 0.0257, // Approx
                 grossAssets: calculations.totalAssets || 0,
                 totalZakatableAssets: calculations.netZakatableWealth + calculations.totalLiabilities, // Approx

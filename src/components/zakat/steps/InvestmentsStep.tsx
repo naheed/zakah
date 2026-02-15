@@ -20,7 +20,7 @@ export function InvestmentsStep({ data, updateData, uploadedDocuments, onDocumen
 
   const purificationAmount = data.dividends * (data.dividendPurificationPercent / 100);
   const isHousehold = data.isHousehold;
-  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['bradford'];
   const fiqhExplanations = getFiqhExplanations(config);
 
   return (

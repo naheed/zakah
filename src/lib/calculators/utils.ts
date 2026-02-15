@@ -28,7 +28,7 @@ export const defaultFormData: ZakatFormData = {
     currency: 'USD',
     calendarType: 'lunar',
     nisabStandard: 'silver',
-    madhab: 'balanced',
+    madhab: 'bradford',
     entryMethod: 'manual',
     isHousehold: false,
     isSimpleMode: false,

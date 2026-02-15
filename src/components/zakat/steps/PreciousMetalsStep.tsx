@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 export function PreciousMetalsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
   const [inputMode, setInputMode] = useState<'weight' | 'value'>('weight');
-  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['bradford'];
   const fiqhExplanations = getFiqhExplanations(config);
 
   return (

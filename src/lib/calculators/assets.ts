@@ -200,10 +200,11 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
     total += data.hsaBalance;
 
     // Trusts
-    if (data.hasTrusts && config.assets.trusts) {
-        total += data.revocableTrustValue * config.assets.trusts.revocable_rate;
+    const trustRules = config.assets.trusts || { revocable_rate: 1.0, irrevocable_rate: 1.0 };
+    if (data.hasTrusts) {
+        total += data.revocableTrustValue * trustRules.revocable_rate;
         if (data.irrevocableTrustAccessible) {
-            total += data.irrevocableTrustValue * config.assets.trusts.irrevocable_rate;
+            total += data.irrevocableTrustValue * trustRules.irrevocable_rate;
         }
     }
 

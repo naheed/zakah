@@ -16,7 +16,7 @@ interface NisabStepProps {
 
 export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) {
   const { data: nisabData, isLoading } = useNisab();
-  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['bradford'];
   const fiqhExplanations = getFiqhExplanations(config);
 
   // Fallback to defaults if loading or error, but ideally show loading state
@@ -88,7 +88,7 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
         >
           {/* Bradford Mode */}
           <label
-            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'balanced'
+            className={`flex items-start space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${data.madhab === 'bradford'
               ? 'border-primary bg-primary/5'
               : 'border-border hover:border-primary/50'
               }`}
@@ -97,7 +97,7 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <ShieldCheck weight="duotone" className="w-5 h-5 text-tertiary" />
-                <span className="font-medium text-foreground">Bradford (Balanced)</span>
+                <span className="font-medium text-foreground">Sheikh Joe Bradford</span>
                 <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Recommended</span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">

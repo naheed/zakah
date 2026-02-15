@@ -14,7 +14,7 @@ import { ZAKAT_PRESETS } from "@/lib/config/presets";
 
 export function TrustsStep({ data, updateData, uploadedDocuments, onDocumentAdded, onRemoveDocument, questionNumber }: AssetStepProps) {
   const isHousehold = data.isHousehold;
-  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['balanced'];
+  const config = ZAKAT_PRESETS[data.madhab] || ZAKAT_PRESETS['bradford'];
   const fiqhExplanations = getFiqhExplanations(config);
   const [allocationDialog, setAllocationDialog] = useState<{
     open: boolean;

@@ -20,9 +20,9 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
   const accessible401k = calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, effectiveConfig, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
   const accessibleIRA = calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, effectiveConfig, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
   const isHousehold = data.isHousehold;
-  const isBalancedMode = data.madhab === 'balanced';
+  const isBradfordMode = data.madhab === 'bradford';
   const isUnder59Half = !data.isOver59Half;
-  const showBalancedExempt = isBalancedMode && isUnder59Half;
+  const showBradfordExempt = isBradfordMode && isUnder59Half;
 
   return (
     <AssetStepWrapper
@@ -39,11 +39,11 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       householdReminder="Include retirement accounts for yourself, spouse, and children."
     >
       {/* Bradford Mode Callout */}
-      {isBalancedMode && (
+      {isBradfordMode && (
         <div className="flex items-start gap-3 p-4 bg-tertiary/10 border border-tertiary/20 rounded-lg">
           <ShieldCheck weight="duotone" className="w-5 h-5 text-tertiary shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Balanced Exclusion Rule Active</p>
+            <p className="text-sm font-medium text-foreground">Sheikh Joe Bradford Exclusion Rule Active</p>
             <p className="text-xs text-muted-foreground">
               Traditional 401(k)/IRA accounts are {isUnder59Half ? (
                 <strong className="text-tertiary">fully exempt</strong>
@@ -110,8 +110,8 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">401(k) / 403(b)</h3>
-          <WhyTooltip {...(showBalancedExempt ? fiqhExplanations.bradfordExclusion : fiqhExplanations.retirementAccounts)} />
-          {showBalancedExempt && (
+          <WhyTooltip {...(showBradfordExempt ? fiqhExplanations.bradfordExclusion : fiqhExplanations.retirementAccounts)} />
+          {showBradfordExempt && (
             <Badge variant="secondary" className="text-xs bg-tertiary/15 text-amber-800 dark:text-amber-400 border-0">
               Exempt
             </Badge>
@@ -129,7 +129,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         {data.fourOhOneKVestedBalance > 0 && (
           <div className="p-3 bg-accent rounded-lg text-sm">
             <span className="text-muted-foreground">Zakatable amount: </span>
-            {showBalancedExempt ? (
+            {showBradfordExempt ? (
               <span className="font-medium text-amber-800 dark:text-amber-400">$0.00 (Exempt)</span>
             ) : (
               <span className="font-medium text-primary">{formatCurrency(accessible401k, data.currency)} (After tax/penalty)</span>
@@ -141,7 +141,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-foreground">Traditional IRA</h3>
-          {showBalancedExempt && (
+          {showBradfordExempt && (
             <Badge variant="secondary" className="text-xs bg-tertiary/15 text-amber-800 dark:text-amber-400 border-0">
               Exempt
             </Badge>
@@ -159,7 +159,7 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         {data.traditionalIRABalance > 0 && (
           <div className="p-3 bg-accent rounded-lg text-sm">
             <span className="text-muted-foreground">Zakatable amount: </span>
-            {showBalancedExempt ? (
+            {showBradfordExempt ? (
               <span className="font-medium text-amber-800 dark:text-amber-400">$0.00 (Exempt)</span>
             ) : (
               <span className="font-medium text-primary">{formatCurrency(accessibleIRA, data.currency)} (After tax/penalty)</span>
@@ -184,17 +184,17 @@ export function RetirementStep({ data, updateData, uploadedDocuments, onDocument
         />
         <CurrencyInput
           label="Earnings (Growth)"
-          description={showBalancedExempt ? "Exempt under Balanced rule" : "Subject to penalty if under 59½"}
+          description={showBradfordExempt ? "Exempt under Sheikh Joe Bradford rule" : "Subject to penalty if under 59½"}
           householdDescription="Combined Roth IRA earnings for all family members"
           isHousehold={isHousehold}
           value={data.rothIRAEarnings}
           onChange={(value) => updateData({ rothIRAEarnings: value })}
           documentContributions={getDocumentContributionsForField(uploadedDocuments, 'rothIRAEarnings')}
         />
-        {data.rothIRAEarnings > 0 && showBalancedExempt && (
+        {data.rothIRAEarnings > 0 && showBradfordExempt && (
           <div className="p-3 bg-accent rounded-lg text-sm">
             <span className="text-muted-foreground">Roth earnings: </span>
-            <span className="font-medium text-tertiary">$0.00 (Exempt under Balanced rule)</span>
+            <span className="font-medium text-tertiary">$0.00 (Exempt under Sheikh Joe Bradford rule)</span>
           </div>
         )}
       </div>

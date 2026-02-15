@@ -20,7 +20,7 @@ interface QuestionLayoutProps {
  * - Tier 2: BalancedTips (contextual, expandable)
  * - Tier 3: LearnMore (deep dive, collapsible)
  */
-export function QuestionLayout({ content, questionNumber, madhab = 'balanced', children }: QuestionLayoutProps) {
+export function QuestionLayout({ content, questionNumber, madhab = 'bradford', children }: QuestionLayoutProps) {
   // Use dynamic question number if provided, otherwise fall back to content
   const displayQuestionNumber = questionNumber ?? content.questionNumber;
 

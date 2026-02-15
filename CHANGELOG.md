@@ -24,7 +24,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.27.2] - 2026-02-14 (ZMCS v2.0.1 — Multi-Rate Calculation)
+## [0.27.3] - 2026-02-14 (Methodology Hardening & Qardawi Verification)
+
+### Changed
+- **Terminology Standardization**: "Balanced" preset formally renamed to "**Sheikh Joe Bradford**" (ID: `bradford`) across all UI, Exports, and internal logic to credit the scholarly source.
+- **Maliki Liability Logic**: Refined debt deduction to strictly follow config — Living Expenses now deduct 1 month (`current_due`) while Mortgage/Loans remain 12-months (`12_month_rule`).
+
+### Fixed
+- **Bradford Retirement Calculation**: Corrected post-59.5 rule to use **30% Proxy** (`market_value * 0.30`) instead of Net Accessible, aligning with the Sheikh's specific rulings.
+- **Trust Calculation Safety**: Added robust fallback logic to `calculateTotalAssets` to ensure Trusts are always included in calculations, even if a preset (like Bradford) lacked an explicit trust config block.
+- **Qardawi Config**: Added explicit 10% rental income rate (already present, but verified in tests).
+
+### Added
+- **Qardawi Test Suite**: Added comprehensive "Ahmed" profile permutation test verifying the interaction of all Qardawi rules (Exempt Jewelry + Net Accessible Retirement + 30% Investments + 12-Month Debts).
+- **Export Consistency**: PDF and CSV exports now dynamically resolve methodology names, ensuring reports say "Sheikh Joe Bradford" instead of generic "Balanced".
+
+---
 
 ### Added
 - **ZMCS v2.0.1 Multi-Rate Calculation Architecture** — Asset-class-specific Zakat rate overrides

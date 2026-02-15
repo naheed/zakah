@@ -6,7 +6,7 @@ import { Check, Sparkle, ListChecks, ShieldCheck, BookOpen } from "@phosphor-ico
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { getMadhhabDisplayName, MadhhabRules } from "@/lib/madhahRules";
+import { getMethodologyDisplayName, MadhhabRules } from "@/lib/madhahRules";
 import { StepHeader } from "../StepHeader";
 import { Link } from "react-router-dom";
 
@@ -195,7 +195,7 @@ export function SetupStep() {
                         <BookOpen className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" weight="duotone" />
                         <div className="flex-1">
                             <p className="font-medium text-foreground text-sm">Learn about our methodology</p>
-                            <p className="text-xs text-muted-foreground">Based on AMJA, AAOIFI & Sheikh Joe Bradford</p>
+                            <p className="text-xs text-muted-foreground">Supports Sheikh Joe Bradford (Default), AMJA & classical opinions</p>
                         </div>
                     </Link>
 

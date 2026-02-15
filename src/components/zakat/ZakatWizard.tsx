@@ -37,6 +37,7 @@ import { List, GearSix, Sun, Moon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@/lib/documentTypes";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
+import { ActiveMethodologyIndicator } from "./ActiveMethodologyIndicator";
 
 // Animation variants for step transitions
 const stepVariants = {
@@ -446,10 +447,10 @@ export function ZakatWizard() {
               </StepNavigatorDrawer>
 
               <div className="flex-1 flex justify-center">
-                {/* Progress Bar moved to Content Area, this is just a spacer or title now */}
-                <span className="text-sm font-semibold text-muted-foreground mr-4">
-                  {/* Optional: Add Title here if needed, or leave blank */}
-                </span>
+                <ActiveMethodologyIndicator
+                  currentMadhab={formData.madhab}
+                  onSelect={(newMadhab) => updateFormData({ madhab: newMadhab })}
+                />
               </div>
 
               {/* Presence Indicator - shows other users editing */}

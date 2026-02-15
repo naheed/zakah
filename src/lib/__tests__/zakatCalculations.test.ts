@@ -51,13 +51,13 @@ describe('Zakat Calculations - Super Ahmed Benchmark', () => {
     // Definition of Expected Values for Ahmed
     const SCENARIOS = [
         {
-            madhab: 'balanced',
-            // Assets: Cash(10k) + Jewelry(0) + 401k(0) + Stock(15k) = 25,000
+            madhab: 'bradford',
+            // Assets: Cash(10k) + Jewelry(5k) + 401k(0) + Stock(15k) = 30,000
             // Liabil: CC(2k) + Mortgage(24k) + Living(12k) = 38,000
-            expectedAssets: 25000,
+            expectedAssets: 30000,
             expectedLiabilities: 38000,
             expectedNet: 0,
-            breakdown: { jewelry: 0, retirement: 0, investments: 15000 }
+            breakdown: { jewelry: 5000, retirement: 0, investments: 15000 }
         },
         {
             madhab: 'hanafi',
@@ -80,10 +80,11 @@ describe('Zakat Calculations - Super Ahmed Benchmark', () => {
         {
             madhab: 'maliki',
             // Assets: Same as Shafii (125k) - Note: Maliki usually shares rules w/ Shafii on assets, logic from test E
-            // Liabil: 12-Month Rule (38k)
+            // Liabil: 12-Month Rule for debts, BUT living expenses are "current due" (1 month) = 1k
+            // Total Liab: CC(2k) + Mortgage(24k) + Living(1k) = 27k
             expectedAssets: 125000,
-            expectedLiabilities: 38000,
-            expectedNet: 87000,
+            expectedLiabilities: 27000,
+            expectedNet: 98000,
             breakdown: { jewelry: 0, retirement: 65000, investments: 50000 }
         },
         {
@@ -106,7 +107,7 @@ describe('Zakat Calculations - Super Ahmed Benchmark', () => {
             };
             const result = calculateZakat(data);
 
-            if (scenario.madhab === 'balanced' && result.enhancedBreakdown.preciousMetals.zakatableAmount !== 0) {
+            if (scenario.madhab === 'bradford' && result.enhancedBreakdown.preciousMetals.zakatableAmount !== 5000) {
                 console.log('DEBUG TEST FAILURE: madhab=', data.madhab, 'zakatableAmount=', result.enhancedBreakdown.preciousMetals.zakatableAmount);
             }
 
@@ -133,7 +134,7 @@ describe('Zakat Calculations - Edge Cases', () => {
         // Feature: CALC-08 (Zero State)
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced'
+            madhab: 'bradford'
         };
         const result = calculateZakat(data);
 
@@ -148,7 +149,7 @@ describe('Zakat Calculations - Edge Cases', () => {
 
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: Math.floor(nisab * 0.5) // Half of nisab
         };
         const result = calculateZakat(data);
@@ -163,7 +164,7 @@ describe('Zakat Calculations - Edge Cases', () => {
 
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             cashOnHand: Math.ceil(nisab) // Exactly at nisab
         };
         const result = calculateZakat(data);
@@ -176,36 +177,38 @@ describe('Zakat Calculations - Edge Cases', () => {
         // Feature: CALC-09 (Retirement Age Threshold)
         const data: ZakatFormData = {
             ...ahmedBase,
-            madhab: 'balanced',
+            madhab: 'bradford',
             age: 60, // Over 59.5
             isOver59Half: true
         };
         const result = calculateZakat(data);
 
         // At age 60, 401k is fully accessible (no penalty)
-        // With 25% tax rate: $100,000 * 0.75 = $75,000
-        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(75000);
+        // With 25% tax rate: Net Accessible = $75,000
+        // Bradford Rule > 59.5: 30% Proxy of Market Value = $100,000 * 0.30 = $30,000 (Tax/Penalty ignored in proxy method)
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(30000);
     });
 
     it('Roth contributions are always zakatable, earnings exempt under 59.5 in Balanced', () => {
         // Feature: CALC-10 (Roth IRA Rules)
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             age: 40,
             rothIRAContributions: 20000, // Contributions (always zakatable)
             rothIRAEarnings: 10000, // Earnings (exempt under 59.5 in Balanced)
         };
         const result = calculateZakat(data);
 
-        // Contributions should be included, earnings exempt
-        expect(result.totalAssets).toBe(20000);
+        // Bradford Rule: Roth Contributions at 30% Proxy
+        // $20,000 * 0.30 = $6,000
+        expect(result.totalAssets).toBe(6000);
     });
 
     it('Roth earnings are zakatable at age 59.5+', () => {
         const data: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             age: 60,
             isOver59Half: true,
             rothIRAContributions: 20000,
@@ -213,8 +216,9 @@ describe('Zakat Calculations - Edge Cases', () => {
         };
         const result = calculateZakat(data);
 
-        // Both contributions and earnings should be included
-        expect(result.totalAssets).toBe(30000);
+        // Bradford Rule > 59.5: Total Balance * 30%
+        // ($20,000 + $10,000) * 0.30 = $9,000
+        expect(result.totalAssets).toBe(9000);
     });
 
 });
@@ -229,7 +233,7 @@ describe('Zakat Calculations - Single Source of Truth', () => {
         // Feature: CALC-11 (Calendar Types)
         const dataLunar: ZakatFormData = {
             ...defaultFormData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             calendarType: 'lunar',
             cashOnHand: 100000
         };
@@ -267,16 +271,16 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
     };
 
     it('Investment Gold should ALWAYS be zakatable (all schools)', () => {
-        // Balanced (Bradford)
-        const dataBalanced: ZakatFormData = {
+        // Bradford
+        const dataBradford: ZakatFormData = {
             ...baseData,
-            madhab: 'balanced',
+            madhab: 'bradford',
             goldInvestmentValue: 10000,
             goldJewelryValue: 5000
         };
-        const resBalanced = calculateTotalAssets(dataBalanced);
-        // Cash (100k) + Inv Gold (10k). Jewelry (5k) is exempt in Balanced
-        expect(resBalanced).toBe(110000);
+        const resBradford = calculateZakat(dataBradford).totalAssets;
+        // Cash (100k) + Inv Gold (10k) + Jewelry (5k). Jewelry is Zakatable in Bradford (unlike old Balanced)
+        expect(resBradford).toBe(115000);
 
         // Hanafi
         const dataHanafi: ZakatFormData = {
@@ -285,7 +289,7 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
             goldInvestmentValue: 10000,
             goldJewelryValue: 5000
         };
-        const resHanafi = calculateTotalAssets(dataHanafi);
+        const resHanafi = calculateZakat(dataHanafi).totalAssets;
         // Cash (100k) + Inv Gold (10k) + Jewelry (5k) is Zakatable in Hanafi
         expect(resHanafi).toBe(115000);
 
@@ -296,7 +300,7 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
             goldInvestmentValue: 10000,
             goldJewelryValue: 5000
         };
-        const resShafii = calculateTotalAssets(dataShafii);
+        const resShafii = calculateZakat(dataShafii).totalAssets;
         // Cash (100k) + Inv Gold (10k). Jewelry (5k) is exempt in Shafi'i
         expect(resShafii).toBe(110000);
     });
@@ -312,7 +316,7 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
             goldInvestmentValue: 0,
             goldJewelryValue: 5000 // Personal jewelry - taxable in Hanafi
         };
-        expect(calculateTotalAssets(dataHanafi)).toBe(105000); // 100k + 5k
+        expect(calculateZakat(dataHanafi).totalAssets).toBe(105000); // 100k + 5k
 
         // Shafi'i (Excludes jewelry)
         const dataShafii: ZakatFormData = {
@@ -321,7 +325,7 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
             goldInvestmentValue: 0,
             goldJewelryValue: 5000 // Personal jewelry - exempt in Shafi'i
         };
-        expect(calculateTotalAssets(dataShafii)).toBe(100000); // 100k + 0
+        expect(calculateZakat(dataShafii).totalAssets).toBe(100000); // 100k + 0
     });
 
     it('Enhanced Breakdown handles split correctly', () => {
@@ -334,7 +338,7 @@ describe('Zakat Calculations - Split Metals (Investment vs Jewelry)', () => {
             silverJewelryValue: 1000     // Exempt
         };
 
-        const breakdown = calculateEnhancedAssetBreakdown(data, 100000);
+        const breakdown = calculateZakat(data).enhancedBreakdown;
         const metals = breakdown.preciousMetals;
 
         // Total should be sum of all (for Sankey visual)

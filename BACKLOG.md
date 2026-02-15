@@ -119,6 +119,12 @@
 - **ZMCS Engine**: Schema-driven calculation engine with standard presets (Hanafi, Shafi'i, etc.).
 - **Transparency**: Public ZMCS specification page and compliance test suite.
 
+### Phase 14C: Robustness & Verification ✅
+> **Released: v0.27.3 (Feb 14, 2026)**
+- **Methodology Hardening**: Fixed critical calculation logic for Maliki (liability) and Bradford (retirement/trusts).
+- **Qardawi Verification**: Expanded test suite to cover full-profile permutations for Dr. Yusuf Al-Qaradawi.
+- **Renaming**: Formalized "Sheikh Joe Bradford" terminology across the platform.
+
 ### Phase 13B: Asset Class Expansion ✅
 > **Released: v0.25.0 (Feb 7, 2026)**
 - **Service Business Toggle**: Consultants, freelancers, SaaS — with al-Qaradawi guidance

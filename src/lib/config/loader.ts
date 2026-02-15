@@ -76,7 +76,7 @@ export function loadMethodologyConfig(input: unknown): ConfigLoadResult {
  *
  * @example
  * ```typescript
- * const custom = mergeConfig(ZAKAT_PRESETS['balanced'], {
+ * const custom = mergeConfig(ZAKAT_PRESETS['bradford'], {
  *   assets: {
  *     ...ZAKAT_PRESETS['balanced'].assets,
  *     precious_metals: {

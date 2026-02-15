@@ -1,5 +1,5 @@
 import { ZakatMethodologyConfig } from '../types';
-import { DEFAULT_CONFIG } from '../defaults';
+import { bradford } from './bradford';
 import { HANAFI_CONFIG } from './hanafi';
 import { SHAFII_CONFIG } from './shafii';
 import { MALIKI_CONFIG } from './maliki';
@@ -16,7 +16,7 @@ import { QARADAWI_CONFIG } from './qaradawi';
 
 export const ZAKAT_PRESETS: Record<string, ZakatMethodologyConfig> = {
     // Modern scholarly methodologies
-    'balanced': DEFAULT_CONFIG,
+    'bradford': bradford,
     'amja': AMJA_CONFIG,
     'tahir_anwar': TAHIR_ANWAR_CONFIG,
     'qaradawi': QARADAWI_CONFIG,

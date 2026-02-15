@@ -126,7 +126,7 @@ describe('ZMCS Jewelry Rules', () => {
     };
 
     // Presets where jewelry is ZAKATABLE
-    ['balanced', 'hanafi', 'tahir_anwar'].forEach(id => {
+    ['bradford', 'hanafi', 'tahir_anwar'].forEach(id => {
         it(`"${id}" taxes jewelry (10000 + 5000 cash = 15000 → $375)`, () => {
             const config = ZAKAT_PRESETS[id];
             const result = calculateZakat(JEWELRY_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
@@ -171,7 +171,7 @@ describe('ZMCS Debt Deduction Rules', () => {
     });
 
     // 12-month rule / current_due_only: credit card is "full" in Bradford, AMJA, Maliki, Qaradawi
-    ['balanced', 'amja', 'maliki', 'qaradawi'].forEach(id => {
+    ['bradford', 'amja', 'maliki', 'qaradawi'].forEach(id => {
         it(`"${id}" deducts credit card debt (immediately due)`, () => {
             const config = ZAKAT_PRESETS[id];
             const result = calculateZakat(DEBT_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
@@ -192,8 +192,8 @@ describe('ZMCS Retirement Rules', () => {
         estimatedTaxRate: 0.25,
     };
 
-    it('"balanced" (Bradford) exempts 401k under 59.5', () => {
-        const config = ZAKAT_PRESETS['balanced'];
+    it('"bradford" (Bradford) exempts 401k under 59.5', () => {
+        const config = ZAKAT_PRESETS['bradford'];
         const result = calculateZakat(RETIREMENT_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
         // Only cash is zakatable: 10000 * 0.025 = 250
         expect(result.zakatDue).toBe(250);
@@ -231,8 +231,8 @@ describe('ZMCS Retirement Rules', () => {
     });
 
     // Bradford post-59.5: uses 30% proxy on market value
-    it('"balanced" (Bradford) uses 30% proxy on 401k after 59.5', () => {
-        const config = ZAKAT_PRESETS['balanced'];
+    it('"bradford" (Bradford) uses 30% proxy on 401k after 59.5', () => {
+        const config = ZAKAT_PRESETS['bradford'];
         const retiredCase = { ...RETIREMENT_CASE, age: 65, isOver59Half: true };
         const result = calculateZakat(retiredCase, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
         // 401k: 100000 * 0.30 = 30000 (proxy rate)
@@ -254,8 +254,8 @@ describe('ZMCS Passive Investment Rules', () => {
         dividendPurificationPercent: 0,
     };
 
-    it('"balanced" (Bradford) uses 30% proxy (5000 + 30000 + 3000 dividends)', () => {
-        const config = ZAKAT_PRESETS['balanced'];
+    it('"bradford" (Bradford) uses 30% proxy (5000 + 30000 + 3000 dividends)', () => {
+        const config = ZAKAT_PRESETS['bradford'];
         const result = calculateZakat(INVESTMENT_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
         // Cash 5000 + Passive 100000*0.30=30000 + Dividends 3000 = 38000 * 0.025 = 950
         expect(result.zakatDue).toBe(950);
@@ -294,8 +294,8 @@ describe('ZMCS Roth IRA Rules', () => {
         age: 35,
     };
 
-    it('"balanced" (Bradford) applies 30% proxy to Roth contributions', () => {
-        const config = ZAKAT_PRESETS['balanced'];
+    it('"bradford" (Bradford) applies 30% proxy to Roth contributions', () => {
+        const config = ZAKAT_PRESETS['bradford'];
         const result = calculateZakat(ROTH_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
         // Cash 5000 + Roth contributions 50000*0.30=15000 = 20000 * 0.025 = 500
         expect(result.zakatDue).toBe(500);
@@ -347,8 +347,8 @@ describe('ZMCS Rental Income Rate Override', () => {
         expect(result.zakatDue).toBe(2250);
     });
 
-    it('"balanced" (Bradford) applies standard 2.5% to rental income (no override)', () => {
-        const config = ZAKAT_PRESETS['balanced'];
+    it('"bradford" (Bradford) applies standard 2.5% to rental income (no override)', () => {
+        const config = ZAKAT_PRESETS['bradford'];
         const result = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, config);
         // All assets in standard pool: (10000 + 20000) * 0.025 = 30000 * 0.025 = 750
         expect(result.zakatDue).toBe(750);
@@ -363,14 +363,14 @@ describe('ZMCS Rental Income Rate Override', () => {
 
     it('"qaradawi" rental rate override produces higher Zakat than standard 2.5%', () => {
         const qaradawiResult = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['qaradawi']);
-        const bradfordResult = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['balanced']);
+        const bradfordResult = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['bradford']);
         // Qaradawi: $2250 vs Bradford: $750 — rental rate override has significant impact
         expect(qaradawiResult.zakatDue).toBeGreaterThan(bradfordResult.zakatDue);
     });
 
     it('rental income appears in totalAssets regardless of rate override', () => {
         const qaradawiResult = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['qaradawi']);
-        const bradfordResult = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['balanced']);
+        const bradfordResult = calculateZakat(RENTAL_CASE, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['bradford']);
         // Both should have the same totalAssets (rental income is included either way)
         expect(qaradawiResult.totalAssets).toBe(bradfordResult.totalAssets);
     });
@@ -378,7 +378,7 @@ describe('ZMCS Rental Income Rate Override', () => {
     it('no rental income means no override impact (falls back to standard)', () => {
         const noRentalCase = { ...RENTAL_CASE, rentalPropertyIncome: 0, hasRealEstate: false };
         const qaradawiResult = calculateZakat(noRentalCase, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['qaradawi']);
-        const bradfordResult = calculateZakat(noRentalCase, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['balanced']);
+        const bradfordResult = calculateZakat(noRentalCase, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZAKAT_PRESETS['bradford']);
         // Without rental income, both use standard path: 10000 * 0.025 = 250
         expect(qaradawiResult.zakatDue).toBe(250);
         expect(bradfordResult.zakatDue).toBe(250);
@@ -391,9 +391,9 @@ describe('ZMCS Rental Income Rate Override', () => {
 describe('ZMCS Config Override', () => {
     it('prioritizes passed config over madhab preset', () => {
         const CUSTOM_CONFIG: ZakatMethodologyConfig = {
-            ...ZAKAT_PRESETS['balanced'],
+            ...ZAKAT_PRESETS['bradford'],
             thresholds: {
-                ...ZAKAT_PRESETS['balanced'].thresholds,
+                ...ZAKAT_PRESETS['bradford'].thresholds,
                 zakat_rate: { lunar: 0.10, solar: 0.10 },
             },
         };
@@ -409,10 +409,10 @@ describe('ZMCS Config Override', () => {
 // =============================================================================
 describe('ZMCS Loader', () => {
     it('loads valid configs successfully', () => {
-        const result = loadMethodologyConfig(ZAKAT_PRESETS['balanced']);
+        const result = loadMethodologyConfig(ZAKAT_PRESETS['bradford']);
         expect(result.isFallback).toBe(false);
         expect(result.errors).toHaveLength(0);
-        expect(result.config.meta.id).toBe('balanced-bradford-v2');
+        expect(result.config.meta.id).toBe('bradford');
     });
 
     it('falls back to default for invalid configs', () => {
@@ -458,7 +458,7 @@ describe('ZMCS Documentation Completeness', () => {
     });
 
     // All modern scholar presets must have scholarly_basis citations
-    ['balanced', 'amja', 'tahir_anwar', 'qaradawi'].forEach(id => {
+    ['bradford', 'amja', 'tahir_anwar', 'qaradawi'].forEach(id => {
         describe(`Scholar preset "${id}" has scholarly citations`, () => {
             it('has retirement scholarly_basis', () => {
                 expect(ZAKAT_PRESETS[id].assets.retirement.scholarly_basis).toBeDefined();
@@ -494,11 +494,11 @@ describe('ZMCS Cross-Methodology Comparison', () => {
 
         // Not all will be unique (e.g., some may share values for certain profiles),
         // but the 4 modern scholars should differ from each other
-        expect(results['balanced']).not.toBe(results['amja']);
-        expect(results['balanced']).not.toBe(results['tahir_anwar']);
+        expect(results['bradford']).not.toBe(results['amja']);
+        expect(results['bradford']).not.toBe(results['tahir_anwar']);
         expect(results['amja']).not.toBe(results['tahir_anwar']);
         // Qaradawi differs from Bradford (jewelry exempt vs zakatable), from AMJA (investments 30% vs income-only)
-        expect(results['qaradawi']).not.toBe(results['balanced']);
+        expect(results['qaradawi']).not.toBe(results['bradford']);
         expect(results['qaradawi']).not.toBe(results['amja']);
 
         // Shafi'i (no debt deduction) should differ from Hanafi (full deduction)

@@ -28,10 +28,10 @@ export interface MadhhabRules {
 }
 
 export const MADHAB_RULES: Record<Madhab, MadhhabRules> = {
-    balanced: {
-        name: 'balanced',
-        displayName: 'Balanced (Sheikh Joe Bradford)',
-        description: '30% passive investments, retirement exempt under 59½, jewelry zakatable, 12-month debts',
+    bradford: {
+        name: 'bradford',
+        displayName: 'Sheikh Joe Bradford',
+        description: 'Contemporary rulings optimized for modern assets (401k, Crypto) where classical texts are silent',
         jewelryZakatable: true, // Bradford: all gold/silver jewelry is zakatable
         debtDeductionMethod: 'twelve_month',
         retirementMethod: 'bradford_exempt',
@@ -125,7 +125,7 @@ export function getScholarlyDifferences(
     const rules = MADHAB_RULES[madhab];
 
     // Retirement exemption for Bradford
-    if (madhab === 'balanced' && !isOver59Half) {
+    if (madhab === 'bradford' && !isOver59Half) {
         differences.push({
             topic: 'Retirement Accounts (401k/IRA)',
             appliedOpinion: 'Exempt under 59½',
@@ -137,7 +137,7 @@ export function getScholarlyDifferences(
     }
 
     // 30% rule for Bradford
-    if (madhab === 'balanced' && rules.passiveInvestmentRate < 1.0) {
+    if (madhab === 'bradford' && rules.passiveInvestmentRate < 1.0) {
         differences.push({
             topic: 'Passive Investments (ETFs/Index Funds)',
             appliedOpinion: '30% of value (underlying assets proxy)',
@@ -206,9 +206,9 @@ export function getScholarlyDifferences(
             topic: 'Personal Jewelry',
             appliedOpinion: 'Zakatable',
             madhhabOpinion: 'Exempt (majority view)',
-            supportingScholars: madhab === 'balanced' ? ['Sheikh Joe Bradford'] :
-                               madhab === 'tahir_anwar' ? ['Imam Tahir Anwar', 'Hanafi scholars'] :
-                               ['Hanafi scholars'],
+            supportingScholars: madhab === 'bradford' ? ['Sheikh Joe Bradford'] :
+                madhab === 'tahir_anwar' ? ['Imam Tahir Anwar', 'Hanafi scholars'] :
+                    ['Hanafi scholars'],
             methodologyLink: '/methodology#metals',
             basis: 'Gold and silver retain monetary nature regardless of form',
         });
@@ -220,19 +220,73 @@ export function getScholarlyDifferences(
 // ---------------------------------------------------------------------------
 // Helper Functions
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Helper Functions
+// ---------------------------------------------------------------------------
 export function isJewelryZakatable(madhab: Madhab): boolean {
     return MADHAB_RULES[madhab].jewelryZakatable;
 }
 
-export function getMadhhabDisplayName(madhab: Madhab): string {
-    return MADHAB_RULES[madhab].displayName;
+export function getMethodologyDisplayName(madhab: Madhab): string {
+    return MADHAB_RULES[madhab]?.displayName || 'Sheikh Joe Bradford';
 }
 
-export function getMadhhabDescription(madhab: Madhab): string {
-    return MADHAB_RULES[madhab].description;
+export function getMethodologyDescription(madhab: Madhab): string {
+    return MADHAB_RULES[madhab]?.description || '';
 }
 
-// Legacy compatibility aliases
-export const getMadhahDisplayName = getMadhhabDisplayName;
-export const getModeDisplayName = getMadhhabDisplayName;
-export const getModeDescription = getMadhhabDescription;
+/**
+ * Returns centralized explanation strings for asset rulings based on the selected methodology.
+ * Used by PDF and CSV reports to ensure consistency.
+ */
+export function getAssetRuleExplanations(madhab: Madhab) {
+    const rules = MADHAB_RULES[madhab] || MADHAB_RULES.bradford;
+
+    return {
+        liquidAssets: {
+            ruling: "100%",
+            sub: "Fully accessible liquidity"
+        },
+        investments: {
+            ruling: rules.passiveInvestmentRate < 1 ? "Mixed" : "100%",
+            sub: rules.passiveInvestmentRate < 1
+                ? `Split Strategy (${(rules.passiveInvestmentRate * 100).toFixed(0)}% Passive)`
+                : "100% Market Value"
+        },
+        retirement: {
+            ruling: rules.retirementMethod === 'bradford_exempt' ? "Exempt" :
+                rules.retirementMethod === 'full' ? "100%" : "Accessible",
+            sub: rules.retirementMethod === 'bradford_exempt' ? "Exempt if under 59.5 (Inaccessible)" :
+                rules.retirementMethod === 'full' ? "Full Vested Balance" :
+                    "Net Accessible (After Tax/Penalty)"
+        },
+        preciousMetals: {
+            ruling: rules.jewelryZakatable ? "100%" : "Mixed",
+            sub: rules.jewelryZakatable ? "Gold & Silver Holdings (Zakatable)" : "Bullion Only (Jewelry Exempt)"
+        },
+        crypto: {
+            ruling: "100%",
+            sub: "Digital Currency & Tokens"
+        },
+        realEstate: {
+            ruling: "100%",
+            sub: "Trade Goods & Inventory"
+        },
+        business: {
+            ruling: "100%",
+            sub: "Cash, Receivables & Inventory"
+        },
+        debtOwedToYou: {
+            ruling: "100%",
+            sub: "Strong/Collectible Debts"
+        }
+    };
+}
+
+// Legacy compatibility aliases - Deprecated
+export const getMadhhabDisplayName = getMethodologyDisplayName;
+export const getMadhahDisplayName = getMethodologyDisplayName;
+export const getModeDisplayName = getMethodologyDisplayName;
+export const getModeDescription = getMethodologyDescription;
+export const getMethodologyLabel = getMethodologyDisplayName;
+

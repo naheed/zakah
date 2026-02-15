@@ -49,7 +49,8 @@ import {
 
 import { SaveCalculationDialog } from "../SaveCalculationDialog";
 import { MethodologySelector } from "../MethodologySelector";
-import { getModeDisplayName } from "@/lib/madhahRules";
+import { getMethodologyDisplayName } from "@/lib/madhahRules";
+
 
 interface ResultsStepProps {
   data: ZakatFormData;
@@ -252,7 +253,7 @@ export function ResultsStep({
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Zakat Calculation Results</h2>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground bg-white dark:bg-card border border-border px-2 py-0.5 rounded shadow-sm">
-              {getModeDisplayName(data.madhab)} Mode
+              {getMethodologyDisplayName(data.madhab)} Mode
             </span>
             {metalPrices.lastUpdated && (
               <span className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded">
@@ -330,23 +331,11 @@ export function ResultsStep({
           netZakatableWealth={netZakatableWealth}
           currency={currency}
           isAboveNisab={isAboveNisab}
-          madhab={data.madhab || 'balanced'}
+          madhab={data.madhab || 'bradford'}
         />
 
-        {/* Methodology Selector - Toggle to see different calculations */}
-        <div className="my-8 p-4 bg-muted/30 rounded-xl border border-border">
-          <MethodologySelector
-            value={data.madhab || 'balanced'}
-            onChange={(mode) => updateData({ madhab: mode })}
-            onSave={(mode) => {
-              // TODO: Save to user profile when persistence is implemented
-              toast({
-                title: 'Methodology updated',
-                description: `Using ${getModeDisplayName(mode)} methodology`,
-              });
-            }}
-          />
-        </div>
+        {/* Methodology Comparison Table */}
+
 
         <div className="my-10 flex flex-col items-center">
           <div className="w-full text-center mb-4">
