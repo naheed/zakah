@@ -59,7 +59,7 @@ export default function LogoutSuccess() {
                             You're signed out
                         </h1>
                         <p className="text-base text-muted-foreground max-w-xs mx-auto">
-                            Your data is secure and encrypted. Only you can access it.
+                            Your data stays encrypted. Only you can access it with your account.
                         </p>
                     </div>
                 </motion.div>

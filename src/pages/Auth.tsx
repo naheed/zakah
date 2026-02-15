@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Helmet>
         <title>Sign In | ZakatFlow</title>
-        <meta name="description" content="Sign in securely to save and access your encrypted Zakat calculations." />
+        <meta name="description" content="Sign in securely to save and access your Zakat calculations. Your data is encrypted in your browser before storage." />
         <link rel="canonical" href={getPrimaryUrl('/auth')} />
         <meta property="og:url" content={getPrimaryUrl('/auth')} />
       </Helmet>
@@ -71,7 +71,7 @@ export default function Auth() {
             <Logo size="lg" />
           </div>
           <p className="text-sm text-muted-foreground">
-            Sign in securely to save and access your Zakat calculations
+            Sign in securely to save and access your Zakat calculations.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -80,27 +80,27 @@ export default function Auth() {
             <div className="flex items-start gap-3">
               <Lock className="w-5 h-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium text-sm text-foreground">End-to-End Encrypted</p>
+                <p className="font-medium text-sm text-foreground">End-to-end encrypted</p>
                 <p className="text-xs text-muted-foreground">
-                  Your financial data is encrypted in your browser before storage
+                  Saved calculations and bank connection details are encrypted in your browser before storage. We only store encrypted data.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Eye className="w-5 h-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium text-sm text-foreground">Privacy First</p>
+                <p className="font-medium text-sm text-foreground">Privacy first</p>
                 <p className="text-xs text-muted-foreground">
-                  Only you can access your saved calculations - not even our team
+                  We don&apos;t have access to your decrypted data. Only your account can decrypt it.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Shield className="w-5 h-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium text-sm text-foreground">Secure Sharing</p>
+                <p className="font-medium text-sm text-foreground">Secure sharing</p>
                 <p className="text-xs text-muted-foreground">
-                  Share with your spouse using encrypted key exchange
+                  Share with your spouse using encrypted key exchange — only they can decrypt.
                 </p>
               </div>
             </div>
@@ -111,8 +111,9 @@ export default function Auth() {
             variant="default"
             className="w-full gap-2 h-12 text-base"
             onClick={handleGoogleLogin}
+            aria-label="Continue with Google"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -140,8 +141,9 @@ export default function Auth() {
           </p>
 
           <p className="text-center text-xs text-muted-foreground">
-            By signing in, you agree to our privacy-first approach.
-            Your data remains encrypted and under your control.
+            By signing in, you agree to our{' '}
+            <Link to="/privacy" className="hover:text-primary underline">Privacy Policy</Link>.
+            Your data is encrypted and only you can decrypt it.
           </p>
         </CardContent>
       </Card>

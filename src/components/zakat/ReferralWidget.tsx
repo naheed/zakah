@@ -37,20 +37,20 @@ interface ReferralWidgetProps {
 function getShareMessages(inviteUrl: string) {
   return {
     whatsapp: encodeURIComponent(
-      `Assalamu Alaikum! I used this to calculate my Zakat—handles 401(k)s, crypto, and real estate, all in one place. Free, private, and you can save your calculation for next year. Give it a try: ${inviteUrl}`
+      `Assalamu Alaikum! I used this to calculate my Zakat—handles 401(k)s, crypto, and real estate, all in one place. Free, private, and you can save your calculation with encrypted storage for next year. Give it a try: ${inviteUrl}`
     ),
     twitter: encodeURIComponent(
-      `Found an easy Zakat calculator that handles 401(k)s, crypto & real estate. Free and private: ${inviteUrl}`
+      `Found an easy Zakat calculator that handles 401(k)s, crypto & real estate. Free and private—your data stays encrypted: ${inviteUrl}`
     ),
     facebook: encodeURIComponent(
-      `Just used this free Zakat calculator. It handles complex assets like 401(k)s and crypto automatically, and you can download a PDF report or save your calculation securely. Sharing in case it helps.`
+      `Just used this free Zakat calculator. It handles complex assets like 401(k)s and crypto automatically. You can download a PDF or save your calculation with encrypted storage—only you can decrypt it. Sharing in case it helps.`
     ),
     linkedin: encodeURIComponent(
-      `For those calculating Zakat this year: I found a comprehensive calculator that handles 401(k)s, RSUs, crypto, and real estate. You can download a PDF report or save calculations securely. Free to use: ${inviteUrl}`
+      `For those calculating Zakat this year: I found a comprehensive calculator that handles 401(k)s, RSUs, crypto, and real estate. You can download a PDF report or save calculations with encrypted storage. Free to use: ${inviteUrl}`
     ),
     emailSubject: encodeURIComponent('Easy Zakat Calculator I Found'),
     emailBody: encodeURIComponent(
-      `Assalamu Alaikum,\n\nI wanted to share this Zakat calculator that I found really helpful. It handles 401(k)s, crypto, real estate, and RSUs automatically, and you can save your calculation securely or download a PDF report.\n\nIt's free and takes about 5 minutes: ${inviteUrl}\n\nHope it helps!`
+      `Assalamu Alaikum,\n\nI wanted to share this Zakat calculator that I found really helpful. It handles 401(k)s, crypto, real estate, and RSUs automatically. You can save your calculation with encrypted storage (only you can decrypt it) or download a PDF report.\n\nIt's free and takes about 5 minutes: ${inviteUrl}\n\nHope it helps!`
     ),
   };
 }

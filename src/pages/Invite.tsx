@@ -54,7 +54,7 @@ export default function Invite() {
     <>
       <Helmet>
         <title>You're Invited to Calculate Your Zakat | ZakatFlow</title>
-        <meta name="description" content="A friend invited you to calculate your Zakat using ZakatFlow - a free, privacy-focused tool based on authentic Islamic methodology." />
+        <meta name="description" content="A friend invited you to calculate your Zakat using ZakatFlow — free, privacy-focused, and your data is encrypted so only you can decrypt it." />
         <link rel="canonical" href={getPrimaryUrl('/invite')} />
         <meta property="og:url" content={getPrimaryUrl('/invite')} />
       </Helmet>
@@ -93,7 +93,7 @@ export default function Invite() {
               {/* Consolidated Trust Badge */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                 <Lock className="w-4 h-4 text-primary" />
-                <span>Free • Save & resume securely • Takes about 5 minutes</span>
+                <span>Free • Save & resume with encrypted storage • Takes about 5 minutes</span>
               </div>
             </div>
 

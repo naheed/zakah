@@ -94,9 +94,9 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
     try {
       // Pass formData so it can be encrypted for recipient if they have a public key
       await createShare(calculationId, email, formData);
-      toast.success(
+        toast.success(
         "Invitation sent!",
-        { description: `${email} will be able to view this calculation once they sign in with Google.` }
+        { description: `${email} can view this calculation after signing in with Google. Only they can decrypt it.` }
       );
       setEmail("");
     } catch (err: unknown) {
@@ -140,7 +140,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
                 <div>
                   <p className="font-medium text-foreground">Account Required</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    To protect your financial data, sharing requires both you and your spouse to sign in with Google.
+                    Sharing is end-to-end encrypted: both you and your spouse sign in with Google. Only they can decrypt the shared calculation.
                   </p>
                 </div>
               </div>
@@ -217,7 +217,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
             Share with Spouse
           </DrawerTitle>
           <DrawerDescription>
-            Invite your partner to view this Zakat calculation securely
+            Invite your partner to view this calculation. Only they can decrypt it.
           </DrawerDescription>
         </DrawerHeader>
         <div className="px-4 pb-8 space-y-4">
@@ -299,8 +299,8 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
             <div className="flex items-start gap-2">
               <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                <strong>End-to-End Encrypted:</strong> Your data is encrypted in your browser
-                and re-encrypted specifically for your spouse. No one else can read it.
+                <strong>End-to-end encrypted:</strong> Your data is encrypted in your browser
+                and re-encrypted for your spouse. Only they can decrypt it.
               </p>
             </div>
             <p className="text-xs text-muted-foreground">

@@ -116,7 +116,7 @@ export function PersistenceChoiceModal({ open, onSelect, onDismiss }: Persistenc
                 {/* Security Note */}
                 <div className="text-xs text-muted-foreground text-center bg-muted/50 p-3 rounded-lg">
                     <Shield weight="fill" className="w-4 h-4 inline mr-1 text-primary" />
-                    Your data is <strong>end-to-end encrypted</strong>. We never see your financial information.
+                    Your data is <strong>end-to-end encrypted</strong>. We don&apos;t have access to your decrypted financial information.
                 </div>
 
                 <Button
