@@ -359,7 +359,6 @@ export type Database = {
           balance_current: number | null
           balance_iso_currency_code: string | null
           created_at: string | null
-          encrypted_payload: string | null
           id: string
           is_active_trader: boolean | null
           last_synced_at: string | null
@@ -378,7 +377,6 @@ export type Database = {
           balance_current?: number | null
           balance_iso_currency_code?: string | null
           created_at?: string | null
-          encrypted_payload?: string | null
           id?: string
           is_active_trader?: boolean | null
           last_synced_at?: string | null
@@ -397,7 +395,6 @@ export type Database = {
           balance_current?: number | null
           balance_iso_currency_code?: string | null
           created_at?: string | null
-          encrypted_payload?: string | null
           id?: string
           is_active_trader?: boolean | null
           last_synced_at?: string | null
@@ -430,7 +427,6 @@ export type Database = {
         Row: {
           cost_basis: number | null
           created_at: string | null
-          encrypted_payload: string | null
           id: string
           institution_price: number | null
           institution_value: number | null
@@ -448,7 +444,6 @@ export type Database = {
         Insert: {
           cost_basis?: number | null
           created_at?: string | null
-          encrypted_payload?: string | null
           id?: string
           institution_price?: number | null
           institution_value?: number | null
@@ -466,7 +461,6 @@ export type Database = {
         Update: {
           cost_basis?: number | null
           created_at?: string | null
-          encrypted_payload?: string | null
           id?: string
           institution_price?: number | null
           institution_value?: number | null
@@ -496,7 +490,6 @@ export type Database = {
           access_token: string
           consent_expiration_time: string | null
           created_at: string | null
-          encrypted_metadata: string | null
           error_code: string | null
           error_message: string | null
           id: string
@@ -511,7 +504,6 @@ export type Database = {
           access_token: string
           consent_expiration_time?: string | null
           created_at?: string | null
-          encrypted_metadata?: string | null
           error_code?: string | null
           error_message?: string | null
           id?: string
@@ -526,7 +518,6 @@ export type Database = {
           access_token?: string
           consent_expiration_time?: string | null
           created_at?: string | null
-          encrypted_metadata?: string | null
           error_code?: string | null
           error_message?: string | null
           id?: string
