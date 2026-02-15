@@ -21,6 +21,8 @@ export interface ZMCSField {
     options?: { value: string; label: string }[];
     default?: string;
     required: boolean;
+    group?: string;
+    groupIcon?: Icon;
 }
 
 export interface ZMCSSection {
@@ -165,6 +167,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Whether cash on hand, checking, savings, and digital wallets are zakatable. Universally true.",
                 default: "true",
                 required: true,
+                group: "Cash",
+                groupIcon: Wallet,
             },
 
             // ── Precious Metals / Jewelry ──
@@ -173,12 +177,15 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 type: "boolean",
                 description: "Whether personal-use gold/silver jewelry is subject to Zakat. MAJOR DIVERGENCE: Hanafi/Bradford = Yes, Majority (Shafi'i/Maliki/Hanbali/AMJA) = No.",
                 required: true,
+                group: "Precious Metals",
+                groupIcon: Coins,
             },
             {
                 path: "assets.precious_metals.jewelry.scholarly_basis",
                 type: "string",
                 description: "Scholarly evidence for the jewelry ruling (hadith, fiqh reference).",
                 required: false,
+                group: "Precious Metals",
             },
 
             // ── Crypto ──
@@ -188,6 +195,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on cryptocurrency held as currency/store of value (BTC, ETH, stablecoins).",
                 default: "1.0",
                 required: true,
+                group: "Cryptocurrency",
+                groupIcon: CurrencyBtc,
             },
             {
                 path: "assets.crypto.staking.vested_only",
@@ -195,6 +204,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "If true, only vested (claimable) staking rewards are counted. Unvested/locked rewards excluded.",
                 default: "true",
                 required: true,
+                group: "Cryptocurrency",
             },
 
             // ── Investments ──
@@ -204,12 +214,15 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on actively traded investments (day/swing trading). Treated as trade goods.",
                 default: "1.0",
                 required: true,
+                group: "Investments",
+                groupIcon: ChartLineUp,
             },
             {
                 path: "assets.investments.passive_investments.rate",
                 type: "number (0-1)",
                 description: "Zakatable portion of passive investment market value. MAJOR DIVERGENCE: 1.0 = classical, 0.30 = Bradford proxy, 0.0 = AMJA income-only.",
                 required: true,
+                group: "Investments",
             },
             {
                 path: "assets.investments.passive_investments.treatment",
@@ -221,12 +234,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "income_only", label: "Income Only — Only dividends/distributions are zakatable, NOT principal (AMJA exploited-asset view)." },
                 ],
                 required: true,
+                group: "Investments",
             },
             {
                 path: "assets.investments.dividends.deduct_purification",
                 type: "boolean",
                 description: "If true, the haram purification percentage is deducted from dividends before Zakat calculation.",
                 required: true,
+                group: "Investments",
             },
 
             // ── REITs ──
@@ -235,6 +250,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 type: "number (0-1)",
                 description: "Zakat rate on Equity REITs. Usually follows passive investment rate. Avoid Mortgage REITs (Shariah compliance concern).",
                 required: true,
+                group: "Investments",
             },
 
             // ── Retirement ──
@@ -250,12 +266,15 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "exempt", label: "Exempt — Fully exempt from Zakat." },
                 ],
                 required: true,
+                group: "Retirement",
+                groupIcon: PiggyBank,
             },
             {
                 path: "assets.retirement.exemption_age",
                 type: "number",
                 description: "Age threshold for 'conditional_age' rule. Below this age, retirement funds are exempt. US standard: 59.5.",
                 required: false,
+                group: "Retirement",
             },
             {
                 path: "assets.retirement.post_threshold_method",
@@ -267,18 +286,21 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "full", label: "Full — Entire balance becomes zakatable." },
                 ],
                 required: false,
+                group: "Retirement",
             },
             {
                 path: "assets.retirement.roth_contributions_rate",
                 type: "number (0-1)",
                 description: "Zakat rate on Roth IRA contributions (always accessible tax-free). Bradford: 0.30 (proxy). Most others: 1.0 (fully zakatable).",
                 required: true,
+                group: "Retirement",
             },
             {
                 path: "assets.retirement.roth_earnings_follow_traditional",
                 type: "boolean",
                 description: "If true, Roth IRA earnings follow the same rules as Traditional/401k retirement. If false, earnings are always fully zakatable.",
                 required: true,
+                group: "Retirement",
             },
             {
                 path: "assets.retirement.distributions_always_zakatable",
@@ -286,6 +308,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Whether retirement distributions already taken (cash in hand) are always zakatable. Universally true.",
                 default: "true",
                 required: true,
+                group: "Retirement",
             },
 
             // ── Real Estate ──
@@ -294,24 +317,29 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 type: "boolean",
                 description: "Whether rental property market value itself is zakatable. Usually false (exploited asset — only income is zakatable).",
                 required: true,
+                group: "Real Estate",
+                groupIcon: HouseLine,
             },
             {
                 path: "assets.real_estate.rental_property.income_zakatable",
                 type: "boolean",
                 description: "Whether net rental income (in bank) is zakatable. Usually true.",
                 required: true,
+                group: "Real Estate",
             },
             {
                 path: "assets.real_estate.for_sale.zakatable",
                 type: "boolean",
                 description: "Whether property listed for sale is zakatable (trade goods).",
                 required: true,
+                group: "Real Estate",
             },
             {
                 path: "assets.real_estate.land_banking.zakatable",
                 type: "boolean",
                 description: "Whether undeveloped land held for long-term appreciation is zakatable.",
                 required: true,
+                group: "Real Estate",
             },
 
             // ── Business ──
@@ -321,6 +349,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on business inventory (raw materials, finished goods for sale).",
                 default: "1.0",
                 required: true,
+                group: "Business",
+                groupIcon: Briefcase,
             },
             {
                 path: "assets.business.fixed_assets_rate",
@@ -328,6 +358,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on fixed business assets (equipment, machinery, vehicles). Usually 0.0 (not zakatable).",
                 default: "0.0",
                 required: true,
+                group: "Business",
             },
 
             // ── Debts Owed ──
@@ -337,12 +368,15 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Rate for debts owed to you where borrower is willing and able to repay.",
                 default: "1.0",
                 required: true,
+                group: "Debts Owed",
+                groupIcon: HandCoins,
             },
             {
                 path: "assets.debts_owed_to_user.bad_debt_on_recovery",
                 type: "boolean",
                 description: "If true, bad debts only become zakatable when actually recovered (pay Zakat on recovery year).",
                 required: true,
+                group: "Debts Owed",
             },
 
             // ── Optional: Trusts ──
@@ -352,6 +386,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on revocable trusts (grantor retains control and ownership).",
                 default: "1.0",
                 required: false,
+                group: "Trusts",
+                groupIcon: Buildings,
             },
             {
                 path: "assets.trusts.irrevocable_rate",
@@ -359,6 +395,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Zakat rate on accessible irrevocable trusts.",
                 default: "1.0",
                 required: false,
+                group: "Trusts",
             },
         ],
     },
@@ -383,6 +420,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "current_due_only", label: "Current Due Only — Only this month's payments are deductible (AMJA strict)." },
                 ],
                 required: true,
+                group: "Deduction Method",
+                groupIcon: Gavel,
             },
             {
                 path: "liabilities.commercial_debt",
@@ -394,12 +433,16 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible (Shafi'i)." },
                 ],
                 required: true,
+                group: "Commercial Debt",
+                groupIcon: Briefcase,
             },
             {
                 path: "liabilities.personal_debt.deductible",
                 type: "boolean",
                 description: "Master switch: whether personal debts can be deducted at all.",
                 required: true,
+                group: "Personal Debt",
+                groupIcon: Bank,
             },
             {
                 path: "liabilities.personal_debt.types.housing",
@@ -412,6 +455,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.student_loans",
@@ -423,6 +467,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.credit_cards",
@@ -433,6 +478,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.living_expenses",
@@ -445,6 +491,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.insurance",
@@ -456,6 +503,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.unpaid_bills",
@@ -466,6 +514,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.taxes",
@@ -477,6 +526,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                     { value: "none", label: "Not deductible." },
                 ],
                 required: false,
+                group: "Personal Debt",
             },
         ],
     },

@@ -537,8 +537,8 @@ const Methodology = () => {
                   <Heading level={4}>Receivables (Owed to You)</Heading>
                   <Text className="text-sm mb-3">{content.debts.receivables.intro}</Text>
                   <div className="space-y-3 mt-2">
-                    <div className="p-3 border border-emerald-500/20 bg-emerald-500/5 rounded">
-                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">{content.debts.receivables.good.title}</p>
+                    <div className="p-3 border border-success/20 bg-success-container rounded">
+                      <p className="text-sm font-medium text-on-success-container">{content.debts.receivables.good.title}</p>
                       <p className="text-xs text-muted-foreground">{content.debts.receivables.good.text}</p>
                     </div>
                     <div className="p-3 border border-border bg-muted/20 rounded">
@@ -563,7 +563,7 @@ const Methodology = () => {
                       <AccordionContent>
                         <div className="grid grid-cols-2 gap-4 mt-2">
                           <div>
-                            <p className="text-xs font-bold text-green-600 mb-1">Deductible</p>
+                            <p className="text-xs font-bold text-success mb-1">Deductible</p>
                             <ul className="text-xs list-disc pl-4 text-muted-foreground">
                               {content.debts.deductible.list.map((l, i) => <li key={i}>{l}</li>)}
                             </ul>
@@ -597,7 +597,7 @@ const Methodology = () => {
               <div className="grid md:grid-cols-3 gap-4 mt-4">
                 <div className="p-4 border border-border rounded">
                   <p className="font-bold text-sm mb-1">{content.trusts.revocable.title}</p>
-                  <Badge variant="outline" className="mb-2 border-emerald-500 text-emerald-600">{content.trusts.revocable.ruling}</Badge>
+                  <Badge variant="outline" className="mb-2 border-success text-success">{content.trusts.revocable.ruling}</Badge>
                   <p className="text-xs text-muted-foreground">{content.trusts.revocable.text}</p>
                 </div>
                 <div className="p-4 border border-border rounded">

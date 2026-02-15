@@ -1,26 +1,32 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Code, TestTube, FileText, GitBranch } from "@phosphor-icons/react";
-import { Link } from "react-router-dom";
+import { Code, TestTube, FileText, GitBranch } from "@phosphor-icons/react";
+import { ArticleLayout } from "@/components/layout/ArticleLayout";
+import { Text } from "@/components/ui/typography";
+
+const tocItems = [
+    { id: "define", number: 1, label: "Define the Configuration" },
+    { id: "register", number: 2, label: "Register the Preset" },
+    { id: "verify", number: 3, label: "Verify Compliance" },
+    { id: "canonical", number: 4, label: "The Canonical Profile" },
+];
 
 export function MethodologyContributing() {
-    return (
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <div className="mb-8">
-                <Link to="/methodology/zmcs">
-                    <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-primary">
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to ZMCS Specification
-                    </Button>
-                </Link>
-                <h1 className="text-4xl font-black tracking-tight mt-4">Contributing a New Methodology</h1>
-                <p className="text-xl text-muted-foreground mt-2">
-                    Add a new fiqh opinion, scholar's view, or organizational standard to ZakatFlow.
-                </p>
-            </div>
+    const headerContent = (
+        <Text variant="lead">
+            Add a new fiqh opinion, scholar's view, or organizational standard to ZakatFlow.
+        </Text>
+    );
 
-            <div className="space-y-8">
-                {/* Step 1 */}
+    return (
+        <ArticleLayout
+            title="Contributing a New Methodology"
+            description="Guide for contributing new Zakat calculation methodologies to ZakatFlow's ZMCS standard."
+            urlPath="/methodology/zmcs/contributing"
+            tocItems={tocItems}
+            headerContent={headerContent}
+        >
+            {/* Step 1 */}
+            <section id="define" className="scroll-mt-24">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -37,8 +43,10 @@ export function MethodologyContributing() {
                         </ul>
                     </CardContent>
                 </Card>
+            </section>
 
-                {/* Step 2 */}
+            {/* Step 2 */}
+            <section id="register" className="scroll-mt-24">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -49,7 +57,7 @@ export function MethodologyContributing() {
                     <CardContent>
                         <p>Add your config to <code className="text-sm bg-muted px-1.5 py-0.5 rounded">src/lib/config/presets/index.ts</code>:</p>
                         <pre className="mt-3 p-4 bg-muted/50 rounded-lg text-xs font-mono overflow-x-auto">
-{`import { MY_METHODOLOGY_CONFIG } from './my_methodology';
+                            {`import { MY_METHODOLOGY_CONFIG } from './my_methodology';
 
 export const ZAKAT_PRESETS = {
   // ...existing presets
@@ -58,8 +66,10 @@ export const ZAKAT_PRESETS = {
                         </pre>
                     </CardContent>
                 </Card>
+            </section>
 
-                {/* Step 3 */}
+            {/* Step 3 */}
+            <section id="verify" className="scroll-mt-24">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -69,14 +79,16 @@ export const ZAKAT_PRESETS = {
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <p>Run the compliance test suite to ensure your methodology meets system standards:</p>
-                        <pre className="p-4 bg-muted/50 rounded-lg text-xs font-mono">
-{`npm test src/lib/__tests__/zmcs_compliance.test.ts`}
+                        <pre className="p-4 bg-muted/50 rounded-lg text-xs font-mono overflow-x-auto">
+                            {`npm test src/lib/__tests__/zmcs_compliance.test.ts`}
                         </pre>
                         <p className="text-sm text-muted-foreground">This ensures the config is structurally valid, produces a calculation &gt; 0 for the canonical test case, and does not crash the calculator.</p>
                     </CardContent>
                 </Card>
+            </section>
 
-                {/* Step 4 */}
+            {/* Step 4 */}
+            <section id="canonical" className="scroll-mt-24">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -86,7 +98,7 @@ export const ZAKAT_PRESETS = {
                     </CardHeader>
                     <CardContent>
                         <p className="mb-3">All methodologies are tested against "Super Ahmed" to ensure baseline rationality:</p>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                             <div className="p-2 bg-muted/50 rounded"><strong>Cash:</strong> $100,000</div>
                             <div className="p-2 bg-muted/50 rounded"><strong>401k:</strong> $100,000 (Vested)</div>
                             <div className="p-2 bg-muted/50 rounded"><strong>Investments:</strong> $100,000 (Passive)</div>
@@ -95,7 +107,7 @@ export const ZAKAT_PRESETS = {
                         <p className="mt-3 text-sm text-muted-foreground"><strong>Expected:</strong> Zakat Due &gt; $0 at 2.5% rate.</p>
                     </CardContent>
                 </Card>
-            </div>
-        </div>
+            </section>
+        </ArticleLayout>
     );
 }

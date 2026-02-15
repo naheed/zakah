@@ -49,7 +49,24 @@ test.describe('Methodology Pages Accessibility', () => {
         });
 
         /**
-         * Test 3: Navigation Flow
+         * Test 3: ZMCS Contributing Guide
+         */
+        test(`ZMCS Contributing Guide (${theme})`, async ({ page }) => {
+            await page.goto('/methodology/zmcs/contributing');
+
+            // Force Theme
+            await page.evaluate((t) => localStorage.setItem('theme', t), theme);
+            await page.reload();
+            await page.waitForLoadState('networkidle');
+
+            await expect(page.getByText('Contributing a New Methodology')).toBeVisible();
+            await page.waitForTimeout(1000);
+
+            await checkA11y(page, `ZMCS Contributing - ${theme}`);
+        });
+
+        /**
+         * Test 4: Navigation Flow
          * Verify we can get from Hub -> ZMCS
          */
         test(`Navigation Flow: Hub to ZMCS (${theme})`, async ({ page }) => {

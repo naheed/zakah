@@ -14,6 +14,8 @@ const pagesToTest = [
     { path: '/privacy', name: 'Privacy Policy' },
     { path: '/terms', name: 'Terms of Service' },
     { path: '/about', name: 'About' },
+    { path: '/jurisprudence', name: 'Jurisprudence' },
+    { path: '/changelog', name: 'Changelog' },
 ];
 
 test.describe('Static Pages Accessibility', () => {
