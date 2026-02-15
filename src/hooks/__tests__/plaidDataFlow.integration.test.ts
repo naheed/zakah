@@ -92,89 +92,38 @@ describe('Plaid Data Flow - Account Type Mapping', () => {
 describe('Plaid Data Flow - End-to-End Calculation', () => {
 
     it('Plaid checking account flows to checkingAccounts', () => {
-        // Simulate Plaid returning $25,000 in checking
-        const plaidData: Partial<ZakatFormData> = {
-            checkingAccounts: 25000,
-        };
-
-        const formData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            ...plaidData,
-        };
-
+        const plaidData: Partial<ZakatFormData> = { checkingAccounts: 25000 };
+        const formData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', ...plaidData };
         const result = calculateZakat(formData);
-
         expect(result.enhancedBreakdown.liquidAssets.zakatableAmount).toBe(25000);
         expect(result.totalAssets).toBe(25000);
     });
 
     it('Plaid savings account flows to savingsAccounts', () => {
-        const plaidData: Partial<ZakatFormData> = {
-            savingsAccounts: 15000,
-        };
-
-        const formData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            ...plaidData,
-        };
-
+        const plaidData: Partial<ZakatFormData> = { savingsAccounts: 15000 };
+        const formData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', ...plaidData };
         const result = calculateZakat(formData);
-
         expect(result.enhancedBreakdown.liquidAssets.zakatableAmount).toBe(15000);
     });
 
     it('Plaid investment account flows to passiveInvestmentsValue', () => {
-        // Simulate Plaid returning $100,000 in investments
-        const plaidData: Partial<ZakatFormData> = {
-            passiveInvestmentsValue: 100000,
-        };
-
-        const formData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            ...plaidData,
-        };
-
+        const plaidData: Partial<ZakatFormData> = { passiveInvestmentsValue: 100000 };
+        const formData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', ...plaidData };
         const result = calculateZakat(formData);
-
-        // Balanced mode applies 30% rule
         expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(30000);
     });
 
     it('Plaid 401k account flows to fourOhOneKVestedBalance', () => {
-        const plaidData: Partial<ZakatFormData> = {
-            fourOhOneKVestedBalance: 80000,
-        };
-
-        const formData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            age: 35, // Under 59.5
-            ...plaidData,
-        };
-
+        const plaidData: Partial<ZakatFormData> = { fourOhOneKVestedBalance: 80000 };
+        const formData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', age: 35, ...plaidData };
         const result = calculateZakat(formData);
-
-        // Balanced mode exempts 401k under 59.5
         expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(0);
     });
 
     it('Plaid credit card flows to creditCardBalance (liability)', () => {
-        const plaidData: Partial<ZakatFormData> = {
-            creditCardBalance: 3000,
-            checkingAccounts: 20000, // Need assets
-        };
-
-        const formData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            ...plaidData,
-        };
-
+        const plaidData: Partial<ZakatFormData> = { creditCardBalance: 3000, checkingAccounts: 20000 };
+        const formData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', ...plaidData };
         const result = calculateZakat(formData);
-
         expect(result.totalLiabilities).toBe(3000);
         expect(result.netZakatableWealth).toBe(17000);
     });
@@ -188,62 +137,26 @@ describe('Plaid Data Flow - End-to-End Calculation', () => {
 describe('Plaid Data Flow - Multiple Accounts', () => {
 
     it('aggregates multiple Plaid accounts correctly', () => {
-        // Simulate user connecting Chase (checking) + Schwab (brokerage) + Fidelity (401k)
         const plaidAggregated: Partial<ZakatFormData> = {
-            checkingAccounts: 15000,      // Chase Checking
-            savingsAccounts: 5000,        // Chase Savings
-            passiveInvestmentsValue: 50000, // Schwab Brokerage
-            fourOhOneKVestedBalance: 100000, // Fidelity 401k
+            checkingAccounts: 15000,
+            savingsAccounts: 5000,
+            passiveInvestmentsValue: 50000,
+            fourOhOneKVestedBalance: 100000,
         };
-
-        const formData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            age: 40,
-            ...plaidAggregated,
-        };
-
+        const formData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', age: 40, ...plaidAggregated };
         const result = calculateZakat(formData);
-
-        // Liquid: $20k (checking + savings)
         expect(result.enhancedBreakdown.liquidAssets.zakatableAmount).toBe(20000);
-
-        // Investments: $15k (50k * 30%)
         expect(result.enhancedBreakdown.investments.zakatableAmount).toBe(15000);
-
-        // Retirement: $0 (exempt under 59.5 in Balanced)
         expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(0);
-
-        // Total: $35k
         expect(result.totalAssets).toBe(35000);
     });
 
     it('handles Plaid refresh with updated balances', () => {
-        // Initial state
-        const initialPlaidData: Partial<ZakatFormData> = {
-            checkingAccounts: 10000,
-        };
-
-        const initialFormData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            ...initialPlaidData,
-        };
-
+        const initialFormData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', checkingAccounts: 10000 };
         const initialResult = calculateZakat(initialFormData);
         expect(initialResult.totalAssets).toBe(10000);
 
-        // After Plaid refresh (balance increased)
-        const refreshedPlaidData: Partial<ZakatFormData> = {
-            checkingAccounts: 15000,
-        };
-
-        const refreshedFormData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            ...refreshedPlaidData,
-        };
-
+        const refreshedFormData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', checkingAccounts: 15000 };
         const refreshedResult = calculateZakat(refreshedFormData);
         expect(refreshedResult.totalAssets).toBe(15000);
     });
@@ -257,56 +170,23 @@ describe('Plaid Data Flow - Multiple Accounts', () => {
 describe('Plaid Data Flow - Single Calculation Implementation', () => {
 
     it('Plaid data uses same calculation as manual entry', () => {
-        // Manual entry scenario
-        const manualData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            checkingAccounts: 50000,
-            passiveInvestmentsValue: 100000,
-        };
-
-        // Plaid entry scenario (same values)
-        const plaidData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            checkingAccounts: 50000,
-            passiveInvestmentsValue: 100000,
-        };
-
+        const manualData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', checkingAccounts: 50000, passiveInvestmentsValue: 100000 };
+        const plaidData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', checkingAccounts: 50000, passiveInvestmentsValue: 100000 };
         const manualResult = calculateZakat(manualData);
         const plaidResult = calculateZakat(plaidData);
-
-        // Both should produce identical results
         expect(plaidResult.totalAssets).toBe(manualResult.totalAssets);
         expect(plaidResult.netZakatableWealth).toBe(manualResult.netZakatableWealth);
         expect(plaidResult.zakatDue).toBe(manualResult.zakatDue);
     });
 
     it('document extraction uses same calculation as Plaid', () => {
-        // Document extraction scenario
-        const docData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            savingsAccounts: 30000,
-            fourOhOneKVestedBalance: 75000,
-            age: 45,
-        };
-
-        // Plaid scenario (same values)
-        const plaidData: ZakatFormData = {
-            ...defaultFormData,
-            madhab: 'balanced',
-            savingsAccounts: 30000,
-            fourOhOneKVestedBalance: 75000,
-            age: 45,
-        };
-
+        const docData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', savingsAccounts: 30000, fourOhOneKVestedBalance: 75000, age: 45 };
+        const plaidData: ZakatFormData = { ...defaultFormData, madhab: 'bradford', savingsAccounts: 30000, fourOhOneKVestedBalance: 75000, age: 45 };
         const docResult = calculateZakat(docData);
         const plaidResult = calculateZakat(plaidData);
-
-        // Both should produce identical results
         expect(plaidResult.totalAssets).toBe(docResult.totalAssets);
         expect(plaidResult.zakatDue).toBe(docResult.zakatDue);
     });
 
 });
+
