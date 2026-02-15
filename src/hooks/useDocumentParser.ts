@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 import { ZakatFormData } from '@/lib/zakatTypes';
 import { toast } from 'sonner';
 import { mapLegacyData, aggregateResults } from '@/lib/documentParserLogic';

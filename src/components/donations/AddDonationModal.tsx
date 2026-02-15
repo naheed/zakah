@@ -12,7 +12,7 @@ import {
     ZAKAT_RECIPIENT_CATEGORIES,
     Donation
 } from '@/types/donations';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 
 interface AddDonationModalProps {
     open: boolean;
