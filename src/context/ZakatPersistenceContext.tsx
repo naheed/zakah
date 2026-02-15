@@ -213,15 +213,16 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
             }
 
             // 5. Update or Append
+            interface HistoryEntry { id: string; name?: string; formData?: ZakatFormData; createdAt?: string; updatedAt?: string }
             const decryptedHistoryPromises = history.map(async (item) => {
                 try {
-                    return await decryptData<any>(item);
+                    return await decryptData<HistoryEntry>(item);
                 } catch { return null; }
             });
 
-            const decryptedHistory = (await Promise.all(decryptedHistoryPromises)).filter(Boolean);
+            const decryptedHistory = (await Promise.all(decryptedHistoryPromises)).filter((h): h is HistoryEntry => h != null);
 
-            const existingIndex = decryptedHistory.findIndex((h: any) => h.id === id);
+            const existingIndex = decryptedHistory.findIndex((h: HistoryEntry) => h.id === id);
 
             if (existingIndex >= 0) {
                 // Update existing

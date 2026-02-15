@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/runtimeClient';
+import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from './useAuth';
 import { useEncryptionKeys } from './useEncryptionKeys';
 import { ZakatFormData, Madhab, defaultFormData, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '@/lib/zakatCalculations';
@@ -31,6 +32,19 @@ interface EncryptedPayload {
   isAboveNisab: boolean;
   yearType: 'lunar' | 'gregorian';
   yearValue: number;
+}
+
+// Local storage decrypted item shape (session-encrypted)
+interface LocalHistoryItem {
+  id: string;
+  name: string;
+  formData: ZakatFormData;
+  zakatDue?: number;
+  isAboveNisab?: boolean;
+  yearType?: 'lunar' | 'gregorian';
+  yearValue?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const ENCRYPTION_VERSION = 3; // Bumped to indicate full metadata encryption including year
@@ -65,7 +79,7 @@ export function useSavedCalculations() {
             try {
               // Local history stores { id, name, formData, createdAt, updatedAt }
               // We need to map it to SavedCalculation
-              const decrypted = await decryptSession<any>(item);
+              const decrypted = await decryptSession<LocalHistoryItem>(item);
 
               // Reconstruct calculation struct
               // We might not have zakat_due stored explicitly in local history payload in previous contexts?
@@ -292,11 +306,11 @@ export function useSavedCalculations() {
 
         // Decrypt all
         const decryptedItems = await Promise.all(history.map(async h => {
-          try { return await decryptSession<any>(h); } catch { return null; }
+          try { return await decryptSession<LocalHistoryItem>(h); } catch { return null; }
         }));
 
-        const cleanItems = decryptedItems.filter(Boolean);
-        const existingIndex = cleanItems.findIndex((i: any) => i.id === id);
+        const cleanItems = decryptedItems.filter((i): i is LocalHistoryItem => i !== null);
+        const existingIndex = cleanItems.findIndex((i) => i.id === id);
 
         if (existingIndex >= 0) {
           cleanItems[existingIndex] = { ...cleanItems[existingIndex], ...payload };
@@ -374,7 +388,7 @@ export function useSavedCalculations() {
       const response = await supabase
         .from('zakat_calculations')
         .update({
-          form_data: encryptedPayload as any,
+          form_data: encryptedPayload as unknown as Json,
           name: '🔒', // Placeholder
           year_type: 'gregorian', // Placeholder
           year_value: 0, // Placeholder
@@ -398,7 +412,7 @@ export function useSavedCalculations() {
           name: '🔒', // Placeholder - real name is encrypted
           year_type: 'gregorian', // Placeholder - real value is encrypted
           year_value: 0, // Placeholder - real value is encrypted
-          form_data: encryptedPayload as any,
+          form_data: encryptedPayload as unknown as Json,
           zakat_due: 0, // Placeholder - real value is encrypted
           is_above_nisab: false, // Placeholder - real value is encrypted
           encryption_version: ENCRYPTION_VERSION,
@@ -460,10 +474,10 @@ export function useSavedCalculations() {
         // Complexity: O(N) decryption to delete.
 
         const decryptedItems = await Promise.all(history.map(async (h: string) => {
-          try { return await decryptSession<any>(h); } catch { return null; }
+          try { return await decryptSession<LocalHistoryItem>(h); } catch { return null; }
         }));
 
-        const filtered = decryptedItems.filter((i: any) => i && i.id !== id);
+        const filtered = decryptedItems.filter((i): i is LocalHistoryItem => i !== null && i.id !== id);
 
         const reEncrypted = await Promise.all(filtered.map(i => encryptSession(i)));
 

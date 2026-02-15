@@ -1,4 +1,5 @@
 import { formatCurrency, formatPercent, EnhancedAssetBreakdown, AssetCategory } from "@/lib/zakatCalculations";
+import type { IconProps } from "@phosphor-icons/react";
 import {
     Wallet, TrendUp, PiggyBank, Coins, CurrencyBtc,
     HouseLine, Storefront, HandCoins, Scroll, TreasureChest
@@ -50,7 +51,7 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
         const cat = enhancedBreakdown[key as keyof EnhancedAssetBreakdown] as AssetCategory;
         if (!cat) return null;
         return { key, cat, Icon: getAssetIcon(key), ruling: getRulingText(key, cat) };
-    }).filter((item): item is { key: typeof assetKeys[number], cat: AssetCategory, Icon: any, ruling: string } =>
+    }).filter((item): item is { key: typeof assetKeys[number], cat: AssetCategory, Icon: React.ComponentType<IconProps>, ruling: string } =>
         item !== null && item.cat && item.cat.total > 0
     );
 

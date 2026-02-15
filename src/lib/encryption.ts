@@ -37,7 +37,7 @@ function openDB(): Promise<IDBDatabase> {
 /**
  * Store a value in IndexedDB
  */
-async function storeInDB(id: string, value: any): Promise<void> {
+async function storeInDB(id: string, value: string | { publicKey: string; privateKey: string }): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -54,7 +54,7 @@ async function storeInDB(id: string, value: any): Promise<void> {
 /**
  * Retrieve a value from IndexedDB
  */
-async function getFromDB(id: string): Promise<any | null> {
+async function getFromDB(id: string): Promise<string | { publicKey: string; privateKey: string } | null> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
@@ -127,7 +127,7 @@ export async function importSymmetricKey(base64Key: string): Promise<CryptoKey> 
  * Encrypt data with symmetric key
  * Returns base64 encoded string with IV prepended
  */
-export async function encryptData(data: any, key: CryptoKey): Promise<string> {
+export async function encryptData(data: unknown, key: CryptoKey): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for AES-GCM
   const plaintext = new TextEncoder().encode(JSON.stringify(data));
   
@@ -152,7 +152,7 @@ export async function encryptData(data: any, key: CryptoKey): Promise<string> {
  * Decrypt data with symmetric key
  * Expects base64 encoded string with IV prepended
  */
-export async function decryptData(encryptedBase64: string, key: CryptoKey): Promise<any> {
+export async function decryptData(encryptedBase64: string, key: CryptoKey): Promise<unknown> {
   const combined = base64ToArrayBuffer(encryptedBase64);
   const iv = combined.slice(0, 12);
   const ciphertext = combined.slice(12);
@@ -324,7 +324,8 @@ export async function retrieveKeyPair(): Promise<CryptoKeyPair | null> {
  */
 export async function getStoredPublicKey(): Promise<string | null> {
   const stored = await getFromDB(KEY_PAIR_ID);
-  return stored?.publicKey ?? null;
+  if (!stored || typeof stored === 'string') return null;
+  return stored.publicKey ?? null;
 }
 
 // ============ UTILITY FUNCTIONS ============

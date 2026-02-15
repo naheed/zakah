@@ -34,7 +34,7 @@ export const SettingsRow = forwardRef<HTMLButtonElement | HTMLDivElement, Settin
 
         return (
             <Component
-                ref={ref as any}
+                ref={ref as React.ForwardedRef<HTMLButtonElement | HTMLDivElement>}
                 type={onClick ? "button" : undefined}
                 onClick={onClick}
                 className={cn(

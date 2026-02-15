@@ -82,9 +82,9 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
         { description: `${email} will be able to view this calculation once they sign in with Google.` }
       );
       setEmail("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Share error:', err);
-      toast.error(err.message || "Failed to share calculation");
+      toast.error(err instanceof Error ? err.message : "Failed to share calculation");
     } finally {
       setIsSharing(false);
     }
@@ -94,7 +94,7 @@ export function ShareDrawer({ formData, zakatDue, calculationId, children }: Sha
     try {
       await removeShare(shareId);
       toast.success(`Removed access for ${email}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error("Failed to remove share");
     }
   };

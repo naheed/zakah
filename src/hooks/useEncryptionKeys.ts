@@ -85,12 +85,12 @@ export function useEncryptionKeys() {
           isLoading: false,
           error: null,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error initializing encryption keys:', err);
         setKeys(prev => ({
           ...prev,
           isLoading: false,
-          error: err.message || 'Failed to initialize encryption',
+          error: err instanceof Error ? err.message : 'Failed to initialize encryption',
         }));
       }
     };
@@ -115,7 +115,7 @@ export function useEncryptionKeys() {
   };
 
   // Encrypt data with user's symmetric key
-  const encrypt = useCallback(async (data: any): Promise<string | null> => {
+  const encrypt = useCallback(async (data: unknown): Promise<string | null> => {
     if (!keys.symmetricKey) {
       console.error('No symmetric key available for encryption');
       return null;
@@ -124,7 +124,7 @@ export function useEncryptionKeys() {
   }, [keys.symmetricKey]);
 
   // Decrypt data with user's symmetric key
-  const decrypt = useCallback(async (encryptedData: string): Promise<any | null> => {
+  const decrypt = useCallback(async (encryptedData: string): Promise<unknown | null> => {
     if (!keys.symmetricKey) {
       console.error('No symmetric key available for decryption');
       return null;
@@ -139,7 +139,7 @@ export function useEncryptionKeys() {
 
   // Encrypt data for sharing with a recipient
   const encryptForSharing = useCallback(async (
-    data: any,
+    data: unknown,
     recipientPublicKeyBase64: string
   ): Promise<{ encryptedData: string; encryptedKey: string } | null> => {
     if (!keys.symmetricKey) {
@@ -169,7 +169,7 @@ export function useEncryptionKeys() {
   const decryptShared = useCallback(async (
     encryptedData: string,
     encryptedKey: string
-  ): Promise<any | null> => {
+  ): Promise<unknown | null> => {
     if (!keys.keyPair?.privateKey) {
       console.error('No private key available for decryption');
       return null;

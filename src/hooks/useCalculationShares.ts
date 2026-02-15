@@ -37,9 +37,9 @@ export function useCalculationShares(calculationId?: string) {
       
       if (fetchError) throw fetchError;
       setShares((data || []) as CalculationShare[]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching shares:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -143,7 +143,7 @@ export function useCalculationShares(calculationId?: string) {
 export function useSharedCalculations() {
   const { user } = useAuth();
   const { isReady, decryptShared } = useEncryptionKeys();
-  const [calculations, setCalculations] = useState<any[]>([]);
+  const [calculations, setCalculations] = useState<SharedCalculationView[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

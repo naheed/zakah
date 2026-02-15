@@ -36,7 +36,7 @@ export interface AssetAccount {
     institution_name: string; // "Bank of America"
     mask: string; // "...1918"
     type: AccountType;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     balance?: number; // Computed from latest snapshot
     created_at: string;
     updated_at: string;

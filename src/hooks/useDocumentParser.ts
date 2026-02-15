@@ -6,7 +6,7 @@ import { mapLegacyData, aggregateResults } from '@/lib/documentParserLogic';
 
 interface ParseResult {
     success: boolean;
-    data: any;
+    data: unknown;
     error?: string;
 }
 

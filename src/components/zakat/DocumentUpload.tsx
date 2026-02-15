@@ -203,8 +203,8 @@ export function DocumentUpload({
 
       const field = mapping[item.inferredCategory];
       if (field) {
-        const current = (extractedFields as any)[field] || 0;
-        (extractedFields as any)[field] = current + item.amount;
+        const current = (extractedFields[field] as number | undefined) ?? 0;
+        (extractedFields as Record<keyof ZakatFormData, unknown>)[field] = current + item.amount;
       }
     });
 

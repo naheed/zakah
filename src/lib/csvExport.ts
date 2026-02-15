@@ -1,4 +1,5 @@
 import { ZakatReport } from "./zakatCalculations";
+import type { AssetCategory, AssetItem } from "./zakatTypes";
 import { format } from "date-fns";
 import { saveAs } from "file-saver";
 import { MADHAB_RULES } from "./madhahRules";
@@ -71,7 +72,7 @@ export function generateCSV(
     ]);
 
     // Breakdown Logic
-    const addCategory = (key: string, cat: any) => {
+    const addCategory = (key: string, cat: AssetCategory) => {
         // Determine rule explanation based on key & madhab
         let ruleNote = "Standard (100%)";
         if (key === 'investments') {
@@ -83,12 +84,12 @@ export function generateCSV(
         }
 
         if (cat.items && cat.items.length > 0) {
-            cat.items.forEach((item: any) => {
+            cat.items.forEach((item: AssetItem & { type?: string }) => {
                 rows.push([
                     safe(cat.label),
                     safe(item.name || item.type || "Item"),
                     money(item.value),
-                    safe((item.zakatablePercent * 100).toFixed(0) + "%"),
+                    safe(((item.zakatablePercent ?? 0) * 100).toFixed(0) + "%"),
                     money(item.zakatableAmount),
                     safe(ruleNote)
                 ]);
@@ -111,9 +112,8 @@ export function generateCSV(
     ];
 
     keys.forEach(k => {
-        // @ts-ignore
-        const cat = enhancedBreakdown[k];
-        if (cat) addCategory(k, cat);
+        const cat = enhancedBreakdown[k as keyof typeof enhancedBreakdown];
+        if (cat && 'zakatableAmount' in cat) addCategory(k, cat);
     });
 
     rows.push([]);
@@ -135,8 +135,7 @@ export function generateCSV(
             rules.debtDeductionMethod === 'none' ? "Not Deductible" : "Full Deduction";
 
         liabilityFields.forEach(l => {
-            // @ts-ignore
-            const val = formData[l.key];
+            const val = formData[l.key as keyof typeof formData] as number | undefined;
             if (val && val > 0) {
                 rows.push(["Liability", safe(l.label), money(val), "100%", money(val), safe(debtRule)]);
             }

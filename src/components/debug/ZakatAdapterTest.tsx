@@ -4,11 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/runtimeClient';
+import type { ZakatFormData } from '@/lib/zakatCalculations';
 
 export default function ZakatAdapterTest() {
     const { user } = useAuth();
     const { fetchAssetsAsFormData, loading, error } = useZakatFormAdapter();
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<ZakatFormData | null>(null);
     const [seedStatus, setSeedStatus] = useState<string>('');
 
     const handleFetch = async () => {
@@ -90,8 +91,8 @@ export default function ZakatAdapterTest() {
             ]);
 
             setSeedStatus('Success! Created Portfolio -> Account -> Snapshot -> Items');
-        } catch (e: any) {
-            setSeedStatus('Error: ' + e.message);
+        } catch (e: unknown) {
+            setSeedStatus('Error: ' + (e instanceof Error ? e.message : 'Unknown error'));
         }
     };
 

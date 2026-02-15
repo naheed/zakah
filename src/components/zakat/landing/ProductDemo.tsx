@@ -51,7 +51,7 @@ export function ProductDemo() {
 
     // --- Animation Loop ---
     useEffect(() => {
-        let timeoutId: any = null;
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
         const runSequence = async () => {
             // PHASE 1: INPUT (0s)
@@ -195,7 +195,7 @@ export function ProductDemo() {
                                             data={SANKEY_DATA}
                                             margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
                                             align="justify"
-                                            colors={(node: any) => node.nodeColor}
+                                            colors={(node: { nodeColor?: string }) => node.nodeColor ?? "#94a3b8"}
                                             nodeOpacity={1}
                                             nodeThickness={14}
                                             nodeInnerPadding={3}

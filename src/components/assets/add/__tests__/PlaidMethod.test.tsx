@@ -21,7 +21,7 @@ vi.mock('@/hooks/usePlaidLink', () => ({
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
     useNavigate: () => mockNavigate,
-    onDataExtracted: (data: any) => {
+    onDataExtracted: (data: unknown) => {
         // This is an example of how onDataExtracted might be used
         // In a real scenario, this would likely be part of the Plaid hook mock
         console.log('Data extracted:', data);

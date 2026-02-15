@@ -23,10 +23,10 @@ export default function Auth() {
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Login failed',
-        description: error.message || 'Could not sign in with Google.',
+        description: error instanceof Error ? error.message : 'Could not sign in with Google.',
         variant: 'destructive',
       });
     }

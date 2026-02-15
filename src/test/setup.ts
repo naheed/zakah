@@ -11,8 +11,8 @@ import { vi, afterEach } from 'vitest';
 // Mock crypto.subtle for tests (happy-dom doesn't fully implement it)
 // In tests, we'll use the actual Web Crypto API when available
 if (typeof globalThis.crypto === 'undefined') {
-    // @ts-ignore - polyfill for Node.js environment
-    globalThis.crypto = require('crypto').webcrypto;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    globalThis.crypto = require('crypto').webcrypto as Crypto;
 }
 
 // Mock IndexedDB for idb-keyval

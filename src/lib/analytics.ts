@@ -61,12 +61,10 @@ export const trackEvent = (
  * Set User Properties (Segmentation)
  * @param properties - Key/value pairs of user attributes
  */
-export const setUserProperties = (properties: Record<string, any>) => {
+export const setUserProperties = (properties: Record<string, string | number | boolean>) => {
     if (IS_PROD && GA_ID) {
-        // @ts-ignore - react-ga4 types might be missing 'set' method or strictly typed
-        ReactGA.set(properties);
-        // Note: In GA4, user properties are set via config or explicit 'set' call depending on implementation.
-        // ReactGA4.set() acts as a global context setter.
+        // react-ga4 exposes .set() but types may lag behind — cast is safe
+        (ReactGA as unknown as { set: (props: Record<string, unknown>) => void }).set(properties);
     } else {
         console.log(`[Analytics] Set User Properties:`, properties);
     }

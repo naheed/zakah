@@ -27,8 +27,7 @@ export const SankeyLegend: React.FC<SankeyLegendProps> = ({ data, enhancedData, 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-4xl">
             {enhancedData?.enhancedBreakdown ? (
                 Object.entries(enhancedData.enhancedBreakdown).map(([key, cat]) => {
-                    // Type assertion if needed or type checking
-                    const c = cat as any; // Simplified for loose coupling or exact type if imports match
+                    const c = cat as { total?: number; label?: string; color?: string } | undefined;
                     if (c?.total <= 0) return null;
                     if (key === 'liabilities' || key === 'exempt') return null; // Usually filtered out
 

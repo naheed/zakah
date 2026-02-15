@@ -205,9 +205,9 @@ export function mapLineItemsToFormData(
 
         if (!fieldName) continue; // Skip unmapped categories
 
-        // Type-safe accumulation
-        const currentValue = (updates[fieldName] as number | undefined) || 0;
-        (updates as any)[fieldName] = currentValue + item.amount;
+        // Type-safe accumulation via Record cast for dynamic field access
+        const currentValue = (updates as Record<string, number | undefined>)[fieldName] || 0;
+        (updates as Record<string, number>)[fieldName] = currentValue + item.amount;
     }
 
     return updates;
@@ -229,7 +229,7 @@ export function mergeAccountIntoFormData(
     for (const [key, value] of Object.entries(updates)) {
         if (typeof value === 'number') {
             const currentValue = (merged[key as keyof ZakatFormData] as number) || 0;
-            (merged as any)[key] = currentValue + value;
+            (merged as Record<keyof ZakatFormData, number | undefined>)[key as keyof ZakatFormData] = currentValue + value;
         }
     }
 

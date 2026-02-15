@@ -20,22 +20,47 @@ const AHMED_IMPACT = {
     hanbali: { amount: 5290, label: c.methodology.explorer.impactLabels.moderate }
 };
 
-const RuleCard = ({ title, icon: Icon, mode, content }: any) => {
+interface MethodologySchool {
+    name: string;
+    text?: string;
+    evidence?: string;
+}
+
+interface MethodologyApproach {
+    title?: string;
+    description?: string;
+    basis?: string;
+}
+
+interface RuleCardContent {
+    schools?: MethodologySchool[];
+    approaches?: MethodologyApproach[];
+    rule30?: { description?: string; standard?: string };
+}
+
+interface RuleCardProps {
+    title: string;
+    icon: React.ComponentType<{ size?: number; weight?: string }>;
+    mode: Madhab;
+    content: RuleCardContent;
+}
+
+const RuleCard = ({ title, icon: Icon, mode, content }: RuleCardProps) => {
     let displayText = "";
     let displayTitle = "";
     let displayEvidence = "";
     let displayBasis = "";
 
     if (title.includes("Jewelry")) {
-        let school;
+        let school: MethodologySchool | undefined;
         if (mode === 'hanafi') {
-            school = content.schools.find((s: any) => s.name === 'Hanafi');
+            school = content.schools?.find((s: MethodologySchool) => s.name === 'Hanafi');
             displayTitle = c.methodology.explorer.ruleHighlights.jewelry.hanafi;
         } else if (mode === 'balanced') {
-            school = content.schools.find((s: any) => s.name === 'Bradford');
+            school = content.schools?.find((s: MethodologySchool) => s.name === 'Bradford');
             displayTitle = c.methodology.explorer.ruleHighlights.jewelry.bradford;
         } else {
-            school = content.schools.find((s: any) => s.name.includes('Shafi'));
+            school = content.schools?.find((s: MethodologySchool) => s.name.includes('Shafi'));
             displayTitle = c.methodology.explorer.ruleHighlights.jewelry.majority;
         }
         displayText = school?.text;
@@ -154,7 +179,7 @@ export const MethodologyExplorer = ({ initialMode = 'balanced' }: MethodologyExp
                                         How {MODES.find(m => m.id === selectedMode)?.label} Works
                                     </h3>
                                     <div className="grid grid-cols-3 gap-4 mt-4">
-                                        {Object.entries(MODES.find(m => m.id === selectedMode)?.rules || {}).map(([key, val]: any) => (
+                                        {Object.entries(MODES.find(m => m.id === selectedMode)?.rules || {}).map(([key, val]: [string, string]) => (
                                             <div key={key} className="text-center p-3 bg-background rounded-lg border border-border shadow-sm">
                                                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">{key}</p>
                                                 <p className="font-bold text-foreground text-sm">{val}</p>

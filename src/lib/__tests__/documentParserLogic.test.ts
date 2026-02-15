@@ -47,8 +47,8 @@ describe('Document Parser Logic', () => {
                 dividends: undefined,
             };
 
-            // Cast to any to simulate messy AI output
-            const result = mapLegacyData(legacy as any);
+            // Simulate messy AI output (extra keys, nulls) - mapLegacyData accepts Record<string, unknown>
+            const result = mapLegacyData(legacy);
             expect(result).toEqual({
                 cashOnHand: 100,
             });

@@ -13,6 +13,32 @@ import { supabase } from '@/integrations/supabase/runtimeClient';
 
 export type PlaidLinkStatus = 'idle' | 'loading_token' | 'ready' | 'open' | 'exchanging' | 'success' | 'error';
 
+/** Plaid Link onSuccess metadata - institution info from Plaid SDK */
+interface PlaidLinkMetadata {
+    institution?: { name?: string };
+}
+
+/** Plaid Link onExit error - may have display_message */
+interface PlaidLinkExitError {
+    display_message?: string;
+}
+
+/** Plaid Link global - loaded via script tag */
+interface PlaidLinkCreator {
+    create: (config: {
+        token: string;
+        onSuccess: (publicToken: string, metadata: PlaidLinkMetadata) => void;
+        onExit: (err: PlaidLinkExitError | null) => void;
+        onEvent?: (eventName: string, metadata: unknown) => void;
+    }) => { open: () => void };
+}
+
+declare global {
+    interface Window {
+        Plaid?: PlaidLinkCreator;
+    }
+}
+
 interface PlaidLinkResult {
     success: boolean;
     itemId?: string;
@@ -115,16 +141,16 @@ export function usePlaidLink() {
 
         return new Promise((resolve) => {
             // Check if Plaid Link is loaded
-            if (typeof window === 'undefined' || !(window as any).Plaid) {
+            if (typeof window === 'undefined' || !window.Plaid) {
                 setStatus('error');
                 setError('Plaid Link SDK not loaded');
                 resolve({ success: false, error: 'Plaid Link SDK not loaded' });
                 return;
             }
 
-            const linkHandler = (window as any).Plaid.create({
+            const linkHandler = window.Plaid!.create({
                 token,
-                onSuccess: async (publicToken: string, metadata: any) => {
+                onSuccess: async (publicToken: string, metadata: PlaidLinkMetadata) => {
                     setStatus('exchanging');
 
                     try {
@@ -168,7 +194,7 @@ export function usePlaidLink() {
                         resolve({ success: false, error: errorMsg });
                     }
                 },
-                onExit: (err: any) => {
+                onExit: (err: PlaidLinkExitError | null) => {
                     if (err) {
                         setStatus('error');
                         setError(err.display_message || 'User exited Plaid Link');
@@ -177,7 +203,7 @@ export function usePlaidLink() {
                     }
                     resolve({ success: false, error: err?.display_message });
                 },
-                onEvent: (eventName: string, metadata: any) => {
+                onEvent: (eventName: string, metadata: unknown) => {
                     console.log('[Plaid Link Event]', eventName, metadata);
                 },
             });

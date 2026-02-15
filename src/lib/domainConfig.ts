@@ -48,7 +48,7 @@ export function getInviteUrl(code: string): string {
  */
 export function isValidDomain(hostname: string): boolean {
   return (
-    DOMAIN_CONFIG.validDomains.includes(hostname as any) ||
-    DOMAIN_CONFIG.legacyDomains.includes(hostname as any)
+    (DOMAIN_CONFIG.validDomains as readonly string[]).includes(hostname) ||
+    (DOMAIN_CONFIG.legacyDomains as readonly string[]).includes(hostname)
   );
 }

@@ -158,7 +158,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
                             }));
 
                             const { error: migrationError } = await supabase
-                                .from('donations' as any)
+                                .from('donations')
                                 .insert(donationsToInsert);
 
                             if (migrationError) {
@@ -299,7 +299,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             // Ideally we insert exactly what we have.
 
             const { data, error } = await supabase
-                .from('donations' as any)
+                .from('donations')
                 .insert({
                     user_id: userId,
                     zakat_year_id: currentZakatYear?.id, // Important: link to real DB ID
@@ -347,7 +347,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             const { error } = await supabase
-                .from('donations' as any)
+                .from('donations')
                 .update({
                     ...updates,
                     updated_at: now
@@ -369,7 +369,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             const { error } = await supabase
-                .from('donations' as any)
+                .from('donations')
                 .delete()
                 .eq('id', id);
 
@@ -419,13 +419,13 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
         if (user) {
             // Upsert Hawl Settings
             const { error: hawlError } = await supabase
-                .from('hawl_settings' as any)
+                .from('hawl_settings')
                 .upsert({
                     user_id: userId,
                     hawl_start_date: date,
                     calendar_type: calendarType,
                     updated_at: now
-                } as any, { onConflict: 'user_id' });
+                }, { onConflict: 'user_id' });
 
             if (hawlError) console.error("Hawl settings save error", hawlError);
 
@@ -433,7 +433,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
             // Note: If no ID exists for year, we insert. If ID exists, we update.
             // Since we generated ID client side or used existing:
             const { error: yearError } = await supabase
-                .from('zakat_years' as any)
+                .from('zakat_years')
                 .upsert({
                     id: newZakatYear.id, // Important if updating existing year
                     user_id: userId,
@@ -442,7 +442,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
                     calculated_amount: newZakatYear.calculated_amount,
                     is_current: true,
                     updated_at: now
-                } as any);
+                });
 
             if (yearError) console.error("Zakat year save error", yearError);
 
@@ -497,7 +497,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             const { error } = await supabase
-                .from('zakat_years' as any)
+                .from('zakat_years')
                 .upsert({
                     id: updatedYear.id,
                     user_id: user.id,
@@ -507,7 +507,7 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
                     hawl_end: updatedYear.hawl_end,
                     is_current: true,
                     updated_at: new Date().toISOString()
-                } as any);
+                });
 
             if (error) console.error("Set calculated amount error", error);
         } else {
@@ -569,12 +569,12 @@ export function useDonationPersistence(): UseDonationPersistenceReturn {
 
         if (user) {
             // Archive old
-            await supabase.from('zakat_years' as any).upsert(archivedYear as any);
+            await supabase.from('zakat_years').upsert(archivedYear);
             // Create new
-            await supabase.from('zakat_years' as any).upsert(newYear as any);
+            await supabase.from('zakat_years').upsert(newYear);
             // Update settings
             if (updatedHawlSettings) {
-                await supabase.from('hawl_settings' as any).upsert(updatedHawlSettings as any);
+                await supabase.from('hawl_settings').upsert(updatedHawlSettings);
             }
         } else {
             // Local Storage: update list of years
