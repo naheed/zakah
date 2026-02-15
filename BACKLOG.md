@@ -20,10 +20,12 @@
 ### Phase 14: Open Source Launch
 > **Goal:** Make ZakatFlow transparent and community-driven.
 
+**Audit:** See **`docs/OPEN_SOURCE_AUDIT.md`** for full findings (history exposure, `.lovable/plan.md`, `supabase/config.toml`), and the two strategies below.
+
 **Pre-Requisites (Security):**
 - [ ] Rotate Supabase anon key (Dashboard → Settings → API)
-- [ ] Fix `.gitignore` to exclude `.env`
-- [ ] Choose branching strategy (Fresh repo recommended)
+- [ ] Fix `.gitignore` to exclude `.env` — **Done** (audit confirms)
+- [ ] Choose strategy: **Option A (clean this repo)** or **Option B (fresh clone, no history)** — backlog recommends **Option B** for zero credential/project-ID in history
 
 **License & Docs:**
 - [ ] Update LICENSE from MIT → AGPL-3.0
@@ -36,7 +38,12 @@
 - [ ] Configure branch protection (require PR reviews)
 - [ ] Create issue templates (bug, feature request)
 
+**Option A — Clean this repo:** Sanitize tracked files (remove/sanitize `.lovable/plan.md`, placeholder in `supabase/config.toml`), rotate keys. Optional: rewrite history to remove `.env` from past commits (force-push required).
+
+**Option B — Fresh clone (recommended):** New repo with no history; copy only current sanitized tree. Guarantees no credential or project ID in any commit. See audit for step-by-step.
+
 **References:**
+- Open-source audit (findings + options): `docs/OPEN_SOURCE_AUDIT.md`
 - Security docs: `docs/SECURITY.md`
 
 ---

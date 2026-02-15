@@ -117,7 +117,16 @@ Plaid `access_tokens` allow withdrawal of data and are treated as critical secre
 - **Algorithm:** AES-256-GCM with PBKDF2 key derivation (100,000 iterations)
 - **Decryption:** Occurs strictly within the `plaid-exchange-token` and `delete-account` Edge Functions. The database administrator cannot read tokens without the runtime env var
 
-### 6.5 Application Secrets
+### 6.5 Plaid Table Data (User-Key / Client-Side)
+
+Plaid account and holding metadata (account names, balances, holding details) are encrypted with the **user’s client-held symmetric key** (same model as `zakat_calculations`):
+
+- **Storage:** `plaid_accounts.encrypted_payload`, `plaid_holdings.encrypted_payload` (and optionally `plaid_items.encrypted_metadata`). Plaintext columns are retained for legacy rows and for join keys (`account_id`, `security_id`, `plaid_item_id`).
+- **Flow:** After the edge function exchanges the Plaid token, it stores only the encrypted access token and item id; it returns accounts and holdings to the client. The client encrypts each payload with the user’s key and inserts rows. The server never sees the user’s key or plaintext account/holding data.
+- **Reading:** Any client that reads these tables must decrypt `encrypted_payload` (or `encrypted_metadata`) when present; if null, fall back to legacy plaintext columns for backward compatibility.
+- **Reference:** See `docs/PLAID_USER_KEY_ENCRYPTION.md` for full design and flow
+
+### 6.6 Application Secrets
 
 API keys (e.g., `PLAID_SECRET`, `SUPABASE_SERVICE_ROLE`) are managed exclusively via environment variables. Secrets are never committed to version control.
 

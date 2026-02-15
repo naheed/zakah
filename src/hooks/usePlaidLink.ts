@@ -17,16 +17,21 @@
 
 /**
  * usePlaidLink Hook
- * 
+ *
  * Handles Plaid Link integration:
  * - Fetches Link token from Supabase Edge Function
  * - Opens Plaid Link modal
  * - Exchanges public token on success
+ * - Persists accounts and holdings encrypted with user's symmetric key (same model as zakat_calculations)
+ *
+ * @see docs/PLAID_USER_KEY_ENCRYPTION.md
  */
 
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useEncryptionKeys } from '@/hooks/useEncryptionKeys';
 import { supabase } from '@/integrations/supabase/runtimeClient';
+import { persistPlaidDataWithUserKey } from '@/lib/plaidEncryptedPersistence';
 
 export type PlaidLinkStatus = 'idle' | 'loading_token' | 'ready' | 'open' | 'exchanging' | 'success' | 'error';
 
@@ -65,6 +70,7 @@ interface PlaidLinkResult {
 
 export function usePlaidLink() {
     const { toast } = useToast();
+    const { encrypt, isReady: encryptionReady } = useEncryptionKeys();
     const [status, setStatus] = useState<PlaidLinkStatus>('idle');
     const [linkToken, setLinkToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -154,6 +160,10 @@ export function usePlaidLink() {
             }
         }
 
+        if (!encryptionReady || !encrypt) {
+            console.warn('[Plaid] Encryption not ready; user-key persistence of account/holding data will be skipped');
+        }
+
         setStatus('open');
 
         return new Promise((resolve) => {
@@ -173,7 +183,7 @@ export function usePlaidLink() {
                     try {
                         const accessToken = await getAccessToken();
 
-                        // Exchange the public token
+                        // Exchange the public token (edge stores only plaid_items; returns accounts/holdings for client encrypt)
                         const { data, error: exchangeError } = await supabase.functions.invoke('plaid-exchange-token', {
                             headers: {
                                 Authorization: `Bearer ${accessToken}`,
@@ -188,6 +198,29 @@ export function usePlaidLink() {
                             throw new Error(exchangeError?.message || data?.error);
                         }
 
+                        const plaidItemId = data.plaid_item_id ?? data.item_id;
+                        const accounts = data.accounts ?? [];
+                        const holdings = data.holdings ?? [];
+
+                        if (encryptionReady && encrypt && plaidItemId && accounts.length > 0) {
+                            const persistResult = await persistPlaidDataWithUserKey(
+                                plaidItemId,
+                                accounts,
+                                holdings,
+                                encrypt
+                            );
+                            if (!persistResult.success) {
+                                console.error('[Plaid] User-key persist failed:', persistResult.error);
+                                toast({
+                                    title: 'Bank connected',
+                                    description: 'Account linked, but some details could not be saved securely. You can reconnect later.',
+                                    variant: 'destructive',
+                                });
+                            }
+                        } else if (accounts.length > 0 && !encrypt) {
+                            console.warn('[Plaid] Encryption not available; account/holding data not persisted (item only)');
+                        }
+
                         setStatus('success');
                         toast({
                             title: 'Bank connected!',
@@ -196,8 +229,8 @@ export function usePlaidLink() {
 
                         resolve({
                             success: true,
-                            itemId: data.item_id,
-                            accountsCount: data.accounts_count,
+                            itemId: plaidItemId,
+                            accountsCount: data.accounts_count ?? accounts.length,
                         });
                     } catch (err) {
                         const errorMsg = err instanceof Error ? err.message : 'Failed to link account';
@@ -227,7 +260,7 @@ export function usePlaidLink() {
 
             linkHandler.open();
         });
-    }, [getAccessToken, linkToken, initializePlaid, toast]);
+    }, [getAccessToken, linkToken, initializePlaid, toast, encrypt, encryptionReady]);
 
     /**
      * Reset state

@@ -146,6 +146,9 @@ serve(async (req: Request) => {
             }
         }
 
+        // 2b. Delete Plaid items (cascades to plaid_accounts, plaid_holdings)
+        await supabaseAdmin.from("plaid_items").delete().eq("user_id", user.id);
+
         // 3. Clean up user data (admin client bypasses RLS)
         // We delete in order of dependencies (shares -> calculations -> profile -> auth)
 

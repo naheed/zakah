@@ -24,5 +24,9 @@ verify_jwt = false
 [functions.plaid-exchange-token]
 verify_jwt = false
 
+# One-time cleanup: revoke all Plaid tokens and delete plaid_* rows. Protected by x-plaid-cleanup-secret.
+[functions.plaid-cleanup-all]
+verify_jwt = false
+
 [functions.fetch-daily-nisab]
 verify_jwt = false

@@ -212,82 +212,82 @@ serve(async (req) => {
             throw new Error(`Failed to store Plaid item: ${itemError.message}`);
         }
 
-        // Fetch accounts from Plaid
+        // Fetch accounts from Plaid. Do NOT insert into plaid_accounts/plaid_holdings here;
+        // client will encrypt with user keys and insert (see docs/PLAID_USER_KEY_ENCRYPTION.md).
         const accountsData = await plaidRequest(plaidBaseUrl, "/accounts/get", {
             ...plaidAuth,
             access_token: accessToken,
         });
 
-        // Store accounts
-        const accountInserts = (accountsData.accounts as PlaidAccount[]).map((account) => ({
-            plaid_item_id: plaidItem.id,
+        const accounts = (accountsData.accounts as PlaidAccount[]).map((account) => ({
             account_id: account.account_id,
             name: account.name,
             official_name: account.official_name,
             type: account.type,
             subtype: account.subtype,
             mask: account.mask,
-            balance_current: account.balances?.current,
-            balance_available: account.balances?.available,
+            balance_current: account.balances?.current ?? null,
+            balance_available: account.balances?.available ?? null,
             balance_iso_currency_code: account.balances?.iso_currency_code || "USD",
-            last_synced_at: new Date().toISOString(),
+            is_active_trader: false,
         }));
 
-        const { data: plaidAccounts, error: accountsError } = await supabase
-            .from("plaid_accounts")
-            .insert(accountInserts)
-            .select();
-
-        if (accountsError) {
-            console.error("Failed to store accounts:", accountsError);
-        }
-
-        // Fetch investment holdings if available
+        // Fetch investment holdings if available; return to client for encrypted persist
+        let holdings: Array<{
+            account_id: string;
+            security_id: string;
+            name: string | null;
+            ticker_symbol: string | null;
+            security_type: string | null;
+            quantity: number;
+            cost_basis: number | null;
+            institution_price: number;
+            institution_value: number;
+            iso_currency_code: string | null;
+            institution_price_as_of: string | null;
+        }> = [];
         try {
             const holdingsData = await plaidRequest(plaidBaseUrl, "/investments/holdings/get", {
                 ...plaidAuth,
                 access_token: accessToken,
             });
 
-            // Build security lookup map
             const securities = new Map<string, PlaidSecurity>(
                 (holdingsData.securities as PlaidSecurity[]).map((s) => [s.security_id, s])
             );
 
-            // Map holdings to accounts
-            for (const holding of holdingsData.holdings as PlaidHolding[]) {
-                const plaidAccount = plaidAccounts?.find(
-                    (a) => a.account_id === holding.account_id
-                );
-                if (!plaidAccount) continue;
-
+            holdings = (holdingsData.holdings as PlaidHolding[]).map((holding) => {
                 const security = securities.get(holding.security_id);
-
-                await supabase.from("plaid_holdings").insert({
-                    plaid_account_id: plaidAccount.id,
+                return {
+                    account_id: holding.account_id,
                     security_id: holding.security_id,
-                    name: security?.name,
-                    ticker_symbol: security?.ticker_symbol,
-                    security_type: security?.type, // cash, equity, etf, etc.
+                    name: security?.name ?? null,
+                    ticker_symbol: security?.ticker_symbol ?? null,
+                    security_type: security?.type ?? null,
                     quantity: holding.quantity,
                     cost_basis: holding.cost_basis,
                     institution_price: holding.institution_price,
                     institution_value: holding.institution_value,
-                    iso_currency_code: holding.iso_currency_code || "USD",
-                    price_as_of: holding.institution_price_as_of,
-                });
-            }
+                    iso_currency_code: holding.iso_currency_code ?? null,
+                    institution_price_as_of: holding.institution_price_as_of ?? null,
+                };
+            });
         } catch (holdingsError) {
-            // Investment holdings may not be available for all accounts
             const errorMsg = holdingsError instanceof Error ? holdingsError.message : "Unknown error";
-            console.log("No investment holdings available:", errorMsg);
+            console.log("[plaid-exchange-token] No investment holdings available:", errorMsg);
         }
+
+        console.log("[plaid-exchange-token] Item stored; returning accounts and holdings to client for user-key encryption");
 
         return new Response(
             JSON.stringify({
                 success: true,
                 item_id: plaidItem.id,
-                accounts_count: plaidAccounts?.length || 0,
+                plaid_item_id: plaidItem.id,
+                item_id_plaid: itemId,
+                accounts_count: accounts.length,
+                accounts,
+                holdings,
             }),
             {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },

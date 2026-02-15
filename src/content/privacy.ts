@@ -97,7 +97,8 @@ export const privacySections: SectionContent[] = [
                 listItems: [
                     "We use Plaid Inc. (\"Plaid\") to gather data from your financial institutions",
                     "By connecting your account, you grant Plaid the right, power, and authority to act on your behalf to access and transmit your personal and financial information",
-                    "You agree to your personal and financial information being transferred, stored, and processed by Plaid in accordance with the Plaid Privacy Policy"
+                    "You agree to your personal and financial information being transferred, stored, and processed by Plaid in accordance with the Plaid Privacy Policy",
+                    "We store Plaid account and holding data (account names, balances, security details) encrypted with your own encryption key — the same zero-knowledge model as saved calculations. Our servers cannot read this data; only your browser can decrypt it."
                 ]
             },
             {
@@ -292,7 +293,7 @@ export const privacySections: SectionContent[] = [
             },
             {
                 title: "8.2 Bank Connection Privacy (Plaid)",
-                content: "If you disconnect a bank account (unlink it), we immediately delete the access tokens and raw transaction cache for that institution. However, we retain the *results* of your past Zakat calculations (the final report) as part of your permanent spiritual record, so you always have a history of your obligations."
+                content: "Bank connection data is stored with strong encryption: the access token we need to refresh your connection is encrypted with a server key, and account names, balances, and holding details are encrypted with your own key (we cannot read them). If you disconnect a bank account (unlink it), we immediately revoke the connection with Plaid and delete the tokens and associated account/holding data for that institution. We retain the *results* of your past Zakat calculations (the final report) as part of your record, so you always have a history of your obligations."
             }
         ]
     },
@@ -302,7 +303,7 @@ export const privacySections: SectionContent[] = [
         content: "We implement appropriate technical and organizational measures to protect your data, including:",
         listItems: [
             "Session-specific encryption for browser-stored data",
-            "End-to-end encryption for saved calculations",
+            "End-to-end encryption for saved calculations and for Plaid account/holding data (your key only)",
             "Secure HTTPS connections",
             "Row-level security policies in our database",
             "Regular security reviews",

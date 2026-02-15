@@ -64,8 +64,8 @@ Data privacy is the paramount requirement for a financial application. ZakatFlow
 | Zone | Data Type | Storage | Encryption | Access |
 | :--- | :--- | :--- | :--- | :--- |
 | **Guest Vault** | Asset values, PII | `localStorage` | AES-256-GCM (Client-Side) | Device Only |
-| **Cloud (User)** | Asset values | Postgres | TLS (Transit) + RLS (At Rest) | Authenticated User Only |
-| **Secure Enclave** | Plaid Tokens | Postgres | AES-256-GCM (Server-Side) | Edge Function Only |
+| **Cloud (User)** | Asset values, Zakat calculations, **Plaid account/holding metadata** | Postgres | TLS (Transit) + RLS + **user-key encrypted payloads** (`encrypted_payload` / `encrypted_metadata`) | Authenticated User Only (client decrypts with user key) |
+| **Secure Enclave** | Plaid access tokens only | Postgres | AES-256-GCM (Server-Side) | Edge Function Only |
 
 ### 3.2 Guest Vault Encryption
 
