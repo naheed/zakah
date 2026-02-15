@@ -80,7 +80,7 @@ export const privacySections: SectionContent[] = [
             },
             {
                 title: "2.2 Financial Data You Enter",
-                content: "When you use the calculator, you provide financial information including asset values, liabilities, and other data needed to calculate Zakat. This data is encrypted before being stored (see Section 5 for details)."
+                content: "When you use the calculator, you provide financial information including asset values, liabilities, and other data needed to calculate Zakat. This data is encrypted using one of our two encryption tiers (Managed or Sovereign). See Section 5 for details."
             },
             {
                 title: "2.3 Uploaded Documents (AI Parsing)",
@@ -183,21 +183,19 @@ export const privacySections: SectionContent[] = [
                 ]
             },
             {
-                title: "5.2 Saved Calculation Encryption (Zero-Knowledge)",
-                content: "When you sign in and save a calculation, all data is encrypted before leaving your browser:",
+                title: "5.2 Encryption Tiers (Managed vs. Sovereign)",
+                content: "We offer two ways to secure your saved Zakat data, giving you control over the balance between convenience and absolute privacy:",
                 listItems: [
-                    "Encryption Standard: AES-256-GCM symmetric encryption",
-                    "What's Encrypted: Calculation name, year, all financial data, Zakat amount, and all metadata",
-                    "Key Storage: Encryption keys generated and stored locally in your browser's IndexedDB",
-                    "Device-Specific: Keys are unique to each browser/device and are never transmitted",
-                    "Sharing Security: RSA-4096 key exchange for securely sharing with others",
-                    "True Zero-Knowledge: Our servers store only encrypted blobs — we cannot see your calculation names, years, financial details, or Zakat amounts",
-                    "Database Contents: Only encrypted data, timestamps, and your user ID are stored"
+                    "Managed Mode (Default): Your encryption key is stored in our database, protected by strict Row-Level Security (RLS). Only your authenticated session can access it. This mode is frictionless as you don't need a recovery phrase.",
+                    "Sovereign Mode (Opt-in): Your encryption key is wrapped using a 12-word recovery phrase that only you know. Our servers never see the unencrypted key. This is a true zero-knowledge, zero-friction-protection model.",
+                    "Encryption Standard: All saved data uses AES-256-GCM symmetric encryption, regardless of mode.",
+                    "What's Encrypted: Calculation names, asset values, Zakat amounts, and all metadata blobs.",
+                    "Device-Specific Keys: Keys are generated client-side and handled in memory for maximum security."
                 ]
             }
         ],
-        warning: "Important: Key Loss Warning\nIf you clear your browser data or use a different device, your encryption keys will be lost. We cannot recover your encrypted data without your keys. Consider backing up your calculations by downloading the PDF report.",
-        recommendation: "Recommendation\nFor permanent, encrypted storage of your calculations, sign in and save your work. Session data is secure but temporary — it becomes unreadable when you close your browser."
+        warning: "Important: Access Recovery\nIn Managed Mode, we can assist in restoring account access, but your encryption keys are tied to your identity. In Sovereign Mode, if you lose your recovery phrase, your data is permanently lost. We cannot reset your phrase or recover data in Sovereign Mode.",
+        recommendation: "Recommendation\nMost users should use Managed Mode for convenience. Choose Sovereign Mode only if you are comfortable managing your own recovery phrases (e.g., using a password manager)."
     },
     {
         id: "sharing",

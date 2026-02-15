@@ -54,6 +54,7 @@ import { getPrimaryUrl } from "@/lib/domainConfig";
 import { PrivacyShield } from "@/components/vault/PrivacyShield";
 import { SettingsSection, SettingsCard } from "@/components/settings/SettingsContainers";
 import { SettingsRow } from "@/components/settings/SettingsRow";
+import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Separator } from "@/components/ui/separator";
 
@@ -350,6 +351,8 @@ export default function Settings() {
           </SettingsSection>
 
           {/* Section: Data & Privacy */}
+          <SecuritySettings />
+
           <SettingsSection title="Data & Privacy">
             <SettingsCard>
               {/* Documents */}

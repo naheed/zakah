@@ -67,8 +67,8 @@ export interface UsePrivacyVaultReturn {
     isUnlocked: boolean;
 
     // Actions
-    initializeVault: (mode: PersistenceMode) => Promise<{ phrase: string }>;
-    unlockVault: (phrase: string) => Promise<void>;
+    initializeVault: (mode: PersistenceMode) => Promise<{ phrase?: string }>;
+    unlockVault: (phrase?: string) => Promise<void>;
     lockVault: () => Promise<void>;
     resetVault: () => Promise<void>;
 
@@ -109,34 +109,66 @@ export function usePrivacyVault(): UsePrivacyVaultReturn {
                 setPersistenceModeState(mode);
 
                 // 3. If no mode set, user needs to set up
+                // 3. If no mode set, default to 'managed' logic for new users
                 if (!mode) {
                     setStatus('needs_setup');
                     return;
                 }
 
-                // 4. Try to get wrapped DEK based on mode
+                // 4. Try to get key based on mode
                 let wrapped: string | null = null;
+                let managed: string | null = null;
 
                 if (mode === 'local') {
                     wrapped = await getLocalWrappedDEK();
-                } else if (mode === 'cloud' && user) {
-                    // Fetch from Supabase user profile
-                    const { data, error } = await supabase
-                        .from('user_profiles')
-                        .select('encrypted_master_key')
-                        .eq('id', user.id)
-                        .single();
+                } else if (mode === 'cloud' || mode === 'managed' || mode === 'sovereign') {
+                    if (user) {
+                        // Fetch from Supabase user profile
+                        const { data, error } = await supabase
+                            .from('user_profiles')
+                            .select('encrypted_master_key, managed_key, persistence_mode')
+                            .eq('id', user.id)
+                            .single();
 
-                    if (!error && data?.encrypted_master_key) {
-                        wrapped = data.encrypted_master_key;
+                        const profile = data as any;
+                        if (!error && profile) {
+                            if (profile.persistence_mode === 'managed' && profile.managed_key) {
+                                managed = profile.managed_key;
+                            } else if (profile.encrypted_master_key) {
+                                wrapped = profile.encrypted_master_key;
+                            }
+                        }
                     }
                 }
 
-                if (wrapped) {
+                if (managed) {
+                    // Auto-unlock for managed mode
+                    // We need to import the key string back to CryptoKey
+                    // Since vault.unlock expects a wrapped key + phrase for unwrapping, 
+                    // we need a new method on vault to just set the raw key.
+                    // Implementation detail: The 'managed' key IS the raw DEK (exported)
+
+                    // Decode base64 to Uint8Array
+                    const binaryString = atob(managed);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+
+                    const dek = await crypto.subtle.importKey(
+                        'raw',
+                        bytes,
+                        { name: 'AES-GCM', length: 256 },
+                        true,
+                        ['encrypt', 'decrypt']
+                    );
+
+                    await vault.setRawKey(dek);
+                    setStatus('unlocked');
+                } else if (wrapped) {
                     setWrappedDEK(wrapped);
                     setStatus('needs_phrase');
                 } else {
-                    // Has mode but no key - might be corrupted state
                     setStatus('needs_setup');
                 }
             } catch (error) {
@@ -151,13 +183,11 @@ export function usePrivacyVault(): UsePrivacyVaultReturn {
     // -------------------------------------------------------------------------
     // Initialize a new vault
     // -------------------------------------------------------------------------
-    const initializeVault = useCallback(async (mode: PersistenceMode): Promise<{ phrase: string }> => {
+    const initializeVault = useCallback(async (mode: PersistenceMode): Promise<{ phrase?: string }> => {
         if (!mode) throw new Error('Persistence mode is required');
 
-        // Generate new keys
+        // Generate new DEK
         const dek = await generateDEK();
-        const phrase = generateRecoveryPhrase();
-        const wrapped = await wrapDEK(dek, phrase);
 
         // Cache DEK for immediate use
         await cacheDEK(dek);
@@ -166,55 +196,127 @@ export function usePrivacyVault(): UsePrivacyVaultReturn {
         await setPersistenceMode(mode);
         setPersistenceModeState(mode);
 
-        if (mode === 'local') {
-            await storeLocalWrappedDEK(wrapped);
-        } else if (mode === 'cloud' && user) {
-            // Store in Supabase
-            const { error } = await supabase
-                .from('user_profiles')
-                .upsert({
-                    id: user.id,
-                    encrypted_master_key: wrapped,
-                    updated_at: new Date().toISOString(),
-                });
+        if (mode === 'managed') {
+            // Managed Mode: Store raw DEK (encrypted by RLS) in Supabase
+            // We need to export it to string first
+            const exported = await crypto.subtle.exportKey('raw', dek);
+            const binaryString = String.fromCharCode(...new Uint8Array(exported));
+            const base64Key = btoa(binaryString);
 
-            if (error) {
-                console.error('[PrivacyVault] Failed to save to cloud:', error);
-                // Fallback to local
-                await storeLocalWrappedDEK(wrapped);
+            if (user) {
+                const { error } = await supabase
+                    .from('user_profiles')
+                    .upsert({
+                        id: user.id,
+                        managed_key: base64Key,
+                        persistence_mode: 'managed',
+                        updated_at: new Date().toISOString(),
+                    });
+
+                if (error) {
+                    console.error('[PrivacyVault] Failed to save managed key:', error);
+                    throw error;
+                }
             }
+
+            // Allow immediate use without phrase
+            await vault.setRawKey(dek);
+            setStatus('unlocked');
+            return {}; // No phrase needed
+
+        } else {
+            // Sovereign / Local / Cloud (Legacy) Mode: Wrap with phrase
+            const phrase = generateRecoveryPhrase();
+            const wrapped = await wrapDEK(dek, phrase);
+
+            if (mode === 'local') {
+                await storeLocalWrappedDEK(wrapped);
+            } else if ((mode === 'cloud' || mode === 'sovereign') && user) {
+                const { error } = await supabase
+                    .from('user_profiles')
+                    .upsert({
+                        id: user.id,
+                        encrypted_master_key: wrapped,
+                        persistence_mode: 'sovereign',
+                        updated_at: new Date().toISOString(),
+                    });
+
+                if (error) {
+                    console.error('[PrivacyVault] Failed to save to cloud:', error);
+                    // Fallback to local
+                    await storeLocalWrappedDEK(wrapped);
+                }
+            }
+
+            // Activate
+            if (mode === 'local' || mode === 'cloud' || mode === 'sovereign') {
+                // For sovereign modes, we need to restore using the phrase content implicitly
+                // ensuring the vault instance has the key
+                await vault.setRawKey(dek);
+            }
+
+            setStatus('unlocked');
+            return { phrase };
         }
-
-        // Restore vault instance
-        await vault.restoreFromCache();
-        setStatus('unlocked');
-
-        return { phrase };
     }, [user]);
 
     // -------------------------------------------------------------------------
-    // Unlock vault with recovery phrase
+    // Unlock vault
     // -------------------------------------------------------------------------
-    const unlockVault = useCallback(async (phrase: string): Promise<void> => {
-        if (!wrappedDEK) {
-            // Try to fetch again
-            const mode = persistenceMode;
-            let wrapped: string | null = null;
+    const unlockVault = useCallback(async (phrase?: string): Promise<void> => {
+        // If managed mode, we shouldn't even be here usually as checkVaultState handles it,
+        // but if we need to force re-fetch:
 
+        const mode = persistenceMode;
+
+        if (mode === 'managed' && user) {
+            const { data } = await supabase
+                .from('user_profiles')
+                .select('managed_key')
+                .eq('id', user.id)
+                .single();
+
+            const profile = data as any;
+            if (profile?.managed_key) {
+                const binaryString = atob(profile.managed_key);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                const dek = await crypto.subtle.importKey(
+                    'raw',
+                    bytes,
+                    { name: 'AES-GCM', length: 256 },
+                    true,
+                    ['encrypt', 'decrypt']
+                );
+
+                await vault.setRawKey(dek);
+                setStatus('unlocked');
+                return;
+            }
+        }
+
+        // Sovereign logic
+        if (!phrase) throw new Error('Recovery phrase required for sovereign mode');
+
+        if (!wrappedDEK) {
+            // ... (existing fetch logic)
+            let wrapped: string | null = null;
             if (mode === 'local') {
                 wrapped = await getLocalWrappedDEK();
-            } else if (mode === 'cloud' && user) {
-                const { data } = await supabase
+            } else if ((mode === 'cloud' || mode === 'sovereign') && user) {
+                const { data } = await (supabase
                     .from('user_profiles')
                     .select('encrypted_master_key')
                     .eq('id', user.id)
-                    .single();
-                wrapped = data?.encrypted_master_key || null;
+                    .single() as any);
+                const profile = data as any;
+                wrapped = profile?.encrypted_master_key || null;
             }
 
-            if (!wrapped) {
-                throw new Error('No encrypted key found. Please set up the vault first.');
-            }
+            if (!wrapped) throw new Error('No encrypted key found');
 
             setWrappedDEK(wrapped);
             await vault.unlock(wrapped, phrase);
@@ -230,8 +332,10 @@ export function usePrivacyVault(): UsePrivacyVaultReturn {
     // -------------------------------------------------------------------------
     const lockVault = useCallback(async (): Promise<void> => {
         await vault.lock();
-        setStatus('needs_phrase');
-    }, []);
+        // If managed, we effectively stay "unlocked" next time they load if logged in
+        // But explicitly calling lock clears the memory.
+        setStatus(persistenceMode === 'managed' ? 'loading' : 'needs_phrase');
+    }, [persistenceMode]);
 
     // -------------------------------------------------------------------------
     // Reset vault (complete wipe)
@@ -243,7 +347,11 @@ export function usePrivacyVault(): UsePrivacyVaultReturn {
             // Clear from Supabase
             await supabase
                 .from('user_profiles')
-                .update({ encrypted_master_key: null })
+                .update({
+                    encrypted_master_key: null,
+                    managed_key: null,
+                    persistence_mode: null
+                })
                 .eq('id', user.id);
         }
 

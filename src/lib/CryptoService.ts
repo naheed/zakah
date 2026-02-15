@@ -42,7 +42,7 @@ const PBES2_ITERATIONS = 310_000;
 const DATA_ENCRYPTION_ALG = 'A256GCM';
 const KEY_ENCRYPTION_ALG = 'PBES2-HS512+A256KW';
 
-export type PersistenceMode = 'local' | 'cloud' | null;
+export type PersistenceMode = 'local' | 'cloud' | 'managed' | 'sovereign' | null;
 
 export interface VaultConfig {
     wrappedDEK: string;
@@ -243,12 +243,47 @@ export async function getPersistenceMode(): Promise<PersistenceMode> {
     return (await get<PersistenceMode>(PERSISTENCE_MODE_KEY)) || null;
 }
 
+const MANAGED_KEY_STORAGE_KEY = 'zakat-vault-managed-key';
+
+/**
+ * Store managed key locally (for session persistence)
+ */
+export async function storeManagedKey(dek: CryptoKey): Promise<void> {
+    const dekBytes = await crypto.subtle.exportKey('raw', dek);
+    await set(MANAGED_KEY_STORAGE_KEY, new Uint8Array(dekBytes));
+}
+
+/**
+ * Get managed key from local storage
+ */
+export async function getManagedKey(): Promise<CryptoKey | null> {
+    try {
+        const dekBytes = await get<Uint8Array>(MANAGED_KEY_STORAGE_KEY);
+        if (!dekBytes) return null;
+
+        // Ensure we pass an ArrayBuffer (not ArrayBufferLike) to WebCrypto
+        const dekKeyBuffer = new ArrayBuffer(dekBytes.byteLength);
+        new Uint8Array(dekKeyBuffer).set(dekBytes);
+
+        return crypto.subtle.importKey(
+            'raw',
+            dekKeyBuffer,
+            { name: 'AES-GCM', length: 256 },
+            true,
+            ['encrypt', 'decrypt']
+        );
+    } catch {
+        return null;
+    }
+}
+
 /**
  * Clear all vault data from local storage
  */
 export async function clearVault(): Promise<void> {
     await del(DEK_STORAGE_KEY);
     await del(WRAPPED_DEK_STORAGE_KEY);
+    await del(MANAGED_KEY_STORAGE_KEY);
     await del(PERSISTENCE_MODE_KEY);
 }
 
@@ -287,6 +322,11 @@ export class CryptoVault {
      */
     async unlock(wrappedDEK: string, phrase: string): Promise<void> {
         const dek = await unwrapDEK(wrappedDEK, phrase);
+        this.dek = dek;
+        await cacheDEK(dek);
+    }
+
+    async setRawKey(dek: CryptoKey): Promise<void> {
         this.dek = dek;
         await cacheDEK(dek);
     }
