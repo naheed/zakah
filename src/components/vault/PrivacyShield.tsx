@@ -39,8 +39,10 @@ export function PrivacyShield() {
 
     // Determine state
     const isGuest = !user;
-    const isCloud = persistenceMode === 'cloud';
-    const isLocalUser = user && persistenceMode === 'local';
+    const isManaged = persistenceMode === 'managed';
+    const isSovereign = persistenceMode === 'sovereign';
+    const isCloud = isManaged || isSovereign || persistenceMode === 'cloud';
+    const isLocalUser = user && (persistenceMode === 'local' || !persistenceMode);
 
     // Icon & Color Logic
     let Icon = Lock;
@@ -53,14 +55,24 @@ export function PrivacyShield() {
         colorClass = "text-tertiary";
         bgClass = "bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30";
         label = "Device Only";
+    } else if (isSovereign) {
+        Icon = ShieldCheck;
+        colorClass = "text-emerald-500";
+        bgClass = "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30";
+        label = "Sovereign Vault";
+    } else if (isManaged) {
+        Icon = CloudCheck;
+        colorClass = "text-primary";
+        bgClass = "bg-primary/5 hover:bg-primary/10";
+        label = "Encrypted Sync";
     } else if (isCloud) {
         Icon = CloudCheck;
-        colorClass = "text-success dark:text-success"; // Using design system success (green) for reassurance
+        colorClass = "text-success dark:text-success";
         bgClass = "bg-success/10 hover:bg-success/20";
         label = "Encrypted Backup";
     } else if (isLocalUser) {
-        Icon = ShieldCheck;
-        colorClass = "text-muted-foreground"; // Using design system muted for neutral
+        Icon = Lock;
+        colorClass = "text-muted-foreground";
         bgClass = "bg-muted/10 hover:bg-muted/20";
         label = "Local Profile";
     }

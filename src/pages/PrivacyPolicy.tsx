@@ -143,7 +143,7 @@ const PrivacyPolicy = () => {
   return (
     <ArticleLayout
       title={header.title}
-      description="Privacy Policy for ZakatFlow - We collect minimal data and use zero-knowledge encryption."
+      description="Privacy Policy for ZakatFlow - We collect minimal data and use tiered encryption for maximum security."
       urlPath="/privacy"
       headerContent={headerContent}
       tocItems={tocItems}

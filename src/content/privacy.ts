@@ -47,7 +47,7 @@ export const privacyHighlights: HighlightItem[] = [
     },
     {
         icon: Eye,
-        text: "Saved calculations are fully encrypted — names, amounts, and all data are unreadable to us (true zero-knowledge)"
+        text: "Saved data is encrypted — choose between seamless Managed mode or private Sovereign zero-knowledge"
     },
     {
         icon: Clock,

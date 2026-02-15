@@ -45,7 +45,7 @@ export const labels = {
 } as const;
 
 export const badges = {
-    zeroKnowledge: 'Zero-Knowledge Encryption',
+    zeroKnowledge: 'Private & Encrypted',
     sessionOnly: 'Session-Only Storage',
 } as const;
 
@@ -60,5 +60,5 @@ export const a11y = {
 } as const;
 
 export const legal = {
-    lastUpdated: 'January 16, 2026',
+    lastUpdated: 'February 14, 2026',
 } as const;
