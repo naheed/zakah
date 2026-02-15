@@ -22,10 +22,19 @@ import type { Database } from "./types";
 // For open-source contributors: create a .env.local with your Supabase credentials.
 // See .env.example for required variables.
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
+const derivedUrl = projectId ? `https://${projectId}.supabase.co` : undefined;
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+const SUPABASE_URL =
+  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ??
+  derivedUrl ??
+  "https://placeholder.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  "placeholder-key";
+
+if (SUPABASE_URL === "https://placeholder.supabase.co") {
   console.warn(
     "Missing Supabase environment variables. " +
     "Backend features will not work. " +
