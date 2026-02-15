@@ -294,7 +294,7 @@ export async function storeSymmetricKey(key: CryptoKey): Promise<void> {
 export async function retrieveSymmetricKey(): Promise<CryptoKey | null> {
   const exported = await getFromDB(SYMMETRIC_KEY_ID);
   if (!exported) return null;
-  return importSymmetricKey(exported);
+  return importSymmetricKey(exported as string);
 }
 
 /**
@@ -313,8 +313,8 @@ export async function retrieveKeyPair(): Promise<CryptoKeyPair | null> {
   const stored = await getFromDB(KEY_PAIR_ID);
   if (!stored) return null;
   
-  const publicKey = await importPublicKey(stored.publicKey);
-  const privateKey = await importPrivateKey(stored.privateKey);
+  const publicKey = await importPublicKey((stored as any).publicKey);
+  const privateKey = await importPrivateKey((stored as any).privateKey);
   
   return { publicKey, privateKey };
 }

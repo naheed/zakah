@@ -229,7 +229,7 @@ export function mergeAccountIntoFormData(
     for (const [key, value] of Object.entries(updates)) {
         if (typeof value === 'number') {
             const currentValue = (merged[key as keyof ZakatFormData] as number) || 0;
-            (merged as Record<keyof ZakatFormData, number | undefined>)[key as keyof ZakatFormData] = currentValue + value;
+            (merged as any)[key as keyof ZakatFormData] = currentValue + value;
         }
     }
 

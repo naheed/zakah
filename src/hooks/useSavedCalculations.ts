@@ -87,25 +87,25 @@ export function useSavedCalculations() {
               // Let's assume the payload matches what saveCalculation stores.
 
               // Determine zakat_due if missing (recalc)
-              let zakatDue = decrypted.zakatDue;
-              let isAboveNisab = decrypted.isAboveNisab;
+              let zakatDue = decrypted?.zakatDue;
+              let isAboveNisab = decrypted?.isAboveNisab;
 
-              if (zakatDue === undefined) {
+              if (zakatDue === undefined && decrypted?.formData) {
                 const res = calculateZakat(decrypted.formData);
                 zakatDue = res.zakatDue;
                 isAboveNisab = res.isAboveNisab;
               }
 
               return {
-                id: decrypted.id,
-                name: decrypted.name,
-                year_type: decrypted.yearType || 'gregorian',
-                year_value: decrypted.yearValue || new Date().getFullYear(),
-                form_data: decrypted.formData,
+                id: decrypted?.id,
+                name: decrypted?.name,
+                year_type: decrypted?.yearType || 'gregorian',
+                year_value: decrypted?.yearValue || new Date().getFullYear(),
+                form_data: decrypted?.formData,
                 zakat_due: zakatDue,
                 is_above_nisab: isAboveNisab,
-                created_at: decrypted.createdAt,
-                updated_at: decrypted.updatedAt,
+                created_at: decrypted?.createdAt,
+                updated_at: decrypted?.updatedAt,
                 version: 1,
                 encryption_version: 3
               } as SavedCalculation;

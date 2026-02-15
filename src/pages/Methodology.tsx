@@ -43,8 +43,8 @@ const Methodology = () => {
     const balancedConfig = ZAKAT_PRESETS['balanced'];
 
     // Update Debt Ruling "ZakatFlow Approach"
-    const expensePeriod = balancedConfig.liabilities.personal_debt.types?.expense_period || 'annual';
-    const periodText = expensePeriod === 'annual' ? '12-month' : 'current month';
+    const liabMethod = balancedConfig.liabilities.method;
+    const periodText = (liabMethod === '12_month_rule' || liabMethod === 'full_deduction') ? '12-month' : 'current month';
 
     baseContent.madhahSchools.debtRuling.zakatFlowApproach =
       `ZakatFlow applies the Maliki/Bradford standard (${periodText} deduction) for the Balanced mode. The Shafi'i mode applies no deduction at all.`;
@@ -54,7 +54,8 @@ const Methodology = () => {
     baseContent.debts.liabilities.zakatFlowView =
       `ZakatFlow follows the Maliki/Bradford view: only immediate obligations (due within ${periodText}) reduce your Zakatable wealth.`;
 
-    if (expensePeriod === 'annual') {
+    const isAnnualPeriod = liabMethod === '12_month_rule' || liabMethod === 'full_deduction';
+    if (isAnnualPeriod) {
       baseContent.debts.deductible.list = ["Unpaid bills", "Upcoming year's mortgage payments", "Credit card balances"];
     } else {
       baseContent.debts.deductible.list = ["Unpaid bills", "Current month's mortgage payment", "Credit card balances"];

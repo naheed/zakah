@@ -41,62 +41,46 @@ interface LegacyExtractedData {
 export function mapLegacyData(legacyData: LegacyExtractedData | Record<string, unknown> | null | undefined): Partial<ZakatFormData> {
     if (!legacyData) return {};
 
-    const data = legacyData as LegacyExtractedData;
+    const data = legacyData as Record<string, unknown>;
+    const num = (key: string): number | undefined => {
+        const v = data[key];
+        return typeof v === 'number' ? v : undefined;
+    };
+
     const mappedData: Partial<ZakatFormData> = {
-        // Liquid Assets
-        checkingAccounts: data.checkingAccounts,
-        savingsAccounts: legacyData.savingsAccounts,
-        cashOnHand: legacyData.cashOnHand,
-        digitalWallets: legacyData.digitalWallets,
-        foreignCurrency: legacyData.foreignCurrency,
-        interestEarned: legacyData.interestEarned,
-
-        // Precious Metals - Map legacy keys to Investment
-        // Prioritize explicit investment keys, fall back to generic legacy keys
-        goldInvestmentValue: legacyData.goldInvestmentValue || legacyData.goldValue,
-        silverInvestmentValue: legacyData.silverInvestmentValue || legacyData.silverValue,
-
-        // Note: Jewelry is typically not extracted by the AI unless specified,
-        // so we default to 0 or undefined. AI usually lumps into 'goldValue'.
-
-        // Crypto
-        cryptoCurrency: legacyData.cryptoCurrency,
-        cryptoTrading: legacyData.cryptoTrading,
-
-        // Investments
-        activeInvestments: legacyData.activeInvestments,
-        passiveInvestmentsValue: legacyData.passiveInvestmentsValue,
-        dividends: legacyData.dividends,
-
-        // Retirement
-        rothIRAContributions: legacyData.rothIRAContributions,
-        rothIRAEarnings: legacyData.rothIRAEarnings,
-        traditionalIRABalance: legacyData.traditionalIRABalance,
-        fourOhOneKVestedBalance: legacyData.fourOhOneKVestedBalance,
-
-        // Trusts
-        revocableTrustValue: legacyData.revocableTrustValue,
-        irrevocableTrustValue: legacyData.irrevocableTrustValue,
-
-        // Real Estate
-        realEstateForSale: legacyData.realEstateForSale,
-        rentalPropertyIncome: legacyData.rentalPropertyIncome,
-
-        // Business
-        businessCashAndReceivables: legacyData.businessCashAndReceivables,
-        businessInventory: legacyData.businessInventory,
-
-        // Liabilities
-        monthlyLivingExpenses: legacyData.monthlyLivingExpenses,
-        creditCardBalance: legacyData.creditCardBalance || legacyData.creditCardDebt, // handle potential alias
-        monthlyMortgage: legacyData.monthlyMortgage,
-        studentLoansDue: legacyData.studentLoansDue,
+        checkingAccounts: num('checkingAccounts'),
+        savingsAccounts: num('savingsAccounts'),
+        cashOnHand: num('cashOnHand'),
+        digitalWallets: num('digitalWallets'),
+        foreignCurrency: num('foreignCurrency'),
+        interestEarned: num('interestEarned'),
+        goldInvestmentValue: num('goldInvestmentValue') || num('goldValue'),
+        silverInvestmentValue: num('silverInvestmentValue') || num('silverValue'),
+        cryptoCurrency: num('cryptoCurrency'),
+        cryptoTrading: num('cryptoTrading'),
+        activeInvestments: num('activeInvestments'),
+        passiveInvestmentsValue: num('passiveInvestmentsValue'),
+        dividends: num('dividends'),
+        rothIRAContributions: num('rothIRAContributions'),
+        rothIRAEarnings: num('rothIRAEarnings'),
+        traditionalIRABalance: num('traditionalIRABalance'),
+        fourOhOneKVestedBalance: num('fourOhOneKVestedBalance'),
+        revocableTrustValue: num('revocableTrustValue'),
+        irrevocableTrustValue: num('irrevocableTrustValue'),
+        realEstateForSale: num('realEstateForSale'),
+        rentalPropertyIncome: num('rentalPropertyIncome'),
+        businessCashAndReceivables: num('businessCashAndReceivables'),
+        businessInventory: num('businessInventory'),
+        monthlyLivingExpenses: num('monthlyLivingExpenses'),
+        creditCardBalance: num('creditCardBalance') || num('creditCardDebt'),
+        monthlyMortgage: num('monthlyMortgage'),
+        studentLoansDue: num('studentLoansDue'),
     };
 
     // Clean data: Remove undefined, null, or 0 values
     const cleanData = Object.entries(mappedData).reduce((acc, [key, value]) => {
         if (typeof value === 'number' && value > 0) {
-            (acc as Partial<ZakatFormData>)[key as keyof ZakatFormData] = value;
+            (acc as any)[key] = value;
         }
         return acc;
     }, {} as Partial<ZakatFormData>);
@@ -115,7 +99,7 @@ export function aggregateResults(results: Partial<ZakatFormData>[]): Partial<Zak
             const val = res[key];
             if (typeof val === 'number') {
                 const current = (totalData[key] as number | undefined) ?? 0;
-                (totalData as Partial<ZakatFormData>)[key] = current + val;
+                (totalData as any)[key] = current + val;
             }
         });
     });

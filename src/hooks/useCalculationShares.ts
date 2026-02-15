@@ -143,7 +143,7 @@ export function useCalculationShares(calculationId?: string) {
 export function useSharedCalculations() {
   const { user } = useAuth();
   const { isReady, decryptShared } = useEncryptionKeys();
-  const [calculations, setCalculations] = useState<SharedCalculationView[]>([]);
+  const [calculations, setCalculations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -25,7 +25,7 @@ export interface UploadedDocument {
 }
 
 // Maps each form field to the step/page it belongs to
-export const fieldToStepMapping: Record<keyof ZakatFormData, string> = {
+export const fieldToStepMapping: Partial<Record<keyof ZakatFormData, string>> = {
   // Liquid Assets
   checkingAccounts: "liquid-assets",
   savingsAccounts: "liquid-assets",

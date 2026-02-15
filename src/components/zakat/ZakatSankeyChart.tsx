@@ -277,8 +277,7 @@ export function ZakatSankeyChart({
           theme={formattedData.chartTheme}
           margin={margin}
           align="justify"
-          // @ts-expect-error Nivo's sort prop types are overly strict; our comparator is valid at runtime
-          sort={sortNodes}
+          sort={sortNodes as any}
           colors={(node: { nodeColor?: string }) => node.nodeColor || "#999"}
           nodeOpacity={1}
           nodeHoverOthersOpacity={0.35}
@@ -310,7 +309,7 @@ export function ZakatSankeyChart({
             </div>
           )}
 
-          linkTooltip={({ link }: { link: SankeyLink & { target: { displayName?: string; id: string } } }) => (
+          linkTooltip={({ link }: { link: any }) => (
             <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-xl border border-border text-xs z-50 min-w-[180px]">
               <div className="text-muted-foreground mb-1">
                 {link.assetName} → {link.target.displayName || link.target.id}

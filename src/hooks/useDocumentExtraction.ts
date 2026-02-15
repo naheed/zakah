@@ -47,7 +47,7 @@ export function useDocumentExtraction(
       const extractedValue = extractedData[field];
       if (typeof extractedValue === 'number' && extractedValue > 0) {
         const currentValue = (currentData[field] as number) || 0;
-        (updates as Record<keyof ZakatFormData, number>)[field] = currentValue + extractedValue;
+        (updates as Record<string, number>)[field] = currentValue + extractedValue;
       }
     }
     

@@ -40,7 +40,7 @@ interface RuleCardContent {
 
 interface RuleCardProps {
     title: string;
-    icon: React.ComponentType<{ size?: number; weight?: string }>;
+    icon: React.ComponentType<any>;
     mode: Madhab;
     content: RuleCardContent;
 }
@@ -63,25 +63,25 @@ const RuleCard = ({ title, icon: Icon, mode, content }: RuleCardProps) => {
             school = content.schools?.find((s: MethodologySchool) => s.name.includes('Shafi'));
             displayTitle = c.methodology.explorer.ruleHighlights.jewelry.majority;
         }
-        displayText = school?.text;
-        displayEvidence = school?.evidence;
+        displayText = school?.text ?? "";
+        displayEvidence = school?.evidence ?? "";
 
     } else if (title.includes("Retirement")) {
         let approach;
         if (mode === 'balanced') {
-            approach = content.approaches[0]; // Bradford is index 0
+            approach = content.approaches?.[0]; // Bradford is index 0
         } else {
-            approach = content.approaches[1]; // Others are index 1
+            approach = content.approaches?.[1]; // Others are index 1
         }
-        displayText = approach?.description;
-        displayTitle = approach?.title;
-        displayBasis = approach?.basis;
+        displayText = approach?.description ?? "";
+        displayTitle = approach?.title ?? "";
+        displayBasis = approach?.basis ?? "";
 
     } else if (title.includes("Stocks")) {
         if (mode === 'balanced') {
-            displayText = content.rule30.description;
+            displayText = content.rule30?.description ?? "";
             displayTitle = c.methodology.explorer.ruleHighlights.stocks.passive.title;
-            displayBasis = content.rule30.standard;
+            displayBasis = content.rule30?.standard ?? "";
         } else {
             displayText = c.methodology.explorer.ruleHighlights.stocks.default.description;
             displayTitle = c.methodology.explorer.ruleHighlights.stocks.default.title;
