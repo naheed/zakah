@@ -37,14 +37,14 @@ export const termsSections: TermSection[] = [
         number: 1,
         title: "Acceptance of Terms",
         icon: Scroll,
-        content: "By accessing or using the Zakat Calculator (\"the Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, you may not use the Service."
+        content: "By accessing or using ZakatFlow (\"the Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, you may not use the Service."
     },
     {
         id: "description",
         number: 2,
         title: "Description of Service",
         icon: FileText,
-        content: "The Zakat Calculator is a web-based tool that helps users estimate their Zakat obligations based on the financial information they provide. The Service:",
+        content: "ZakatFlow is a web-based tool that helps users estimate their Zakat obligations based on the financial information they provide. The Service:",
         listItems: [
             "Calculates estimated Zakat based on user-provided financial data",
             "Allows users to save and retrieve encrypted calculations",
@@ -150,14 +150,13 @@ export const termsSections: TermSection[] = [
         number: 10,
         title: "Indemnification",
         icon: Handshake,
-        content: "You agree to indemnify and hold harmless the Service and its creator from any claims, damages, or expenses arising from your use of the Service or violation of these Terms."
     },
     {
         id: "intellectual",
         number: 11,
         title: "Intellectual Property",
         icon: Copyright,
-        content: "The Service and its original content, features, and functionality are owned by the creator and are protected by applicable intellectual property laws. You may not copy, modify, distribute, or create derivative works without permission."
+        content: "The ZakatFlow code is open-source and licensed under the GNU Affero General Public License v3.0 (AGPL v3). You are free to inspect, modify, and redistribute the code under the terms of this license. However, the 'ZakatFlow' brand name, logo, and hosted service are proprietary."
     },
     {
         id: "termination",

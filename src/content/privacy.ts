@@ -101,7 +101,7 @@ export const privacySections: SectionContent[] = [
                 ]
             },
             {
-                title: "2.4 Usage Data",
+                title: "2.5 Usage Data",
                 content: "We may collect anonymized usage analytics to improve the Service, including pages visited and feature usage patterns."
             },
             {
@@ -307,7 +307,8 @@ export const privacySections: SectionContent[] = [
             "End-to-end encryption for saved calculations",
             "Secure HTTPS connections",
             "Row-level security policies in our database",
-            "Regular security reviews"
+            "Regular security reviews",
+            "Verifiable Code: Our entire codebase is open-source (AGPL v3), allowing independent security experts to verify our encryption and privacy claims"
         ]
     },
     {
