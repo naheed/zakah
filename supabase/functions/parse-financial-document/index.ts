@@ -380,7 +380,7 @@ RULES:
       });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
 
     const requestBody = {
       contents: [{ parts }],
@@ -434,6 +434,13 @@ RULES:
     const functionCallPart = content?.parts?.find((part: any) => part.functionCall);
 
     // --- RESPONSE HANDLING ---
+    if (!functionCallPart) {
+      console.error("No function call in Gemini response. Full response:", JSON.stringify(data).substring(0, 1000));
+      return new Response(
+        JSON.stringify({ error: "AI could not extract structured data from this document. Please try a clearer image or PDF." }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const args = functionCallPart.functionCall.args || {};
 
     if (extractionType === 'donation_receipt') {
