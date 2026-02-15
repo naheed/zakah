@@ -79,9 +79,9 @@ export function VaultGuard({
 
         try {
             console.log('[VaultGuard] Initializing vault with mode:', mode);
-            const { phrase } = await initializeVault(mode);
+            const result = await initializeVault(mode);
             console.log('[VaultGuard] Vault initialized, showing phrase');
-            setGeneratedPhrase(phrase);
+            setGeneratedPhrase(result.phrase ?? '');
             setSetupStep('phrase');
         } catch (error) {
             console.error('[VaultGuard] Initialization failed:', error);
