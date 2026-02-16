@@ -32,6 +32,7 @@ export const accountTypeLabels = {
     TRUST: 'Trust',
     METALS: 'Precious Metals',
     BUSINESS: 'Business',
+    HSA: 'HSA',
     OTHER: 'Other',
 } as const;
 

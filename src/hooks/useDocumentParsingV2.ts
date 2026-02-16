@@ -40,6 +40,7 @@ export interface DocumentExtractionResult {
     institutionName?: string;
     accountName?: string;  // Account type/name
     accountId?: string;    // Last 4 digits
+    accountType?: string;  // Detected account container type (RETIREMENT_401K, BROKERAGE, etc.)
     notes?: string;
     error?: string;
 }
@@ -113,6 +114,7 @@ export function useDocumentParsingV2() {
                 institutionName: data.institutionName,
                 accountName: data.accountName,
                 accountId: data.accountId,
+                accountType: data.accountType,
                 notes: data.notes,
             };
 

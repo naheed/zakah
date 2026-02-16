@@ -39,9 +39,10 @@ interface ExtractionReviewProps {
     initialData: {
         institutionName?: string;
         accountName?: string;
+        accountType?: string;
         lineItems: ExtractionLineItem[];
     };
-    onConfirm: (data: { institutionName: string; accountName: string; lineItems: ExtractionLineItem[] }) => void;
+    onConfirm: (data: { institutionName: string; accountName: string; accountType: string; lineItems: ExtractionLineItem[] }) => void;
     onCancel: () => void;
     isSaving?: boolean;
 }
@@ -49,6 +50,7 @@ interface ExtractionReviewProps {
 export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = false }: ExtractionReviewProps) {
     const [institutionName, setInstitutionName] = useState(initialData.institutionName || '');
     const [accountName, setAccountName] = useState(initialData.accountName || '');
+    const [accountType, setAccountType] = useState(initialData.accountType || 'OTHER');
     const [lineItems, setLineItems] = useState<ExtractionLineItem[]>(initialData.lineItems || []);
 
     const totalValue = useMemo(() => {
@@ -87,9 +89,28 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
         onConfirm({
             institutionName,
             accountName,
+            accountType,
             lineItems,
         });
     };
+
+    const ACCOUNT_TYPE_OPTIONS = [
+        { value: 'CHECKING', label: 'Checking Account' },
+        { value: 'SAVINGS', label: 'Savings Account' },
+        { value: 'BROKERAGE', label: 'Brokerage / Investment' },
+        { value: 'RETIREMENT_401K', label: '401(k) / 403(b)' },
+        { value: 'RETIREMENT_IRA', label: 'Traditional IRA' },
+        { value: 'ROTH_IRA', label: 'Roth IRA' },
+        { value: 'HSA', label: 'HSA (Health Savings)' },
+        { value: 'CRYPTO_WALLET', label: 'Cryptocurrency' },
+        { value: 'METALS', label: 'Precious Metals' },
+        { value: 'REAL_ESTATE', label: 'Real Estate' },
+        { value: 'TRUST', label: 'Trust' },
+        { value: 'BUSINESS', label: 'Business' },
+        { value: 'OTHER', label: 'Other' },
+    ];
+
+    const isRetirementType = ['RETIREMENT_401K', 'RETIREMENT_IRA', 'ROTH_IRA', 'HSA'].includes(accountType);
 
     return (
         <TooltipProvider>
@@ -113,7 +134,7 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
 
                 <CardContent className="space-y-6 pt-6">
                     {/* Metadata Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="institution">Institution Name</Label>
                             <Input
@@ -124,14 +145,29 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
                             />
                         </div>
                         <div className="space-y-2">
+                            <Label htmlFor="accountType">Account Type</Label>
+                            <Select value={accountType} onValueChange={setAccountType}>
+                                <SelectTrigger id="accountType" className="h-9">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent position="popper" sideOffset={5}>
+                                    {ACCOUNT_TYPE_OPTIONS.map(opt => (
+                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {isRetirementType && (
+                                <p className="text-xs text-primary">All holdings will map to the {ACCOUNT_TYPE_OPTIONS.find(o => o.value === accountType)?.label} field for Zakat.</p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
                             <Label htmlFor="accountName">Account Name (Optional)</Label>
                             <Input
                                 id="accountName"
                                 value={accountName}
                                 onChange={(e) => setAccountName(e.target.value)}
-                                placeholder="e.g. Brokerage Account"
+                                placeholder="e.g. PCRA"
                             />
-                            <p className="text-xs text-muted-foreground">Used to identify this specific account (e.g. "Roth IRA")</p>
                         </div>
                     </div>
 

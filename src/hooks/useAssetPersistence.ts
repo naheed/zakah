@@ -327,7 +327,8 @@ export function useAssetPersistence() {
         lineItems: ExtractionLineItem[],
         stepId?: string,
         accountName?: string,
-        accountId?: string
+        accountId?: string,
+        confirmedAccountType?: string
     ): Promise<PersistResult> => {
         console.log(`[persistExtraction] Called with: Inst="${institutionName}", Name="${accountName}", ID="${accountId}"`);
         if (!user) {
@@ -349,7 +350,7 @@ export function useAssetPersistence() {
             if (account) {
                 dbAccountId = account.id;
             } else {
-                const accountType = stepId ? inferAccountTypeFromStep(stepId) : 'OTHER';
+                const accountType = (confirmedAccountType as AccountType) || (stepId ? inferAccountTypeFromStep(stepId) : 'OTHER');
                 const displayName = accountName || `${institutionName} Account`;
                 const newAccountId = await createAccount(portfolioId, institutionName, accountType, displayName, accountId);
                 if (!newAccountId) {

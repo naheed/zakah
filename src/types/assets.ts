@@ -27,6 +27,7 @@ export type AccountType =
     | 'TRUST'
     | 'METALS'
     | 'BUSINESS'
+    | 'HSA'
     | 'OTHER';
 
 export type ExtractionMethod = 'MANUAL' | 'PDF_PARSE' | 'PLAID_API' | 'COINBASE_API';

@@ -58,6 +58,7 @@ const accountTypeIcons: Record<AccountType, React.ReactNode> = {
     TRUST: <Briefcase className="w-5 h-5" weight="duotone" />,
     METALS: <CoinVertical className="w-5 h-5" weight="duotone" />,
     BUSINESS: <Briefcase className="w-5 h-5" weight="duotone" />,
+    HSA: <ShieldCheck className="w-5 h-5" weight="duotone" />,
     OTHER: <DotsThreeOutline className="w-5 h-5" weight="duotone" />,
 };
 
@@ -74,6 +75,7 @@ const accountTypeBadgeColors: Record<AccountType, string> = {
     TRUST: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
     METALS: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
     BUSINESS: "bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    HSA: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
     OTHER: "bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
 };
 
