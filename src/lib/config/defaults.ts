@@ -52,8 +52,9 @@ export const DEFAULT_CONFIG: ZakatMethodologyConfig = {
         description: 'Modern synthesis by Sheikh Joe Bradford: 30% proxy for passive investments, retirement exempt under 59.5, jewelry zakatable, 12-month debt deduction.',
         ui_label: 'Balanced (Bradford)',
         scholar_url: 'https://joebradford.net',
-        certification: {
-            certified_by: 'Sheikh Joe Bradford',
+        tier: 'official',
+        reference: {
+            authority: 'Sheikh Joe Bradford',
             url: 'https://joebradford.net/zakat-on-assets-a-quick-review/',
         },
     },

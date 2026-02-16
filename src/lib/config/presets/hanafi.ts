@@ -49,6 +49,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
         author: 'ZakatFlow Official',
         description: 'Classical Hanafi: jewelry zakatable, full debt deduction, net accessible retirement, 100% investments.',
         ui_label: 'Hanafi',
+        tier: 'official',
     },
 
     thresholds: {
@@ -102,7 +103,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             passive_investments: {
                 rate: 1.0,
                 treatment: 'market_value',
-                description: '100% of market value is zakatable.',
+                description: '100% of market value is zakatable. Stocks are treated as trade goods regardless of intent (active vs passive).',
                 scholarly_basis: 'Stocks are trade goods valued at market price on assessment date.',
             },
             reits_rate: 1.0,
@@ -137,7 +138,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             cash_receivables_rate: 1.0,
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
-            description: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
+            description: 'Cash, receivables, and inventory are fully zakatable. Fixed assets (machinery, buildings) are exempt.',
         },
 
         debts_owed_to_user: {

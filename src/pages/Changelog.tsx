@@ -31,6 +31,44 @@ interface Release {
 
 const RELEASES: Release[] = [
     {
+        version: "0.29.0",
+        date: "2026-02-15",
+        title: "Visual & UX Polish",
+        added: [
+            "Financial Statement Hero: Realistic report card design",
+            "Phosphor Icons: Complete migration for unified visual language",
+            "Scroll UX: Consistent navigation cues across all devices"
+        ],
+        changed: [
+            "Footer: Simplified scholarly methodology citation",
+            "Privacy Badges: clearer 'Session Encrypted' status"
+        ]
+    },
+    {
+        version: "0.28.0",
+        date: "2026-02-15",
+        title: "Security & Classification Overhaul",
+        added: [
+            "AGPL-3.0 License: Codebase is now fully open source",
+            "Two-Tier Encryption: Choice between Managed (Ease) and Sovereign (Max Privacy) keys",
+            "Plaid Encryption: Bank tokens now encrypted with user-derived keys"
+        ],
+        fixed: [
+            "Upload Classification: Improved AI mapping for uploaded statements",
+            "Bank Sync: Better category detection for Plaid accounts"
+        ]
+    },
+    {
+        version: "0.27.0",
+        date: "2026-02-14",
+        title: "Methodology Engine (ZMCS)",
+        added: [
+            "ZMCS v2.0: Schema-driven calculation engine for 8 methodologies",
+            "New Scholars: AMJA, Imam Tahir Anwar, and Al-Qaradawi support",
+            "Dynamic Nisab: Real-time gold/silver price fetching"
+        ]
+    },
+    {
         version: "0.25.0",
         date: "2026-02-07",
         title: "Asset Class Expansion",

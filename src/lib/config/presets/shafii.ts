@@ -44,6 +44,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
         author: 'ZakatFlow Official',
         description: "Classical Shafi'i: jewelry exempt, NO debt deduction, net accessible retirement, 100% investments.",
         ui_label: "Shafi'i",
+        tier: 'official',
     },
 
     thresholds: {
@@ -96,7 +97,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             passive_investments: {
                 rate: 1.0,
                 treatment: 'market_value',
-                description: '100% of market value is zakatable.',
+                description: '100% of market value is zakatable. Stocks are viewed as trade goods.',
                 scholarly_basis: 'Stocks treated as trade goods at market value.',
             },
             reits_rate: 1.0,

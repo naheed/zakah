@@ -46,6 +46,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
         author: 'ZakatFlow Official',
         description: 'Classical Maliki: jewelry exempt, 12-month debt deduction, commercial debt ring-fenced to business assets, 100% investments.',
         ui_label: 'Maliki',
+        tier: 'official',
     },
 
     thresholds: {
@@ -98,7 +99,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             passive_investments: {
                 rate: 1.0,
                 treatment: 'market_value',
-                description: '100% of market value is zakatable.',
+                description: '100% of market value is zakatable. For modern listed shares, the market value indicates the tradeable price.',
                 scholarly_basis: 'Maliki fiqh distinguishes between Mudir (active trader, valued at market) and Muhtakir (long-term holder, valued at cost). For modern diversified stock portfolios, market value is the practical standard.',
             },
             reits_rate: 1.0,

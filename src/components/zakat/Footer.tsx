@@ -17,6 +17,8 @@
 
 import { Link } from "react-router-dom";
 
+import { footer } from "@/content/marketing";
+
 interface FooterProps {
   className?: string;
 }
@@ -27,7 +29,7 @@ export function Footer({ className = "" }: FooterProps) {
       <div className="max-w-4xl mx-auto">
         {/* Methodology citation + links in one row */}
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground mb-3">
-          <span>ZakatFlow supports multiple scholarly methodologies, including Sheikh Joe Bradford (Default), AMJA & classical opinions</span>
+          <span>{footer.methodologyDisclaimer}</span>
           <span className="text-muted-foreground/50">•</span>
           <Link
             to="/methodology"

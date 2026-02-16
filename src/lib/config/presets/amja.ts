@@ -52,11 +52,12 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
         zmcs_version: '2.0.0',
         author: 'ZakatFlow Official (based on AMJA fatwas)',
         description: 'AMJA collective ijtihād: net-withdrawable retirement, stocks as exploited assets (dividends only), jewelry exempt, currently-due debt deduction only.',
-        ui_label: 'AMJA Compliant',
-        scholar_url: 'https://www.amjaonline.org',
-        certification: {
-            certified_by: 'AMJA Fatwa Committee',
-            url: 'https://www.amjaonline.org/fatwa/en/82475/zakat-on-401k-shares',
+        ui_label: 'AMJA Standard',
+        scholar_url: 'https://www.amjaonline.org/fatwa/en/',
+        tier: 'official',
+        reference: {
+            authority: 'AMJA Resident Fatwa Committee',
+            url: 'https://www.amjaonline.org/fatwa/en/87747/zakat-on-401k',
         },
     },
 

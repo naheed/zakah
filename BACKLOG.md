@@ -145,6 +145,13 @@
 
 ## ✅ Completed Milestones
 
+### Phase 18: Visual & UX Polish ✅
+> **Released: v0.29.0 (Feb 15, 2026)**
+- **Hero Redesign**: "Financial Statement" card with realistic data and zero fluff.
+- **Icon System**: Complete migration to Phosphor Icons.
+- **Scroll UX**: Consistent mobile-visible scroll cues across all landing sections.
+- **Footer**: Simplified copy for 8 scholarly methodologies.
+
 ### Phase 14B: ZMCS v2.0 Foundational Standard ✅
 > **Released: v0.27.0 (Feb 14, 2026)**
 - **ZMCS v2.0**: Exhaustive 60+ parameter schema with documentation strings per field.

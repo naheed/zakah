@@ -16,13 +16,18 @@
  */
 
 import { useState } from "react";
+import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight } from "@phosphor-icons/react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCircle, WarningCircle, Users, GitBranch } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ZAKAT_PRESETS } from "@/lib/config/presets";
+import { ZMCS_TEMPLATE } from "@/content/config-template";
 import { ZMCS_DOCS, ZMCSField } from "@/content/zmcs-docs";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text } from "@/components/ui/typography";
@@ -30,8 +35,9 @@ import { cn } from "@/lib/utils";
 
 const tocItems = [
     { id: "what-is-zmcs", number: 1, label: "What is ZMCS?" },
-    { id: "config-reference", number: 2, label: "Configuration Reference" },
-    { id: "presets", number: 3, label: "Presets & Configuration" },
+    { id: "registry", number: 2, label: "Methodology Registry" },
+    { id: "config-reference", number: 3, label: "Configuration Reference" },
+    { id: "presets", number: 4, label: "Explorer & JSON" },
 ];
 
 // ─── Type badge config ───────────────────────────────────────────────────────
@@ -199,6 +205,12 @@ export function MethodologyZMCS() {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleDownloadTemplate = () => {
+        const jsonString = JSON.stringify(ZMCS_TEMPLATE, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+        saveAs(blob, "zmcs-v2.template.json");
+    };
+
     const headerContent = (
         <div className="space-y-4">
             <Text variant="lead">
@@ -211,17 +223,18 @@ export function MethodologyZMCS() {
                         Contributor Guide
                     </Button>
                 </Link>
-                <Button variant="outline" className="gap-2" disabled>
+
+                <Button variant="outline" className="gap-2" onClick={handleDownloadTemplate}>
                     <Database className="w-4 h-4" />
                     Download Schema (JSON)
                 </Button>
-            </div>
+            </div >
             <div className="bg-muted p-4 rounded-lg text-sm text-muted-foreground">
                 <p className="font-bold text-foreground mb-1">Version Info</p>
                 <p>ZMCS Standard: v1.0</p>
                 <p>Engine Build: 2.1.0</p>
             </div>
-        </div>
+        </div >
     );
 
     return (
@@ -248,12 +261,96 @@ export function MethodologyZMCS() {
                 </p>
                 <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                     <li>Support multiple Madhahib (Schools of Thought) instantly.</li>
-                    <li>Allow scholars to audit specific rule sets without reading code.</li>
-                    <li>Enable organizations to publish their own "Gold Standard" configs.</li>
                 </ul>
             </section>
 
-            {/* Section 2: Schema Explorer */}
+            {/* Section 2: Methodology Registry */}
+            <section id="registry" className="space-y-6 scroll-mt-24">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <ShieldCheck className="w-6 h-6 text-primary" />
+                    Methodology Registry
+                </h2>
+                <p className="text-muted-foreground">
+                    ZakatFlow maintains a curated registry of verified ZMCS configurations. These presets are tested against thousands of edge cases to ensure compliance with their source texts.
+                </p>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Official Calculation Standards</CardTitle>
+                        <CardDescription>
+                            Presets maintained by the ZakatFlow team based on authoritative scholarly sources.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Methodology</TableHead>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead>Author / Source</TableHead>
+                                        <TableHead className="text-right">Version</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {Object.values(ZAKAT_PRESETS)
+                                        .sort((a, b) => (a.meta.tier === 'official' && b.meta.tier !== 'official') ? -1 : 1)
+                                        .map((preset) => (
+                                            <TableRow key={preset.meta.id}>
+                                                <TableCell className="font-medium">
+                                                    <div className="flex flex-col">
+                                                        <span>{preset.meta.name}</span>
+                                                        <span className="text-xs text-muted-foreground sr-only">{preset.meta.description}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {preset.meta.tier === 'official' ? (
+                                                        <Badge variant="default" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 flex w-fit gap-1 items-center pl-1 pr-2">
+                                                            <CheckCircle weight="fill" className="w-3.5 h-3.5" /> Official
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="flex w-fit gap-1 items-center pl-1 pr-2">
+                                                            <Users weight="duotone" className="w-3.5 h-3.5" /> Community
+                                                        </Badge>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-muted-foreground">
+                                                    {preset.meta.author}
+                                                    {preset.meta.reference && (
+                                                        <div className="flex items-center gap-1 mt-0.5 text-xs text-primary">
+                                                            <ShieldCheck weight="fill" className="w-3 h-3" />
+                                                            Scholarly Source
+                                                        </div>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                                                    v{preset.meta.version}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <div className="p-4 bg-muted/30 rounded-lg border border-border flex gap-4 items-start mt-4">
+                    <div className="p-2 bg-primary/10 rounded-full text-primary shrink-0">
+                        <GitBranch size={24} weight="duotone" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-sm">Future Proofing & Contributions</h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            The ZMCS standard is designed to be extensible. New Madhab opinions or modern fatwas (e.g., regarding crypto staking or DeFi yields) can be added as new configuration files without changing the core calculator engine code.
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                            To contribute a preset, please submit a Pull Request to our <a href="#" className="text-primary hover:underline">GitHub repository</a> with the requisite scholarly citations.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section 3: Configuration Reference */}
             <section id="config-reference" className="space-y-6 scroll-mt-24">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                     <Code className="w-6 h-6 text-primary" />
@@ -300,11 +397,11 @@ export function MethodologyZMCS() {
                 </Tabs>
             </section>
 
-            {/* Section 3: Interactive Presets */}
+            {/* Section 4: Preset Explorer */}
             <section id="presets" className="space-y-6 scroll-mt-24">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                     <ShieldCheck className="w-6 h-6 text-primary" />
-                    Presets & Configuration
+                    Preset Explorer
                 </h2>
                 <p className="text-muted-foreground">
                     Select a methodology to view its full JSON configuration. These are the standard configs loaded in the ZakatFlow engine.

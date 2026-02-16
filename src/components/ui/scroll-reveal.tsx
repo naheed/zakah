@@ -69,6 +69,12 @@ export function ScrollReveal({
   const isInView = useInView(ref, { once, margin });
   const [forceVisible, setForceVisible] = useState(false);
 
+  // Accessibility: Check for reduced motion preference
+  // If true, we skip the 'hidden' state and render immediately visible.
+  const prefersReducedMotion = typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
+
   // Fail-open: if IntersectionObserver is unavailable (or never fires in some iframes),
   // ensure content becomes visible so pages don't render as blank.
   useEffect(() => {
@@ -91,20 +97,20 @@ export function ScrollReveal({
     return () => window.clearTimeout(t);
   }, [isInView]);
 
-  const shouldShow = forceVisible || isInView;
+  const shouldShow = forceVisible || isInView || prefersReducedMotion;
 
   return (
     <motion.div
       ref={ref}
-      initial="hidden"
+      initial={prefersReducedMotion ? "visible" : "hidden"}
       animate={shouldShow ? "visible" : "hidden"}
       variants={variants[variant]}
       transition={{
         type: "spring",
         stiffness: 300,
         damping: 30,
-        delay,
-        duration,
+        delay: prefersReducedMotion ? 0 : delay,
+        duration: prefersReducedMotion ? 0 : duration,
       }}
       className={cn(className)}
     >

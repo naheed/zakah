@@ -47,6 +47,7 @@ import { RecentCalculations } from "../RecentCalculations";
 import { UserMenu } from "../UserMenu";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
 import { ProductDemo } from "../landing/ProductDemo";
+import { LandingPage } from "../landing/LandingPage";
 
 
 import { Footer } from "../Footer";
@@ -511,126 +512,6 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
     );
   }
 
-  // First-time user experience - optimized landing page
-  return (
-    <div className="min-h-[90vh] flex flex-col bg-background selection:bg-primary/20">
-      {/* Hero Section */}
-      <section className="flex-1 flex flex-col justify-center px-4 py-12 md:py-20 relative overflow-hidden">
-        {/* Background blobs */}
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="w-full max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
-          {/* Left Side - CTA (Primary focus) */}
-          <motion.div className="order-1 flex flex-col" variants={containerVariants} initial="hidden" animate="visible">
-            {/* Brand Logo - Hero placement */}
-            <motion.div variants={itemVariants} className="mb-8">
-              <Logo size="lg" className="h-16 md:h-20 -ml-1" />
-            </motion.div>
-
-            {/* Main Headline - Display Style */}
-            <motion.h1
-              variants={itemVariants}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight leading-[1.1]"
-            >
-              {c.marketing.hero.headline}<br />
-              <span className="text-primary">{c.marketing.hero.headlineAccent}</span>
-            </motion.h1>
-
-
-
-            {/* Subhead with methodology link */}
-            <motion.p
-              variants={itemVariants}
-              className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
-            >
-              Navigate your complex portfolio—401(k)s, crypto, gold, trusts, and more—across 8 scholarly{' '}
-              <Link to="/methodology" className="text-primary hover:underline">methodologies</Link>
-              {' '}and generate a detailed PDF or CSV report in minutes. Private, secure, and accurate.
-            </motion.p>
-
-            {/* Primary CTA */}
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-6">
-              <Button
-                onClick={onNext}
-                size="lg"
-                data-testid="start-calculating-button"
-                className="gap-2 text-base h-12 px-8 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
-              >
-                {c.common.buttons.startCalculating}
-                <ArrowRight className="w-4 h-4" weight="bold" />
-              </Button>
-            </motion.div>
-
-            {/* Sample Report Links - Updated to include CSV */}
-            <motion.div variants={itemVariants} className="mb-8 flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <a
-                href="/samples/sample-zakat-report.pdf"
-                target="_blank"
-                className="inline-flex items-center gap-2 hover:text-primary transition-colors group"
-              >
-                <div className="p-1 rounded bg-muted group-hover:bg-primary/10 transition-colors">
-                  <FileText className="w-3.5 h-3.5" weight="duotone" />
-                </div>
-                Preview PDF Report
-              </a>
-              <span className="text-border">|</span>
-              <a
-                href="/samples/sample-zakat-report.csv"
-                target="_blank"
-                className="inline-flex items-center gap-2 hover:text-primary transition-colors group"
-              >
-                <div className="p-1 rounded bg-muted group-hover:bg-primary/10 transition-colors">
-                  <Table className="w-3.5 h-3.5" weight="duotone" />
-                </div>
-                Download CSV Sample
-              </a>
-            </motion.div>
-
-            {/* Trust Badge & Metrics */}
-            <motion.div variants={itemVariants} className="space-y-6">
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
-                  <Lock className="w-3.5 h-3.5" weight="duotone" />
-                  {c.common.badges.zeroKnowledge}
-                </div>
-                <span className="hidden sm:inline text-muted-foreground/30">•</span>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
-                  <Trash className="w-3.5 h-3.5" weight="duotone" />
-                  {c.common.badges.sessionOnly}
-                </div>
-              </div>
-
-              {/* Usage Metrics - Moved to Left Side for Visibility */}
-              {!metricsLoading && metrics && (
-                <div className="pt-2 border-t border-dashed border-border/50 max-w-md">
-                  <MetricsDisplay
-                    assets={metrics.allTime.totalAssets}
-                    zakat={metrics.allTime.totalZakat}
-                    className="text-left"
-                  />
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-
-          {/* Right Side - Interactive Demo (Proof) */}
-          <motion.div
-            className="order-2 relative"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            {/* New Product Reality Demo */}
-            <div className="relative z-10 w-full transform md:scale-100 transition-transform duration-700">
-              <ProductDemo />
-            </div>
-            {/* Metrics removed from here */}
-          </motion.div>
-        </div>
-      </section>
-
-      <Footer />
-    </div>
-  );
+  // First-time user experience — scrollable landing page
+  return <LandingPage onNext={onNext} />;
 }

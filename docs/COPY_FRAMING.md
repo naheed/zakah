@@ -49,4 +49,23 @@ When copy mentions saving or privacy in share messages (WhatsApp, Twitter, Faceb
 
 ## Last audit
 
-February 2026 — Aligned Auth, LogoutSuccess, PersistenceChoiceModal, ShareDrawer, Invite page, ReferralWidget, and ShareToolSection with the principles above.
+
+---
+
+## Audience Principles (Methodology & Docs)
+
+### 1. The Giver (Consumer)
+**Goal:** "Understand enough to feel confident."
+*   **Tone:** Reassuring, Educational, Simple.
+*   **Data Depth:** Focus on **Principles & Outcomes** (e.g., "Jewelry is exempt"). Avoid exposing raw parameters unless necessary.
+*   **Key Surface:** `/methodology`
+*   **Do:** Use "Scholarship differs on this..." / "ZakatFlow allows you to follow..."
+*   **Don't:** Overwhelm with Fiqh jargon (Istihsan, 'Illah) without plain-English context.
+
+### 2. The Contributor (Scholar/Dev)
+**Goal:** "Verify mapping of Fiqh to Code."
+*   **Tone:** Precise, Technical, Transparent.
+*   **Data Depth:** Focus on **Parameters & Types** (e.g., `jewelry.zakatable: false`).
+*   **Key Surface:** `/methodology/zmcs`
+*   **Do:** Use exact JSON keys and ZMCS schema definitions.
+*   **Don't:** Use marketing fluff. Be strictly factual about the logic.

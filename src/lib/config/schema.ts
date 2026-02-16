@@ -78,19 +78,23 @@ export const MetaSchema = z.object({
     scholar_url: z.string().url().optional()
         .describe("URL to the scholar's website or institution's official page."),
 
-    /** Optional certification information linking to authoritative sources. */
-    certification: z.object({
-        /** Name of the certifying scholar or body. */
-        certified_by: z.string().optional()
-            .describe("Name of the certifying scholar or body."),
-        /** Date of certification or last review. */
+    /** Optional reference information linking to authoritative sources. */
+    reference: z.object({
+        /** Name of the scholar, body, or text being referenced. */
+        authority: z.string().optional()
+            .describe("Name of the scholar, body, or text being referenced."),
+        /** Date of the ruling or publication. */
         date: z.string().optional()
-            .describe("Date of certification or last scholarly review (ISO 8601)."),
-        /** URL to the fatwa, paper, or official ruling document. */
+            .describe("Date of the ruling or publication (ISO 8601)."),
+        /** URL to the fatwa, paper, or official source document. */
         url: z.string().url().optional()
             .describe("URL to the fatwa, paper, or official source document."),
     }).optional()
-        .describe("Optional certification linking this config to an authoritative scholarly ruling."),
+        .describe("Optional reference information linking to authoritative sources."),
+
+    /** Trust tier for the methodology. */
+    tier: z.enum(['official', 'community']).default('community')
+        .describe("Trust tier: 'official' = built-in ZakatFlow preset. 'community' = user/community contributed."),
 });
 
 

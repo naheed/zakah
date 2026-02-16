@@ -44,6 +44,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
         author: 'ZakatFlow Official',
         description: 'Classical Hanbali: jewelry exempt, full debt deduction, net accessible retirement, 100% investments.',
         ui_label: 'Hanbali',
+        tier: 'official',
     },
 
     thresholds: {

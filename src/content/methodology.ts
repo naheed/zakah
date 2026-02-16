@@ -20,9 +20,9 @@ import { Gavel, Scales, Calendar, Wallet, TrendUp, ShieldCheck, CurrencyBtc, Coi
 
 export const header = {
     title: "Methodology & References",
-    intro: "Zakat rules are derived from the four Sunni schools of jurisprudence (Madhabs) and contemporary research. ZakatFlow empowers you to select the methodology that best aligns with your understanding, backed by clear evidence.",
-    primaryInfluences: "Influenced by the works of Sheikh Joe Bradford and AAOIFI Shariah Standards. Our 'Sheikh Joe Bradford' mode follows his published methodology.",
-    scholarsNote: "Note: AMJA (Assembly of Muslim Jurists of America) has distinct positions on retirement accounts. Their fatwa requires Zakat on the net withdrawable amount annually—differing from Sheikh Bradford's exemption for those under 59½. We plan to add AMJA as a separate option in a future update."
+    intro: "Zakat rules are derived from both classical jurisprudence (Madhabs) and contemporary scholarly research. ZakatFlow empowers you to select the methodology that best aligns with your conviction, backed by clear evidence.",
+    primaryInfluences: "Influenced by classical texts, AAOIFI Shariah Standards, and contemporary scholarship from Dr. Yusuf Al-Qaradawi and Sheikh Joe Bradford.",
+    scholarsNote: ""
 };
 export const principles = {
     id: "principles",
@@ -81,10 +81,10 @@ export const madhahSchools = {
     number: 1.5,
     title: "Schools of Thought (Madhabs)",
     icon: Gavel,
-    intro: "ZakatFlow supports the four major Sunni schools of jurisprudence plus a specialized modern methodology. Your selection determines how specific assets like jewelry, retirement accounts, and debts are treated.",
+    intro: "ZakatFlow supports accepted classical and contemporary methodologies. Your selection determines how specific assets like jewelry, retirement accounts, and debts are treated.",
     overview: {
         title: "Supported Methodologies",
-        text: "You can toggle between these modes at any time to see how they impact your calculation.",
+        text: "You can toggle between these modes above to see how they impact your calculation.",
         note: "The 'Sheikh Joe Bradford' mode is the default, offering a contemporary synthesis of fiqh suited for modern financial assets."
     },
     jewelryRuling: {

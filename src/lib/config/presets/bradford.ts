@@ -26,9 +26,10 @@ export const bradford: ZakatMethodologyConfig = {
         author: 'ZakatFlow Official',
         description: 'Contemporary rulings optimized for modern assets (401k, Crypto) where classical texts are silent. This is the default setting for ZakatFlow.',
         ui_label: 'Sheikh Joe Bradford',
+        tier: 'official',
         scholar_url: 'https://joebradford.net',
-        certification: {
-            certified_by: 'Sheikh Joe Bradford',
+        reference: {
+            authority: 'Sheikh Joe Bradford',
             url: 'https://joebradford.net/zakat-on-assets-a-quick-review/',
         },
     },

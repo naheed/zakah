@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🌟 Feature Highlights (Quick Look)
 | Version | Major Feature | Released |
 |---|---|---|
+| **v0.29.0** | 🎨 **Visual & UX Polish** — "Financial Statement" Hero, Scroll Cues, Phosphor Icons | Feb 15, 2026 |
 | **v0.28.0** | 🔒 **Security & Classification Overhaul** — AGPL, Two-Tier Encryption, Upload & Plaid Fixes | Feb 15, 2026 |
 | **v0.27.2** | 🔧 **ZMCS v2.0.1** — Multi-rate calculation + rental income override | Feb 14, 2026 |
 | **v0.27.1** | 📖 **Docs Consolidation** + **Al-Qaradawi Methodology** (8 total) | Feb 14, 2026 |
@@ -24,6 +25,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **v0.1.0** | 🧠 **AI Extraction** (Asset Intelligence) | Dec 30, 2025 |
 
 ---
+
+## [0.29.0] - 2026-02-15 (Visual & UX Polish)
+
+### Changed
+- **Hero "Financial Statement" Redesign**
+  - Replaced "demo" look with a realistic, data-focused report card
+  - Removed "Certified" visual fluff for a cleaner, professional aesthetic
+  - Clearly displays `Total Assets - Liabilities = Zakatable Wealth`
+- **Icon System Migration**
+  - **Complete Phosphor Icons Migration**: Removed `lucide-react` dependency entirely
+  - Standardized all icons to `@phosphor-icons/react` (Duotone weight default)
+- **Scroll UX Standardization**
+  - Added consistent `ArrowDown` scroll chevrons to `ThreeWaysIn` and `WhatsCovered` sections
+  - Fixed mobile visibility issues for scroll indicators
+- **Footer Refinement**
+  - Condensed footer copy to "8 Scholarly Methodologies: Sheikh Joe Bradford (Default), AMJA & Classical Opinions"
+  - Moved copy strings to centered `marketing.ts` configuration
+- **Privacy Messaging**
+  - Refined "Session Encrypted" vs "Zero-Knowledge" badges
+  - Updated Trust Badges to "Open Source & Auditable"
+
+### Fixed
+- **Mobile Scroll Cues**: Scroll indicators are now visible on all device sizes
+- **Design Consistency**: Unified icon styles across Landing, Dashboard, and Settings
 
 ## [0.28.0] - 2026-02-15 (Security & Classification Overhaul)
 

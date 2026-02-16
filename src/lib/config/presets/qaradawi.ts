@@ -75,10 +75,10 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
         author: 'ZakatFlow Official (based on Fiqh al-Zakah by Dr. Yusuf Al-Qaradawi)',
         description: 'The most comprehensive modern Zakat treatise. Combines classical scholarship with progressive ijtihād: jewelry exempt (paying recommended), 30% proxy for passive investments, 10% on rental income (agricultural analogy), net-accessible retirement, 12-month debt rule, gold Nisab standard.',
         ui_label: 'Al-Qaradawi (Fiqh al-Zakah)',
+        tier: 'official',
         scholar_url: 'https://fiqh.islamonline.net',
-        certification: {
-            certified_by: 'Dr. Yusuf Al-Qaradawi',
-            date: '1973-01-01',
+        reference: {
+            authority: 'Dr. Yusuf Al-Qaradawi',
             url: 'https://islamfuture.wordpress.com/2010/07/05/fiqh-az-zakat-a-comparative-study-volume-i-by-yusuf-al-qaradawi/',
         },
     },
