@@ -15,14 +15,43 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Re-export the auto-generated Supabase client.
-// This module exists so every app import uses a single path
-// (`@/integrations/supabase/runtimeClient`) while the actual
-// client is created by the auto-generated `client.ts`.
-//
-// For open-source contributors without Lovable Cloud:
-// The auto-generated client.ts reads VITE_SUPABASE_URL and
-// VITE_SUPABASE_PUBLISHABLE_KEY from your .env.local file.
-// See .env.example for the required variables.
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./types";
 
-export { supabase } from "./client";
+// Lovable Cloud injects these via Vite env vars at build time.
+// For open-source contributors: create a .env.local with your Supabase credentials.
+// See .env.example for required variables.
+
+const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
+const derivedUrl = projectId ? `https://${projectId}.supabase.co` : undefined;
+
+const SUPABASE_URL =
+  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ??
+  derivedUrl ??
+  "";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  "";
+
+if (!SUPABASE_URL) {
+  console.warn(
+    "Missing Supabase environment variables. " +
+    "Backend features will not work. " +
+    "Create a .env.local with your Supabase credentials (see .env.example)."
+  );
+}
+
+// Only create a real client when we have valid credentials.
+// This prevents the "supabaseUrl is required" crash in open-source / preview environments.
+export const supabase = createClient<Database>(
+  SUPABASE_URL || "https://placeholder.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY || "placeholder-key",
+  {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  }
+);
