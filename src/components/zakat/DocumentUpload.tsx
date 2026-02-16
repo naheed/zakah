@@ -58,6 +58,7 @@ interface ExtractedResult {
   documentDate?: string;
   institutionName?: string;
   accountName?: string;
+  accountType?: string;
   accountId?: string;
   notes?: string;
   error?: string;
@@ -191,7 +192,7 @@ export function DocumentUpload({
     }
   };
 
-  const handleConfirmReview = (confirmed: { institutionName: string; accountName: string; lineItems: ExtractionLineItem[] }) => {
+  const handleConfirmReview = (confirmed: { institutionName: string; accountName: string; accountType: string; lineItems: ExtractionLineItem[] }) => {
     if (!reviewData) return;
 
     const { result, file } = reviewData;
@@ -278,6 +279,7 @@ export function DocumentUpload({
           initialData={{
             institutionName: reviewData.result.institutionName || reviewData.file.name.replace(/\.[^/.]+$/, ''),
             accountName: reviewData.result.accountName || reviewData.file.name.replace(/\.[^/.]+$/, ''),
+            accountType: reviewData.result.accountType || 'OTHER',
             lineItems: reviewData.lineItems,
           }}
           onConfirm={handleConfirmReview}

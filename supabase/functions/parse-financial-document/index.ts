@@ -87,12 +87,21 @@ function mapLineItemToLegacyField(item: ExtractionLineItem): string | null {
   return CATEGORY_TO_FORM_FIELD[cat] ?? null;
 }
 
+// Account type override map: retirement wrappers override per-line mapping
+const ACCOUNT_TYPE_OVERRIDE: Record<string, string> = {
+  'RETIREMENT_401K': 'fourOhOneKVestedBalance',
+  'RETIREMENT_IRA': 'traditionalIRABalance',
+  'ROTH_IRA': 'rothIRAContributions',
+  'HSA': 'hsaBalance',
+};
+
 // Aggregates granular line items into the flat legacy format
-function aggregateLegacyData(lineItems: ExtractionLineItem[]): LegacyExtractedData {
+function aggregateLegacyData(lineItems: ExtractionLineItem[], accountType?: string): LegacyExtractedData {
   const legacyData: LegacyExtractedData = {};
+  const overrideField = accountType ? ACCOUNT_TYPE_OVERRIDE[accountType] : null;
 
   for (const item of lineItems) {
-    const field = mapLineItemToLegacyField(item);
+    const field = overrideField || mapLineItemToLegacyField(item);
     if (field) {
       legacyData[field] = (legacyData[field] || 0) + item.amount;
     }
@@ -246,6 +255,22 @@ ACCOUNT IDENTIFICATION (CRITICAL):
   - Look for "Account #", "Account Number", or patterns like "***5678".
   - Return ONLY the last 4 digits (e.g., "5678").
   - This is VITAL to distinguish multiple accounts at the same bank.
+
+ACCOUNT TYPE DETECTION (CRITICAL):
+Determine the accountType — the type of CONTAINER this statement is from:
+- "401(k)", "401K", "403(b)", "457", "TSP" -> accountType = "RETIREMENT_401K"
+- "Roth IRA" -> accountType = "ROTH_IRA"
+- "Traditional IRA", "SEP IRA", "SIMPLE IRA", "IRA" -> accountType = "RETIREMENT_IRA"
+- "HSA", "Health Savings" -> accountType = "HSA"
+- "Brokerage", "Individual", "Joint", "Taxable" -> accountType = "BROKERAGE"
+- "Checking" -> accountType = "CHECKING"
+- "Savings", "Money Market" -> accountType = "SAVINGS"
+- "Crypto", "Digital Assets" -> accountType = "CRYPTO_WALLET"
+- Otherwise -> accountType = "OTHER"
+
+IMPORTANT: The accountType describes the CONTAINER, not the contents.
+A 401(k) account that holds stocks and mutual funds is still accountType = "RETIREMENT_401K".
+Do NOT let the individual holdings change the accountType.
 `;
 
     const RECEIPT_PROMPT = `You are an expert at parsing donation receipts and tax acknowledgement letters for Zakat tracking.
@@ -297,6 +322,7 @@ RULES:
                 institutionName: { type: "string", description: "Financial institution name" },
                 accountName: { type: "string", description: "Account type/nickname" },
                 accountId: { type: "string", description: "Last 4 digits of account number" },
+                accountType: { type: "string", enum: ["CHECKING", "SAVINGS", "BROKERAGE", "RETIREMENT_401K", "RETIREMENT_IRA", "ROTH_IRA", "HSA", "CRYPTO_WALLET", "OTHER"], description: "The account container type (e.g. RETIREMENT_401K for a 401k holding stocks)" },
                 notes: { type: "string", description: "Any important notes" },
               },
               required: ["lineItems", "summary", "documentDate", "institutionName", "accountName"]
@@ -439,11 +465,13 @@ RULES:
 
     // Default: Asset Statement Logic
     const lineItems: ExtractionLineItem[] = (args as any).lineItems || [];
+    const accountType: string = (args as any).accountType || 'OTHER';
 
-    // Aggregate for backward compatibility with existing UI
-    const extractedData = aggregateLegacyData(lineItems);
+    // Aggregate for backward compatibility with existing UI, using account type override
+    const extractedData = aggregateLegacyData(lineItems, accountType);
 
     console.log("Extracted line items count:", lineItems.length);
+    console.log("Detected accountType:", accountType);
     console.log("Aggregated Legacy Data:", JSON.stringify(extractedData));
 
     // Validate and sanitize documentDate
@@ -469,6 +497,7 @@ RULES:
         institutionName: (args as any).institutionName,
         accountName: (args as any).accountName,
         accountId: (args as any).accountId,
+        accountType,
         notes: (args as any).notes,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

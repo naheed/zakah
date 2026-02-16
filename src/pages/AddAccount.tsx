@@ -224,6 +224,7 @@ export default function AddAccount() {
                                     initialData={{
                                         institutionName: extractionFlow.reviewData.institutionName,
                                         accountName: extractionFlow.reviewData.accountName,
+                                        accountType: extractionFlow.reviewData.accountType,
                                         lineItems: extractionFlow.reviewData.lineItems
                                     }}
                                     onConfirm={extractionFlow.confirmReview}

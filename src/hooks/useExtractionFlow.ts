@@ -43,6 +43,7 @@ export type ExtractionFlowStatus =
 export interface ReviewableData {
     institutionName: string;
     accountName: string;
+    accountType: string;
     documentDate?: string;
     lineItems: ExtractionLineItem[];
     rawResult: DocumentExtractionResult;
@@ -51,6 +52,7 @@ export interface ReviewableData {
 export interface ConfirmedData {
     institutionName: string;
     accountName: string;
+    accountType: string;
     lineItems: ExtractionLineItem[];
 }
 
@@ -96,6 +98,7 @@ export function useExtractionFlow(options: UseExtractionFlowOptions = {}) {
             const reviewable: ReviewableData = {
                 institutionName: result.institutionName || file.name.replace(/\.[^/.]+$/, ''),
                 accountName: result.accountName || file.name.replace(/\.[^/.]+$/, ''),
+                accountType: result.accountType || 'OTHER',
                 documentDate: result.documentDate,
                 lineItems: result.lineItems || [],
                 rawResult: result,
@@ -138,7 +141,9 @@ export function useExtractionFlow(options: UseExtractionFlowOptions = {}) {
                 reviewData?.documentDate,
                 confirmed.lineItems,
                 stepId,
-                confirmed.accountName
+                confirmed.accountName,
+                undefined,
+                confirmed.accountType
             );
 
             if (!result.success) {
