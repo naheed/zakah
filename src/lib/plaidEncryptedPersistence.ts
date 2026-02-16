@@ -6,9 +6,13 @@
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Persists Plaid accounts and holdings encrypted with the user's symmetric key.
+ * Persists Plaid accounts and holdings with user-key encryption.
+ * Sensitive financial data (balances, prices, quantities) is encrypted in
+ * `encrypted_payload`. Non-sensitive metadata (account_id, type, subtype, mask)
+ * stays plaintext for joins/display.
+ *
  * Also bridges Plaid data into the asset_accounts/snapshots/line_items pipeline
- * for use in Zakat calculations.
+ * for Zakat calculations.
  *
  * @see docs/PLAID_USER_KEY_ENCRYPTION.md
  */
@@ -18,7 +22,7 @@ import { AccountType } from '@/types/assets';
 import { plaidSubtypeToAccountType, ACCOUNT_TYPE_ZAKAT_FIELD_OVERRIDE } from '@/lib/accountImportMapper';
 import { mapToZakatCategory } from '@/hooks/useAssetPersistence';
 
-/** Account payload returned by plaid-exchange-token (to be encrypted and stored) */
+/** Account payload returned by plaid-exchange-token */
 export interface PlaidAccountPayload {
     account_id: string;
     name: string;
@@ -32,7 +36,7 @@ export interface PlaidAccountPayload {
     is_active_trader: boolean;
 }
 
-/** Holding payload returned by plaid-exchange-token (to be encrypted and stored) */
+/** Holding payload returned by plaid-exchange-token */
 export interface PlaidHoldingPayload {
     account_id: string;
     security_id: string;
@@ -65,17 +69,13 @@ function plaidSecurityTypeToCategory(securityType: string | null): string {
 }
 
 /**
- * Persist Plaid accounts and holdings to the database with user-key encryption.
- * Also creates asset_accounts, asset_snapshots, and asset_line_items for the
- * Zakat calculation pipeline.
+ * Persist Plaid accounts and holdings to the database.
  *
- * @param plaidItemId - UUID of the row in plaid_items
- * @param accounts - Accounts array from plaid-exchange-token response
- * @param holdings - Holdings array from plaid-exchange-token response
- * @param encrypt - User's symmetric encrypt function (from useEncryptionKeys)
- * @param portfolioId - User's portfolio ID for asset pipeline bridging
- * @param institutionName - Institution name for asset_accounts
- * @returns { success: boolean; error?: string }
+ * Sensitive data (balances, prices, quantities) → encrypted in `encrypted_payload`
+ * Non-sensitive metadata (account_id, type, subtype, mask) → plaintext for joins/display
+ *
+ * Also creates asset_accounts, asset_snapshots, and asset_line_items for
+ * the Zakat calculation pipeline when portfolioId is provided.
  */
 export async function persistPlaidDataWithUserKey(
     plaidItemId: string,
@@ -94,19 +94,32 @@ export async function persistPlaidDataWithUserKey(
 
     try {
         for (const account of accounts) {
-            // Derive AccountType from Plaid's type/subtype
             const accountType = plaidSubtypeToAccountType(account.type, account.subtype);
             accountIdToAccountType[account.account_id] = accountType;
 
-            // Note: encrypt function kept for future encrypted_payload column support
-            // Currently storing plaintext in typed columns per DB schema
+            // Encrypt sensitive financial data (balances, official name)
+            const sensitivePayload = {
+                name: account.name,
+                official_name: account.official_name,
+                balance_current: account.balance_current,
+                balance_available: account.balance_available,
+                balance_iso_currency_code: account.balance_iso_currency_code,
+                is_active_trader: account.is_active_trader,
+            };
+            const encryptedPayload = await encrypt(sensitivePayload);
+            if (!encryptedPayload) {
+                console.error('[plaidEncryptedPersistence] Encrypt returned null for account', account.account_id);
+                return { success: false, error: 'Encryption failed for account data' };
+            }
 
-            // Insert into plaid_accounts with plaintext fields (schema has no encrypted_payload column)
+            // Insert: encrypted_payload has sensitive data; plaintext columns for joins/display
             const { data: row, error } = await supabase
                 .from('plaid_accounts')
                 .insert({
                     plaid_item_id: plaidItemId,
                     account_id: account.account_id,
+                    encrypted_payload: encryptedPayload,
+                    // Plaintext metadata for joins, display, and account-type detection
                     name: account.name,
                     official_name: account.official_name,
                     type: account.type,
@@ -157,8 +170,7 @@ export async function persistPlaidDataWithUserKey(
 
                     // Create snapshot for this account
                     const accountHoldings = holdings.filter(h => h.account_id === account.account_id);
-                    const isRetirementOverride = accountType in ACCOUNT_TYPE_ZAKAT_FIELD_OVERRIDE &&
-                        ['RETIREMENT_401K', 'RETIREMENT_IRA', 'ROTH_IRA', 'HSA'].includes(accountType);
+                    const isRetirementOverride = ['RETIREMENT_401K', 'RETIREMENT_IRA', 'ROTH_IRA', 'HSA'].includes(accountType);
 
                     // For depository accounts with no holdings, use balance as the single line item
                     const lineItems = accountHoldings.length > 0
@@ -223,7 +235,7 @@ export async function persistPlaidDataWithUserKey(
             }
         }
 
-        // Persist holdings to plaid_holdings
+        // Persist holdings to plaid_holdings with encrypted payload
         for (const holding of holdings) {
             const plaidAccountId = accountIdToPlaidAccountId[holding.account_id];
             if (!plaidAccountId) {
@@ -231,9 +243,29 @@ export async function persistPlaidDataWithUserKey(
                 continue;
             }
 
+            // Encrypt sensitive holding data (prices, quantities, values)
+            const sensitiveHoldingPayload = {
+                name: holding.name,
+                ticker_symbol: holding.ticker_symbol,
+                security_type: holding.security_type,
+                quantity: holding.quantity,
+                cost_basis: holding.cost_basis,
+                institution_price: holding.institution_price,
+                institution_value: holding.institution_value,
+                iso_currency_code: holding.iso_currency_code,
+                institution_price_as_of: holding.institution_price_as_of,
+            };
+            const encryptedHoldingPayload = await encrypt(sensitiveHoldingPayload);
+            if (!encryptedHoldingPayload) {
+                console.warn('[plaidEncryptedPersistence] Encrypt returned null for holding', holding.security_id);
+                continue;
+            }
+
             const { error: holdError } = await supabase.from('plaid_holdings').insert({
                 plaid_account_id: plaidAccountId,
                 security_id: holding.security_id,
+                encrypted_payload: encryptedHoldingPayload,
+                // Plaintext columns for display/queries
                 name: holding.name,
                 ticker_symbol: holding.ticker_symbol,
                 security_type: holding.security_type,
