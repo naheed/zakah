@@ -23,7 +23,68 @@
  */
 
 import { ZakatFormData } from './zakatCalculations';
-import { AssetLineItem } from '@/types/assets';
+import { AssetLineItem, AccountType } from '@/types/assets';
+
+/**
+ * Maps Plaid account subtype strings to our internal AccountType enum.
+ * Plaid subtypes: https://plaid.com/docs/api/accounts/#account-type-schema
+ */
+export function plaidSubtypeToAccountType(
+    plaidType: string | null,
+    plaidSubtype: string | null
+): AccountType {
+    const subtype = (plaidSubtype || '').toLowerCase().trim();
+    const type = (plaidType || '').toLowerCase().trim();
+
+    // Retirement containers
+    if (['401k', 'roth 401k', '403b', '457b', 'pension', 'profit sharing plan',
+         'keogh', 'defined benefit', 'defined contribution'].includes(subtype)) {
+        return 'RETIREMENT_401K';
+    }
+    if (['ira', 'sep ira', 'simple ira', 'rollover ira'].includes(subtype)) {
+        return 'RETIREMENT_IRA';
+    }
+    if (['roth', 'roth ira'].includes(subtype)) {
+        return 'ROTH_IRA';
+    }
+    if (['hsa'].includes(subtype)) {
+        return 'HSA';
+    }
+
+    // Depository
+    if (['checking'].includes(subtype)) return 'CHECKING';
+    if (['savings', 'money market', 'cd', 'cash management'].includes(subtype)) return 'SAVINGS';
+
+    // Investment
+    if (['brokerage', 'stock plan', 'non-taxable brokerage account'].includes(subtype) ||
+        (type === 'investment' && !subtype)) {
+        return 'BROKERAGE';
+    }
+
+    // Crypto
+    if (['crypto exchange'].includes(subtype)) return 'CRYPTO_WALLET';
+
+    // Fallback by Plaid top-level type
+    if (type === 'depository') return 'CHECKING';
+    if (type === 'investment') return 'BROKERAGE';
+
+    return 'OTHER';
+}
+
+/**
+ * Account-type override map for Zakat field routing.
+ * When an account container is a retirement/HSA type, ALL holdings inside
+ * roll up to a single wizard field regardless of individual asset class.
+ * Shared between Plaid and PDF extraction flows.
+ */
+export const ACCOUNT_TYPE_ZAKAT_FIELD_OVERRIDE: Partial<Record<AccountType, keyof ZakatFormData>> = {
+    'RETIREMENT_401K': 'fourOhOneKVestedBalance',
+    'RETIREMENT_IRA': 'traditionalIRABalance',
+    'ROTH_IRA': 'rothIRAContributions',
+    'HSA': 'hsaBalance',
+    'CHECKING': 'checkingAccounts',
+    'SAVINGS': 'savingsAccounts',
+};
 
 /**
  * Question context types used in the wizard
