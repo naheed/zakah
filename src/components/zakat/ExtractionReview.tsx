@@ -137,7 +137,7 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
 
                     {/* Line Items Table */}
                     <div className="rounded-md border bg-background">
-                        <div className="grid grid-cols-[3fr,2fr,2fr,auto] gap-4 p-3 font-medium text-sm text-muted-foreground bg-muted/50 border-b">
+                        <div className="grid grid-cols-[2fr,2.5fr,1.5fr,auto] gap-3 p-3 font-medium text-sm text-muted-foreground bg-muted/50 border-b">
                             <div>Description</div>
                             <div className="flex items-center gap-1">
                                 Category
@@ -163,8 +163,8 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
                                     return (
                                         <div
                                             key={index}
-                                            className={cn(
-                                                "grid grid-cols-[3fr,2fr,2fr,auto] gap-4 p-3 items-center hover:bg-muted/20 transition-colors",
+                                        className={cn(
+                                            "grid grid-cols-[2fr,2.5fr,1.5fr,auto] gap-3 p-3 items-center hover:bg-muted/20 transition-colors",
                                                 isLowConfidence && "bg-yellow-50/50 dark:bg-yellow-900/10"
                                             )}
                                         >
@@ -195,7 +195,7 @@ export function ExtractionReview({ initialData, onConfirm, onCancel, isSaving = 
                                                 <SelectTrigger className={cn("h-8 text-xs font-medium border-0", getCategoryColor(item.inferredCategory))}>
                                                     <SelectValue>{getCategoryLabel(item.inferredCategory)}</SelectValue>
                                                 </SelectTrigger>
-                                                <SelectContent>
+                                                <SelectContent position="popper" sideOffset={5} className="z-50 max-h-[300px]">
                                                     {Object.entries(groupedCategories).map(([groupLabel, categories]) => (
                                                         <SelectGroup key={groupLabel}>
                                                             <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">

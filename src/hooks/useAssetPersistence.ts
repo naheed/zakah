@@ -28,42 +28,60 @@ import {
 } from '@/types/assets';
 import { ExtractionLineItem } from '@/hooks/useDocumentParsingV2';
 
-// Map AI categories to Zakat categories
+/**
+ * Maps extraction category IDs to Zakat calculation categories.
+ * Uses exact ID matching (no substring matching).
+ */
 export function mapToZakatCategory(inferredCategory: string): ZakatCategory {
     const cat = inferredCategory.toUpperCase();
 
-    // Cash = 100% Liquid
-    if (cat.includes('CASH') || cat.includes('CHECKING') || cat.includes('SAVINGS')) {
-        return 'LIQUID';
-    }
+    const CATEGORY_TO_ZAKAT: Record<string, ZakatCategory> = {
+        // Cash = 100% Liquid
+        'CASH_CHECKING': 'LIQUID',
+        'CASH_SAVINGS': 'LIQUID',
+        'CASH_ON_HAND': 'LIQUID',
+        'CASH_DIGITAL_WALLET': 'LIQUID',
 
-    // Crypto = 100% Zakatable
-    if (cat.includes('CRYPTO')) {
-        return 'PROXY_100';
-    }
+        // Investments
+        'INVESTMENT_STOCK': 'PROXY_30',
+        'INVESTMENT_MUTUAL_FUND': 'PROXY_30',
+        'INVESTMENT_BOND': 'LIQUID',
+        'INVESTMENT_ACTIVE': 'PROXY_100',
+        'INVESTMENT_REIT': 'PROXY_30',
+        'INCOME_DIVIDEND': 'LIQUID',
 
-    // Stocks/ETFs = 30% Proxy (passive)
-    if (cat.includes('EQUITY') || cat.includes('STOCK') || cat.includes('ETF') || cat.includes('MUTUAL')) {
-        return 'PROXY_30';
-    }
+        // Retirement
+        'RETIREMENT_401K': 'PROXY_30',
+        'RETIREMENT_IRA': 'PROXY_30',
+        'RETIREMENT_ROTH': 'PROXY_30',
+        'RETIREMENT_HSA': 'EXEMPT',
 
-    // Bonds = Liquid
-    if (cat.includes('FIXED_INCOME') || cat.includes('BOND')) {
-        return 'LIQUID';
-    }
+        // Crypto
+        'CRYPTO': 'PROXY_100',
+        'CRYPTO_STAKED': 'PROXY_100',
 
-    // Retirement accounts - complex, default to PROXY_30
-    if (cat.includes('RETIREMENT') || cat.includes('401K') || cat.includes('IRA')) {
-        return 'PROXY_30';
-    }
+        // Commodities
+        'COMMODITY_GOLD': 'LIQUID',
+        'COMMODITY_SILVER': 'LIQUID',
 
-    // Expenses/Liabilities - not directly zakatable assets
-    if (cat.includes('EXPENSE') || cat.includes('LIABILITY') || cat.includes('DEBT')) {
-        return 'EXEMPT';
-    }
+        // Liabilities
+        'LIABILITY_CREDIT_CARD': 'EXEMPT',
+        'LIABILITY_LOAN': 'EXEMPT',
 
-    // Default to liquid for safety
-    return 'LIQUID';
+        // Other
+        'OTHER': 'LIQUID',
+
+        // Legacy category IDs (backward compat with old data)
+        'INVESTMENT_EQUITY': 'PROXY_30',
+        'INVESTMENT_FIXED_INCOME': 'LIQUID',
+        'INCOME_INTEREST': 'LIQUID',
+        'EXPENSE_UTILITY': 'EXEMPT',
+        'EXPENSE_GROCERY': 'EXEMPT',
+        'EXPENSE_TRANSPORT': 'EXEMPT',
+        'EXPENSE_INSURANCE': 'EXEMPT',
+    };
+
+    return CATEGORY_TO_ZAKAT[cat] ?? 'LIQUID';
 }
 
 // Infer account type from wizard step
@@ -107,7 +125,6 @@ export function useAssetPersistence() {
     const getOrCreatePortfolio = useCallback(async (): Promise<string | null> => {
         if (!user) return null;
 
-        // Check for existing portfolio
         const { data: existing, error: fetchError } = await supabase
             .from('portfolios')
             .select('id')
@@ -116,7 +133,6 @@ export function useAssetPersistence() {
 
         if (existing) return existing.id;
 
-        // Create new portfolio
         const { data: created, error: createError } = await supabase
             .from('portfolios')
             .insert({ user_id: user.id, currency: 'USD' })
@@ -151,10 +167,8 @@ export function useAssetPersistence() {
             return null;
         }
 
-        // Filter by Institution first
         const candidates = data.filter(account => {
             const existingInstitution = account.institution_name.toLowerCase().trim();
-            // Fuzzy match institution
             return existingInstitution.includes(normalizedInstitution) ||
                 normalizedInstitution.includes(existingInstitution) ||
                 existingInstitution === normalizedInstitution;
@@ -199,20 +213,9 @@ export function useAssetPersistence() {
             return null;
         }
 
-        // CRITICAL: Disable loose fallback. 
-        // If we have no Mask and no Name, do NOT assumes it matches the single existing account.
-        // This causes merging of different accounts (Start -> Schwab 1, Upload -> Schwab 2 (merges)).
-        // Safe behavior: Create new account.
         if (candidates.length === 1) {
             const candidate = candidates[0];
-            // Only use fallback if we have *something* to match on, or if we want to be very aggressive.
-            // Given the bug report, we must be conservative.
-            // If accountName is present, we checked it above. If we are here, Name didn't match or wasn't provided.
-
-            // DEBUG LOG keeping trace of what would have happened
             console.log(`[findAccount] Single candidate found (${candidate.name}) but no Name/ID match provided. SKIPPING fallback to prevent merge.`);
-
-            // return candidate; // DISABLED
         }
 
         console.log(`[findAccount] NO MATCH: Multiple candidates or no specific match criteria. Creating NEW.`);
@@ -276,10 +279,8 @@ export function useAssetPersistence() {
     ): Promise<string | null> => {
         console.log(`[createSnapshot] Creating snapshot. Account="${accountId}", Items=${lineItems.length}`);
 
-        // Calculate total value from line items
         const totalValue = lineItems.reduce((sum, item) => sum + item.amount, 0);
 
-        // Create snapshot
         const { data: snapshot, error: snapshotError } = await supabase
             .from('asset_snapshots')
             .insert({
@@ -299,7 +300,6 @@ export function useAssetPersistence() {
 
         console.log(`[createSnapshot] Snapshot created: ${snapshot.id}. Inserting ${lineItems.length} line items.`);
 
-        // Create line items
         const lineItemsToInsert = lineItems.map(item => ({
             snapshot_id: snapshot.id,
             description: item.description,
@@ -315,7 +315,6 @@ export function useAssetPersistence() {
 
         if (lineItemsError) {
             console.error('Error creating line items:', lineItemsError);
-            // Still return snapshot ID - line items can be retried
         }
 
         return snapshot.id;
@@ -327,26 +326,23 @@ export function useAssetPersistence() {
         statementDate: string | undefined,
         lineItems: ExtractionLineItem[],
         stepId?: string,
-        accountName?: string,  // Account name
-        accountId?: string     // Account ID / Mask
+        accountName?: string,
+        accountId?: string
     ): Promise<PersistResult> => {
         console.log(`[persistExtraction] Called with: Inst="${institutionName}", Name="${accountName}", ID="${accountId}"`);
         if (!user) {
             return { success: false, error: 'User not authenticated' };
         }
-        // ...
 
         setLoading(true);
         setError(null);
 
         try {
-            // 1. Get or create portfolio
             const portfolioId = await getOrCreatePortfolio();
             if (!portfolioId) {
                 throw new Error('Failed to get/create portfolio');
             }
 
-            // 2. Find or create account
             let account = await findAccount(portfolioId, institutionName, accountName, accountId);
             let dbAccountId: string;
 
@@ -362,7 +358,6 @@ export function useAssetPersistence() {
                 dbAccountId = newAccountId;
             }
 
-            // 3. Check for duplicate snapshot
             const date = statementDate || new Date().toISOString().split('T')[0];
             const isDuplicate = await isDuplicateSnapshot(dbAccountId, date);
 
@@ -375,7 +370,6 @@ export function useAssetPersistence() {
                 };
             }
 
-            // 4. Create snapshot with line items
             const snapshotId = await createSnapshot(dbAccountId, date, lineItems);
             if (!snapshotId) {
                 throw new Error('Failed to create snapshot');
@@ -404,7 +398,6 @@ export function useAssetPersistence() {
         const portfolioId = await getOrCreatePortfolio();
         if (!portfolioId) return [];
 
-        // Fetch accounts with latest snapshot's total_value as balance
         const { data: accounts, error } = await supabase
             .from('asset_accounts')
             .select('*')
@@ -416,7 +409,6 @@ export function useAssetPersistence() {
             return [];
         }
 
-        // For each account, fetch the latest snapshot to get balance
         const accountsWithBalances = await Promise.all(
             (accounts || []).map(async (account) => {
                 const { data: latestSnapshot } = await supabase
@@ -452,7 +444,6 @@ export function useAssetPersistence() {
             return [];
         }
 
-        // Cast database strings to typed enums
         return (data || []).map(snapshot => ({
             ...snapshot,
             method: snapshot.method as AssetSnapshot['method'],
@@ -472,63 +463,33 @@ export function useAssetPersistence() {
             return [];
         }
 
-        // Cast database strings to typed enums
         return (data || []).map(item => ({
             ...item,
             zakat_category: item.zakat_category as ZakatCategory,
         })) as AssetLineItem[];
     }, []);
 
-    // Delete an account (cascades to snapshots and line_items via RLS)
+    // Delete an account
     const deleteAccount = useCallback(async (accountId: string): Promise<boolean> => {
-        if (!user) return false;
+        const { error } = await supabase
+            .from('asset_accounts')
+            .delete()
+            .eq('id', accountId);
 
-        try {
-            // First delete all line items for all snapshots of this account
-            const { data: snapshots } = await supabase
-                .from('asset_snapshots')
-                .select('id')
-                .eq('account_id', accountId);
-
-            if (snapshots && snapshots.length > 0) {
-                const snapshotIds = snapshots.map(s => s.id);
-                await supabase
-                    .from('asset_line_items')
-                    .delete()
-                    .in('snapshot_id', snapshotIds);
-            }
-
-            // Delete all snapshots for this account
-            await supabase
-                .from('asset_snapshots')
-                .delete()
-                .eq('account_id', accountId);
-
-            // Finally delete the account
-            const { error } = await supabase
-                .from('asset_accounts')
-                .delete()
-                .eq('id', accountId);
-
-            if (error) {
-                console.error('Error deleting account:', error);
-                return false;
-            }
-
-            return true;
-        } catch (err) {
-            console.error('Error deleting account:', err);
+        if (error) {
+            console.error('Error deleting account:', error);
             return false;
         }
-    }, [user]);
+        return true;
+    }, []);
 
     return {
+        loading,
+        error,
         persistExtraction,
         fetchAccounts,
         fetchSnapshots,
         fetchLineItems,
         deleteAccount,
-        loading,
-        error,
     };
 }

@@ -3,18 +3,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getCorsHeaders } from "../_shared/domainConfig.ts";
 
 // --- Rate Limiting ---
-// Simple in-memory rate limiter (per-instance, resets on cold start)
-// For production scale, consider Upstash Redis
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_MAX = 10; // requests per window
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 function checkRateLimit(identifier: string): { allowed: boolean; remaining: number; resetIn: number } {
   const now = Date.now();
   const record = rateLimitMap.get(identifier);
   
   if (!record || now > record.resetTime) {
-    // New window
     rateLimitMap.set(identifier, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
     return { allowed: true, remaining: RATE_LIMIT_MAX - 1, resetIn: RATE_LIMIT_WINDOW_MS };
   }
@@ -27,7 +24,6 @@ function checkRateLimit(identifier: string): { allowed: boolean; remaining: numb
   return { allowed: true, remaining: RATE_LIMIT_MAX - record.count, resetIn: record.resetTime - now };
 }
 
-// Clean up old entries periodically (prevent memory leak)
 setInterval(() => {
   const now = Date.now();
   for (const [key, value] of rateLimitMap.entries()) {
@@ -35,7 +31,7 @@ setInterval(() => {
       rateLimitMap.delete(key);
     }
   }
-}, 5 * 60 * 1000); // Clean every 5 minutes
+}, 5 * 60 * 1000);
 
 // --- Types & Interfaces ---
 
@@ -50,61 +46,45 @@ interface LegacyExtractedData {
   [key: string]: number;
 }
 
-// --- Helper Functions ---
+// --- Unified Category → ZakatFormData Field Mapping ---
+// This is the single source of truth for how extraction categories map to wizard fields.
+// Category IDs must match those in src/lib/assetCategories.ts
+const CATEGORY_TO_FORM_FIELD: Record<string, string | null> = {
+  'CASH_CHECKING': 'checkingAccounts',
+  'CASH_SAVINGS': 'savingsAccounts',
+  'CASH_ON_HAND': 'cashOnHand',
+  'CASH_DIGITAL_WALLET': 'digitalWallets',
+  'INVESTMENT_STOCK': 'passiveInvestmentsValue',
+  'INVESTMENT_MUTUAL_FUND': 'passiveInvestmentsValue',
+  'INVESTMENT_BOND': 'passiveInvestmentsValue',
+  'INVESTMENT_ACTIVE': 'activeInvestments',
+  'INVESTMENT_REIT': 'reitsValue',
+  'INCOME_DIVIDEND': 'dividends',
+  'RETIREMENT_401K': 'fourOhOneKVestedBalance',
+  'RETIREMENT_IRA': 'traditionalIRABalance',
+  'RETIREMENT_ROTH': 'rothIRAContributions',
+  'RETIREMENT_HSA': 'hsaBalance',
+  'CRYPTO': 'cryptoCurrency',
+  'CRYPTO_STAKED': 'stakedAssets',
+  'COMMODITY_GOLD': 'goldInvestmentValue',
+  'COMMODITY_SILVER': 'silverInvestmentValue',
+  'LIABILITY_CREDIT_CARD': 'creditCardBalance',
+  'LIABILITY_LOAN': 'studentLoansDue',
+  'OTHER': 'cashOnHand',
 
-// Maps AI inferred category to Legacy Zakat Field
+  // Legacy category IDs (backward compat with old extractions in DB)
+  'INVESTMENT_EQUITY': 'passiveInvestmentsValue',
+  'INVESTMENT_FIXED_INCOME': 'passiveInvestmentsValue',
+  'INCOME_INTEREST': null,
+  'EXPENSE_UTILITY': null,
+  'EXPENSE_GROCERY': null,
+  'EXPENSE_TRANSPORT': null,
+  'EXPENSE_INSURANCE': null,
+};
+
 function mapLineItemToLegacyField(item: ExtractionLineItem): string | null {
   const cat = item.inferredCategory.toUpperCase();
-  const desc = item.description.toLowerCase();
-
-  // 1. CASH / LIQUID - Prioritize category over description
-  if (cat.includes("CHECKING")) return "checkingAccounts";
-  if (cat.includes("CASH") || cat.includes("SAVINGS") || cat.includes("MONEY_MARKET")) {
-    if (cat.includes("SAVINGS")) return "savingsAccounts";
-    // Default cash to checking if not explicitly savings
-    if (desc.includes("check")) return "checkingAccounts";
-    return "savingsAccounts";
-  }
-
-  // 2. RETIREMENT
-  if (cat.includes("RETIREMENT") || cat.includes("401K") || cat.includes("IRA")) {
-    if (desc.includes("roth")) return "rothIRAEarnings";
-    if (desc.includes("401")) return "fourOhOneKVestedBalance";
-    return "traditionalIRABalance";
-  }
-
-  // 3. INVESTMENTS
-  if (cat.includes("EQUITY") || cat.includes("STOCK") || cat.includes("ETF") || cat.includes("MUTUAL")) {
-    return "passiveInvestmentsValue";
-  }
-  if (cat.includes("FIXED_INCOME") || cat.includes("BOND")) {
-    return "passiveInvestmentsValue";
-  }
-  if (cat.includes("CRYPTO")) {
-    return "cryptoCurrency";
-  }
-  if (cat.includes("COMMODITY") || cat.includes("GOLD") || cat.includes("SILVER")) {
-    return "goldValue";
-  }
-
-  // 4. LIABILITIES / EXPENSES
-  if (cat.includes("EXPENSE") || cat.includes("BILL") || cat.includes("UTILITY")) {
-    if (desc.includes("grocery") || desc.includes("food")) return "groceriesExpenses";
-    if (desc.includes("transport") || desc.includes("gas") || desc.includes("uber")) return "transportExpenses";
-    if (desc.includes("insurance")) return "insuranceExpenses";
-    return "utilitiesExpenses";
-  }
-  if (cat.includes("DEBT") || cat.includes("LOAN") || cat.includes("CREDIT")) {
-    if (desc.includes("student")) return "studentLoansDue";
-    if (desc.includes("mortgage")) return "monthlyMortgage";
-    return "creditCardBalance";
-  }
-
-  // 5. INCOME
-  if (cat.includes("DIVIDEND")) return "dividends";
-  if (cat.includes("INTEREST")) return "interestEarned";
-
-  return null;
+  return CATEGORY_TO_FORM_FIELD[cat] ?? null;
 }
 
 // Aggregates granular line items into the flat legacy format
@@ -116,14 +96,6 @@ function aggregateLegacyData(lineItems: ExtractionLineItem[]): LegacyExtractedDa
     if (field) {
       legacyData[field] = (legacyData[field] || 0) + item.amount;
     }
-  }
-
-  // Derived fields
-  if (legacyData["utilitiesExpenses"] || legacyData["groceriesExpenses"] || legacyData["transportExpenses"]) {
-    legacyData["monthlyLivingExpenses"] =
-      (legacyData["utilitiesExpenses"] || 0) +
-      (legacyData["groceriesExpenses"] || 0) +
-      (legacyData["transportExpenses"] || 0);
   }
 
   return legacyData;
@@ -138,7 +110,6 @@ serve(async (req: Request) => {
   }
 
   // --- Rate Limiting Check ---
-  // Use IP address or forwarded IP as identifier
   const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
     || req.headers.get('cf-connecting-ip') 
     || 'anonymous';
@@ -190,19 +161,17 @@ serve(async (req: Request) => {
       );
     }
 
-
     // --- SECURITY: File Type Validation ---
     function validateFileType(base64: string, expectedMime: string): boolean {
-      // Magic number checks (Base64 prefixes)
       const signatures: Record<string, string[]> = {
-        'application/pdf': ['JVBERi'], // %PDF
-        'image/jpeg': ['/9j/'], // FF D8 FF
-        'image/png': ['iVBORw0KGgo'], // 89 50 4E 47
-        'image/webp': ['UklGR'] // RIFF
+        'application/pdf': ['JVBERi'],
+        'image/jpeg': ['/9j/'],
+        'image/png': ['iVBORw0KGgo'],
+        'image/webp': ['UklGR']
       };
 
       const validSignatures = signatures[expectedMime];
-      if (!validSignatures) return false; // MIME type not allowed
+      if (!validSignatures) return false;
 
       return validSignatures.some(sig => base64.startsWith(sig));
     }
@@ -223,44 +192,52 @@ serve(async (req: Request) => {
     const STATEMENT_PROMPT = `You are an expert financial auditor for Zakat purification.
 
 OBJECTIVE:
-Extract every financial line item from the document with extreme precision. Do not aggregate values yourself. List them individually so they can be classified correctly.
+Extract every financial line item (holdings, balances, positions) from the document with extreme precision. Do not aggregate values yourself. List them individually so they can be classified correctly.
 
-OUTPUT CATEGORIES (use these for inferredCategory):
+IMPORTANT: Only extract ASSET HOLDINGS and BALANCES. Do NOT extract expenses, transactions, or payment activity. Focus on what the person OWNS, not what they spent.
+
+OUTPUT CATEGORIES (use EXACTLY these IDs for inferredCategory):
 - CASH_CHECKING: Checking account balances
-- CASH_SAVINGS: Savings, Money Market, CD balances
-- INVESTMENT_EQUITY: Stocks, ETFs, Mutual Funds
-- INVESTMENT_FIXED_INCOME: Bonds, Sukuk, Fixed Income funds
-- RETIREMENT_401K: 401k balances
-- RETIREMENT_IRA: Traditional or Sep IRA
-- RETIREMENT_ROTH: Roth IRA
-- CRYPTO: Cryptocurrency holdings
-- COMMODITY_GOLD: Gold holdings
-- COMMODITY_SILVER: Silver holdings
-- EXPENSE_UTILITY: Electricity, water, internet, phone
-- EXPENSE_GROCERY: Food and household supplies
-- EXPENSE_TRANSPORT: Gas, public transit, vehicle maintenance
-- EXPENSE_INSURANCE: Health, auto, home premiums
-- LIABILITY_CREDIT_CARD: Credit card debt
-- LIABILITY_LOAN: Installment loans, mortgages
-- INCOME_DIVIDEND: Dividend payments
-- INCOME_INTEREST: Interest/Riba payments (for purification)
-- OTHER: Anything that doesn't fit
+- CASH_SAVINGS: Savings accounts, Money Market accounts, CDs
+- CASH_ON_HAND: Physical cash
+- CASH_DIGITAL_WALLET: PayPal, Venmo, Apple Cash balances
+- INVESTMENT_STOCK: Individual stocks, ETFs (e.g. AAPL, VTI, SPY)
+- INVESTMENT_MUTUAL_FUND: Mutual funds (e.g. VFIAX, FXAIX)
+- INVESTMENT_BOND: Bonds, fixed income, sukuk
+- INVESTMENT_ACTIVE: Day trading positions, options contracts
+- INVESTMENT_REIT: Real Estate Investment Trusts
+- INCOME_DIVIDEND: Dividend payments or accumulated dividends
+- RETIREMENT_401K: 401(k), 403(b), 457 plan balances
+- RETIREMENT_IRA: Traditional IRA, SEP IRA
+- RETIREMENT_ROTH: Roth IRA balances
+- RETIREMENT_HSA: Health Savings Account balances
+- CRYPTO: Bitcoin, Ethereum, cryptocurrency holdings
+- CRYPTO_STAKED: Staked cryptocurrency or DeFi positions
+- COMMODITY_GOLD: Gold holdings (physical or ETFs like GLD)
+- COMMODITY_SILVER: Silver holdings (physical or ETFs like SLV)
+- LIABILITY_CREDIT_CARD: Credit card debt/balance
+- LIABILITY_LOAN: Loans, mortgages, student debt
+- OTHER: Anything that doesn't fit above categories
+
+DISTINGUISHING RULES:
+- Individual stocks (AAPL, MSFT, GOOG) and ETFs (VTI, SPY, QQQ) → INVESTMENT_STOCK
+- Mutual funds with 5-letter tickers ending in X (VFIAX, FXAIX) → INVESTMENT_MUTUAL_FUND
+- "Cash & Cash Equivalents" or "Sweep" in a brokerage account → CASH_SAVINGS
+- Day trading or options → INVESTMENT_ACTIVE
+- If a brokerage holds BOTH stocks and a cash sweep, create SEPARATE line items for each
 
 CRITICAL EXTRACTION RULES:
 1. Extract exact amounts as numbers (no currency symbols).
-2. For "Cash & Cash Equivalents" in a brokerage, use CASH_SAVINGS.
-3. Extract the 'description' exactly as it appears on the statement.
-4. Provide a 'confidence' score (0.0 to 1.0) for your categorization.
-5. For each distinct holding or balance, create a separate line item.
+2. Extract the 'description' exactly as it appears on the statement.
+3. Provide a 'confidence' score (0.0 to 1.0) for your categorization.
+4. For each distinct holding or balance, create a separate line item.
 
 DATE EXTRACTION (CRITICAL):
 - Look for "Statement Date", "Statement Period", "As of", or similar.
 - The date MUST be a real date from the document, NOT made up.
 - **CONVERSION REQUIRED:** You MUST convert the found date to **YYYY-MM-DD** format.
-  - Source: "October 31, 2025" -> Output: "2025-10-31"
-  - Source: "10/31/25" -> Output: "2025-10-31"
 - Financial statements are historical - dates should be in the PAST.
-- If you cannot find a clear date, use today's date or leave empty.
+- If you cannot find a clear date, leave empty.
 
 ACCOUNT IDENTIFICATION (CRITICAL):
 - Extract the 'institutionName' (e.g., "Charles Schwab", "Chase").
@@ -292,7 +269,6 @@ RULES:
 
     // --- TOOL DEFINITIONS ---
 
-    // 1. Tool for Financial Statements
     const TOOLS_STATEMENT = [
       {
         functionDeclarations: [
@@ -310,7 +286,7 @@ RULES:
                     properties: {
                       description: { type: "string", description: "Description as shown on statement" },
                       amount: { type: "number", description: "Numeric value" },
-                      inferredCategory: { type: "string", description: "One of the OUTPUT CATEGORIES" },
+                      inferredCategory: { type: "string", description: "One of the OUTPUT CATEGORIES (exact ID)" },
                       confidence: { type: "number", description: "Confidence 0.0-1.0" }
                     },
                     required: ["description", "amount", "inferredCategory"]
@@ -330,7 +306,6 @@ RULES:
       }
     ];
 
-    // 2. Tool for Donation Receipts
     const TOOLS_RECEIPT = [
       {
         functionDeclarations: [
@@ -444,7 +419,6 @@ RULES:
     const args = functionCallPart.functionCall.args || {};
 
     if (extractionType === 'donation_receipt') {
-      // Return Receipt Data Structure
       return new Response(
         JSON.stringify({
           success: true,
@@ -477,22 +451,18 @@ RULES:
     if (documentDate) {
       const parsedDate = new Date(documentDate);
       const today = new Date();
-      // If date is in the future or invalid, use today's date
       if (isNaN(parsedDate.getTime()) || parsedDate > today) {
         console.log(`Invalid or future date detected: ${documentDate}, using today's date`);
         documentDate = today.toISOString().split('T')[0];
       }
     } else {
-      // No date found, use today
       documentDate = new Date().toISOString().split('T')[0];
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        // V2 Data (granular)
         lineItems,
-        // Legacy Data (aggregated for existing UI)
         extractedData,
         summary: (args as any).summary || "Data extracted successfully",
         documentDate,
