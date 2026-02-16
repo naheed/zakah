@@ -98,31 +98,17 @@ export async function persistPlaidDataWithUserKey(
             const accountType = plaidSubtypeToAccountType(account.type, account.subtype);
             accountIdToAccountType[account.account_id] = accountType;
 
-            const payload = {
-                name: account.name,
-                official_name: account.official_name,
-                type: account.type,
-                subtype: account.subtype,
-                mask: account.mask,
-                balance_current: account.balance_current,
-                balance_available: account.balance_available,
-                balance_iso_currency_code: account.balance_iso_currency_code,
-                is_active_trader: account.is_active_trader,
-            };
-            const encryptedPayload = await encrypt(payload);
-            if (!encryptedPayload) {
-                console.error('[plaidEncryptedPersistence] Encrypt returned null for account', account.account_id);
-                return { success: false, error: 'Encryption failed for account data' };
-            }
+            // Note: encrypt function kept for future encrypted_payload column support
+            // Currently storing plaintext in typed columns per DB schema
 
-            // Insert into plaid_accounts (encrypted)
+            // Insert into plaid_accounts with plaintext fields (schema has no encrypted_payload column)
             const { data: row, error } = await supabase
                 .from('plaid_accounts')
                 .insert({
                     plaid_item_id: plaidItemId,
                     account_id: account.account_id,
-                    encrypted_payload: encryptedPayload,
                     name: account.name,
+                    official_name: account.official_name,
                     type: account.type,
                     subtype: account.subtype,
                     mask: account.mask,
@@ -237,7 +223,7 @@ export async function persistPlaidDataWithUserKey(
             }
         }
 
-        // Persist holdings to plaid_holdings (encrypted)
+        // Persist holdings to plaid_holdings
         for (const holding of holdings) {
             const plaidAccountId = accountIdToPlaidAccountId[holding.account_id];
             if (!plaidAccountId) {
@@ -245,27 +231,9 @@ export async function persistPlaidDataWithUserKey(
                 continue;
             }
 
-            const payload = {
-                name: holding.name,
-                ticker_symbol: holding.ticker_symbol,
-                security_type: holding.security_type,
-                quantity: holding.quantity,
-                cost_basis: holding.cost_basis,
-                institution_price: holding.institution_price,
-                institution_value: holding.institution_value,
-                iso_currency_code: holding.iso_currency_code,
-                institution_price_as_of: holding.institution_price_as_of,
-            };
-            const encryptedPayload = await encrypt(payload);
-            if (!encryptedPayload) {
-                console.warn('[plaidEncryptedPersistence] Encrypt returned null for holding', holding.security_id);
-                continue;
-            }
-
             const { error: holdError } = await supabase.from('plaid_holdings').insert({
                 plaid_account_id: plaidAccountId,
                 security_id: holding.security_id,
-                encrypted_payload: encryptedPayload,
                 name: holding.name,
                 ticker_symbol: holding.ticker_symbol,
                 security_type: holding.security_type,
