@@ -71,7 +71,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **`plaid-exchange-token`** refactor: Now encrypts tokens at exchange time using user-derived keys
   - DB Migration: `20260215100000_plaid_user_key_encryption.sql`
   - Documentation: `docs/PLAID_USER_KEY_ENCRYPTION.md` (143 lines)
-- **Open Source Audit**: `docs/OPEN_SOURCE_AUDIT.md` (148 lines) documenting pre-launch findings and remediation strategies
 - **Copy Framing Guide**: `docs/COPY_FRAMING.md` (52 lines) establishing accurate privacy claim language
 - **Fiqh Explanations Content**: `src/content/fiqhExplanations.ts` (382 lines) — comprehensive scholarly explanations for UI tooltips
 

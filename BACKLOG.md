@@ -51,8 +51,6 @@
 ### Phase 14: Open Source Launch
 > **Goal:** Make ZakatFlow transparent and community-driven.
 
-**Audit:** See **`docs/OPEN_SOURCE_AUDIT.md`** for full findings (history exposure, `.lovable/plan.md`, `supabase/config.toml`), and the two strategies below.
-
 **Pre-Requisites (Security):**
 - [ ] Rotate Supabase anon key (Dashboard → Settings → API)
 - [x] Fix `.gitignore` to exclude `.env` — **Done** (audit confirms)
@@ -75,7 +73,6 @@
 **Option B — Fresh clone (recommended):** New repo with no history; copy only current sanitized tree. Guarantees no credential or project ID in any commit. See audit for step-by-step.
 
 **References:**
-- Open-source audit (findings + options): `docs/OPEN_SOURCE_AUDIT.md`
 - Security docs: `docs/SECURITY.md`
 
 ---

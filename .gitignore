@@ -29,6 +29,9 @@ playwright-report/
 test-results/
 coverage/
 
+# Tool / host-specific (may contain project IDs or internal notes)
+.lovable/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

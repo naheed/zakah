@@ -1,4 +1,5 @@
-project_id = "pcwdpsoheoiiavkeyeyx"
+# Replace with your Supabase project ID (from dashboard). Never commit a production project ID.
+project_id = "your-project-id"
 
 [functions.parse-financial-document]
 verify_jwt = false
