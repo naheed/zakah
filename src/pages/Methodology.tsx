@@ -312,9 +312,9 @@ const Methodology = () => {
         <ScrollReveal>
           <div className="text-center mb-12">
             <Badge className="mb-4">Live Tool</Badge>
-            <h2 className="text-3xl font-bold mb-4 tracking-tight">Madhab Comparison Tool</h2>
+            <h2 className="text-3xl font-bold mb-4 tracking-tight">Methodology Comparison Tool</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              ZakatFlow adapts to your chosen school of thought. Explore the key differences in how assets are categorized.
+              Select two methodologies below to compare their rulings on key assets side-by-side.
             </p>
           </div>
           <MethodologyExplorer initialMode={initialMode} />

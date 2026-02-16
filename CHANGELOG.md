@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🌟 Feature Highlights (Quick Look)
 | Version | Major Feature | Released |
 |---|---|---|
+| **v0.30.0** | ⚡ **Real-Time Methodology Engine** — Interactive "Theory vs Practice" Comparisons | Feb 16, 2026 |
 | **v0.29.0** | 🎨 **Visual & UX Polish** — "Financial Statement" Hero, Scroll Cues, Phosphor Icons | Feb 15, 2026 |
 | **v0.28.0** | 🔒 **Security & Classification Overhaul** — AGPL, Two-Tier Encryption, Upload & Plaid Fixes | Feb 15, 2026 |
 | **v0.27.2** | 🔧 **ZMCS v2.0.1** — Multi-rate calculation + rental income override | Feb 14, 2026 |

@@ -31,6 +31,19 @@ interface Release {
 
 const RELEASES: Release[] = [
     {
+        version: "0.30.0",
+        date: "2026-02-16",
+        title: "Real-Time Methodology Engine",
+        added: [
+            "Interactive Comparison Tool: Switch between 'Theory' rules and 'Practice' case study",
+            "Real-Time Logic: Runs the actual Zakat engine in the browser for 100% accuracy",
+            "Ahmed Family Case Study: Standardized profile to demonstrate rule differences (e.g. Jewelry exemptions)"
+        ],
+        changed: [
+            "Methodology Explorer: Enhanced UI with dynamic calculation visualization"
+        ]
+    },
+    {
         version: "0.29.0",
         date: "2026-02-15",
         title: "Visual & UX Polish",

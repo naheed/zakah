@@ -139,53 +139,16 @@ export const CaseStudy = () => {
                 </div>
 
                 {/* Bottom: Detailed Calculation Comparison */}
-                <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                        <Calculator size={24} className="text-primary" />
-                        <h3 className="text-2xl font-semibold">Scholarly Impact Comparison</h3>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {example.calculation.modes.map((mode, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                            >
-                                <Card className="h-full border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-colors shadow-sm overflow-hidden">
-                                    <div className="bg-slate-50 dark:bg-slate-900 px-4 py-3 border-b flex justify-between items-center">
-                                        <span className="font-bold text-sm uppercase tracking-wider text-slate-500">{mode.title}</span>
-                                        <div className="p-1 rounded bg-white dark:bg-slate-800 shadow-sm border">
-                                            <Info size={14} className="text-slate-400" />
-                                        </div>
-                                    </div>
-                                    <CardContent className="pt-6">
-                                        <div className="text-3xl font-black text-primary mb-4 tracking-tight">
-                                            {mode.result}
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {mode.details.map((detail, di) => (
-                                                <li key={di} className="text-xs text-muted-foreground border-b border-slate-50 dark:border-slate-900 pb-1.5 last:border-0">
-                                                    {detail}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </div>
 
-                    <Card className="bg-primary/5 border-primary/10">
-                        <CardContent className="py-4 flex items-start gap-3">
-                            <Info size={20} className="text-primary mt-0.5" />
-                            <p className="text-sm text-balance">
-                                <span className="font-bold">Interpretation Breakdown:</span> {example.summary.text}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
+                <Card className="bg-primary/5 border-primary/10">
+                    <CardContent className="py-4 flex items-start gap-3">
+                        <Info size={20} className="text-primary mt-0.5" />
+                        <p className="text-sm text-balance">
+                            <span className="font-bold">Interpretation Breakdown:</span> {example.summary.text}
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
         </section>
     );

@@ -190,6 +190,16 @@ export default function About() {
         <StaggerItem variant="slide-up">
           <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-border before:to-transparent text-left">
 
+            {/* Item -2 - Real-Time Engine v0.30.0 */}
+            <div className="relative flex items-start group">
+              <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
+              <div className="ml-12">
+                <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
+                <h3 className="text-lg font-medium">Real-Time Methodology Engine</h3>
+                <p className="text-muted-foreground mt-1 text-sm">Interactive "Theory vs Practice" comparisons. See exactly how different rules impact the same portfolio with real-time calculations.</p>
+              </div>
+            </div>
+
             {/* Item -1 - Visual Polish v0.29.0 */}
             <div className="relative flex items-start group">
               <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
