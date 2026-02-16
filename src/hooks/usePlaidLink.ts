@@ -32,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useEncryptionKeys } from '@/hooks/useEncryptionKeys';
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { persistPlaidDataWithUserKey } from '@/lib/plaidEncryptedPersistence';
+import { useAssetPersistence } from '@/hooks/useAssetPersistence';
 
 export type PlaidLinkStatus = 'idle' | 'loading_token' | 'ready' | 'open' | 'exchanging' | 'success' | 'error';
 
@@ -71,9 +72,33 @@ interface PlaidLinkResult {
 export function usePlaidLink() {
     const { toast } = useToast();
     const { encrypt, isReady: encryptionReady } = useEncryptionKeys();
+    const { persistExtraction } = useAssetPersistence();
     const [status, setStatus] = useState<PlaidLinkStatus>('idle');
     const [linkToken, setLinkToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    /** Get or create the user's portfolio ID for asset pipeline bridging */
+    const getPortfolioId = useCallback(async (): Promise<string | null> => {
+        try {
+            const { data: existing } = await supabase
+                .from('portfolios')
+                .select('id')
+                .single();
+            if (existing) return existing.id;
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return null;
+
+            const { data: created } = await supabase
+                .from('portfolios')
+                .insert({ user_id: user.id, currency: 'USD' })
+                .select('id')
+                .single();
+            return created?.id || null;
+        } catch {
+            return null;
+        }
+    }, []);
 
     const getAccessToken = useCallback(async () => {
         // First try getSession, then fallback to getUser for fresh token
@@ -201,13 +226,19 @@ export function usePlaidLink() {
                         const plaidItemId = data.plaid_item_id ?? data.item_id;
                         const accounts = data.accounts ?? [];
                         const holdings = data.holdings ?? [];
+                        const instName = metadata.institution?.name || null;
+
+                        // Get portfolio for asset pipeline bridging
+                        const portfolioId = await getPortfolioId();
 
                         if (encryptionReady && encrypt && plaidItemId && accounts.length > 0) {
                             const persistResult = await persistPlaidDataWithUserKey(
                                 plaidItemId,
                                 accounts,
                                 holdings,
-                                encrypt
+                                encrypt,
+                                portfolioId,
+                                instName
                             );
                             if (!persistResult.success) {
                                 console.error('[Plaid] User-key persist failed:', persistResult.error);
