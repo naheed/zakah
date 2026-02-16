@@ -49,7 +49,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
         id: 'amja-standard-v2',
         name: 'AMJA (Assembly of Muslim Jurists of America)',
         version: '2.0.0',
-        zmcs_version: '1.0.0',
+        zmcs_version: '2.0.0',
         author: 'ZakatFlow Official (based on AMJA fatwas)',
         description: 'AMJA collective ijtihād: net-withdrawable retirement, stocks as exploited assets (dividends only), jewelry exempt, currently-due debt deduction only.',
         ui_label: 'AMJA Standard',
@@ -124,7 +124,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
                 rate: 0.0,
                 treatment: 'income_only',
                 description: 'Long-term stocks treated as EXPLOITED ASSETS (like rental property): Zakat due only on dividends/profits received, NOT on market value of the shares themselves.',
-                scholarly_basis: 'AMJA fatwa #87289: "Zakat is due only on dividends or profits received, not on the current market value, as stocks are treated like exploited assets (similar to rental property or a taxi cab)." Alternative: Dr. Hatem al-Haj suggests ~20% of total investment as a practical proxy estimate.',
+                scholarly_basis: 'AMJA Fatwa #82475: Long-term stocks are treated as "exploited assets" (mustaghallāt) like rental property. Zakat is due on the *income/dividends* only, not the capital market value.',
             },
             reits_rate: 0.0,
             dividends: {
@@ -147,7 +147,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             roth_earnings_follow_traditional: true,
             distributions_always_zakatable: true,
             description: 'Zakat on the NET WITHDRAWABLE amount: balance minus prescribed penalties minus taxes. You do not need to actually withdraw — it only needs to be legally withdrawable. Roth contributions always fully zakatable (accessible tax-free).',
-            scholarly_basis: 'AMJA fatwa #82475 (Dr. Main Al-Qudah, 2008): "Calculate Zakat on the withdrawable amount after deducting all prescribed penalties, taxes, and administrative fees." Fiqh Council of North America (Feb 2024): "Zakat is an annual obligation due on the withdrawable amount after accounting for penalties and taxes." Alternative: Dr. Hatem al-Haj suggests 20% of total investment as a reasonable proxy estimate.',
+            scholarly_basis: 'AMJA Fatwa #82216: "Zakah is mandated on the withdrawable amount after deducting all taxes, interest, administrative fees, penalty."',
             tooltip: 'Zakat on the NET WITHDRAWABLE amount: balance minus prescribed penalties minus taxes.',
         },
 

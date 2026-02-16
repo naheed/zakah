@@ -58,7 +58,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
         id: 'tahir-anwar-hanafi-v2',
         name: 'Imam Tahir Anwar (Hanafi)',
         version: '2.0.0',
-        zmcs_version: '1.0.0',
+        zmcs_version: '2.0.0',
         author: 'ZakatFlow Official (based on Imam Tahir Anwar teachings)',
         description: 'Hanafi "strong ownership" approach: full retirement balance zakatable, jewelry zakatable, 100% investment market value, full debt deduction for short-term debts.',
         ui_label: 'Imam Tahir Anwar',

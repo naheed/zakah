@@ -71,7 +71,7 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
         id: 'qaradawi-fiqh-alzakah-v1',
         name: 'Dr. Yusuf Al-Qaradawi (Fiqh al-Zakah)',
         version: '1.0.0',
-        zmcs_version: '1.0.0',
+        zmcs_version: '2.0.0',
         author: 'ZakatFlow Official (based on Fiqh al-Zakah by Dr. Yusuf Al-Qaradawi)',
         description: 'The most comprehensive modern Zakat treatise. Combines classical scholarship with progressive ijtihād: jewelry exempt (paying recommended), 30% proxy for passive investments, 10% on rental income (agricultural analogy), net-accessible retirement, 12-month debt rule, gold Nisab standard.',
         ui_label: 'Al-Qaradawi (Fiqh al-Zakah)',
@@ -145,8 +145,8 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
             passive_investments: {
                 rate: 0.30,
                 treatment: 'underlying_assets',
-                description: 'Al-Qaradawi distinguishes between company types. COMMERCIAL companies: Zakat on underlying zakatable assets (cash, inventory, receivables) at 2.5% — approximated via 30% proxy (AAOIFI). INDUSTRIAL companies (transport, hotels, manufacturing): uniquely advocates 10% on NET PROFITS (analogy to agricultural produce). ZakatFlow uses the 30% proxy as Al-Qaradawi accepts this as a valid simplification.',
-                scholarly_basis: 'Fiqh al-Zakah, Vol. 1, Chapter on Shares: "Manufacturing/industrial companies — Zakat is due on profits if they reach nisab... no Zakat on shares in industrial companies themselves except for cash reserves." He also states "2.5% on Market Value as a proxy is acceptable if detailed calculation is impractical." Al-Qaradawi modernized traditional doctrine by ruling that productive capital (plants, factories) is subject to Zakat, rejecting the historical exemption.',
+                description: 'Al-Qaradawi distinguishes between company types. COMMERCIAL companies: Zakat on underlying zakatable assets (cash, inventory, receivables) at 2.5% — approximated via 30% proxy (AAOIFI).',
+                scholarly_basis: 'Derived from "Fiqh al-Zakah": Deduction of fixed assets allowed. The 30% rule is a modern application of estimating the zakatable "growth" portion of a mixed entity.',
             },
             reits_rate: 0.30,
             dividends: {
@@ -183,7 +183,7 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
                 zakatable: false,
                 income_zakatable: true,
                 income_rate: 0.10,
-                description: 'Rental property is an "exploited asset" — the property value itself is NOT zakatable, but the rental income IS zakatable at 10% (Al-Qaradawi\'s agricultural analogy: rental buildings = land watered by rain, subject to \'ushr rate). This rate override is applied via ZMCS v2.0.1 multi-rate calculation — rental income is separated from the standard 2.5% pool and taxed at 10% independently.',
+                description: 'Rental property income is zakatable at 10% (agricultural analogy). Scholarly Basis: Qaradawi Unique Ruling: Analogy to Agriculture. Net rental income is zakatable at 10% (if expenses deducted) or 5% (gross), immediately upon receipt.',
             },
             for_sale: {
                 zakatable: true,
@@ -195,8 +195,6 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
                 rate: 1.0,
                 description: 'Undeveloped land held for appreciation: zakatable annually as trade goods by intent.',
             },
-            description: 'Al-Qaradawi classifies rental property as "exploited assets" (al-māl al-mustaghall). Income is zakatable at 10% (via income_rate override); property value is not. Property for sale/speculation is trade goods. The 10% rate implements Al-Qaradawi\'s agricultural analogy for rental income.',
-            tooltip: 'Rental property value NOT zakatable; rental income is zakatable at 10% (agricultural analogy).',
         },
 
         // ── Business ──

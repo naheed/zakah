@@ -22,7 +22,7 @@ export const bradford: ZakatMethodologyConfig = {
         id: 'bradford',
         name: 'Sheikh Joe Bradford',
         version: '2.0.0',
-        zmcs_version: '1.0.0',
+        zmcs_version: '2.0.0',
         author: 'ZakatFlow Official',
         description: 'Contemporary rulings optimized for modern assets (401k, Crypto) where classical texts are silent. This is the default setting for ZakatFlow.',
         ui_label: 'Sheikh Joe Bradford',
@@ -97,7 +97,7 @@ export const bradford: ZakatMethodologyConfig = {
                 rate: 0.30,
                 treatment: 'underlying_assets',
                 description: '30% proxy rule: Only ~30% of a diversified fund\'s market value represents underlying zakatable assets (cash, receivables, inventory). The remainder is non-zakatable (equipment, IP, goodwill).',
-                scholarly_basis: 'Based on AAOIFI Shariah Standard No. 9 and Bradford\'s adaptation: "(Market Value × 30%) × 2.5%" targets current assets in a diversified portfolio.',
+                scholarly_basis: 'Approximation of AAOIFI Shariah Standard No. 35. Estimates that ~30% of a diversified equity portfolio represents zakatable liquid assets (cash, receivables, inventory).',
             },
             reits_rate: 0.30,
             dividends: {
@@ -124,7 +124,7 @@ export const bradford: ZakatMethodologyConfig = {
             roth_earnings_follow_traditional: true,
             distributions_always_zakatable: true,
             description: '401k/IRA exempt under 59.5 (Māl ḍimār — inaccessible wealth lacking milk tām and qudrah). After 59.5, use 30% proxy on market value. Roth contributions: 30% proxy always. Cash distributions taken before retirement: zakatable on the amount withdrawn.',
-            scholarly_basis: 'Bradford\'s position: "No Zakat if no distributions are taken" before retirement age. Post-retirement (stay invested): "(Market Value × 30%) × 2.5%" annually. Cash-out: "2.5% once on total." Roth: "(Total Contributions × 30%) × 2.5%".',
+            scholarly_basis: 'Based on the concept of "Māl ḍimār" (inaccessible wealth). Funds are not fully owned (Milk Tām) until penalty-free access (age 59.5). Post-access, the 30% proxy applies to estimate liquid zakatable assets. (Source: JoeBradford.net, "Zakat on Retirement Accounts")',
             tooltip: '401k/IRA exempt under 59.5 (Māl ḍimār). After 59.5, use 30% proxy on market value.',
         },
 
