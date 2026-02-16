@@ -248,7 +248,7 @@ export const liquid = {
 };
 export const stocks = {
     id: "stocks",
-    number: 5,
+    number: 6,
     title: "Stocks & Investments",
     icon: TrendUp,
     intro: "Treatment depends on intent (trade vs. hold), ownership status (vested vs. unvested), and methodology (30% proxy vs. 100% market value).",
@@ -311,7 +311,7 @@ export const stocks = {
 };
 export const retirement = {
     id: "retirement",
-    number: 6,
+    number: 7,
     title: "Retirement Accounts (401k, IRA, 403b, 457, Pension)",
     icon: ShieldCheck,
     intro: "Retirement accounts present complex Zakat questions due to access restrictions, penalties, and deferred taxation. Two major scholarly approaches exist.",
@@ -390,7 +390,7 @@ export const retirement = {
 };
 export const crypto = {
     id: "crypto",
-    number: 7,
+    number: 8,
     title: "Cryptocurrency & Digital Assets",
     icon: CurrencyBtc,
     intro: "Crypto spans the line between currency (thaman), trade goods (ʿurūḍ al-tijārah), and novel digital assets. Treatment depends on usage and intent.",
@@ -445,7 +445,7 @@ export const crypto = {
 };
 export const metals = {
     id: "metals",
-    number: 8,
+    number: 5,
     title: "Gold & Silver",
     icon: Coins,
     intro: "Gold and silver hold special significance in Zakat law as they were the original basis for the niṣāb measurement.",

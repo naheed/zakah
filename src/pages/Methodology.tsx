@@ -116,17 +116,17 @@ const Methodology = () => {
     { id: principles.id, label: principles.title },
     { id: nisab.id, label: nisab.title },
     { id: hawl.id, label: hawl.title },
-    { id: "explorer", label: "Comparison Tool" },
-    { id: "case-study", label: "Example: Ahmed Family" },
     { id: liquid.id, label: liquid.title },
-    { id: retirement.id, label: retirement.title },
+    { id: metals.id, label: metals.title },
     { id: stocks.id, label: stocks.title },
+    { id: retirement.id, label: retirement.title },
     { id: crypto.id, label: crypto.title },
     { id: realEstate.id, label: realEstate.title },
     { id: business.id, label: business.title },
-    { id: metals.id, label: metals.title },
     { id: debts.id, label: debts.title },
     { id: trusts.id, label: trusts.title },
+    { id: "explorer", label: "Comparison Tool" },
+    { id: "case-study", label: "Example: Ahmed Family" },
     { id: "glossary", label: "Glossary" },
     { id: "references", label: "References" }
   ];
@@ -305,31 +305,8 @@ const Methodology = () => {
         </div>
       </section>
 
-      <Separator className="my-20" />
-
-      {/* 4. Methodology Explorer (Comparison Tool) */}
-      <section id="explorer">
-        <ScrollReveal>
-          <div className="text-center mb-12">
-            <Badge className="mb-4">Live Tool</Badge>
-            <h2 className="text-3xl font-bold mb-4 tracking-tight">Methodology Comparison Tool</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Select two methodologies below to compare their rulings on key assets side-by-side.
-            </p>
-          </div>
-          <MethodologyExplorer initialMode={initialMode} />
-        </ScrollReveal>
-      </section>
-
-      {/* 5. Ahmed Family Case Study (Application) */}
-      <ScrollReveal>
-        <CaseStudy />
-      </ScrollReveal>
-
-      <Separator className="my-20" />
-
-      {/* 6. Liquid Assets */}
-      <section id={liquid.id} className="pt-12">
+      {/* 4. Liquid Assets */}
+      <section id={liquid.id} className="pt-20">
         <SectionHeader icon={liquid.icon} number={liquid.number} title={liquid.title} intro={liquid.intro} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
@@ -368,39 +345,38 @@ const Methodology = () => {
         </div>
       </section>
 
-      {/* 7. Retirement */}
-      <section id={retirement.id} className="pt-20">
-        <SectionHeader icon={retirement.icon} number={retirement.number} title={retirement.title} intro={retirement.intro} />
-        <div className="space-y-6">
-          {retirement.approaches.map((approach: any, i: number) => (
-            <Card key={i} className="border-border/50 bg-muted/5">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{approach.title}</CardTitle>
-                  {approach.tag && <Badge>{approach.tag}</Badge>}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm">
-                <p>{approach.description}</p>
-                <div className="grid md:grid-cols-2 gap-4 pt-4 border-t">
-                  <div>
-                    <p className="font-bold mb-2 text-xs uppercase text-muted-foreground">Process</p>
-                    <ul className="space-y-1 list-disc pl-4 text-muted-foreground">
-                      {approach.steps.map((s: string, j: number) => <li key={j}>{s}</li>)}
-                    </ul>
+      {/* 5. Precious Metals (Gold & Silver) */}
+      <section id={metals.id} className="pt-20">
+        <SectionHeader icon={metals.icon} number={metals.number} title={metals.title} intro={metals.intro} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card className="border-amber-200 bg-amber-50/30">
+            <CardHeader><CardTitle className="text-base text-amber-800">{metals.alwaysZakatable.title}</CardTitle></CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {metals.alwaysZakatable.list.map((m: any, i: number) => (
+                  <li key={i} className="text-sm"><span className="font-bold">{m.label}:</span> <span className="text-muted-foreground">{m.text}</span></li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle className="text-base">{metals.jewelry.title}</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">{metals.jewelry.intro}</p>
+              <div className="grid gap-2">
+                {metals.jewelry.views.map((v: any, i: number) => (
+                  <div key={i} className="p-3 rounded border text-sm">
+                    <span className="font-bold block text-primary mb-1">{v.title}</span>
+                    <span className="text-muted-foreground italic">"{v.text}"</span>
                   </div>
-                  <div>
-                    <p className="font-bold mb-2 text-xs uppercase text-muted-foreground">Jurisprudence</p>
-                    <p className="italic text-muted-foreground">{approach.basis}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
-      {/* 8. Stocks & Investments */}
+      {/* 6. Stocks & Investments */}
       <section id={stocks.id} className="pt-20">
         <SectionHeader icon={stocks.icon} number={stocks.number} title={stocks.title} intro={stocks.intro} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -438,7 +414,39 @@ const Methodology = () => {
         </div>
       </section>
 
-      {/* 9. Crypto */}
+      {/* 7. Retirement */}
+      <section id={retirement.id} className="pt-20">
+        <SectionHeader icon={retirement.icon} number={retirement.number} title={retirement.title} intro={retirement.intro} />
+        <div className="space-y-6">
+          {retirement.approaches.map((approach: any, i: number) => (
+            <Card key={i} className="border-border/50 bg-muted/5">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{approach.title}</CardTitle>
+                  {approach.tag && <Badge>{approach.tag}</Badge>}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <p>{approach.description}</p>
+                <div className="grid md:grid-cols-2 gap-4 pt-4 border-t">
+                  <div>
+                    <p className="font-bold mb-2 text-xs uppercase text-muted-foreground">Process</p>
+                    <ul className="space-y-1 list-disc pl-4 text-muted-foreground">
+                      {approach.steps.map((s: string, j: number) => <li key={j}>{s}</li>)}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-bold mb-2 text-xs uppercase text-muted-foreground">Jurisprudence</p>
+                    <p className="italic text-muted-foreground">{approach.basis}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* 8. Crypto */}
       <section id={crypto.id} className="pt-20">
         <SectionHeader icon={crypto.icon} number={crypto.number} title={crypto.title} intro={crypto.intro} />
         <Card className="bg-muted/30">
@@ -473,7 +481,7 @@ const Methodology = () => {
         </Card>
       </section>
 
-      {/* 10. Real Estate */}
+      {/* 9. Real Estate */}
       <section id={realEstate.id} className="pt-20">
         <SectionHeader icon={realEstate.icon} number={realEstate.number} title={realEstate.title} intro={realEstate.intro} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -491,7 +499,7 @@ const Methodology = () => {
         </div>
       </section>
 
-      {/* 11. Business Assets */}
+      {/* 10. Business Assets */}
       <section id={business.id} className="pt-20">
         <SectionHeader icon={business.icon} number={business.number} title={business.title} intro={business.intro} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -524,38 +532,7 @@ const Methodology = () => {
         </div>
       </section>
 
-      {/* 12. Precious Metals */}
-      <section id={metals.id} className="pt-20">
-        <SectionHeader icon={metals.icon} number={metals.number} title={metals.title} intro={metals.intro} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="border-amber-200 bg-amber-50/30">
-            <CardHeader><CardTitle className="text-base text-amber-800">{metals.alwaysZakatable.title}</CardTitle></CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {metals.alwaysZakatable.list.map((m: any, i: number) => (
-                  <li key={i} className="text-sm"><span className="font-bold">{m.label}:</span> <span className="text-muted-foreground">{m.text}</span></li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle className="text-base">{metals.jewelry.title}</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{metals.jewelry.intro}</p>
-              <div className="grid gap-2">
-                {metals.jewelry.views.map((v: any, i: number) => (
-                  <div key={i} className="p-3 rounded border text-sm">
-                    <span className="font-bold block text-primary mb-1">{v.title}</span>
-                    <span className="text-muted-foreground italic">"{v.text}"</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* 13. Debts & Liabilities */}
+      {/* 11. Debts & Liabilities */}
       <section id={debts.id} className="pt-20">
         <SectionHeader icon={debts.icon} number={debts.number} title={debts.title} intro={debts.intro} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -603,7 +580,7 @@ const Methodology = () => {
         </div>
       </section>
 
-      {/* 14. Trusts */}
+      {/* 12. Trusts */}
       <section id={trusts.id} className="pt-20">
         <SectionHeader icon={trusts.icon} number={trusts.number} title={trusts.title} intro={trusts.intro} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -628,8 +605,31 @@ const Methodology = () => {
         </div>
       </section>
 
+      <Separator className="my-20" />
+
+      {/* 13. Methodology Explorer (Comparison Tool) */}
+      <section id="explorer">
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <Badge className="mb-4">Live Tool</Badge>
+            <h2 className="text-3xl font-bold mb-4 tracking-tight">Methodology Comparison Tool</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Select two methodologies below to compare their rulings on key assets side-by-side.
+            </p>
+          </div>
+          <MethodologyExplorer initialMode={initialMode} />
+        </ScrollReveal>
+      </section>
+
+      {/* 14. Ahmed Family Case Study (Application) */}
+      <ScrollReveal>
+        <CaseStudy />
+      </ScrollReveal>
+
+      <Separator className="my-20" />
+
       {/* 15. Glossary */}
-      <section id="glossary" className="pt-20">
+      <section id="glossary">
         <ScrollReveal>
           <Card className="border-primary/20 shadow-lg">
             <CardHeader className="bg-primary/5 border-b border-primary/10">
