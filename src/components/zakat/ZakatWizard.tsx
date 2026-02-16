@@ -144,8 +144,13 @@ const allSteps: Step[] = [
   { id: 'results', title: c.wizard.stepTitles.results, section: 'results' },
 ];
 
+import { useCalculatorDeepLink } from "@/hooks/useCalculatorDeepLink";
+
 export function ZakatWizard() {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize deep linking logic
+  useCalculatorDeepLink();
 
   const {
     formData,

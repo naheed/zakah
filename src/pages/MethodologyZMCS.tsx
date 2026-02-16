@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,7 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCircle, WarningCircle, Users, GitBranch } from "@phosphor-icons/react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ZAKAT_PRESETS } from "@/lib/config/presets";
@@ -193,14 +193,40 @@ function GroupedFields({ fields }: { fields: ZMCSField[] }) {
     );
 }
 
+// ... existing imports
+
 export function MethodologyZMCS() {
-    const [selectedPreset, setSelectedPreset] = useState<string>("bradford");
+    const [searchParams, setSearchParams] = useSearchParams();
     const [copied, setCopied] = useState(false);
 
+    // Get preset from URL or default to 'bradford'
+    const presetParam = searchParams.get("preset");
+    const selectedPreset = (presetParam && ZAKAT_PRESETS[presetParam]) ? presetParam : "bradford";
     const selectedConfig = ZAKAT_PRESETS[selectedPreset];
 
+    // Scroll to section if hash is present (handling hydration timing)
+    useEffect(() => {
+        if (window.location.hash) {
+            const id = window.location.hash.replace("#", "");
+            const element = document.getElementById(id);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: "smooth" });
+                }, 100);
+            }
+        }
+    }, [location.hash]); // Re-run if hash changes
+
+    const setSelectedPreset = (presetId: string) => {
+        setSearchParams({ preset: presetId }, { replace: true });
+    };
+
     const handleCopy = () => {
-        navigator.clipboard.writeText(JSON.stringify(selectedConfig, null, 2));
+        // Copy the current URL with the preset param and hash
+        const urlArgs = new URLSearchParams();
+        urlArgs.set("preset", selectedPreset);
+        const url = `${window.location.origin}${window.location.pathname}?${urlArgs.toString()}#presets`;
+        navigator.clipboard.writeText(url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -444,6 +470,12 @@ export function MethodologyZMCS() {
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             {selectedConfig.meta.description}
                         </p>
+                        {selectedConfig.meta.tooltip && (
+                            <div className="flex gap-2 items-start p-2 bg-muted/40 rounded text-xs text-muted-foreground border border-border/50">
+                                <span className="shrink-0 font-bold uppercase tracking-wider text-[10px] pt-0.5 text-primary/70">Tooltip:</span>
+                                <span>{selectedConfig.meta.tooltip}</span>
+                            </div>
+                        )}
                         {/* Quick comparison stats */}
                         <div className="pt-2 border-t border-border/40 grid grid-cols-3 gap-4 text-xs">
                             <div>
@@ -476,6 +508,20 @@ export function MethodologyZMCS() {
                             <CaretRight className="w-3 h-3 text-muted-foreground/50" />
                             <code className="text-xs text-muted-foreground">{selectedPreset}.json</code>
                         </div>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(JSON.stringify(selectedConfig, null, 2));
+                                }}
+                                className="gap-1.5 h-7 text-xs text-muted-foreground hover:text-foreground"
+                            >
+                                <Code className="w-3.5 h-3.5" />
+                                JSON
+                            </Button>
+                            <div className="w-px h-4 bg-border/50 self-center" />
+                        </div>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -490,7 +536,7 @@ export function MethodologyZMCS() {
                             ) : (
                                 <>
                                     <Copy className="w-3.5 h-3.5" />
-                                    Copy
+                                    Copy Link
                                 </>
                             )}
                         </Button>
@@ -502,6 +548,6 @@ export function MethodologyZMCS() {
                     </ScrollArea>
                 </div>
             </section>
-        </ArticleLayout>
+        </ArticleLayout >
     );
 }

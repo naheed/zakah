@@ -49,10 +49,11 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
         id: 'amja-standard-v2',
         name: 'AMJA (Assembly of Muslim Jurists of America)',
         version: '2.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official (based on AMJA fatwas)',
         description: 'AMJA collective ijtihād: net-withdrawable retirement, stocks as exploited assets (dividends only), jewelry exempt, currently-due debt deduction only.',
         ui_label: 'AMJA Standard',
+        tooltip: 'AMJA collective ijtihād: net-withdrawable retirement, stocks as exploited assets, jewelry exempt, currently-due debt deduction only.',
         scholar_url: 'https://www.amjaonline.org/fatwa/en/',
         tier: 'official',
         reference: {
@@ -67,11 +68,13 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             gold_grams: 85.0,
             silver_grams: 595.0,
             description: 'Silver standard (lower threshold) is the safer option, ensuring more people fulfill their obligation.',
+            tooltip: 'Silver standard (lower threshold) is the safer option, ensuring more people fulfill their obligation.',
         },
         zakat_rate: {
             lunar: 0.025,
             solar: 0.02577,
             description: 'Standard 2.5% lunar rate.',
+            tooltip: 'Standard 2.5% lunar rate.',
         },
     },
 
@@ -82,6 +85,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             rate: 1.0,
             description: 'All liquid cash holdings are fully zakatable.',
             scholarly_basis: 'Unanimous consensus (Ijma\').',
+            tooltip: 'All liquid cash holdings are fully zakatable.',
         },
 
         // ── Precious Metals ──
@@ -96,6 +100,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
                 scholarly_basis: 'AMJA follows the majority view: "No Zakat is obligatory on jewelry intended for personal adornment and regular wear." Based on the practice of companions (Aishah, Ibn Umar, Jabir). Jewelry exceeding societal average (extravagance) may have the surplus zakatable.',
             },
             description: 'Investment metals are zakatable. Personal jewelry exempt (majority view).',
+            tooltip: 'Investment metals are zakatable. Personal jewelry EXEMPT (majority view).',
         },
 
         // ── Crypto ──
@@ -109,6 +114,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             },
             description: 'Cryptocurrency treated as zakatable asset based on thamaniyya (monetary value) principle.',
             scholarly_basis: 'While AMJA has not issued a specific crypto fatwa, the general scholarly consensus treats crypto as possessing monetary value and desirability, making it zakatable like currency.',
+            tooltip: 'Cryptocurrency treated as zakatable asset based on thamaniyya (monetary value) principle.',
         },
 
         // ── Investments ──
@@ -128,6 +134,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             },
             description: 'Active trading: full market value (trade goods). Long-term/passive: exploited-asset view — only dividends/income zakatable.',
             scholarly_basis: 'AMJA distinguishes between trading stocks (trade goods = market value) and long-term investment stocks (exploited assets = income only). This mirrors the classical distinction between \'urūḍ al-tijāra and al-māl al-mustaghall.',
+            tooltip: 'Long-term stocks: Exploited assets (only dividends zakatable). Active trading: Market value.',
         },
 
         // ── Retirement ──
@@ -141,6 +148,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             distributions_always_zakatable: true,
             description: 'Zakat on the NET WITHDRAWABLE amount: balance minus prescribed penalties minus taxes. You do not need to actually withdraw — it only needs to be legally withdrawable. Roth contributions always fully zakatable (accessible tax-free).',
             scholarly_basis: 'AMJA fatwa #82475 (Dr. Main Al-Qudah, 2008): "Calculate Zakat on the withdrawable amount after deducting all prescribed penalties, taxes, and administrative fees." Fiqh Council of North America (Feb 2024): "Zakat is an annual obligation due on the withdrawable amount after accounting for penalties and taxes." Alternative: Dr. Hatem al-Haj suggests 20% of total investment as a reasonable proxy estimate.',
+            tooltip: 'Zakat on the NET WITHDRAWABLE amount: balance minus prescribed penalties minus taxes.',
         },
 
         // ── Real Estate ──
@@ -165,6 +173,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
                 description: 'Land held for appreciation: zakatable annually (trade goods by intent).',
             },
             description: 'AMJA: Rental property value NOT zakatable; rental income IS. Property for sale or land banking is trade goods.',
+            tooltip: 'Rental property value NOT zakatable; rental income IS. Property for sale is trade goods.',
         },
 
         // ── Business ──
@@ -173,6 +182,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Business cash, receivables, and inventory are zakatable. Fixed assets exempt.',
+            tooltip: 'Business cash, receivables, and inventory are zakatable. Fixed assets exempt.',
         },
 
         // ── Debts Owed To User ──
@@ -181,6 +191,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             bad_debt_rate: 0.0,
             bad_debt_on_recovery: true,
             description: 'Good debts zakatable. Bad debts only upon recovery.',
+            tooltip: 'Good debts zakatable. Bad debts only upon recovery.',
         },
     },
 
@@ -202,5 +213,6 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             scholarly_basis: 'AMJA fatwa #76458: "Only the payment due (e.g., monthly mortgage payment) is deductible, not the entire loan balance." Principle: "Just as future income is not added to the Zakat pool, future debt payments are not deducted before they are due."',
         },
         description: 'AMJA strict interpretation: only currently due payments reduce zakatable wealth. Future obligations do not affect current Zakat liability.',
+        tooltip: 'Only currently due payments (this month) are deductible. Future debt obligations are NOT deducted.',
     },
 };

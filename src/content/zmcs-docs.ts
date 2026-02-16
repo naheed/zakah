@@ -117,6 +117,12 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Link to the public fatwa, paper, or official ruling document.",
                 required: false,
             },
+            {
+                path: "meta.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining this section.",
+                required: false,
+            },
         ],
     },
 
@@ -139,6 +145,12 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 ],
                 required: true,
                 helpText: "silverNisab",
+            },
+            {
+                path: "thresholds.nisab.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Nisab section.",
+                required: false,
             },
             {
                 path: "thresholds.nisab.gold_grams",
@@ -168,6 +180,12 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 default: "0.02577 (2.577%)",
                 required: true,
             },
+            {
+                path: "thresholds.zakat_rate.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Zakat Rate section.",
+                required: false,
+            },
         ],
     },
 
@@ -191,6 +209,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 groupIcon: Wallet,
                 helpText: "checkingAccounts",
             },
+            {
+                path: "assets.cash.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Cash section.",
+                required: false,
+                group: "Cash",
+            },
+
 
             // ── Precious Metals / Jewelry ──
             {
@@ -209,6 +235,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: false,
                 group: "Precious Metals",
             },
+            {
+                path: "assets.precious_metals.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Precious Metals section (specifically jewelry).",
+                required: false,
+                group: "Precious Metals",
+            },
+
 
             // ── Crypto ──
             {
@@ -230,6 +264,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 group: "Cryptocurrency",
                 helpText: "stakedAssets",
             },
+            {
+                path: "assets.crypto.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Crypto section.",
+                required: false,
+                group: "Cryptocurrency",
+            },
+
 
             // ── Investments ──
             {
@@ -267,6 +309,13 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 type: "boolean",
                 description: "If true, the haram purification percentage is deducted from dividends before Zakat calculation.",
                 required: true,
+                group: "Investments",
+            },
+            {
+                path: "assets.investments.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Investments section.",
+                required: false,
                 group: "Investments",
             },
 
@@ -339,6 +388,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Retirement",
             },
+            {
+                path: "assets.retirement.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Retirement section.",
+                required: false,
+                group: "Retirement",
+            },
+
 
             // ── Real Estate ──
             {
@@ -370,6 +427,13 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Real Estate",
             },
+            {
+                path: "assets.real_estate.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Real Estate section.",
+                required: false,
+                group: "Real Estate",
+            },
 
             // ── Business ──
             {
@@ -389,6 +453,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Business",
             },
+            {
+                path: "assets.business.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Business section.",
+                required: false,
+                group: "Business",
+            },
+
 
             // ── Debts Owed ──
             {
@@ -407,6 +479,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Debts Owed",
             },
+            {
+                path: "assets.debts_owed_to_user.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Debts Owed section.",
+                required: false,
+                group: "Debts Owed",
+            },
+
 
             // ── Optional: Trusts ──
             {
@@ -427,6 +507,13 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: false,
                 group: "Trusts",
                 helpText: "irrevocableTrust",
+            },
+            {
+                path: "assets.trusts.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Trusts section.",
+                required: false,
+                group: "Trusts",
             },
         ],
     },
@@ -562,6 +649,13 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 ],
                 required: false,
                 group: "Personal Debt",
+            },
+            {
+                path: "liabilities.tooltip",
+                type: "string",
+                description: "User-facing tooltip explaining the Liabilities section.",
+                required: false,
+                group: "Liabilities",
             },
         ],
     },

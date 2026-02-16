@@ -42,11 +42,12 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
         id: 'maliki-standard-v2',
         name: 'Maliki',
         version: '2.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Classical Maliki: jewelry exempt, 12-month debt deduction, commercial debt ring-fenced to business assets, 100% investments.',
         ui_label: 'Maliki',
         tier: 'official',
+        tooltip: 'Classical Maliki: jewelry exempt, 12-month debt deduction, commercial debt ring-fenced.',
     },
 
     thresholds: {
@@ -55,6 +56,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             gold_grams: 85.0,
             silver_grams: 595.0,
             description: 'Maliki scholars commonly reference the gold standard.',
+            tooltip: 'Maliki scholars commonly reference the gold standard.',
         },
         zakat_rate: {
             lunar: 0.025,
@@ -68,6 +70,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             rate: 1.0,
             description: 'All cash holdings fully zakatable.',
             scholarly_basis: 'Unanimous consensus.',
+            tooltip: 'All cash holdings fully zakatable.',
         },
 
         precious_metals: {
@@ -81,6 +84,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
                 scholarly_basis: 'Khalil in Mukhtasar: gold and silver used for permissible adornment are exempt. Based on the practice of the Companions and the principle that personal-use items are not zakatable.',
             },
             description: 'Investment metals zakatable. Personal jewelry exempt.',
+            tooltip: 'Personal-use jewelry EXEMPT. Jewelry for trading or hoarding is zakatable.',
         },
 
         crypto: {
@@ -92,6 +96,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
                 vested_only: true,
             },
             description: 'Crypto fully zakatable.',
+            tooltip: 'Crypto fully zakatable.',
         },
 
         investments: {
@@ -109,6 +114,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
                 description: 'Dividends zakatable.',
             },
             description: 'All investments at full market value.',
+            tooltip: '100% of market value is zakatable. For modern listed shares, the market value indicates the tradeable price.',
         },
 
         retirement: {
@@ -121,6 +127,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             distributions_always_zakatable: true,
             description: 'Net accessible amount: balance minus taxes and penalties.',
             scholarly_basis: 'Contemporary Maliki application: Zakat on accessible portion.',
+            tooltip: 'Net accessible amount: balance minus taxes and penalties.',
         },
 
         real_estate: {
@@ -135,6 +142,7 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
+            tooltip: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
             scholarly_basis: 'Al-Dardir: trade goods valued at market price for the Mudir (frequent trader).',
         },
 
@@ -164,5 +172,6 @@ export const MALIKI_CONFIG: ZakatMethodologyConfig = {
             scholarly_basis: 'Maliki fiqh: Khalil in Mukhtasar — debts are deductible only if they would reduce wealth below Nisab AND are due within the Zakat year. Commercial debt is separated from personal debt (ring-fencing). Al-Dardir elaborates the conditions for debt deduction.',
         },
         description: 'Maliki: limited debt deduction with 12-month horizon and business-asset ring-fencing.',
+        tooltip: '12-month rule: Only debts due within the coming year reduce zakatable wealth.',
     },
 };

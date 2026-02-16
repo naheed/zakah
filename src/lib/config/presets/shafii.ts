@@ -40,11 +40,12 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
         id: 'shafii-standard-v2',
         name: "Shafi'i",
         version: '2.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: "Classical Shafi'i: jewelry exempt, NO debt deduction, net accessible retirement, 100% investments.",
         ui_label: "Shafi'i",
         tier: 'official',
+        tooltip: "Classical Shafi'i: jewelry exempt, NO debt deduction, net accessible retirement, 100% investments.",
     },
 
     thresholds: {
@@ -53,6 +54,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             gold_grams: 85.0,
             silver_grams: 595.0,
             description: "Shafi'i scholars often prefer the gold standard (higher threshold), though silver is also accepted.",
+            tooltip: "Shafi'i scholars often prefer the gold standard (higher threshold), though silver is also accepted.",
         },
         zakat_rate: {
             lunar: 0.025,
@@ -66,6 +68,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             rate: 1.0,
             description: 'All cash holdings fully zakatable.',
             scholarly_basis: 'Unanimous consensus.',
+            tooltip: 'All cash holdings fully zakatable.',
         },
 
         precious_metals: {
@@ -79,6 +82,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 scholarly_basis: "Al-Nawawi in Al-Majmu': jewelry used for permissible personal adornment is exempt. Based on the practice of the Companions: Aishah, Ibn Umar, and Jabir did not pay Zakat on their jewelry. Al-Shirazi in Al-Muhadhdhab supports this ruling.",
             },
             description: 'Investment metals zakatable. Personal jewelry exempt (permissible use).',
+            tooltip: 'Personal-use jewelry is EXEMPT from Zakat. Investment metals zakatable.',
         },
 
         crypto: {
@@ -90,6 +94,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 vested_only: true,
             },
             description: 'Crypto fully zakatable as currency equivalent.',
+            tooltip: 'Crypto fully zakatable as currency equivalent.',
         },
 
         investments: {
@@ -107,6 +112,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 description: 'Dividends zakatable.',
             },
             description: 'All investments at full market value.',
+            tooltip: '100% of market value is zakatable. Stocks are viewed as trade goods.',
         },
 
         retirement: {
@@ -119,6 +125,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             distributions_always_zakatable: true,
             description: 'Net accessible amount: balance minus taxes and penalties.',
             scholarly_basis: "Contemporary Shafi'i application of accessibility principle.",
+            tooltip: 'Net accessible amount: balance minus taxes and penalties.',
         },
 
         real_estate: {
@@ -133,6 +140,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
+            tooltip: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
         },
 
         debts_owed_to_user: {
@@ -140,6 +148,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             bad_debt_rate: 0.0,
             bad_debt_on_recovery: true,
             description: 'Good debts zakatable. Bad debts upon recovery.',
+            tooltip: 'Good debts zakatable. Bad debts upon recovery.',
         },
     },
 
@@ -161,5 +170,6 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             scholarly_basis: "Al-Nawawi in Al-Majmu': Zakat is an obligation tied to the wealth itself (haqq muta'alliq bi'l-māl), not the owner's net position. The presence of debt does not negate the obligation on wealth that reaches Nisab. This is the strongest distinguishing feature of the Shafi'i position.",
         },
         description: "Shafi'i: No debt deduction. Zakat obligation exists independently of the owner's debt situation.",
+        tooltip: "NO debt deduction. Zakat obligation exists independently of the owner's debt situation.",
     },
 };

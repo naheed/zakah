@@ -92,6 +92,8 @@ export const AnalyticsEvents = {
         STEP_VIEW: "view_step",
         COMPLETE: "calculation_complete",
         ERROR: "calculation_error",
+        DEEP_LINK: "deep_link_landed",
+        JUMP_TO_STEP: "jump_to_step",
     },
     FEEDBACK: {
         REACTION: "feedback_reaction",

@@ -59,8 +59,8 @@ export const MetaSchema = z.object({
         .describe("Semantic version of this specific config file."),
 
     /** ZMCS schema version this config targets. Enables forward-compatibility checking. */
-    zmcs_version: z.string().default('2.0.0')
-        .describe("ZMCS schema version this configuration targets (e.g., '2.0.0')."),
+    zmcs_version: z.string().default('1.0.0')
+        .describe("ZMCS schema version this configuration targets (e.g., '1.0.0')."),
 
     /** Author or organization responsible for this configuration. */
     author: z.string()
@@ -95,6 +95,10 @@ export const MetaSchema = z.object({
     /** Trust tier for the methodology. */
     tier: z.enum(['official', 'community']).default('community')
         .describe("Trust tier: 'official' = built-in ZakatFlow preset. 'community' = user/community contributed."),
+
+    /** Tooltip for the methodology metadata section. */
+    tooltip: z.string().optional()
+        .describe("User-facing tooltip explaining this section."),
 });
 
 
@@ -119,6 +123,9 @@ export const ThresholdsSchema = z.object({
         /** Methodology-specific notes on Nisab determination. */
         description: z.string().optional()
             .describe("Methodology-specific notes on Nisab standard choice and reasoning."),
+        /** Tooltip for the Nisab section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     /** Zakat percentage rates for lunar and solar calendar years. */
@@ -134,6 +141,9 @@ export const ThresholdsSchema = z.object({
         /** Methodology notes on rate calculation. */
         description: z.string().optional()
             .describe("Notes on rate calculation methodology."),
+        /** Tooltip for the Zakat rate section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 });
 
@@ -157,6 +167,9 @@ export const AssetsSchema = z.object({
         /** Scholarly basis for the ruling. */
         scholarly_basis: z.string().optional()
             .describe("Scholarly evidence for cash zakatability ruling."),
+        /** Tooltip for the cash section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Precious Metals (Gold & Silver) ───────────────────────────────────
@@ -188,6 +201,9 @@ export const AssetsSchema = z.object({
         /** Section-level description. */
         description: z.string().optional()
             .describe("General notes on precious metals treatment in this methodology."),
+        /** Tooltip for the jewelry zakatability field. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Cryptocurrency & Digital Assets ────────────────────────────────────
@@ -216,6 +232,9 @@ export const AssetsSchema = z.object({
         /** Scholarly basis for crypto rulings. */
         scholarly_basis: z.string().optional()
             .describe("Scholarly evidence for crypto zakatability (e.g., analogy to gold, currency, or trade goods)."),
+        /** Tooltip for the crypto section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Investments (Stocks, ETFs, Mutual Funds, REITs) ────────────────────
@@ -257,6 +276,9 @@ export const AssetsSchema = z.object({
             /** Description of dividend treatment. */
             description: z.string().optional()
                 .describe("Notes on dividend treatment in this methodology."),
+            /** Tooltip for the dividends section. */
+            tooltip: z.string().optional()
+                .describe("User-facing tooltip explaining this section."),
         }),
         /** Section-level description. */
         description: z.string().optional()
@@ -264,6 +286,9 @@ export const AssetsSchema = z.object({
         /** Scholarly basis for investment rulings. */
         scholarly_basis: z.string().optional()
             .describe("Scholarly evidence for investment classification and treatment."),
+        /** Tooltip for the investments section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Retirement Accounts (401k, IRA, Roth, Pension) ─────────────────────
@@ -338,6 +363,9 @@ export const AssetsSchema = z.object({
         /** Scholarly basis for retirement ruling. */
         scholarly_basis: z.string().optional()
             .describe("Scholarly evidence for the retirement zakatability position (e.g., Māl ḍimār, strong ownership, AMJA fatwas)."),
+        /** Tooltip for the retirement section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Real Estate ────────────────────────────────────────────────────────
@@ -378,6 +406,9 @@ export const AssetsSchema = z.object({
         /** Section-level description. */
         description: z.string().optional()
             .describe("General notes on real estate Zakat treatment."),
+        /** Tooltip for the real estate section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Business Assets ────────────────────────────────────────────────────
@@ -397,6 +428,9 @@ export const AssetsSchema = z.object({
         /** Scholarly basis. */
         scholarly_basis: z.string().optional()
             .describe("Scholarly evidence for business asset classification."),
+        /** Tooltip for the business section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Debts Owed To You ──────────────────────────────────────────────────
@@ -416,6 +450,9 @@ export const AssetsSchema = z.object({
         /** Scholarly basis. */
         scholarly_basis: z.string().optional()
             .describe("Scholarly evidence for debt classification (good vs bad debt)."),
+        /** Tooltip for the debts section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }),
 
     // ── Illiquid Assets (Optional) ─────────────────────────────────────────
@@ -426,6 +463,9 @@ export const AssetsSchema = z.object({
         /** Description. */
         description: z.string().optional()
             .describe("Notes on illiquid asset treatment."),
+        /** Tooltip for the illiquid assets section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }).optional()
         .describe("Optional: Rules for illiquid assets like commodities and livestock."),
 
@@ -440,6 +480,9 @@ export const AssetsSchema = z.object({
         /** Description. */
         description: z.string().optional()
             .describe("Notes on trust Zakat treatment."),
+        /** Tooltip for the trusts section. */
+        tooltip: z.string().optional()
+            .describe("User-facing tooltip explaining this section."),
     }).optional()
         .describe("Optional: Rules for revocable and irrevocable trusts."),
 });
@@ -553,9 +596,15 @@ export const LiabilitiesSchema = z.object({
             .describe("Scholarly evidence for the debt deduction position."),
     }),
 
+
+
     /** Section-level description. */
     description: z.string().optional()
         .describe("General notes on the liabilities approach."),
+
+    /** Tooltip for the liabilities section. */
+    tooltip: z.string().optional()
+        .describe("User-facing tooltip explaining this section."),
 });
 
 

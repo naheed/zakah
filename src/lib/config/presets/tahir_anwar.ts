@@ -58,11 +58,12 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
         id: 'tahir-anwar-hanafi-v2',
         name: 'Imam Tahir Anwar (Hanafi)',
         version: '2.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official (based on Imam Tahir Anwar teachings)',
         description: 'Hanafi "strong ownership" approach: full retirement balance zakatable, jewelry zakatable, 100% investment market value, full debt deduction for short-term debts.',
         ui_label: 'Imam Tahir Anwar',
         tier: 'official',
+        tooltip: 'Imam Tahir Anwar: Full retirement balance zakatable, jewelry zakatable, 100% investments, full debt deduction.',
         scholar_url: 'https://www.zaytuna.edu',
         reference: {
             authority: 'Imam Tahir Anwar',
@@ -76,6 +77,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             gold_grams: 85.0,
             silver_grams: 595.0,
             description: 'Standard Hanafi Nisab: 85g gold (20 Mithqal) or 595g silver (200 Dirhams). Silver standard preferred (lower threshold, more inclusive).',
+            tooltip: 'Standard Hanafi Nisab: 85g gold (20 Mithqal) or 595g silver (200 Dirhams). Silver standard preferred.',
         },
         zakat_rate: {
             lunar: 0.025,
@@ -91,6 +93,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             rate: 1.0,
             description: 'All liquid cash holdings are fully zakatable.',
             scholarly_basis: 'Unanimous consensus (Ijma\').',
+            tooltip: 'All liquid cash holdings are fully zakatable.',
         },
 
         // ── Precious Metals ──
@@ -105,6 +108,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
                 scholarly_basis: 'Abu Hanifa\'s position: gold and silver are inherently monetary metals (thaman) and retain their zakatable nature regardless of form. Al-Kasani in Badai\' al-Sanai\': "Gold and silver are created as prices (athmān), and their nature does not change by fashioning them into jewelry." Supported by hadith of the woman with gold bracelets (Abu Dawud).',
             },
             description: 'All gold and silver — investment or jewelry — is zakatable. Hanafi foundational principle.',
+            tooltip: 'ALL gold and silver jewelry is zakatable, including worn jewelry. Hanafi position.',
         },
 
         // ── Crypto ──
@@ -118,6 +122,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             },
             description: 'Cryptocurrency treated as trade goods (\'urūḍ al-tijāra) — full market value zakatable.',
             scholarly_basis: 'Contemporary Hanafi scholars apply the principle of analogical reasoning (qiyās) to classify crypto as either currency or trade goods, both of which are zakatable at full value.',
+            tooltip: 'Crypto treated as trade goods — full market value zakatable.',
         },
 
         // ── Investments ──
@@ -137,6 +142,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             },
             description: 'All investments at full market value. Active and passive treated equally — your ownership stake is your zakatable amount.',
             scholarly_basis: 'Hanafi fiqh treats stocks as trade goods (\'urūḍ al-tijāra) valued at market price on the Zakat assessment date.',
+            tooltip: '100% of market value is zakatable. No proxy reduction.',
         },
 
         // ── Retirement ──
@@ -148,6 +154,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             distributions_always_zakatable: true,
             description: 'FULL vested balance is zakatable regardless of age, penalties, or access restrictions. Strong ownership (milk tām): if you own the money and it is legally yours, Zakat is due on it. No deduction for potential penalties or taxes — those are hypothetical until withdrawal.',
             scholarly_basis: 'Hanafi principle of strong ownership (milk tām): "The person possesses the capacity to exercise authority over the designated sum." Even with early withdrawal penalties, the funds are legally yours. The penalty is a cost of access, not a reduction in ownership. Supported by: Al-Hidaya (Al-Marghinani), Shariahboard.org ruling #234473. Imam Tahir Anwar teaches: Zakat on the full deposited amount if it meets Nisab, even if withdrawal is restricted.',
+            tooltip: 'FULL vested balance is zakatable regardless of age or penalties. Strong ownership (milk tām).',
         },
 
         // ── Real Estate ──
@@ -172,6 +179,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
                 description: 'Land held for appreciation: zakatable (trade goods by intent).',
             },
             description: 'Hanafi real estate treatment: personal use exempt, income-producing = income zakatable, trade = full value.',
+            tooltip: 'Hanafi: personal use exempt, income-producing = income zakatable, trade = full value.',
         },
 
         // ── Business ──
@@ -181,6 +189,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             fixed_assets_rate: 0.0,
             description: 'Business Zakat on cash, receivables, and inventory. Fixed assets exempt.',
             scholarly_basis: 'Classical Hanafi: \'urūḍ al-tijāra (trade goods) are zakatable at market value. Fixed assets (āt al-hirfa) used in production are exempt.',
+            tooltip: 'Business Zakat on cash, receivables, and inventory. Fixed assets exempt.',
         },
 
         // ── Debts Owed To User ──
@@ -190,6 +199,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             bad_debt_on_recovery: true,
             description: 'Good debts are zakatable. Bad debts only upon actual recovery.',
             scholarly_basis: 'Hanafi: Receivable debts (dayn) owed by a solvent debtor are zakatable. Debts owed by an insolvent debtor are not zakatable until recovered.',
+            tooltip: 'Good debts are zakatable. Bad debts only upon actual recovery.',
         },
     },
 
@@ -211,5 +221,6 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             scholarly_basis: 'Hanafi fiqh: "Debt weakens ownership" (al-dayn yunqiṣ al-milk). Al-Kasani in Badai\' al-Sanai\': debts to humans (dayn al-\'ibād) are deductible because they have a claimant who can enforce collection. SeekersGuidance ruling: "Once debts are deducted, calculate whether remaining assets meet Nisab."',
         },
         description: 'Hanafi: full deduction philosophy. All debts to humans reduce zakatable wealth. This can significantly reduce or eliminate Zakat liability for heavily indebted individuals.',
+        tooltip: 'Full deduction: All debts reduce zakatable wealth. Short-term fully deductible.',
     },
 };

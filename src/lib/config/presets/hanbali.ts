@@ -40,11 +40,12 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
         id: 'hanbali-standard-v2',
         name: 'Hanbali',
         version: '2.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Classical Hanbali: jewelry exempt, full debt deduction, net accessible retirement, 100% investments.',
         ui_label: 'Hanbali',
         tier: 'official',
+        tooltip: 'Classical Hanbali: jewelry exempt, full debt deduction, net accessible retirement.',
     },
 
     thresholds: {
@@ -53,6 +54,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
             gold_grams: 85.0,
             silver_grams: 595.0,
             description: 'Hanbali standard: silver threshold (200 Dirhams = 595g).',
+            tooltip: 'Hanbali standard: silver threshold (200 Dirhams = 595g).',
         },
         zakat_rate: {
             lunar: 0.025,
@@ -66,6 +68,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
             rate: 1.0,
             description: 'All cash holdings fully zakatable.',
             scholarly_basis: 'Unanimous consensus.',
+            tooltip: 'All cash holdings fully zakatable.',
         },
 
         precious_metals: {
@@ -79,6 +82,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
                 scholarly_basis: 'Ibn Qudama in Al-Mughni: "There is no Zakat on jewelry that is used for permissible adornment." This is the position of the majority of companions and scholars.',
             },
             description: 'Investment metals zakatable. Personal jewelry exempt (majority Hanbali view).',
+            tooltip: 'Personal-use jewelry EXEMPT (majority view). Investment metals zakatable.',
         },
 
         crypto: {
@@ -90,6 +94,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
                 vested_only: true,
             },
             description: 'Crypto fully zakatable.',
+            tooltip: 'Crypto fully zakatable.',
         },
 
         investments: {
@@ -107,6 +112,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
                 description: 'Dividends zakatable.',
             },
             description: 'All investments at full market value.',
+            tooltip: '100% of market value is zakatable.',
         },
 
         retirement: {
@@ -119,6 +125,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
             distributions_always_zakatable: true,
             description: 'Net accessible: balance minus taxes and penalties.',
             scholarly_basis: 'Contemporary Hanbali application.',
+            tooltip: 'Net accessible: balance minus taxes and penalties.',
         },
 
         real_estate: {
@@ -133,6 +140,7 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
+            tooltip: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
         },
 
         debts_owed_to_user: {
@@ -161,5 +169,6 @@ export const HANBALI_CONFIG: ZakatMethodologyConfig = {
             scholarly_basis: 'Ibn Qudama in Al-Mughni: debts prevent Zakat on the amount owed. The principle is that debts reduce the net zakatable wealth.',
         },
         description: 'Hanbali: full debt deduction, similar to Hanafi position.',
+        tooltip: 'Full deduction: all debts offset zakatable wealth (similar to Hanafi).',
     },
 };

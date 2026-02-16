@@ -6,7 +6,7 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
         "id": "zmcs-template-v2",
         "name": "ZMCS Revision 2 Template",
         "version": "2.0.0",
-        "zmcs_version": "2.0.0",
+        "zmcs_version": "1.0.0",
         "author": "ZakatFlow",
         "description": "Template configuration for Zakat Methodology Configuration Standard (ZMCS). customize this file to define your own Zakat calculation methodology.",
         "ui_label": "Custom Methodology",
@@ -15,19 +15,22 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
             "authority": "You (The Author)",
             "url": ""
         },
-        "tier": "community"
+        "tier": "community",
+        "tooltip": "Template configuration for Zakat Methodology. Customize to define your own rules."
     },
     "thresholds": {
         "nisab": {
             "default_standard": "silver",
             "gold_grams": 85,
             "silver_grams": 595,
-            "description": "Uses silver standard (lower threshold) as the safer option for ensuring Zakat obligations are met."
+            "description": "Uses silver standard (lower threshold) as the safer option for ensuring Zakat obligations are met.",
+            "tooltip": "Define Nisab (minimum wealth) and Zakat rates."
         },
         "zakat_rate": {
             "lunar": 0.025,
             "solar": 0.02577,
-            "description": "Standard 2.5% lunar rate. Solar rate adjusted for 365-day year."
+            "description": "Standard 2.5% lunar rate. Solar rate adjusted for 365-day year.",
+            "tooltip": "Standard 2.5% lunar rate. Solar rate adjusted for 365-day year."
         }
     },
     "assets": {
@@ -35,7 +38,8 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
             "zakatable": true,
             "rate": 1,
             "description": "All liquid cash holdings are fully zakatable.",
-            "scholarly_basis": "Unanimous scholarly consensus."
+            "scholarly_basis": "Unanimous scholarly consensus.",
+            "tooltip": "All liquid cash holdings are generally zakatable."
         },
         "precious_metals": {
             "investment_gold_rate": 1,
@@ -47,7 +51,8 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
                 "description": "All gold and silver jewelry is zakatable regardless of personal use.",
                 "scholarly_basis": "Precautionary position: gold and silver are monetary by nature."
             },
-            "description": "Investment metals are universally zakatable."
+            "description": "Investment metals are universally zakatable.",
+            "tooltip": "Gold and silver holdings."
         },
         "crypto": {
             "currency_rate": 1,
@@ -58,7 +63,8 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
                 "vested_only": true
             },
             "description": "Cryptocurrency is treated as equivalent to gold/silver.",
-            "scholarly_basis": "Analogy to gold/silver currency."
+            "scholarly_basis": "Analogy to gold/silver currency.",
+            "tooltip": "Cryptocurrency holdings."
         },
         "investments": {
             "active_trading_rate": 1,
@@ -74,7 +80,8 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
                 "deduct_purification": true,
                 "description": "Dividend income is zakatable after purification."
             },
-            "description": "Active trading: full value. Passive: 30% proxy."
+            "description": "Active trading: full value. Passive: 30% proxy.",
+            "tooltip": "Stocks, funds, and other investments."
         },
         "retirement": {
             "zakatability": "conditional_age",
@@ -88,7 +95,8 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
             "roth_earnings_follow_traditional": true,
             "distributions_always_zakatable": true,
             "description": "Exempt until access/retirement age (Māl ḍimār).",
-            "scholarly_basis": "Lack of complete ownership (milk tām) until access."
+            "scholarly_basis": "Lack of complete ownership (milk tām) until access.",
+            "tooltip": "Retirement accounts (401k, IRA, etc)."
         },
         "real_estate": {
             "primary_residence": {
@@ -110,26 +118,30 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
                 "rate": 1,
                 "description": "Undeveloped land held for appreciation is zakatable."
             },
-            "description": "Personal property exempt. Trade property zakatable."
+            "description": "Personal property exempt. Trade property zakatable.",
+            "tooltip": "Real estate properties (personal, rental, trade)."
         },
         "business": {
             "cash_receivables_rate": 1,
             "inventory_rate": 1,
             "fixed_assets_rate": 0,
             "description": "Zakat on liquid assets and inventory. Fixed assets exempt.",
-            "scholarly_basis": "Trade goods and liquid assets are zakatable."
+            "scholarly_basis": "Trade goods and liquid assets are zakatable.",
+            "tooltip": "Business assets and inventory."
         },
         "debts_owed_to_user": {
             "good_debt_rate": 1,
             "bad_debt_rate": 0,
             "bad_debt_on_recovery": true,
             "description": "Good debts zakatable. Bad debts zakatable on recovery.",
-            "scholarly_basis": "Based on likelihood of recovery."
+            "scholarly_basis": "Based on likelihood of recovery.",
+            "tooltip": "Debts owed to you by others."
         },
         "trusts": {
             "revocable_rate": 1,
             "irrevocable_rate": 1,
-            "description": "Trusts are look-through entities."
+            "description": "Trusts are look-through entities.",
+            "tooltip": "Trusts are look-through entities."
         }
     },
     "liabilities": {
@@ -149,6 +161,7 @@ export const ZMCS_TEMPLATE: ZakatMethodologyConfig = {
             "description": "Deduct debts due within the coming year (12-month rule).",
             "scholarly_basis": "Maliki position on debt deduction."
         },
-        "description": "Debts due within 12 months are deductible."
+        "description": "Debts due within 12 months are deductible.",
+        "tooltip": "Debts you owe that may reduce your zakatable wealth."
     }
 };

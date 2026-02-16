@@ -45,11 +45,12 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
         id: 'hanafi-standard-v2',
         name: 'Hanafi',
         version: '2.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Classical Hanafi: jewelry zakatable, full debt deduction, net accessible retirement, 100% investments.',
         ui_label: 'Hanafi',
         tier: 'official',
+        tooltip: 'Classical Hanafi: jewelry zakatable, full debt deduction, net accessible retirement, 100% investments.',
     },
 
     thresholds: {
@@ -58,6 +59,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             gold_grams: 85.0,
             silver_grams: 595.0,
             description: 'Standard Hanafi Nisab: 85g gold (20 Mithqal) or 595g silver (200 Dirhams).',
+            tooltip: 'Standard Hanafi Nisab: 85g gold (20 Mithqal) or 595g silver (200 Dirhams).',
         },
         zakat_rate: {
             lunar: 0.025,
@@ -84,6 +86,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
                 scholarly_basis: 'Abu Hanifa: gold and silver are inherently monetary (thaman) and do not lose their zakatable nature when fashioned into jewelry. Al-Kasani in Badai\' al-Sanai\': "They are created as prices, and their nature does not change."',
             },
             description: 'All gold and silver is zakatable — investment and personal jewelry alike.',
+            tooltip: 'All gold and silver is zakatable — investment and personal jewelry alike.',
         },
 
         crypto: {
@@ -96,6 +99,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             },
             description: 'Crypto classified as trade goods or currency — fully zakatable.',
             scholarly_basis: 'Analogical reasoning (qiyās) to trade goods (\'urūḍ al-tijāra) or currency.',
+            tooltip: 'Crypto classified as trade goods or currency — fully zakatable.',
         },
 
         investments: {
@@ -113,6 +117,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
                 description: 'Dividend income is zakatable.',
             },
             description: 'All investments at full market value. Stocks treated as trade goods.',
+            tooltip: '100% of market value is zakatable. Stocks are treated as trade goods.',
         },
 
         retirement: {
@@ -125,6 +130,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             distributions_always_zakatable: true,
             description: 'Zakatable on net accessible amount: vested balance minus taxes and early withdrawal penalties.',
             scholarly_basis: 'Mainstream contemporary Hanafi application: Zakat on what you could access today. Penalties and taxes reduce the net accessible amount.',
+            tooltip: 'Zakatable on net accessible amount: vested balance minus taxes and early withdrawal penalties.',
         },
 
         real_estate: {
@@ -139,6 +145,7 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Cash, receivables, and inventory are fully zakatable. Fixed assets (machinery, buildings) are exempt.',
+            tooltip: 'Cash, receivables, and inventory are fully zakatable. Fixed assets (machinery, buildings) are exempt.',
         },
 
         debts_owed_to_user: {
@@ -167,5 +174,6 @@ export const HANAFI_CONFIG: ZakatMethodologyConfig = {
             scholarly_basis: 'Al-Kasani: debts to humans (dayn al-\'ibād) have a claimant who can enforce collection, reducing the strength of ownership.',
         },
         description: 'Hanafi: debts are a full offset against zakatable wealth.',
+        tooltip: 'Full deduction: all debts reduce zakatable wealth. "Debt weakens ownership".',
     },
 };
