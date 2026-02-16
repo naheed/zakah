@@ -1,112 +1,131 @@
 
 
-# Audit: Document Extraction Categories & Review UI
+# Fix: Account-Level Context for Document Extraction
 
-## Problem 1: Category Mismatch Between Gemini Prompt and Wizard Fields
+## The Core Problem
 
-There are **three separate category systems** that are not aligned:
+Your Schwab 401(k) statement clearly says **"GOOGLE LLC 401K PLAN"** and **"Personal Choice Retirement Account (PCRA)"** at the top of every page. But the current system:
 
-### Current State (3 disconnected systems)
+1. **Ignores the account wrapper type** -- Gemini classifies each holding by its *asset class* (TSLA -> `INVESTMENT_STOCK`, AMAGX -> `INVESTMENT_MUTUAL_FUND`), completely losing the fact that everything is inside a 401(k).
+2. **Has no `accountType` in the Gemini output** -- The tool schema returns `accountName` (a freeform string like "PCRA") but no structured `accountType` field.
+3. **The persistence layer defaults to `OTHER`** -- Since no `stepId` is passed when uploading from the "Upload First" flow, `inferAccountTypeFromStep()` returns `OTHER`, so the account type in the database is wrong.
+4. **Line items map to wrong wizard fields** -- TSLA inside a 401(k) maps to `passiveInvestmentsValue` instead of `fourOhOneKVestedBalance`.
 
-| Layer | Categories Used | Example |
-|-------|----------------|---------|
-| **Gemini Prompt** (edge function) | `CASH_CHECKING`, `INVESTMENT_EQUITY`, `RETIREMENT_401K`, `EXPENSE_UTILITY`, etc. | 18 categories |
-| **ExtractionReview UI** (assetCategories.ts) | `CASH_CHECKING`, `INVESTMENT_EQUITY`, `RETIREMENT_401K`, `INCOME_DIVIDEND`, etc. | 22 categories (includes internal LIQUID, PROXY_30, EXEMPT, etc.) |
-| **Calculation Engine** (accountImportMapper.ts) | `CHECKING`, `SAVINGS`, `STOCKS`, `401K`, `IRA`, etc. | 40+ loose string matches |
+### What Should Happen with Your Schwab 401(k) Statement
 
-The Gemini prompt produces categories like `INVESTMENT_EQUITY` but the accountImportMapper expects `EQUITY` or `STOCKS`. The `mapToZakatCategory()` in useAssetPersistence.ts does substring matching (`cat.includes('EQUITY')`) which accidentally works but is fragile.
+| What Gemini Currently Does | What It Should Do |
+|---|---|
+| TSLA -> `INVESTMENT_STOCK` -> `passiveInvestmentsValue` | TSLA -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
+| AMAGX -> `INVESTMENT_MUTUAL_FUND` -> `passiveInvestmentsValue` | AMAGX -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
+| HLAL -> `INVESTMENT_STOCK` -> `passiveInvestmentsValue` | HLAL -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
+| Cash Sweep -> `CASH_SAVINGS` -> `savingsAccounts` | Cash Sweep -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
 
-### Key Gaps
+The entire account value ($1,039,100.40) should roll up to the **401(k) vested balance** field for Zakat calculation purposes.
 
-1. **Missing categories in Gemini prompt**: No `INVESTMENT_MUTUAL_FUND` (just `INVESTMENT_EQUITY` for all stocks/ETFs/mutuals), no `HSA`, no `CRYPTO_STAKED`
-2. **Gemini returns expense categories** (`EXPENSE_UTILITY`, `EXPENSE_GROCERY`) that are irrelevant for Zakat -- these shouldn't be extracted from financial statements
-3. **The ExtractionReview dropdown shows internal categories** (LIQUID, PROXY_30, EXEMPT, DEDUCTIBLE) that users should never see or select
-4. **`mapLineItemToLegacyField()`** uses both category AND description substring matching, creating brittle double-inference
+## Architecture: Two-Layer Classification
 
-## Problem 2: Categories Don't Match Wizard Questionnaire
+The fix introduces a **two-layer classification** system:
 
-The wizard asks about these specific asset types:
-- **Liquid**: Checking, Savings, Cash on Hand, Digital Wallets, Foreign Currency
-- **Investments**: Active investments, Passive investments (stocks/ETFs/mutual funds), REITs, Dividends
-- **Retirement**: Roth IRA (contributions vs earnings), Traditional IRA, 401(k) (vested vs unvested), HSA
-- **Crypto**: Currency, Trading, Staked, Staked Rewards, Liquidity Pool
-- **Precious Metals**: Gold (investment vs jewelry), Silver (investment vs jewelry)
-- **Liabilities**: Living expenses, Credit card, Mortgage, Student loans, Property tax
+**Layer 1 -- Account Type (container):** What kind of account is this document from?
+- Detected from PDF metadata: "401K PLAN", "Roth IRA", "Brokerage", "Checking", "HSA", etc.
+- Returned as a new `accountType` field from Gemini.
+- User confirms/overrides in the ExtractionReview UI.
 
-The Gemini prompt lumps "Stocks, ETFs, Mutual Funds" into one `INVESTMENT_EQUITY` category, making it impossible to distinguish. Retirement categories don't separate contributions vs. earnings.
+**Layer 2 -- Asset Class (contents):** What are the individual holdings?
+- Stocks, mutual funds, ETFs, cash, bonds, etc.
+- This is what Gemini already does well.
+- Kept for informational display but NOT used for Zakat field mapping when the account type overrides it.
 
-## Problem 3: UI Issues (from screenshots)
-
-1. **Category dropdown overlaps other rows** -- the `SelectContent` popover covers the "Confirm & Save" button and line items below
-2. **Category labels truncated** ("Stocks &...") -- the column is too narrow
-3. **Internal categories visible** in dropdown (LIQUID, PROXY_30, EXEMPT, etc.)
-4. **No visual grouping** helps users understand which categories matter for Zakat
-
----
+**The rule:** When an account type is a retirement wrapper (401K, IRA, ROTH, HSA), ALL holdings inside it map to the corresponding retirement wizard field, regardless of their individual asset class.
 
 ## Plan
 
-### Step 1: Unify Categories to Match Wizard Fields
+### Step 1: Add `accountType` to Gemini Prompt and Tool Schema
 
-Create a single authoritative list of **user-facing extraction categories** that map 1:1 to `ZakatFormData` fields. Remove expense categories and internal-only categories from the dropdown.
+**File:** `supabase/functions/parse-financial-document/index.ts`
 
-**New unified categories for Gemini + UI:**
+- Add a new section to the `STATEMENT_PROMPT` instructing Gemini to detect the **account wrapper type** from document metadata (headers, footers, plan names).
+- Add an `accountType` field to the `extract_financial_data` tool schema with enum values matching `AccountType` in `src/types/assets.ts`: `CHECKING`, `SAVINGS`, `BROKERAGE`, `RETIREMENT_401K`, `RETIREMENT_IRA`, `ROTH_IRA`, `CRYPTO_WALLET`, `OTHER`.
+- Add clear prompt rules:
 
-| Category ID | Label | Maps to ZakatFormData field |
-|---|---|---|
-| `CASH_CHECKING` | Checking Account | `checkingAccounts` |
-| `CASH_SAVINGS` | Savings / Money Market | `savingsAccounts` |
-| `CASH_ON_HAND` | Cash on Hand | `cashOnHand` |
-| `CASH_DIGITAL_WALLET` | Digital Wallet (PayPal, Venmo) | `digitalWallets` |
-| `INVESTMENT_STOCK` | Stocks & ETFs | `passiveInvestmentsValue` |
-| `INVESTMENT_MUTUAL_FUND` | Mutual Funds | `passiveInvestmentsValue` |
-| `INVESTMENT_BOND` | Bonds / Fixed Income | `passiveInvestmentsValue` |
-| `INVESTMENT_ACTIVE` | Active Trading | `activeInvestments` |
-| `INVESTMENT_REIT` | REITs | `reitsValue` |
-| `INCOME_DIVIDEND` | Dividends | `dividends` |
-| `RETIREMENT_401K` | 401(k) | `fourOhOneKVestedBalance` |
-| `RETIREMENT_IRA` | Traditional IRA | `traditionalIRABalance` |
-| `RETIREMENT_ROTH` | Roth IRA | `rothIRAContributions` |
-| `RETIREMENT_HSA` | HSA | `hsaBalance` |
-| `CRYPTO` | Cryptocurrency | `cryptoCurrency` |
-| `CRYPTO_STAKED` | Staked Crypto | `stakedAssets` |
-| `COMMODITY_GOLD` | Gold | `goldInvestmentValue` |
-| `COMMODITY_SILVER` | Silver | `silverInvestmentValue` |
-| `LIABILITY_CREDIT_CARD` | Credit Card Balance | `creditCardBalance` |
-| `LIABILITY_LOAN` | Loan / Debt | `studentLoansDue` |
-| `OTHER` | Other | `cashOnHand` |
+```text
+ACCOUNT TYPE DETECTION (CRITICAL):
+Look for these clues in the document header, footer, and account description:
+- "401(k)", "401K", "403(b)", "457" -> accountType = "RETIREMENT_401K"
+- "Roth IRA" -> accountType = "ROTH_IRA"  
+- "Traditional IRA", "SEP IRA", "IRA" -> accountType = "RETIREMENT_IRA"
+- "HSA", "Health Savings" -> accountType = "HSA"
+- "Brokerage", "Individual", "Joint" -> accountType = "BROKERAGE"
+- "Checking" -> accountType = "CHECKING"
+- "Savings", "Money Market" -> accountType = "SAVINGS"
+- "Crypto", "Digital Assets" -> accountType = "CRYPTO_WALLET"
 
-### Step 2: Update Gemini Prompt
+IMPORTANT: The accountType describes the CONTAINER, not the contents. 
+A 401(k) account that holds stocks and mutual funds is still accountType = "RETIREMENT_401K".
+```
 
-Update the `STATEMENT_PROMPT` in the edge function to use the exact category IDs from Step 1. Remove expense categories entirely (financial statements list holdings, not expenses). Add clearer instructions for distinguishing mutual funds vs. stocks vs. active trading.
+- Return `accountType` in the response alongside existing fields.
 
-### Step 3: Update `assetCategories.ts`
+### Step 2: Add Account Type Confirmation to ExtractionReview UI
 
-- Remove internal-only categories (`LIQUID`, `PROXY_30`, `EXEMPT`, `DEDUCTIBLE`, `GOLD_FULL`, `SILVER_FULL`) from the user-facing list
-- Add missing categories (`CASH_DIGITAL_WALLET`, `INVESTMENT_ACTIVE`, `INVESTMENT_REIT`, `RETIREMENT_HSA`, `CRYPTO_STAKED`)
-- Keep internal categories in a separate non-exported array if needed elsewhere
+**File:** `src/components/zakat/ExtractionReview.tsx`
 
-### Step 4: Update Mappers
+- Add a new **Account Type** dropdown between the Institution Name and Account Name fields.
+- Pre-populate with Gemini's detected `accountType`.
+- User can override if Gemini got it wrong.
+- Use the `AccountType` values from `src/types/assets.ts` with user-friendly labels.
+- Show a brief explanation: "This determines how holdings are classified for Zakat. A 401(k) with stocks inside is treated as retirement, not investments."
 
-- Rewrite `mapToZakatCategory()` in `useAssetPersistence.ts` to use exact ID matches instead of substring matching
-- Rewrite `mapLineItemToLegacyField()` in the edge function to use the same exact IDs
-- Update `CATEGORY_TO_FIELDS` in `accountImportMapper.ts` to include the new category IDs
+### Step 3: Update `CATEGORY_TO_FORM_FIELD` Mapping with Account Context
 
-### Step 5: Fix ExtractionReview UI
+**File:** `supabase/functions/parse-financial-document/index.ts`
 
-- **Widen category column**: Change grid from `[3fr,2fr,2fr,auto]` to `[2fr,2.5fr,1.5fr,auto]` so labels aren't truncated
-- **Fix dropdown overlap**: Add `position="popper"` and `sideOffset` to `SelectContent` so it renders in a portal above other content
-- **Filter dropdown**: Only show user-facing categories (exclude internal ones)
-- **Mobile responsiveness**: Stack description + category vertically on small screens
+- Update `aggregateLegacyData()` to accept an `accountType` parameter.
+- When `accountType` is `RETIREMENT_401K`, ALL line items map to `fourOhOneKVestedBalance` regardless of their `inferredCategory`.
+- When `accountType` is `RETIREMENT_IRA`, ALL map to `traditionalIRABalance`.
+- When `accountType` is `ROTH_IRA`, ALL map to `rothIRAContributions`.
+- When `accountType` is `CHECKING`, cash items stay as `checkingAccounts`.
+- When `accountType` is `BROKERAGE` or `OTHER`, use the existing per-line-item category mapping (current behavior).
+
+### Step 4: Pass `accountType` Through the Extraction Flow
+
+**Files:** `src/hooks/useDocumentParsingV2.ts`, `src/hooks/useExtractionFlow.ts`, `src/hooks/useAssetPersistence.ts`
+
+- Add `accountType` to `DocumentExtractionResult` interface.
+- Pass it through `ReviewableData` and `ConfirmedData`.
+- In `persistExtraction()`, use `accountType` from the confirmed data instead of `inferAccountTypeFromStep()`.
+- In `createSnapshot()` / line item insertion, when `accountType` is a retirement type, override `inferred_category` and `zakat_category` accordingly.
+
+### Step 5: Add `HSA` to `AccountType`
+
+**File:** `src/types/assets.ts`
+
+- Add `'HSA'` to the `AccountType` union type since it's missing but needed for HSA statement detection.
 
 ---
 
 ## Technical Details
 
-### Files to modify:
-1. `supabase/functions/parse-financial-document/index.ts` -- Update prompt categories, rewrite `mapLineItemToLegacyField()`
-2. `src/lib/assetCategories.ts` -- Add missing categories, separate internal vs user-facing, update `getCategoriesGrouped()` to exclude internal
-3. `src/hooks/useAssetPersistence.ts` -- Rewrite `mapToZakatCategory()` with exact matches
-4. `src/lib/accountImportMapper.ts` -- Add new category IDs to `CATEGORY_TO_FIELDS`
-5. `src/components/zakat/ExtractionReview.tsx` -- Fix grid layout, dropdown overlap, filter internal categories
+### Account Type to Wizard Field Override Map
+
+```text
+RETIREMENT_401K -> ALL holdings -> fourOhOneKVestedBalance
+RETIREMENT_IRA  -> ALL holdings -> traditionalIRABalance  
+ROTH_IRA        -> ALL holdings -> rothIRAContributions
+HSA             -> ALL holdings -> hsaBalance
+CHECKING        -> use per-line category mapping (default)
+SAVINGS         -> use per-line category mapping (default)
+BROKERAGE       -> use per-line category mapping (default)
+CRYPTO_WALLET   -> use per-line category mapping (default)
+OTHER           -> use per-line category mapping (default)
+```
+
+### Files to Modify
+
+1. `supabase/functions/parse-financial-document/index.ts` -- Add accountType to prompt, tool schema, response, and override logic in `aggregateLegacyData()`
+2. `src/types/assets.ts` -- Add `'HSA'` to AccountType
+3. `src/hooks/useDocumentParsingV2.ts` -- Add `accountType` to `DocumentExtractionResult`
+4. `src/hooks/useExtractionFlow.ts` -- Pass `accountType` through review flow
+5. `src/components/zakat/ExtractionReview.tsx` -- Add Account Type dropdown with user confirmation
+6. `src/hooks/useAssetPersistence.ts` -- Use confirmed `accountType` in persistence, override zakat_category for retirement wrappers
 
