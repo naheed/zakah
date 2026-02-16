@@ -22,7 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCircle, WarningCircle, Users, GitBranch } from "@phosphor-icons/react";
+import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCircle, WarningCircle, Users, GitBranch, ShareNetwork } from "@phosphor-icons/react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,6 +33,7 @@ import { ZMCS_DOCS, ZMCSField } from "@/content/zmcs-docs";
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { Text } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
+import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
 
 const tocItems = [
     { id: "what-is-zmcs", number: 1, label: "What is ZMCS?" },
@@ -228,6 +229,10 @@ export function MethodologyZMCS() {
         urlArgs.set("preset", selectedPreset);
         const url = `${window.location.origin}${window.location.pathname}?${urlArgs.toString()}#presets`;
         navigator.clipboard.writeText(url);
+
+        // Track the share event
+        trackEvent(AnalyticsEvents.SHARE.METHODOLOGY_LINK, "share_click", selectedPreset);
+
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -464,8 +469,19 @@ export function MethodologyZMCS() {
                                 <h3 className="font-bold text-lg leading-tight">{selectedConfig.meta.name}</h3>
                                 <code className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{selectedPreset}</code>
                             </div>
-                            <div className="shrink-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                                <Check className="w-3.5 h-3.5 text-primary-foreground" weight="bold" />
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                    onClick={handleCopy}
+                                >
+                                    {copied ? <Check className="w-3.5 h-3.5" /> : <ShareNetwork className="w-3.5 h-3.5" />}
+                                    {copied ? "Copied" : "Share Preset"}
+                                </Button>
+                                <div className="shrink-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center" title="Active Preset">
+                                    <Check className="w-3.5 h-3.5 text-primary-foreground" weight="bold" />
+                                </div>
                             </div>
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">

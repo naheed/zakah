@@ -99,4 +99,8 @@ export const AnalyticsEvents = {
         REACTION: "feedback_reaction",
         SURVEY_CLICK: "survey_link_click",
     },
+    SHARE: {
+        METHODOLOGY_LINK: "share_methodology_link",
+        CONFIG_JSON: "share_config_json"
+    }
 } as const;

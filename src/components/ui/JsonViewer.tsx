@@ -53,7 +53,7 @@ export function JsonViewer({ data, title = "JSON Data", className }: JsonViewerP
                     language="json"
                 >
                     {({ style, tokens, getLineProps, getTokenProps }: any) => (
-                        <pre style={{ ...style, margin: 0, padding: '1rem', fontFamily: 'monospace' }}>
+                        <pre style={{ ...style, margin: 0, padding: '1rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {tokens.map((line: any, i: number) => (
                                 <div key={i} {...getLineProps({ line })}>
