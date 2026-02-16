@@ -26,6 +26,7 @@ import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCi
 import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { JsonViewer } from "@/components/ui/JsonViewer";
 import { ZAKAT_PRESETS } from "@/lib/config/presets";
 import { ZMCS_TEMPLATE } from "@/content/config-template";
 import { ZMCS_DOCS, ZMCSField } from "@/content/zmcs-docs";
@@ -286,7 +287,7 @@ export function MethodologyZMCS() {
                     This allows us to:
                 </p>
                 <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                    <li>Support multiple Madhahib (Schools of Thought) instantly.</li>
+                    <li>Support multiple Methodologies instantly.</li>
                 </ul>
             </section>
 
@@ -499,53 +500,12 @@ export function MethodologyZMCS() {
                     </CardContent>
                 </Card>
 
-                {/* JSON viewer — immediately visible below detail panel */}
-                <div className="relative">
-                    <div className="flex items-center justify-between px-4 py-3 bg-muted/70 rounded-t-lg border border-b-0 border-border/60">
-                        <div className="flex items-center gap-2 text-sm">
-                            <FileText className="w-4 h-4 text-primary" />
-                            <span className="font-medium">{selectedConfig.meta.name}</span>
-                            <CaretRight className="w-3 h-3 text-muted-foreground/50" />
-                            <code className="text-xs text-muted-foreground">{selectedPreset}.json</code>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(JSON.stringify(selectedConfig, null, 2));
-                                }}
-                                className="gap-1.5 h-7 text-xs text-muted-foreground hover:text-foreground"
-                            >
-                                <Code className="w-3.5 h-3.5" />
-                                JSON
-                            </Button>
-                            <div className="w-px h-4 bg-border/50 self-center" />
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCopy}
-                            className="gap-1.5 h-7 text-xs"
-                        >
-                            {copied ? (
-                                <>
-                                    <Check className="w-3.5 h-3.5" />
-                                    Copied
-                                </>
-                            ) : (
-                                <>
-                                    <Copy className="w-3.5 h-3.5" />
-                                    Copy Link
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                    <ScrollArea className="h-[500px] w-full rounded-b-lg border border-border/60 bg-muted/20 p-4">
-                        <pre className="text-xs font-mono leading-relaxed text-foreground/90">
-                            {JSON.stringify(selectedConfig, null, 2)}
-                        </pre>
-                    </ScrollArea>
+                {/* JSON viewer — using Prism syntax highlighter */}
+                <div className="mt-4">
+                    <JsonViewer
+                        data={selectedConfig}
+                        title={`${selectedConfig.meta.name} Configuration`}
+                    />
                 </div>
             </section>
         </ArticleLayout >
