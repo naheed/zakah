@@ -19,8 +19,7 @@
  * Account Import Mapper
  * 
  * Maps line items from imported accounts to ZakatFormData fields.
- * Handles cross-question mapping (e.g., a brokerage account with checking sweep
- * can contribute to both Liquid Assets and Investments).
+ * Uses unified category IDs from assetCategories.ts.
  */
 
 import { ZakatFormData } from './zakatCalculations';
@@ -41,18 +40,49 @@ export type QuestionContext =
     | 'debts';
 
 /**
- * Mapping from Zakat categories to form fields
+ * Unified mapping from category IDs to ZakatFormData fields.
+ * Category IDs match those in src/lib/assetCategories.ts and the Gemini prompt.
  */
 const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData | null> = {
-    // Liquid assets
+    // Unified category IDs (primary)
+    'CASH_CHECKING': 'checkingAccounts',
+    'CASH_SAVINGS': 'savingsAccounts',
+    'CASH_ON_HAND': 'cashOnHand',
+    'CASH_DIGITAL_WALLET': 'digitalWallets',
+    'INVESTMENT_STOCK': 'passiveInvestmentsValue',
+    'INVESTMENT_MUTUAL_FUND': 'passiveInvestmentsValue',
+    'INVESTMENT_BOND': 'passiveInvestmentsValue',
+    'INVESTMENT_ACTIVE': 'activeInvestments',
+    'INVESTMENT_REIT': 'reitsValue',
+    'INCOME_DIVIDEND': 'dividends',
+    'RETIREMENT_401K': 'fourOhOneKVestedBalance',
+    'RETIREMENT_IRA': 'traditionalIRABalance',
+    'RETIREMENT_ROTH': 'rothIRAContributions',
+    'RETIREMENT_HSA': 'hsaBalance',
+    'CRYPTO': 'cryptoCurrency',
+    'CRYPTO_STAKED': 'stakedAssets',
+    'COMMODITY_GOLD': 'goldInvestmentValue',
+    'COMMODITY_SILVER': 'silverInvestmentValue',
+    'LIABILITY_CREDIT_CARD': 'creditCardBalance',
+    'LIABILITY_LOAN': 'studentLoansDue',
+    'OTHER': 'cashOnHand',
+
+    // Legacy category IDs (backward compat with old extractions)
+    'INVESTMENT_EQUITY': 'passiveInvestmentsValue',
+    'INVESTMENT_FIXED_INCOME': 'passiveInvestmentsValue',
+    'INCOME_INTEREST': null,
+    'EXPENSE_UTILITY': null,
+    'EXPENSE_GROCERY': null,
+    'EXPENSE_TRANSPORT': null,
+    'EXPENSE_INSURANCE': null,
+
+    // Legacy shorthand categories (from Plaid or old imports)
     'CHECKING': 'checkingAccounts',
     'SAVINGS': 'savingsAccounts',
     'CASH': 'cashOnHand',
     'MONEY_MARKET': 'savingsAccounts',
     'CD': 'savingsAccounts',
     'LIQUID': 'checkingAccounts',
-
-    // Investments
     'STOCKS': 'passiveInvestmentsValue',
     'EQUITY': 'passiveInvestmentsValue',
     'ETF': 'passiveInvestmentsValue',
@@ -65,88 +95,73 @@ const CATEGORY_TO_FIELDS: Record<string, keyof ZakatFormData | null> = {
     'OPTIONS': 'activeInvestments',
     'PROXY_30': 'passiveInvestmentsValue',
     'PROXY_100': 'activeInvestments',
-
-    // Retirement
     'RETIREMENT': 'fourOhOneKVestedBalance',
     '401K': 'fourOhOneKVestedBalance',
     'IRA': 'traditionalIRABalance',
     'ROTH_IRA': 'rothIRAContributions',
     'PENSION': 'fourOhOneKVestedBalance',
-
-    // Crypto
-    'CRYPTO': 'cryptoCurrency',
     'CRYPTOCURRENCY': 'cryptoCurrency',
     'BITCOIN': 'cryptoCurrency',
     'ETHEREUM': 'cryptoCurrency',
     'STAKING': 'stakedAssets',
     'NFT': 'cryptoTrading',
-
-    // Precious metals
     'GOLD': 'goldInvestmentValue',
     'SILVER': 'silverInvestmentValue',
     'METALS': 'goldInvestmentValue',
     'GOLD_FULL': 'goldInvestmentValue',
     'SILVER_FULL': 'silverInvestmentValue',
-
-    // Real estate - map to rental income (net cash received)
     'REAL_ESTATE': 'rentalPropertyIncome',
     'PROPERTY': 'rentalPropertyIncome',
-
-    // Business - map to business fields
     'BUSINESS': 'businessCashAndReceivables',
     'INVENTORY': 'businessInventory',
     'RECEIVABLES': 'goodDebtOwedToYou',
-
-    // Liabilities (negative values)
     'CREDIT_CARD': 'creditCardBalance',
     'DEBT': 'unpaidBills',
     'LOAN': 'studentLoansDue',
     'EXPENSE': 'monthlyLivingExpenses',
     'LIABILITY': 'unpaidBills',
-
-    // Other
-    'EXEMPT': null, // Not zakatable, don't map
+    'EXEMPT': null,
     'DEDUCTIBLE': null,
-    'OTHER': 'cashOnHand', // Default fallback
 };
 
 /**
  * Question context to relevant categories mapping
- * Used to filter which accounts appear for each question
- * 
- * NOTE: Categories are intentionally overlapping to handle real-world scenarios:
- * - Retirement accounts often appear in brokerage statements
- * - Brokerage accounts may have retirement holdings
- * - Credit cards may have rewards (cash-like)
  */
 const CONTEXT_TO_CATEGORIES: Record<QuestionContext, string[]> = {
     'liquid-assets': [
+        'CASH_CHECKING', 'CASH_SAVINGS', 'CASH_ON_HAND', 'CASH_DIGITAL_WALLET',
         'CHECKING', 'SAVINGS', 'CASH', 'MONEY_MARKET', 'CD', 'LIQUID',
-        'BROKERAGE_CASH', 'SWEEP', 'CASH_SWEEP', // Brokerage sweep accounts
+        'BROKERAGE_CASH', 'SWEEP', 'CASH_SWEEP',
     ],
     'investments': [
+        'INVESTMENT_STOCK', 'INVESTMENT_MUTUAL_FUND', 'INVESTMENT_BOND', 'INVESTMENT_ACTIVE',
+        'INVESTMENT_REIT', 'INCOME_DIVIDEND', 'INVESTMENT_EQUITY', 'INVESTMENT_FIXED_INCOME',
         'STOCKS', 'EQUITY', 'ETF', 'MUTUAL_FUNDS', 'INDEX_FUNDS', 'BONDS',
         'FIXED_INCOME', 'DIVIDENDS', 'ACTIVE_TRADING', 'OPTIONS', 'PROXY_30', 'PROXY_100',
-        'BROKERAGE', 'SECURITIES', // Generic brokerage
-        // Retirement often in brokerage statements:
+        'BROKERAGE', 'SECURITIES',
+        'RETIREMENT_401K', 'RETIREMENT_IRA', 'RETIREMENT_ROTH', 'RETIREMENT_HSA',
         'RETIREMENT', '401K', 'IRA', 'ROTH_IRA', 'PENSION', 'HSA', '529',
     ],
     'retirement': [
+        'RETIREMENT_401K', 'RETIREMENT_IRA', 'RETIREMENT_ROTH', 'RETIREMENT_HSA',
         'RETIREMENT', '401K', 'IRA', 'ROTH_IRA', 'PENSION', 'HSA', '529', '403B', '457',
-        // Retirement accounts hold investments:
+        'INVESTMENT_STOCK', 'INVESTMENT_MUTUAL_FUND', 'INVESTMENT_BOND',
         'STOCKS', 'EQUITY', 'ETF', 'MUTUAL_FUNDS', 'INDEX_FUNDS', 'BONDS', 'FIXED_INCOME',
         'BROKERAGE', 'SECURITIES',
     ],
     'crypto': [
-        'CRYPTO', 'CRYPTOCURRENCY', 'BITCOIN', 'ETHEREUM', 'STAKING', 'NFT',
+        'CRYPTO', 'CRYPTO_STAKED',
+        'CRYPTOCURRENCY', 'BITCOIN', 'ETHEREUM', 'STAKING', 'NFT',
         'DEFI', 'WALLET', 'ALTCOIN', 'TOKEN',
     ],
     'precious-metals': [
+        'COMMODITY_GOLD', 'COMMODITY_SILVER',
         'GOLD', 'SILVER', 'METALS', 'GOLD_FULL', 'SILVER_FULL',
         'BULLION', 'COINS', 'PLATINUM', 'PALLADIUM',
     ],
     'real-estate': [
         'REAL_ESTATE', 'PROPERTY', 'RENTAL', 'REIT', 'MORTGAGE_ASSET',
+        'INVESTMENT_REIT',
     ],
     'business': [
         'BUSINESS', 'INVENTORY', 'RECEIVABLES', 'REVENUE', 'COMMERCIAL',
@@ -155,6 +170,7 @@ const CONTEXT_TO_CATEGORIES: Record<QuestionContext, string[]> = {
         'TRUST', 'TRUSTEE', 'BENEFICIARY', 'ESTATE',
     ],
     'debts': [
+        'LIABILITY_CREDIT_CARD', 'LIABILITY_LOAN',
         'CREDIT_CARD', 'DEBT', 'LOAN', 'LIABILITY', 'EXPENSE',
         'MORTGAGE', 'AUTO_LOAN', 'STUDENT_LOAN', 'PERSONAL_LOAN', 'HOME_EQUITY',
         'BALANCE', 'OWED', 'PAYABLE', 'CREDIT_LINE',
@@ -177,7 +193,6 @@ export function isAccountRelevantForContext(
 
 /**
  * Filter accounts to those relevant for a given context
- * Also filters to accounts updated within maxAgeMonths
  */
 export function filterRelevantAccounts<T extends {
     id: string;
@@ -193,23 +208,19 @@ export function filterRelevantAccounts<T extends {
     cutoffDate.setMonth(cutoffDate.getMonth() - maxAgeMonths);
 
     return accounts.filter(account => {
-        // Check recency
         const accountDate = new Date(account.updated_at || account.created_at || 0);
         if (accountDate < cutoffDate) return false;
 
-        // Check relevance (if we have line items)
         if (account.lineItems && account.lineItems.length > 0) {
             return isAccountRelevantForContext(account.lineItems, context);
         }
 
-        // If no line items, include it (we'll fetch them later)
         return true;
     });
 }
 
 /**
  * Map line items from an account to form field updates
- * Returns partial ZakatFormData with values to merge
  */
 export function mapLineItemsToFormData(
     lineItems: AssetLineItem[]
@@ -220,9 +231,8 @@ export function mapLineItemsToFormData(
         const category = (item.zakat_category || item.inferred_category || 'OTHER').toUpperCase();
         const fieldName = CATEGORY_TO_FIELDS[category];
 
-        if (!fieldName) continue; // Skip unmapped categories
+        if (!fieldName) continue;
 
-        // Type-safe accumulation via Record cast for dynamic field access
         const currentValue = (updates as Record<string, number | undefined>)[fieldName] || 0;
         (updates as Record<string, number>)[fieldName] = currentValue + item.amount;
     }
@@ -232,7 +242,6 @@ export function mapLineItemsToFormData(
 
 /**
  * Merge imported account data into existing form data
- * Handles the cross-question nature of imports
  */
 export function mergeAccountIntoFormData(
     currentFormData: ZakatFormData,
@@ -240,7 +249,6 @@ export function mergeAccountIntoFormData(
 ): ZakatFormData {
     const updates = mapLineItemsToFormData(lineItems);
 
-    // Merge updates into current form data
     const merged = { ...currentFormData };
 
     for (const [key, value] of Object.entries(updates)) {
@@ -255,7 +263,6 @@ export function mergeAccountIntoFormData(
 
 /**
  * Get all form fields that would be updated by an account's line items
- * Useful for showing users which questions will be affected
  */
 export function getAffectedFormFields(lineItems: AssetLineItem[]): string[] {
     const fields = new Set<string>();
@@ -279,17 +286,17 @@ export function getAffectedQuestionLabels(lineItems: AssetLineItem[]): string[] 
     const labels = new Set<string>();
 
     for (const field of fields) {
-        if (['checkingAccounts', 'savingsAccounts', 'cashOnHand'].includes(field)) {
+        if (['checkingAccounts', 'savingsAccounts', 'cashOnHand', 'digitalWallets'].includes(field)) {
             labels.add('Liquid Assets');
-        } else if (['passiveInvestmentsValue', 'activeInvestments', 'dividends'].includes(field)) {
+        } else if (['passiveInvestmentsValue', 'activeInvestments', 'dividends', 'reitsValue'].includes(field)) {
             labels.add('Investments');
-        } else if (['fourOhOneKVestedBalance', 'traditionalIRABalance', 'rothIRAContributions'].includes(field)) {
+        } else if (['fourOhOneKVestedBalance', 'traditionalIRABalance', 'rothIRAContributions', 'hsaBalance'].includes(field)) {
             labels.add('Retirement');
         } else if (['cryptoCurrency', 'cryptoTrading', 'stakedAssets'].includes(field)) {
             labels.add('Crypto');
         } else if (['goldInvestmentValue', 'goldJewelryValue', 'silverInvestmentValue', 'silverJewelryValue'].includes(field)) {
             labels.add('Precious Metals');
-        } else if (['creditCardDebt', 'personalLoans', 'otherShortTermDebt'].includes(field)) {
+        } else if (['creditCardBalance', 'studentLoansDue', 'unpaidBills'].includes(field)) {
             labels.add('Debts');
         }
     }
