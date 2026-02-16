@@ -42,27 +42,27 @@ const DEMO_NODES = [
 ];
 
 const DEMO_LINKS = [
-    // Business ($140k) -> 40% Zakatable Inventory
-    { source: "Business", target: "Zakat_Due", value: 1400 },   // 2.5% of $56k
-    { source: "Business", target: "Retained", value: 54600 },   // Rest of zakatable
-    { source: "Business", target: "Exempt", value: 84000 },       // Fixed assets
+    // Business ($150k) -> 33% Zakatable
+    { source: "Business", target: "Zakat_Due", value: 1250 },   // 2.5% of $50k
+    { source: "Business", target: "Retained", value: 48750 },   // $50k - $1.25k
+    { source: "Business", target: "Exempt", value: 100000 },    // $150k - $50k
 
-    // Crypto ($80k) -> 100% Zakatable
-    { source: "Crypto", target: "Zakat_Due", value: 2000 },     // 2.5% of $80k
-    { source: "Crypto", target: "Retained", value: 78000 },
+    // Crypto ($60k) -> 100% Zakatable
+    { source: "Crypto", target: "Zakat_Due", value: 1500 },     // 2.5% of $60k
+    { source: "Crypto", target: "Retained", value: 58500 },
 
-    // Gold ($60k) -> 100% Zakatable
-    { source: "Gold", target: "Zakat_Due", value: 1500 },     // 2.5% of $60k
-    { source: "Gold", target: "Retained", value: 58500 },
+    // Gold ($50k) -> 100% Zakatable
+    { source: "Gold", target: "Zakat_Due", value: 1250 },      // 2.5% of $50k
+    { source: "Gold", target: "Retained", value: 48750 },
 
-    // Cash ($45k) -> 100% Zakatable
-    { source: "Cash", target: "Zakat_Due", value: 1125 },   // 2.5% of $45k
-    { source: "Cash", target: "Retained", value: 43875 },
+    // Cash ($40k) -> 100% Zakatable
+    { source: "Cash", target: "Zakat_Due", value: 1000 },      // 2.5% of $40k
+    { source: "Cash", target: "Retained", value: 39000 },
 
-    // Investments ($180k) -> 30% Zakatable
-    { source: "Investments", target: "Zakat_Due", value: 1350 }, // 2.5% of $54k
-    { source: "Investments", target: "Retained", value: 52650 },
-    { source: "Investments", target: "Exempt", value: 126000 },
+    // Investments ($200k) -> 20% Zakatable (e.g. following the 20% proxy or specific mix)
+    { source: "Investments", target: "Zakat_Due", value: 1000 }, // 2.5% of $40k
+    { source: "Investments", target: "Retained", value: 39000 },
+    { source: "Investments", target: "Exempt", value: 160000 },  // $200k - $40k
 ];
 
 const DEMO_DATA = { nodes: DEMO_NODES, links: DEMO_LINKS };
@@ -184,7 +184,7 @@ export function SankeyBrandMoment() {
                                 <span className="text-[10px] uppercase tracking-wider text-primary font-semibold flex items-center justify-center gap-1">
                                     <Wallet className="w-2.5 h-2.5" /> {sankey.zakatDue}
                                 </span>
-                                <span className="text-base font-bold font-mono text-primary">$5,500</span>
+                                <span className="text-base font-bold font-mono text-primary">$6,000</span>
                             </div>
                         </motion.div>
                     </div>
