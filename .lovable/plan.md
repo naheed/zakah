@@ -1,131 +1,185 @@
 
 
-# Fix: Account-Level Context for Document Extraction
+# Audit: Plaid Integration -- Account Type Detection and API Usage
 
-## The Core Problem
+## Current State Analysis
 
-Your Schwab 401(k) statement clearly says **"GOOGLE LLC 401K PLAN"** and **"Personal Choice Retirement Account (PCRA)"** at the top of every page. But the current system:
+### What Plaid Already Returns (But We Ignore)
 
-1. **Ignores the account wrapper type** -- Gemini classifies each holding by its *asset class* (TSLA -> `INVESTMENT_STOCK`, AMAGX -> `INVESTMENT_MUTUAL_FUND`), completely losing the fact that everything is inside a 401(k).
-2. **Has no `accountType` in the Gemini output** -- The tool schema returns `accountName` (a freeform string like "PCRA") but no structured `accountType` field.
-3. **The persistence layer defaults to `OTHER`** -- Since no `stepId` is passed when uploading from the "Upload First" flow, `inferAccountTypeFromStep()` returns `OTHER`, so the account type in the database is wrong.
-4. **Line items map to wrong wizard fields** -- TSLA inside a 401(k) maps to `passiveInvestmentsValue` instead of `fourOhOneKVestedBalance`.
+The Plaid `/accounts/get` and `/investments/holdings/get` APIs already return **structured account type and subtype fields** that tell us exactly what kind of container each account is:
 
-### What Should Happen with Your Schwab 401(k) Statement
+| Plaid Field | Example Values | What It Tells Us |
+|---|---|---|
+| `account.type` | `investment`, `depository`, `credit`, `loan` | High-level container |
+| `account.subtype` | `401k`, `roth`, `ira`, `brokerage`, `hsa`, `checking`, `savings` | Exact container type |
 
-| What Gemini Currently Does | What It Should Do |
-|---|---|
-| TSLA -> `INVESTMENT_STOCK` -> `passiveInvestmentsValue` | TSLA -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
-| AMAGX -> `INVESTMENT_MUTUAL_FUND` -> `passiveInvestmentsValue` | AMAGX -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
-| HLAL -> `INVESTMENT_STOCK` -> `passiveInvestmentsValue` | HLAL -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
-| Cash Sweep -> `CASH_SAVINGS` -> `savingsAccounts` | Cash Sweep -> `RETIREMENT_401K` -> `fourOhOneKVestedBalance` |
+For your Schwab 401(k), Plaid would return:
+- `type: "investment"`
+- `subtype: "401k"`
 
-The entire account value ($1,039,100.40) should roll up to the **401(k) vested balance** field for Zakat calculation purposes.
+**But our current code throws this away.** The `plaid-exchange-token` edge function maps accounts like this:
 
-## Architecture: Two-Layer Classification
+```
+accounts = accountsData.accounts.map((account) => ({
+    type: account.type,        // "investment" -- too generic
+    subtype: account.subtype,  // "401k" -- THIS IS THE KEY, but we don't use it
+    ...
+}));
+```
 
-The fix introduces a **two-layer classification** system:
+The client receives `type` and `subtype` but `persistPlaidDataWithUserKey` encrypts them into `encrypted_payload` and never uses them for classification. There is **no account-type-to-wizard-field mapping** for Plaid data at all.
 
-**Layer 1 -- Account Type (container):** What kind of account is this document from?
-- Detected from PDF metadata: "401K PLAN", "Roth IRA", "Brokerage", "Checking", "HSA", etc.
-- Returned as a new `accountType` field from Gemini.
-- User confirms/overrides in the ExtractionReview UI.
+### What API Products We Request
 
-**Layer 2 -- Asset Class (contents):** What are the individual holdings?
-- Stocks, mutual funds, ETFs, cash, bonds, etc.
-- This is what Gemini already does well.
-- Kept for informational display but NOT used for Zakat field mapping when the account type overrides it.
+In `plaid-link-token/index.ts`, we request:
+```
+products: ["investments", "transactions"]
+```
 
-**The rule:** When an account type is a retirement wrapper (401K, IRA, ROTH, HSA), ALL holdings inside it map to the corresponding retirement wizard field, regardless of their individual asset class.
+- **`investments`**: Gives us `/investments/holdings/get` (holdings with quantities, prices, cost basis). This is correct for brokerage and retirement accounts.
+- **`transactions`**: Gives us `/transactions/get` (individual transactions). We never actually call this endpoint -- we fetch it but don't use it.
+
+### Missing: Plaid Statements API
+
+Plaid has a **Statements** product (`/statements/list` + `/statements/download`) that retrieves actual bank-branded PDF statements. However, this is:
+- A separate product requiring `products: ["statements"]` in Link token
+- US-only, limited institution coverage
+- Returns PDFs, not structured data
+- Better suited for loan verification, not Zakat calculation
+
+**Recommendation**: We do NOT need the Statements API. The `/investments/holdings/get` and `/accounts/get` endpoints already return structured, machine-readable data (balances, holdings, quantities) which is far superior to parsing PDFs. The two-layer architecture should work with the structured data Plaid already gives us.
+
+### What We Should Remove
+
+The `transactions` product is requested but never used. This adds unnecessary Plaid Link friction (users see "transactions" permission request) and may limit institution compatibility. We should remove it unless there's a future plan for transaction data.
+
+## The Fix
+
+### Problem 1: Plaid subtype not mapped to AccountType
+
+Plaid returns `subtype: "401k"` but we never map it to our `AccountType` enum. We need a `plaidSubtypeToAccountType()` mapper.
+
+### Problem 2: No account-type override for Plaid holdings
+
+When Plaid data is persisted, individual holdings are stored with their asset class (stock, ETF, mutual fund) but there's no logic to roll them up based on the account container -- the same problem we fixed for PDF uploads.
+
+### Problem 3: Plaid data doesn't flow to the wizard
+
+After Plaid connect, data is stored in `plaid_accounts` and `plaid_holdings` tables, but there's no code that reads this data and maps it to `ZakatFormData` fields for calculation. The data is stored but never used for Zakat computation.
 
 ## Plan
 
-### Step 1: Add `accountType` to Gemini Prompt and Tool Schema
+### Step 1: Map Plaid subtypes to AccountType
 
-**File:** `supabase/functions/parse-financial-document/index.ts`
+**File:** `src/lib/accountImportMapper.ts` (or new `src/lib/plaidAccountMapper.ts`)
 
-- Add a new section to the `STATEMENT_PROMPT` instructing Gemini to detect the **account wrapper type** from document metadata (headers, footers, plan names).
-- Add an `accountType` field to the `extract_financial_data` tool schema with enum values matching `AccountType` in `src/types/assets.ts`: `CHECKING`, `SAVINGS`, `BROKERAGE`, `RETIREMENT_401K`, `RETIREMENT_IRA`, `ROTH_IRA`, `CRYPTO_WALLET`, `OTHER`.
-- Add clear prompt rules:
+Create a mapping from Plaid's `subtype` values to our `AccountType`:
 
-```text
-ACCOUNT TYPE DETECTION (CRITICAL):
-Look for these clues in the document header, footer, and account description:
-- "401(k)", "401K", "403(b)", "457" -> accountType = "RETIREMENT_401K"
-- "Roth IRA" -> accountType = "ROTH_IRA"  
-- "Traditional IRA", "SEP IRA", "IRA" -> accountType = "RETIREMENT_IRA"
-- "HSA", "Health Savings" -> accountType = "HSA"
-- "Brokerage", "Individual", "Joint" -> accountType = "BROKERAGE"
-- "Checking" -> accountType = "CHECKING"
-- "Savings", "Money Market" -> accountType = "SAVINGS"
-- "Crypto", "Digital Assets" -> accountType = "CRYPTO_WALLET"
-
-IMPORTANT: The accountType describes the CONTAINER, not the contents. 
-A 401(k) account that holds stocks and mutual funds is still accountType = "RETIREMENT_401K".
+```
+'401k' | 'roth 401k' | '403B' | '457b' | 'pension' -> RETIREMENT_401K
+'ira' | 'sep ira' | 'simple ira' -> RETIREMENT_IRA
+'roth' -> ROTH_IRA
+'hsa' -> HSA
+'brokerage' | 'stock plan' -> BROKERAGE
+'checking' -> CHECKING
+'savings' | 'money market' | 'cd' -> SAVINGS
+'crypto exchange' -> CRYPTO_WALLET
 ```
 
-- Return `accountType` in the response alongside existing fields.
+### Step 2: Apply account-type override in Plaid persistence
 
-### Step 2: Add Account Type Confirmation to ExtractionReview UI
+**File:** `src/lib/plaidEncryptedPersistence.ts`
 
-**File:** `src/components/zakat/ExtractionReview.tsx`
+After encrypting and persisting Plaid accounts, also create corresponding `asset_accounts` and `asset_snapshots` with the correct `AccountType` derived from Step 1. Each holding's `zakat_category` should be overridden based on the account container (same logic as the PDF extraction fix):
 
-- Add a new **Account Type** dropdown between the Institution Name and Account Name fields.
-- Pre-populate with Gemini's detected `accountType`.
-- User can override if Gemini got it wrong.
-- Use the `AccountType` values from `src/types/assets.ts` with user-friendly labels.
-- Show a brief explanation: "This determines how holdings are classified for Zakat. A 401(k) with stocks inside is treated as retirement, not investments."
+- `RETIREMENT_401K` container -> all holdings map to `fourOhOneKVestedBalance`
+- `RETIREMENT_IRA` container -> all holdings map to `traditionalIRABalance`
+- `ROTH_IRA` container -> all holdings map to `rothIRAContributions`
+- `HSA` container -> all holdings map to `hsaBalance`
+- `BROKERAGE` / `CHECKING` / `SAVINGS` -> per-holding asset class mapping (existing logic)
 
-### Step 3: Update `CATEGORY_TO_FORM_FIELD` Mapping with Account Context
+### Step 3: Create asset_accounts + snapshots from Plaid data
 
-**File:** `supabase/functions/parse-financial-document/index.ts`
+**File:** `src/hooks/usePlaidLink.ts` and `src/lib/plaidEncryptedPersistence.ts`
 
-- Update `aggregateLegacyData()` to accept an `accountType` parameter.
-- When `accountType` is `RETIREMENT_401K`, ALL line items map to `fourOhOneKVestedBalance` regardless of their `inferredCategory`.
-- When `accountType` is `RETIREMENT_IRA`, ALL map to `traditionalIRABalance`.
-- When `accountType` is `ROTH_IRA`, ALL map to `rothIRAContributions`.
-- When `accountType` is `CHECKING`, cash items stay as `checkingAccounts`.
-- When `accountType` is `BROKERAGE` or `OTHER`, use the existing per-line-item category mapping (current behavior).
+After Plaid exchange succeeds, in addition to persisting to `plaid_accounts`/`plaid_holdings`, also create:
+1. An `asset_account` row (with correct `type` from the subtype mapping) linked to the user's portfolio
+2. An `asset_snapshot` with `method: 'PLAID_API'`
+3. `asset_line_items` for each holding, with `zakat_category` set according to the account-type override logic
 
-### Step 4: Pass `accountType` Through the Extraction Flow
+This bridges the Plaid data into the same asset pipeline used by PDF uploads and manual entries, making it visible in the Assets page and usable in Zakat calculations.
 
-**Files:** `src/hooks/useDocumentParsingV2.ts`, `src/hooks/useExtractionFlow.ts`, `src/hooks/useAssetPersistence.ts`
+### Step 4: Remove unused `transactions` product
 
-- Add `accountType` to `DocumentExtractionResult` interface.
-- Pass it through `ReviewableData` and `ConfirmedData`.
-- In `persistExtraction()`, use `accountType` from the confirmed data instead of `inferAccountTypeFromStep()`.
-- In `createSnapshot()` / line item insertion, when `accountType` is a retirement type, override `inferred_category` and `zakat_category` accordingly.
+**File:** `supabase/functions/plaid-link-token/index.ts`
 
-### Step 5: Add `HSA` to `AccountType`
+Change:
+```
+products: ["investments", "transactions"]
+```
+To:
+```
+products: ["investments"]
+```
 
-**File:** `src/types/assets.ts`
+This reduces permission scope and improves institution coverage. If checking/savings accounts are needed (which don't have "investments"), we should use `products: ["transactions"]` only as a fallback or use Plaid's `required_if_supported_products` field.
 
-- Add `'HSA'` to the `AccountType` union type since it's missing but needed for HSA statement detection.
+Actually, the better approach for broad account support:
+```
+products: ["transactions"],
+additional_products: ["investments"]
+```
+
+This way:
+- Depository accounts (checking/savings) connect via `transactions` (which gives us `/accounts/get` with balances)
+- Investment accounts also return holdings via `/investments/holdings/get`
+
+### Step 5: Link `plaid_accounts` to `asset_accounts`
+
+**File:** `src/lib/plaidEncryptedPersistence.ts`
+
+The `plaid_accounts` table already has an `asset_account_id` FK column (currently always null). After creating the `asset_account`, update `plaid_accounts.asset_account_id` to link them. This enables future "refresh" flows where we can update the same asset_account with new Plaid data.
 
 ---
 
 ## Technical Details
 
-### Account Type to Wizard Field Override Map
+### Plaid subtype to AccountType mapping table
 
 ```text
-RETIREMENT_401K -> ALL holdings -> fourOhOneKVestedBalance
-RETIREMENT_IRA  -> ALL holdings -> traditionalIRABalance  
-ROTH_IRA        -> ALL holdings -> rothIRAContributions
-HSA             -> ALL holdings -> hsaBalance
-CHECKING        -> use per-line category mapping (default)
-SAVINGS         -> use per-line category mapping (default)
-BROKERAGE       -> use per-line category mapping (default)
-CRYPTO_WALLET   -> use per-line category mapping (default)
-OTHER           -> use per-line category mapping (default)
+Plaid subtype         -> AccountType
+-------------------------------------------
+401k, roth 401k       -> RETIREMENT_401K
+403B, 457b            -> RETIREMENT_401K
+pension, profit sharing -> RETIREMENT_401K
+ira, sep ira, simple ira -> RETIREMENT_IRA
+roth                  -> ROTH_IRA
+hsa                   -> HSA
+brokerage, stock plan -> BROKERAGE
+checking              -> CHECKING
+savings, money market, cd -> SAVINGS
+crypto exchange       -> CRYPTO_WALLET
+(anything else)       -> OTHER
 ```
 
-### Files to Modify
+### AccountType to ZakatFormData override (shared with PDF flow)
 
-1. `supabase/functions/parse-financial-document/index.ts` -- Add accountType to prompt, tool schema, response, and override logic in `aggregateLegacyData()`
-2. `src/types/assets.ts` -- Add `'HSA'` to AccountType
-3. `src/hooks/useDocumentParsingV2.ts` -- Add `accountType` to `DocumentExtractionResult`
-4. `src/hooks/useExtractionFlow.ts` -- Pass `accountType` through review flow
-5. `src/components/zakat/ExtractionReview.tsx` -- Add Account Type dropdown with user confirmation
-6. `src/hooks/useAssetPersistence.ts` -- Use confirmed `accountType` in persistence, override zakat_category for retirement wrappers
+```text
+RETIREMENT_401K -> ALL -> fourOhOneKVestedBalance
+RETIREMENT_IRA  -> ALL -> traditionalIRABalance
+ROTH_IRA        -> ALL -> rothIRAContributions
+HSA             -> ALL -> hsaBalance
+BROKERAGE       -> per-holding category mapping
+CHECKING        -> checkingAccounts (sum of balances)
+SAVINGS         -> savingsAccounts (sum of balances)
+CRYPTO_WALLET   -> per-holding category mapping
+```
+
+### Files to modify
+
+1. `src/lib/accountImportMapper.ts` -- Add `plaidSubtypeToAccountType()` mapping function
+2. `src/lib/plaidEncryptedPersistence.ts` -- Create asset_accounts, snapshots, and line items from Plaid data; link plaid_accounts to asset_accounts; apply account-type override for zakat_category
+3. `src/hooks/usePlaidLink.ts` -- Pass portfolio context; call updated persistence that creates asset pipeline entries
+4. `supabase/functions/plaid-link-token/index.ts` -- Change products to `["transactions"]` with `additional_products: ["investments"]` for broader coverage
+5. `src/hooks/useAssetPersistence.ts` -- Ensure `fetchAccounts` includes Plaid-created asset_accounts; add shared account-type override utility
 
