@@ -8,7 +8,8 @@
 
 | Priority | Phase | Feature Area | Status | Goal |
 |---|---|---|---|---|
-| **P0** | **Phase 14** | **Open Source Launch** | ⬜ Planned | Public repo, AGPL-3.0, community contributions |
+| **✅** | **Phase 13.5** | **Security & Classification Overhaul** | ✅ Complete | Two-tier encryption, Plaid encryption, upload/Plaid classification fixes |
+| **P0** | **Phase 14** | **Open Source Launch** | 🟡 In Progress | Public repo, AGPL-3.0 ✅, community contributions |
 | **P1** | **Phase 15** | **Reports 2.0** | ⬜ Planned | Frozen historical reports, YoY comparison, QR codes |
 | **P2** | **Phase 16** | **Charity Portal** | ⬜ Planned | Charity directory and verified recipient discovery |
 | **P3** | **Phase 17** | **Analytics** | ⬜ Planned | GA4 funnels, user feedback surveys |
@@ -17,6 +18,36 @@
 
 ## 📅 Roadmap Breakdown
 
+### Phase 13.5: Security & Classification Overhaul ✅ (v0.28.0 — Feb 15, 2026)
+> **Goal:** Production-grade security for encryption and data import, plus classification accuracy for uploads and Plaid.
+
+**Encryption:**
+- [x] Two-tier encryption architecture (Managed Key + Sovereign Key)
+- [x] Managed key schema migration
+- [x] CryptoService hybrid encryption support
+- [x] Privacy Vault refactor for dual-mode operation
+- [x] VaultGuard two-tier persistence flow
+
+**Plaid Security:**
+- [x] User-key encryption for Plaid access tokens (`plaidEncryptedPersistence.ts`)
+- [x] `plaid-exchange-token` encrypts at exchange time
+- [x] `plaid-cleanup-all` Edge Function for full Plaid revocation
+- [x] Documentation (`docs/PLAID_USER_KEY_ENCRYPTION.md`)
+
+**Classification Fixes:**
+- [x] `parse-financial-document` Edge Function rewrite for accurate asset categorization
+- [x] `accountImportMapper.ts` rewrite for Plaid account → Zakat category mapping
+- [x] `ExtractionReview.tsx` improved classification review UI
+- [x] `useAssetPersistence.ts` refactored import flow
+
+**Privacy & Compliance:**
+- [x] Privacy policy updated for Managed vs Sovereign encryption
+- [x] Terms of service refreshed
+- [x] Copy Framing Guide (`docs/COPY_FRAMING.md`)
+- [x] Fiqh Explanations content (`src/content/fiqhExplanations.ts`)
+
+---
+
 ### Phase 14: Open Source Launch
 > **Goal:** Make ZakatFlow transparent and community-driven.
 
@@ -24,13 +55,14 @@
 
 **Pre-Requisites (Security):**
 - [ ] Rotate Supabase anon key (Dashboard → Settings → API)
-- [ ] Fix `.gitignore` to exclude `.env` — **Done** (audit confirms)
+- [x] Fix `.gitignore` to exclude `.env` — **Done** (audit confirms)
 - [ ] Choose strategy: **Option A (clean this repo)** or **Option B (fresh clone, no history)** — backlog recommends **Option B** for zero credential/project-ID in history
 
 **License & Docs:**
-- [ ] Update LICENSE from MIT → AGPL-3.0
+- [x] Update LICENSE from MIT → AGPL-3.0 ✅ (v0.28.0)
+- [x] Add license headers to all source files ✅ (v0.28.0)
 - [ ] Add CODE_OF_CONDUCT.md (Contributor Covenant)
-- [ ] Add SECURITY.md (vulnerability reporting)
+- [x] Add SECURITY.md (vulnerability reporting) ✅
 
 **GitHub Setup:**
 - [ ] Enable Dependabot alerts

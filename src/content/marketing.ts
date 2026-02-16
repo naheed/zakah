@@ -23,7 +23,7 @@
 export const hero = {
     headline: 'Zakat,',
     headlineAccent: 'Clarified.',
-    subhead: "Navigate your complex portfolio—from 401(k)s to RSUs—with a professional Zakat calculator. Choose your preferred scholarly methodology and generate a detailed PDF or CSV report in minutes. Private, secure, and accurate.",
+    subhead: "Navigate your complex portfolio—401(k)s, crypto, gold, trusts, and more—across 8 scholarly methodologies. Generate a detailed PDF or CSV report in minutes. Private, secure, and accurate.",
 } as const;
 
 // REMOVED: valueBadges (Too noisy/redundant)

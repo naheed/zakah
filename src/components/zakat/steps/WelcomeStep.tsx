@@ -544,8 +544,8 @@ export function WelcomeStep({ onNext, onLoadCalculation, onViewResults }: Welcom
               variants={itemVariants}
               className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg"
             >
-              Navigate your complex portfolio—from 401(k)s to RSUs—with a professional Zakat calculator. Choose your preferred{' '}
-              <Link to="/methodology" className="text-primary hover:underline">scholarly methodology</Link>
+              Navigate your complex portfolio—401(k)s, crypto, gold, trusts, and more—across 8 scholarly{' '}
+              <Link to="/methodology" className="text-primary hover:underline">methodologies</Link>
               {' '}and generate a detailed PDF or CSV report in minutes. Private, secure, and accurate.
             </motion.p>
 

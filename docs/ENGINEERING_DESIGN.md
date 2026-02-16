@@ -3,14 +3,14 @@
 | **Author** | ZakatFlow Engineering Team |
 | :--- | :--- |
 | **Status** | Living Document |
-| **Last Updated** | February 14, 2026 (v0.27.0 — ZMCS v2.0) |
+| **Last Updated** | February 15, 2026 (v0.28.0 — Security & Classification Overhaul) |
 | **Audience** | Engineering, Product, Security, Open-Source Contributors |
 
 ## 1. Overview
 
 ### 1.1 Objective
 
-ZakatFlow is an open-source, privacy-first Zakat calculation platform. It transforms Zakat calculation from a simple form-based calculator into a comprehensive, methodology-aware system supporting 7+ scholarly methodologies via the **Zakat Methodology Configuration Standard (ZMCS)**.
+ZakatFlow is an open-source, privacy-first Zakat calculation platform. It transforms Zakat calculation from a simple form-based calculator into a comprehensive, methodology-aware system supporting 8 scholarly methodologies via the **Zakat Methodology Configuration Standard (ZMCS)**.
 
 ### 1.2 High-Level Goals
 
@@ -57,23 +57,29 @@ graph TD
 
 > Full security policy: [SECURITY.md](SECURITY.md)
 
-Data privacy is the paramount requirement for a financial application. ZakatFlow implements a **Hybrid Encryption Strategy** depending on user state.
+Data privacy is the paramount requirement for a financial application. ZakatFlow implements a **Two-Tier Encryption Architecture** with three trust zones.
 
 ### 3.1 Trust Zones
 
 | Zone | Data Type | Storage | Encryption | Access |
 | :--- | :--- | :--- | :--- | :--- |
 | **Guest Vault** | Asset values, PII | `localStorage` | AES-256-GCM (Client-Side) | Device Only |
-| **Cloud (User)** | Asset values, Zakat calculations, **Plaid account/holding metadata** | Postgres | TLS (Transit) + RLS + **user-key encrypted payloads** (`encrypted_payload` / `encrypted_metadata`) | Authenticated User Only (client decrypts with user key) |
-| **Secure Enclave** | Plaid access tokens only | Postgres | AES-256-GCM (Server-Side) | Edge Function Only |
+| **Cloud (User)** | Asset values, Zakat calculations, **Plaid account/holding metadata** | Postgres | TLS (Transit) + RLS + **Two-tier user-key encryption** (Managed Key or Sovereign zero-knowledge) | Authenticated User Only (client decrypts with user key) |
+| **Secure Enclave** | Plaid access tokens only | Postgres | AES-256-GCM (Server-Side, per-user PBKDF2 key) | Edge Function Only |
 
-### 3.2 Guest Vault Encryption
+### 3.2 Two-Tier Encryption (v0.28.0)
+
+- **Managed Mode** (Default): User's symmetric key stored in database under RLS. Frictionless — no recovery phrase needed. We store the key but do not access decrypted data.
+- **Sovereign Mode** (Opt-in): Key wrapped with a 12-word recovery phrase known only to the user. True zero-knowledge — server never sees the unencrypted key.
+- **Both modes**: AES-256-GCM via `SubtleCrypto` (Web Crypto API). All saved calculations, Plaid account data, and metadata blobs are encrypted client-side before storage.
+
+### 3.3 Guest Vault Encryption
 
 - **Algorithm**: AES-256-GCM via `SubtleCrypto` (Web Crypto API)
 - **Key Derivation**: Ephemeral session key in `sessionStorage` (memory-like)
 - **Threat Model**: Protects against casual snooping; does not protect against a compromised device
 
-### 3.3 Account Deletion (Cascade & Revoke)
+### 3.4 Account Deletion (Cascade & Revoke)
 
 1. Decrypt all stored Plaid tokens for the user
 2. Revoke access via Plaid API (`/item/remove`)
@@ -176,7 +182,7 @@ We employ a "Testing Trophy" strategy weighted toward Integration and Static Ana
 
 ### 6.1 ZMCS Compliance Tests
 
-All 7 presets are validated against a comprehensive compliance suite (`zmcs_compliance.test.ts`):
+All 8 presets are validated against a comprehensive compliance suite (`zmcs_compliance.test.ts`):
 
 - Schema validation (all presets pass Zod)
 - Metadata completeness

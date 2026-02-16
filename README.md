@@ -7,7 +7,7 @@
 
 **Zakat calculation made simple.** A guided, step-by-step application for accurate Islamic wealth purification.
 
-[Live Demo](https://zakatflow.org) · [Methodology](https://zakatflow.org/methodology) · [Report an Issue](https://github.com/your-username/zakatflow/issues)
+[Live Demo](https://zakatflow.org) · [Product Guide](PRODUCT.md) · [Methodology](https://zakatflow.org/methodology) · [Report an Issue](https://github.com/your-username/zakatflow/issues)
 
 ---
 
@@ -37,33 +37,31 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 > **Deep Dive**: For a comprehensive technical breakdown, see the [Engineering Design Document](docs/ENGINEERING_DESIGN.md).
 
 ```
-│                        Frontend (React)                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   Wizard    │  │   Assets    │  │  Donations  │  │   Report    │ │
-│  │   Pages     │  │   Dashboard │  │  Tracking   │  │   Export    │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘ │
-│         │                │                │                │        │
-│         └────────────────┼────────────────┼────────────────┘        │
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Frontend (React/Vite)                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌───────────┐  │
+│  │   Wizard    │  │   Assets    │  │  Donations  │  │  Report   │  │
+│  │   Pages     │  │  Dashboard  │  │  Tracking   │  │  Export   │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────┬─────┘  │
+│         └────────────────┼────────────────┼───────────────┘         │
 │                          ▼                ▼                         │
-│              ┌─────────────────────┐  ┌─────────────────────┐       │
-│              │   Zakat Calculation │  │   Active Hawl       │       │
-│              │      Engine         │  │      Manager        │       │
-│              └─────────────────────┘  └─────────────────────┘       │
+│  ┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────┐ │
+│  │   ZMCS Calculation  │  │   Privacy Vault     │  │  Active     │ │
+│  │   Engine (8 presets)│  │   (AES-256-GCM)     │  │  Hawl Mgr   │ │
+│  └─────────────────────┘  └─────────────────────┘  └─────────────┘ │
 └─────────────────────────────────────────────────────────────────────┘
                           │
                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     Backend (Supabase)                           │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   Auth      │  │   Database  │  │   Edge      │              │
-│  │   (Google)  │  │   (Postgres)│  │   Functions │              │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │
-│                          │                │                      │
-│                          │         ┌──────┴──────┐               │
-│                          │         │  AI Parser  │               │
-│                          │         │  (Gemini 3.0) │               │
-│                          │         └─────────────┘               │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Backend (Supabase)                               │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────────┐ │
+│  │   Auth      │  │   Database  │  │       Edge Functions         │ │
+│  │  (Google)   │  │  (Postgres) │  │  ┌──────────┐ ┌──────────┐  │ │
+│  └─────────────┘  └─────────────┘  │  │ AI Parser│ │  Plaid   │  │ │
+│                                    │  │(Gemini)  │ │  Sync    │  │ │
+│                                    │  └──────────┘ └──────────┘  │ │
+│                                    └──────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -149,20 +147,32 @@ src/
 │   ├── ui/                # Shadcn UI primitives
 │   ├── zakat/             # Domain-specific components
 │   │   ├── steps/         # Wizard step components
-│   │   └── report/        # Report generation components
+│   │   ├── report/        # Report generation components
+│   │   └── sankey/        # Sankey chart visualization
 │   ├── assets/            # Asset management components
-│   ├── settings/          # Settings page components (new)
+│   ├── vault/             # Privacy Vault (encryption UI)
+│   ├── settings/          # Settings page components
+│   ├── upload/            # Batch document upload
 │   └── donations/         # Donation tracking & receipt scanning
 ├── hooks/
-│   ├── useAuth.ts         # Authentication state
+│   ├── useAuth.ts              # Authentication state
 │   ├── useAssetPersistence.ts  # Asset CRUD operations
 │   ├── useDocumentParsingV2.ts # AI document extraction
-│   └── usePlaidLink.ts    # Bank connection (future)
+│   ├── usePlaidLink.ts         # Plaid bank connection
+│   └── usePrivacyVault.ts      # Two-tier encryption (Managed/Sovereign)
 ├── lib/
 │   ├── zakatCalculations.ts    # Core calculation engine
+│   ├── config/                 # ZMCS methodology presets
 │   ├── madhahRules.ts          # School of thought rules
-│   ├── assetCategories.ts      # Category definitions
+│   ├── assetCategories.ts      # Category definitions & classification
+│   ├── accountImportMapper.ts  # Plaid → Zakat category mapping
+│   ├── CryptoService.ts        # AES-256-GCM encryption service
+│   ├── plaidEncryptedPersistence.ts  # Plaid encrypted token storage
 │   └── generatePDFV2.ts        # PDF report generation
+├── content/               # All user-facing copy & content
+│   ├── privacy.ts         # Privacy policy content
+│   ├── fiqhExplanations.ts # Scholarly explanations
+│   └── zmcs-docs.ts       # ZMCS specification content
 ├── pages/                 # Route components
 ├── types/                 # TypeScript interfaces
 └── integrations/
@@ -171,8 +181,10 @@ src/
 supabase/
 ├── functions/             # Edge Functions
 │   ├── parse-financial-document/  # AI document parser
-│   ├── plaid-link-token/          # Plaid integration
-│   └── delete-account/            # Account deletion
+│   ├── plaid-link-token/          # Plaid Link session
+│   ├── plaid-exchange-token/      # Token exchange + encryption
+│   ├── plaid-cleanup-all/         # Revoke all Plaid connections
+│   └── delete-account/            # Account deletion + Plaid revocation
 └── migrations/            # Database schema
 ```
 
@@ -201,14 +213,7 @@ supabase/
                                                 └─────────────────┘
 ```
 
-### Zakat Categories
-
-| Category | Description | Zakat Rate |
-|----------|-------------|------------|
-| `LIQUID` | Cash, checking, savings | 100% |
-| `PROXY_30` | Passive investments (stocks, ETFs) | 30% proxy |
-| `PROXY_100` | Active trading, cryptocurrency | 100% |
-| `EXEMPT` | Personal use, unvested, liabilities | 0% |
+> **Note:** Zakat rates are not fixed constants — they are determined per-asset-class by the selected ZMCS methodology. For example, passive investments are 30% under Bradford but 100% under Tahir Anwar. See [ZMCS Specification](docs/ZMCS_SPECIFICATION.md) for the full schema.
 
 ### Donation Tracking Model
 
@@ -272,17 +277,17 @@ For detailed scholarly analysis, see [Zakat Jurisprudence](docs/ZAKAT_JURISPRUDE
 
 ## Deployment
 
-### Vercel (Recommended)
+### Frontend (Lovable Cloud)
+
+The production frontend is hosted on [Lovable Cloud](https://lovable.dev), which provides integrated Supabase backend services.
+
+For self-hosting or local development:
 
 ```bash
 npm run build
 # Output: dist/
+# Deploy to any static host (Vercel, Netlify, Cloudflare Pages, etc.)
 ```
-
-Configure in Vercel:
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Environment Variables**: Add your Supabase credentials
 
 ### Edge Functions
 
@@ -293,9 +298,8 @@ supabase functions deploy parse-financial-document
 supabase functions deploy delete-account
 supabase functions deploy plaid-link-token
 supabase functions deploy plaid-exchange-token
+supabase functions deploy plaid-cleanup-all
 ```
-
----
 
 ---
 
@@ -349,8 +353,10 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 | Settings & Vault | ✅ Complete | Expressive Dashboard & Data Safety (Privacy Shield) |
 | Bank Sync | ✅ Complete | Plaid Integration for real-time balances |
 | Methodology UX | ✅ Complete | Active Indicator & Context-Aware Switching |
+| Security Overhaul | ✅ Complete | Two-tier encryption, Plaid user-key encryption, AGPL-3.0 |
+| Open Source | 🟡 In Progress | AGPL license applied; repo prep for public launch |
 | Charity Directory | 📋 Planned | Search & filter vetted recipients |
-| Mobile App | 📋 Planned | React Native implementation |
+| ChatGPT App | 📋 Planned | Conversational Zakat calculation via OpenAI Apps SDK |
 
 ---
 

@@ -3,7 +3,7 @@
 **Organization:** vora.dev (dba ZakatFlow)
 **Owner:** Information Security Officer (security@vora.dev)
 **Effective Date:** January 5, 2026
-**Version:** 3.0
+**Version:** 3.1
 
 > This document consolidates ZakatFlow's security architecture, data privacy policies,
 > and contributor security guidelines into a single authoritative reference.
@@ -42,8 +42,8 @@ ZakatFlow is designed with a **zero-trust, secrets-never-in-code** architecture:
 | Zone | Data Type | Storage | Encryption | Access |
 | :--- | :--- | :--- | :--- | :--- |
 | **Guest Vault** | Asset values, PII | `localStorage` | AES-256-GCM (Client-Side) | Device Only |
-| **Cloud (User)** | Asset values | Postgres | TLS (Transit) + RLS (At Rest) | Authenticated User Only |
-| **Secure Enclave** | Plaid Tokens | Postgres | AES-256-GCM (Server-Side) | Edge Function Only |
+| **Cloud (User)** | Asset values, calculations, Plaid metadata | Postgres | TLS (Transit) + RLS + **Two-tier user-key encryption** (Managed Key or Sovereign zero-knowledge) | Authenticated User Only (client decrypts) |
+| **Secure Enclave** | Plaid access tokens | Postgres | AES-256-GCM (per-user PBKDF2 key, Server-Side) | Edge Function Only |
 
 ---
 

@@ -122,7 +122,7 @@ export default function About() {
                   Yes — and it always will be.
                 </p>
                 <p>
-                  Very soon, the entire codebase will be open-sourced. Naheed's sole intention is to spread good.
+                  The entire codebase is open-sourced under <a href="https://www.gnu.org/licenses/agpl-3.0" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">AGPL-3.0</a>. You can audit every line of code, including the encryption and privacy logic. Naheed's sole intention is to spread good.
                 </p>
               </div>
             </details>
@@ -190,23 +190,23 @@ export default function About() {
         <StaggerItem variant="slide-up">
           <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-border before:to-transparent text-left">
 
-            {/* Item 0 - NEW */}
+            {/* Item 0 - Security & Classification v0.28.0 */}
+            <div className="relative flex items-start group">
+              <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
+              <div className="ml-12">
+                <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
+                <h3 className="text-lg font-medium">Security & Classification Overhaul</h3>
+                <p className="text-muted-foreground mt-1 text-sm">Two-tier encryption, Plaid user-key encryption, improved upload and bank account classification, and AGPL-3.0 open source licensing.</p>
+              </div>
+            </div>
+
+            {/* Item 0.5 - ZMCS */}
             <div className="relative flex items-start group">
               <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
               <div className="ml-12">
                 <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
                 <h3 className="text-lg font-medium">Methodology Engine (ZMCS)</h3>
                 <p className="text-muted-foreground mt-1 text-sm">A new open standard for Zakat calculation. Live Nisab fetching, schema-driven rules, and total transparency.</p>
-              </div>
-            </div>
-
-            {/* Item 0.5 - NEW */}
-            <div className="relative flex items-start group">
-              <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
-              <div className="ml-12">
-                <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
-                <h3 className="text-lg font-medium">Active Methodology Indicator</h3>
-                <p className="text-muted-foreground mt-1 text-sm">Always know which scholar's rules are active. Switch methodologies instantly from any screen.</p>
               </div>
             </div>
 

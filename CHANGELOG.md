@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🌟 Feature Highlights (Quick Look)
 | Version | Major Feature | Released |
 |---|---|---|
+| **v0.28.0** | 🔒 **Security & Classification Overhaul** — AGPL, Two-Tier Encryption, Upload & Plaid Fixes | Feb 15, 2026 |
 | **v0.27.2** | 🔧 **ZMCS v2.0.1** — Multi-rate calculation + rental income override | Feb 14, 2026 |
 | **v0.27.1** | 📖 **Docs Consolidation** + **Al-Qaradawi Methodology** (8 total) | Feb 14, 2026 |
 | **v0.27.0** | 📐 **ZMCS v2.0** (Foundational Standard + 3 Scholar Configs) | Feb 14, 2026 |
@@ -21,6 +22,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **v0.11.0** | 🧾 **Donation Tracking** (Receipt Scanning) | Jan 6, 2026 |
 | **v0.6.0** | 🕌 **Madhab Support** (4 Schools of Thought) | Jan 3, 2026 |
 | **v0.1.0** | 🧠 **AI Extraction** (Asset Intelligence) | Dec 30, 2025 |
+
+---
+
+## [0.28.0] - 2026-02-15 (Security & Classification Overhaul)
+
+### Added
+- **AGPL-3.0 Open Source License**
+  - License headers added to 150+ source files across the entire codebase
+  - New `LICENSE` file (GNU Affero General Public License v3.0)
+  - `package.json` license field updated to `AGPL-3.0-or-later`
+  - `scripts/add_license_headers.cjs` automation for future files
+- **Two-Tier Encryption Architecture**
+  - **Managed Key Mode**: New server-managed encryption key (`managed_key` in `user_profiles`) as a fallback for users who don't want to manage a recovery phrase
+  - **CryptoService Upgrade**: `CryptoService.ts` extended with managed key derivation and hybrid encryption support
+  - **Privacy Vault Refactor**: `usePrivacyVault.ts` rewritten (~233 lines) to support both Sovereign (user-key) and Managed encryption modes
+  - **VaultGuard**: Updated to handle two-tier persistence choice flow
+  - DB Migration: `20260214220000_managed_key_schema.sql`
+- **Plaid User-Key Encryption**
+  - **`plaidEncryptedPersistence.ts`** (290 lines): New encrypted persistence layer for Plaid access tokens using per-user keys
+  - **`plaid-cleanup-all`** Edge Function (181 lines): Server-side cleanup that decrypts tokens and revokes all Plaid items
+  - **`plaid-exchange-token`** refactor: Now encrypts tokens at exchange time using user-derived keys
+  - DB Migration: `20260215100000_plaid_user_key_encryption.sql`
+  - Documentation: `docs/PLAID_USER_KEY_ENCRYPTION.md` (143 lines)
+- **Open Source Audit**: `docs/OPEN_SOURCE_AUDIT.md` (148 lines) documenting pre-launch findings and remediation strategies
+- **Copy Framing Guide**: `docs/COPY_FRAMING.md` (52 lines) establishing accurate privacy claim language
+- **Fiqh Explanations Content**: `src/content/fiqhExplanations.ts` (382 lines) — comprehensive scholarly explanations for UI tooltips
+
+### Changed
+- **AI Document Classification Rewrite**
+  - `parse-financial-document` Edge Function overhauled (238 lines changed) with improved line-item extraction, better category inference, and source-aware classification
+  - `ExtractionReview.tsx` upgraded with richer UI for reviewing and correcting AI classifications
+  - `useAssetPersistence.ts` refactored for cleaner import flow
+- **Plaid Account Classification**
+  - `accountImportMapper.ts` rewritten (63 lines) with improved Zakat category mapping from Plaid account/subtype
+  - `usePlaidLink.ts` expanded (91 lines) with encrypted persistence and better error handling
+  - `AccountCard.tsx` updated to display classification quality indicators
+- **Privacy & Terms Updates**
+  - `privacy.ts`: Updated claims to accurately distinguish Managed vs. Sovereign encryption modes
+  - `terms.ts`: Refreshed terms of service language
+  - `PrivacyShield.tsx`: Updated trust badges and privacy claim strings
+  - `common.ts`: Updated shared UI strings
+  - Auth, Invite, and LogoutSuccess pages: Refined copy
+- **PDF Report Updates**: `ZakatPDFDocumentV2.tsx` updated for latest methodology naming
+- **Methodology UX**
+  - `ActiveMethodologyIndicator.tsx` (125 lines): New persistent indicator showing active madhab
+  - `MethodologyExplorer.tsx`: Enhanced visualization and content
+  - `MethodologySelector.tsx`: Improved selection UX
+  - ZMCS tooltip standardization across all asset steps
+  - `MethodologyContributing.tsx`: Expanded contributing guide
+- **Supabase Runtime Client**: `runtimeClient.ts` iterated for encrypted client support (multiple stabilization passes)
+
+### Fixed
+- **Upload Classification**: Document extraction now properly maps extracted line items to correct Zakat asset categories
+- **Plaid Classification**: Bank accounts imported via Plaid now correctly categorize into Cash, Investments, Retirement, etc.
+- **Test Cleanup**: Removed 195 lines of deprecated test code; consolidated integration tests
 
 ---
 
