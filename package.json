@@ -13,10 +13,9 @@
     "bugs": {
         "url": "https://github.com/naheed/zakah/issues"
     },
-    "scripts": {        
+    "scripts": {
         "test": "npm run test --workspaces",
-        "build:dev": "vite build --mode development",
-        "test": "npm run test --workspaces"
+        "build:dev": "vite build --mode development"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.26.0",
