@@ -46,6 +46,9 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
         ui_label: "Shafi'i",
         tier: 'official',
         tooltip: "Classical Shafi'i: jewelry exempt, NO debt deduction, net accessible retirement, 100% investments.",
+        reference: {
+            authority: "Al-Nawawi (Al-Majmu' Sharh al-Muhadhdhab), Al-Shirazi (Al-Muhadhdhab fi Fiqh al-Imam al-Shafi'i)",
+        },
     },
 
     thresholds: {
@@ -59,6 +62,8 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
         zakat_rate: {
             lunar: 0.025,
             solar: 0.02577,
+            description: 'Standard 2.5% (1/40th) for a lunar year. Solar rate adjusted to 2.577% for the Gregorian calendar.',
+            tooltip: 'Standard 2.5% lunar rate. Solar rate adjusted for 365-day year (2.577%).',
         },
     },
 
@@ -67,7 +72,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             zakatable: true,
             rate: 1.0,
             description: 'All cash holdings fully zakatable.',
-            scholarly_basis: 'Unanimous consensus.',
+            scholarly_basis: 'Quran 9:34-35 establishes the obligation on gold and silver. Cash is the modern equivalent of gold and silver coinage (thaman). Consensus (ijma\') of all four schools that currency holdings are zakatable.',
             tooltip: 'All cash holdings fully zakatable.',
         },
 
@@ -79,7 +84,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 rate: 1.0,
                 conditions: ['personal_use'],
                 description: "Personal-use jewelry is EXEMPT from Zakat. Only gold/silver kept for trading or hoarding is zakatable.",
-                scholarly_basis: "Al-Nawawi in Al-Majmu': jewelry used for permissible personal adornment is exempt. Based on the practice of the Companions: Aishah, Ibn Umar, and Jabir did not pay Zakat on their jewelry. Al-Shirazi in Al-Muhadhdhab supports this ruling.",
+                scholarly_basis: "Al-Nawawi in Al-Majmu' Sharh al-Muhadhdhab: jewelry used for permissible personal adornment is exempt from Zakat. Based on the practice of the Companions: 'A'ishah (raḍiya Allāhu 'anhā) used to care for orphan girls with gold jewelry and did not pay Zakat on it (Muwatta' Malik). Ibn 'Umar and Jābir also held this view. Al-Shirazi in Al-Muhadhdhab supports this ruling, classifying worn jewelry as personal-use goods (hawā'ij aṣliyya) rather than monetary wealth.",
             },
             description: 'Investment metals zakatable. Personal jewelry exempt (permissible use).',
             tooltip: 'Personal-use jewelry is EXEMPT from Zakat. Investment metals zakatable.',
@@ -93,8 +98,9 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 rewards_rate: 1.0,
                 vested_only: true,
             },
-            description: 'Crypto fully zakatable as currency equivalent.',
-            tooltip: 'Crypto fully zakatable as currency equivalent.',
+            description: 'Crypto fully zakatable as a store of value analogous to currency or trade goods.',
+            scholarly_basis: 'Contemporary Shafi\'i scholars apply qiyās (analogical reasoning) to classify cryptocurrency: if used as a medium of exchange, it takes the ruling of currency (nuqūd); if held for profit, it takes the ruling of trade goods (\'urūḍ al-tijāra). In either case, Zakat is due at market value. The key Shafi\'i principle is that any wealth (māl) with thamaniyya (monetary value recognized by people) is zakatable.',
+            tooltip: 'Crypto fully zakatable as currency equivalent or trade goods.',
         },
 
         investments: {
@@ -103,7 +109,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 rate: 1.0,
                 treatment: 'market_value',
                 description: '100% of market value is zakatable. Stocks are viewed as trade goods.',
-                scholarly_basis: 'Stocks treated as trade goods at market value.',
+                scholarly_basis: "Al-Nawawi in Al-Majmu': trade goods (\'urūḍ al-tijāra) are valued at their market price (al-qīma al-sūqiyya) on the day the Hawl is complete. Stocks represent fractional ownership in company assets and are classified as trade goods. The market price is the authoritative valuation.",
             },
             reits_rate: 1.0,
             dividends: {
@@ -112,6 +118,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 description: 'Dividends zakatable.',
             },
             description: 'All investments at full market value.',
+            scholarly_basis: "Shafi'i fiqh: stocks are trade goods (\'urūḍ al-tijāra) valued at current market price. Al-Nawawi in Al-Majmu': the owner values trade goods at market price on the assessment date, not at cost.",
             tooltip: '100% of market value is zakatable. Stocks are viewed as trade goods.',
         },
 
@@ -124,15 +131,17 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             roth_earnings_follow_traditional: true,
             distributions_always_zakatable: true,
             description: 'Net accessible amount: balance minus taxes and penalties.',
-            scholarly_basis: "Contemporary Shafi'i application of accessibility principle.",
+            scholarly_basis: "Contemporary Shafi'i application of the principle of milk tām (complete ownership) and qudrah 'ala al-taṣarruf (ability to dispose). Al-Nawawi in Al-Majmu' establishes that Zakat is due on wealth over which the owner has actual authority. Retirement funds with withdrawal restrictions are zakatable on the net amount one could actually access, deducting penalties and taxes that would be incurred upon withdrawal.",
             tooltip: 'Net accessible amount: balance minus taxes and penalties.',
         },
 
         real_estate: {
-            primary_residence: { zakatable: false, description: 'Exempt.' },
-            rental_property: { zakatable: false, income_zakatable: true, description: 'Value exempt; rental income zakatable.' },
-            for_sale: { zakatable: true, rate: 1.0, description: 'Trade goods.' },
-            land_banking: { zakatable: true, rate: 1.0, description: 'Trade goods by intent.' },
+            primary_residence: { zakatable: false, description: 'Exempt. Personal-use assets (hawā\'ij aṣliyya) are not zakatable by consensus.' },
+            rental_property: { zakatable: false, income_zakatable: true, description: 'Property value exempt (exploited asset — al-māl al-mustaghall). Rental income zakatable at standard 2.5% rate.' },
+            for_sale: { zakatable: true, rate: 1.0, description: 'Trade goods (\'urūḍ al-tijāra) at full market value.' },
+            land_banking: { zakatable: true, rate: 1.0, description: 'Trade goods by intent (niyyat al-tijāra).' },
+            description: 'Personal property exempt. Rental income zakatable at 2.5%. Trade property at full value.',
+            tooltip: 'Personal property exempt. Rental income zakatable. Trade property at full value.',
         },
 
         business: {
@@ -140,6 +149,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
+            scholarly_basis: "Al-Nawawi in Al-Majmu': trade goods (\'urūḍ al-tijāra) including inventory and receivables are valued at market price and are zakatable. Fixed assets used in production (ālāt al-ṣinā'a) are exempt as they are not items of trade. This follows the principle that only nāmī (growth-generating) wealth is zakatable.",
             tooltip: 'Cash, receivables, inventory zakatable. Fixed assets exempt.',
         },
 
@@ -147,8 +157,16 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
             good_debt_rate: 1.0,
             bad_debt_rate: 0.0,
             bad_debt_on_recovery: true,
-            description: 'Good debts zakatable. Bad debts upon recovery.',
+            description: 'Good debts (dayn on a solvent, acknowledging debtor) are fully zakatable. Bad debts (doubtful recovery) are not zakatable until actually recovered.',
+            scholarly_basis: "Al-Nawawi in Al-Majmu': debts owed to you are classified by recoverability. A debt owed by a solvent, acknowledging debtor (mūsir muqirr) is treated as if the creditor holds the money — Zakat is due annually. A debt owed by an insolvent or denying debtor is like māl ḍimār (inaccessible wealth) — Zakat is deferred until recovery.",
             tooltip: 'Good debts zakatable. Bad debts upon recovery.',
+        },
+
+        trusts: {
+            revocable_rate: 1.0,
+            irrevocable_rate: 1.0,
+            description: 'Revocable trusts: grantor retains ownership (milk tām), fully zakatable. Irrevocable trusts: zakatable if the beneficiary has actual access and the ability to dispose (qudrah \'ala al-taṣarruf).',
+            tooltip: 'Trusts are look-through entities. Zakat on underlying assets if ownership/access exists.',
         },
     },
 
@@ -167,7 +185,7 @@ export const SHAFII_CONFIG: ZakatMethodologyConfig = {
                 taxes: 'none',
             },
             description: "NO debt deduction. Debts do not reduce Zakat liability in Shafi'i fiqh.",
-            scholarly_basis: "Shafi'i Position (Al-Majmu'): Zakat is attached to the wealth itself (Ain al-Mal), independent of the owner's liabilities. Existing debt does not prevent the obligation.",
+            scholarly_basis: "Shafi'i Position (Al-Nawawi, Al-Majmu' Sharh al-Muhadhdhab): Zakat is attached to the wealth itself ('ayn al-māl), independent of the owner's liabilities. The obligation arises from possessing Nisab, regardless of debt. Al-Nawawi: \"The correct view (al-ṣaḥīḥ) in our school is that debt does not prevent the obligation of Zakat.\" This is because Zakat is a right of the poor attached to the wealth, and the creditor's claim does not negate the poor's right.",
         },
         description: "Shafi'i: No debt deduction. Zakat obligation exists independently of the owner's debt situation.",
         tooltip: "NO debt deduction. Zakat obligation exists independently of the owner's debt situation.",

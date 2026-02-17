@@ -182,6 +182,7 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             inventory_rate: 1.0,
             fixed_assets_rate: 0.0,
             description: 'Business cash, receivables, and inventory are zakatable. Fixed assets exempt.',
+            scholarly_basis: 'Classical consensus across all schools: trade goods (\'urūḍ al-tijāra) — cash, receivables, inventory — are zakatable at market value. Fixed assets used in production (machinery, equipment) are exempt as tools of the trade, not items intended for sale.',
             tooltip: 'Business cash, receivables, and inventory are zakatable. Fixed assets exempt.',
         },
 
@@ -191,7 +192,16 @@ export const AMJA_CONFIG: ZakatMethodologyConfig = {
             bad_debt_rate: 0.0,
             bad_debt_on_recovery: true,
             description: 'Good debts zakatable. Bad debts only upon recovery.',
+            scholarly_basis: 'Standard majority scholarly position: debts owed by a solvent, acknowledging debtor are zakatable. Debts owed by an insolvent or denying debtor are not zakatable until recovered.',
             tooltip: 'Good debts zakatable. Bad debts only upon recovery.',
+        },
+
+        // ── Trusts ──
+        trusts: {
+            revocable_rate: 1.0,
+            irrevocable_rate: 1.0,
+            description: 'Trusts are look-through entities. Zakat is due on the underlying assets if the beneficiary has ownership and access. AMJA applies the principle of milk tām (complete ownership).',
+            tooltip: 'Trusts are look-through entities. Zakat on underlying assets if ownership/access exists.',
         },
     },
 

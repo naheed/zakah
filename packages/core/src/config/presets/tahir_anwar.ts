@@ -83,6 +83,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             lunar: 0.025,
             solar: 0.02577,
             description: 'Standard 2.5% lunar rate.',
+            tooltip: 'Standard 2.5% lunar rate. Solar rate adjusted for 365-day year (2.577%).',
         },
     },
 
@@ -200,6 +201,14 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             description: 'Good debts are zakatable. Bad debts only upon actual recovery.',
             scholarly_basis: 'Hanafi: Receivable debts (dayn) owed by a solvent debtor are zakatable. Debts owed by an insolvent debtor are not zakatable until recovered.',
             tooltip: 'Good debts are zakatable. Bad debts only upon actual recovery.',
+        },
+
+        // ── Trusts ──
+        trusts: {
+            revocable_rate: 1.0,
+            irrevocable_rate: 1.0,
+            description: 'Trusts are look-through entities. Zakat is due on the underlying assets if the beneficiary has ownership (milk tām) and access.',
+            tooltip: 'Trusts are look-through entities. Zakat on underlying assets if ownership/access exists.',
         },
     },
 

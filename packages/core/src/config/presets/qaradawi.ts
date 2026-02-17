@@ -193,8 +193,10 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
             land_banking: {
                 zakatable: true,
                 rate: 1.0,
-                description: 'Undeveloped land held for appreciation: zakatable annually as trade goods by intent.',
+            description: 'Undeveloped land held for appreciation: zakatable annually as trade goods by intent.',
             },
+            description: 'Personal property exempt. Rental income at 10% (agricultural analogy). Trade property at full value.',
+            tooltip: 'Personal property exempt. Rental income at 10%. Trade property at full value.',
         },
 
         // ── Business ──
@@ -213,8 +215,16 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
             bad_debt_rate: 0.0,
             bad_debt_on_recovery: true,
             description: 'Good debts (collectible) are zakatable. Bad debts only upon actual recovery.',
-            scholarly_basis: 'Standard scholarly position across all schools.',
+            scholarly_basis: 'Fiqh al-Zakah: debts owed by a solvent, acknowledging debtor are zakatable annually. Debts owed by an insolvent or denying debtor are māl ḍimār (inaccessible wealth) — Zakat deferred until recovery.',
             tooltip: 'Good debts zakatable. Bad debts only upon actual recovery.',
+        },
+
+        // ── Trusts ──
+        trusts: {
+            revocable_rate: 1.0,
+            irrevocable_rate: 1.0,
+            description: 'Trusts are look-through entities. Zakat is due on the underlying assets if the beneficiary has ownership and the ability to dispose (qudrah \'ala al-taṣarruf).',
+            tooltip: 'Trusts are look-through entities. Zakat on underlying assets if ownership/access exists.',
         },
     },
 
