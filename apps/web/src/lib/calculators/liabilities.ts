@@ -20,7 +20,7 @@ import { ZakatMethodologyConfig } from '../config/types';
 import { DEFAULT_CONFIG } from '../config/defaults';
 
 // =============================================================================
-// Liability Calculation Engine (ZMCS v2.0)
+// Liability Calculation Engine (ZMCS v1.0)
 // =============================================================================
 //
 // This function calculates total deductible liabilities based on the methodology

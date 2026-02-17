@@ -37,10 +37,10 @@ import { ZakatMethodologyConfig } from '../types';
 
 export const SHAFII_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'shafii-standard-v2',
+        id: 'shafii-standard',
         name: "Shafi'i",
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: "Classical Shafi'i: jewelry exempt, NO debt deduction, net accessible retirement, 100% investments.",
         ui_label: "Shafi'i",

@@ -37,10 +37,10 @@ import { ZakatMethodologyConfig } from '../types';
 
 export const HANBALI_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'hanbali-standard-v2',
+        id: 'hanbali-standard',
         name: 'Hanbali',
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Classical Hanbali: jewelry exempt, full debt deduction, net accessible retirement, 100% investments.',
         ui_label: 'Hanbali',

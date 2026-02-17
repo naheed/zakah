@@ -3,7 +3,7 @@ import { baseAgent } from './base.agent';
 
 export const hanbaliAgent: AgentOverlay = {
     ...baseAgent,
-    target_methodology_id: "hanbali-standard-v2",
+    target_methodology_id: "hanbali-standard",
     agent_persona: {
         ...baseAgent.agent_persona,
         role: "You are a precise Zakat calculation agent following the classical Hanbali school. Your primary goal is to use the `calculate_zakat` tool."

@@ -18,7 +18,7 @@
 import { z } from 'zod';
 
 // =============================================================================
-// ZMCS: Zakat Methodology Configuration Standard — Schema Definition v2.0.0
+// ZMCS: Zakat Methodology Configuration Standard — Schema Definition v1.0.0
 // =============================================================================
 //
 // PURPOSE:
@@ -46,9 +46,9 @@ import { z } from 'zod';
 // 1. META — Identity, attribution, and certification
 // ---------------------------------------------------------------------------
 export const MetaSchema = z.object({
-    /** Unique slug identifier for this configuration (e.g., 'hanafi-standard-v1'). Must be URL-safe. */
+    /** Unique slug identifier for this configuration (e.g., 'hanafi-standard'). Must be URL-safe. */
     id: z.string()
-        .describe("Unique slug identifier for this configuration (e.g., 'hanafi-standard-v1'). Must be URL-safe."),
+        .describe("Unique slug identifier for this configuration (e.g., 'hanafi-standard'). Must be URL-safe."),
 
     /** Human-readable name of the methodology (e.g., 'Hanafi Standard'). */
     name: z.string()

@@ -51,7 +51,7 @@ import { ZakatMethodologyConfig } from '../types';
 //   - IUMS (International Union of Muslim Scholars) rulings
 //   - islamiceconomicsproject.com/fiqh-uz-zakat/
 //
-// LIMITATIONS (ZMCS v2.0.1):
+// LIMITATIONS (ZMCS v1.0.1):
 //   Two of Al-Qaradawi's unique positions cannot be fully represented:
 //   1. 10% on net profits for purely industrial companies — ZakatFlow does not
 //      distinguish portfolio sectors. The 30% underlying-assets proxy (which
@@ -59,7 +59,7 @@ import { ZakatMethodologyConfig } from '../types';
 //   2. Zakat al-Mustafad (immediate salary Zakat) — ZakatFlow uses a year-end
 //      balance model. Salary accumulated as cash at year-end is still zakatable.
 //
-// RESOLVED in v2.0.1:
+// RESOLVED in v1.0.1:
 //   - 5-10% on rental income (agricultural analogy) — Now implemented via
 //     rental_property.income_rate override (set to 0.10 = 10%). Rental income
 //     is taxed at 10% instead of the global 2.5% rate.
@@ -71,7 +71,7 @@ export const QARADAWI_CONFIG: ZakatMethodologyConfig = {
         id: 'qaradawi-fiqh-alzakah-v1',
         name: 'Dr. Yusuf Al-Qaradawi (Fiqh al-Zakah)',
         version: '1.0.0',
-        zmcs_version: '2.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official (based on Fiqh al-Zakah by Dr. Yusuf Al-Qaradawi)',
         description: 'The most comprehensive modern Zakat treatise. Combines classical scholarship with progressive ijtihād: jewelry exempt (paying recommended), 30% proxy for passive investments, 10% on rental income (agricultural analogy), net-accessible retirement, 12-month debt rule, gold Nisab standard.',
         ui_label: 'Al-Qaradawi (Fiqh al-Zakah)',

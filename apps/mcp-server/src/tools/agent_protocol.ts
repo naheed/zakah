@@ -42,40 +42,38 @@ export function registerAgentProtocol(mcp: McpServer) {
                     protocol = bradfordAgent;
                     break;
                 case 'amja':
-                case 'amja-standard-v2':
+                case 'amja-standard':
                     protocol = amjaAgent;
                     break;
                 case 'tahir_anwar':
-                case 'tahir-anwar-hanafi-v2':
+                case 'tahir-anwar-hanafi':
                     protocol = tahirAnwarAgent;
                     break;
                 case 'qaradawi':
-                case 'qaradawi-fiqh-alzakah-v1':
+                case 'qaradawi-fiqh-alzakah':
                     protocol = qaradawiAgent;
                     break;
                 case 'hanafi':
-                case 'hanafi-standard-v2':
+                case 'hanafi-standard':
                     protocol = hanafiAgent;
                     break;
                 case 'shafii':
-                case 'shafii-standard-v2':
+                case 'shafii-standard':
                     protocol = shafiiAgent;
                     break;
                 case 'maliki':
-                case 'maliki-standard-v2':
+                case 'maliki-standard':
                     protocol = malikiAgent;
                     break;
                 case 'hanbali':
-                case 'hanbali-standard-v2':
+                case 'hanbali-standard':
                     protocol = hanbaliAgent;
                     break;
                 default:
-                    // Return bradford as safe default, or error
-                    // For now, let's return a helpful error so the agent knows to retry or stick to defaults
                     return {
                         content: [{
                             type: "text",
-                            text: `Protocol not found for ID: ${methodology_id}. Available: bradford, amja, tahir-anwar-hanafi-v2, qaradawi-fiqh-alzakah-v1`
+                            text: `Protocol not found for ID: ${methodology_id}. Available: bradford, amja, tahir-anwar-hanafi, qaradawi-fiqh-alzakah`
                         }]
                     };
             }

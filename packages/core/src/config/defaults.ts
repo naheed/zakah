@@ -44,10 +44,10 @@ import { ZakatMethodologyConfig } from './types';
 
 export const DEFAULT_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'balanced-bradford-v2',
+        id: 'balanced-bradford',
         name: 'Balanced (Sheikh Joe Bradford)',
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Modern synthesis by Sheikh Joe Bradford: 30% proxy for passive investments, retirement exempt under 59.5, jewelry zakatable, 12-month debt deduction.',
         ui_label: 'Balanced (Bradford)',

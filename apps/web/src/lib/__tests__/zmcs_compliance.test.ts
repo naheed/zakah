@@ -23,7 +23,7 @@ import { ZakatMethodologySchema } from "@zakatflow/core";
 import { loadMethodologyConfig, validateConfig } from "@zakatflow/core";
 
 // =============================================================================
-// ZMCS v2.0 COMPLIANCE SUITE
+// ZMCS v1.0 COMPLIANCE SUITE
 // =============================================================================
 //
 // This test suite validates that:
@@ -341,7 +341,7 @@ describe('ZMCS Roth IRA Rules', () => {
 });
 
 // =============================================================================
-// 9. Rental Income Rate Override (ZMCS v2.0.1 — Multi-Rate)
+// 9. Rental Income Rate Override (ZMCS v1.0.1 — Multi-Rate)
 // =============================================================================
 //
 // Al-Qaradawi applies 10% on net rental income (agricultural analogy) instead

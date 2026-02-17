@@ -39,10 +39,10 @@ import { ZakatMethodologyConfig } from '../types';
 
 export const MALIKI_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'maliki-standard-v2',
+        id: 'maliki-standard',
         name: 'Maliki',
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Classical Maliki: jewelry exempt, 12-month debt deduction, commercial debt ring-fenced to business assets, 100% investments.',
         ui_label: 'Maliki',

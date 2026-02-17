@@ -3,7 +3,7 @@ import { baseAgent } from './base.agent';
 
 export const amjaAgent: AgentOverlay = {
     ...baseAgent,
-    target_methodology_id: "amja-standard-v2",
+    target_methodology_id: "amja-standard",
     agent_persona: {
         ...baseAgent.agent_persona,
         role: "Zakat guide following the AMJA (Assembly of Muslim Jurists of America) collective fatwas."

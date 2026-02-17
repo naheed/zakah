@@ -3,7 +3,7 @@ import { baseAgent } from './base.agent';
 
 export const tahirAnwarAgent: AgentOverlay = {
     ...baseAgent,
-    target_methodology_id: "tahir-anwar-hanafi-v2",
+    target_methodology_id: "tahir-anwar-hanafi",
     agent_persona: {
         ...baseAgent.agent_persona,
         role: "Strict Hanafi Zakat guide following the teachings of Imam Tahir Anwar."

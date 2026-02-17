@@ -16,7 +16,7 @@
  */
 
 // =============================================================================
-// Zakat Calculation Engine (ZMCS v2.0.1 — Multi-Rate Support)
+// Zakat Calculation Engine (ZMCS v1.0.1 — Multi-Rate Support)
 // =============================================================================
 //
 // This is the main entry point for Zakat calculation. It orchestrates:
@@ -26,7 +26,7 @@
 //   4. Nisab threshold comparison
 //   5. Multi-rate Zakat calculation
 //
-// v2.0.1 Multi-Rate Architecture:
+// v1.0.1 Multi-Rate Architecture:
 // ─────────────────────────────
 // Some methodologies apply different Zakat rates to specific asset classes.
 // For example, Al-Qaradawi applies 10% to net rental income (agricultural
