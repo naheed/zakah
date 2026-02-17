@@ -66,6 +66,19 @@ By participating in this project, you agree to maintain a respectful and inclusi
    npm test
    ```
 
+## Monorepo & Lovable Build Contract
+
+This project is a monorepo (`apps/web`, `apps/mcp-server`, `packages/core`) that also builds inside Lovable's single-package environment.
+
+### Key Rules
+
+1. **The root `package.json` is the single source of truth for Lovable builds.** Lovable installs dependencies from the root only — it does not read `apps/web/package.json`.
+2. **When adding a dependency to `apps/web/package.json`, you MUST also add it to the root `package.json`** with the same version range.
+3. **Root config files are wrappers.** `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`, and `postcss.config.cjs` at the root point the build to `apps/web/src`. Do not delete them.
+4. **`packages/core` is resolved via Vite alias** (`@zakatflow/core` → `packages/core/src/index.ts`), not via npm workspaces.
+5. **`apps/mcp-server` is NOT built by Lovable.** It has its own build pipeline.
+6. **React 18 and Tailwind v3 are pinned.** Do not upgrade to React 19 or Tailwind v4 without a coordinated migration.
+
 ### Setting Up Supabase
 
 1. Create a free project at [supabase.com](https://supabase.com)
