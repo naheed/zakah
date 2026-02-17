@@ -1,0 +1,28 @@
+{
+    "name": "@zakatflow/core",
+    "version": "0.1.0",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "scripts": {
+        "build": "tsup src/index.ts --format esm,cjs --dts",
+        "dev": "tsup src/index.ts --format esm,cjs --watch --dts",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "zod": "^3.25.76",
+        "decimal.js": "^10.4.3"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.1",
+        "tsup": "^8.0.1"
+    }
+}

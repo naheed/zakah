@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "zakatflow": {
+            "command": "node",
+            "args": [
+                "dist/apps/mcp-server/dist/stdio.js"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            }
+        }
+    }
+}
