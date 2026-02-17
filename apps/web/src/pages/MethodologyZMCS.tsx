@@ -21,9 +21,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
-import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCircle, WarningCircle, Users, GitBranch, ShareNetwork } from "@phosphor-icons/react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Code, FileText, Database, ShieldCheck, Copy, Check, CaretRight, CheckCircle, WarningCircle, Users, GitBranch, ShareNetwork, Lightbulb, LinkSimple, Scales, Eye, EyeSlash } from "@phosphor-icons/react";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { JsonViewer } from "@/components/ui/JsonViewer";
@@ -53,14 +54,14 @@ const TYPE_STYLES: Record<string, { label: string; className: string }> = {
     enum: { label: "ENUM", className: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" },
 };
 
-// ─── Split a dot path into breadcrumb + leaf ─────────────────────────────────
+// ─── Split a dot path into breadcrumb + leaf with anchor link ────────────────
 function FieldPath({ path }: { path: string }) {
     const parts = path.split(".");
     const leaf = parts.pop()!;
     const breadcrumb = parts.join(" › ");
 
     return (
-        <div className="font-mono text-sm">
+        <div id={path} className="font-mono text-sm scroll-mt-28 group">
             {breadcrumb && (
                 <span className="text-muted-foreground/50 text-xs">
                     {breadcrumb}
@@ -68,6 +69,9 @@ function FieldPath({ path }: { path: string }) {
                 </span>
             )}
             <span className="font-semibold text-primary">{leaf}</span>
+            <a href={`#${path}`} className="ml-1.5 opacity-0 group-hover:opacity-60 transition-opacity text-muted-foreground" aria-label={`Link to ${path}`}>
+                <LinkSimple className="w-3 h-3 inline" />
+            </a>
         </div>
     );
 }
@@ -81,11 +85,16 @@ function FieldRow({ field }: { field: ZMCSField }) {
             {/* Row 1: Path */}
             <FieldPath path={field.path} />
 
-            {/* Row 2: Type + Required + Default — inline metadata */}
+            {/* Row 2: Type + Required + Default + Category — inline metadata */}
             <div className="flex items-center gap-2 flex-wrap">
                 <span className={cn("text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded", typeStyle.className)}>
                     {typeStyle.label}
                 </span>
+                {field.category === 'content' && (
+                    <span className="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        UI Content
+                    </span>
+                )}
                 {field.required ? (
                     <span className="text-[10px] uppercase tracking-wider font-bold text-primary">
                         required
@@ -110,6 +119,19 @@ function FieldRow({ field }: { field: ZMCSField }) {
                 {field.description}
             </p>
 
+            {/* Row 3b: Expandable scholarly detail */}
+            {field.detail && (
+                <Collapsible>
+                    <CollapsibleTrigger className="text-xs text-primary hover:underline flex items-center gap-1 group/detail">
+                        <CaretRight className="w-3 h-3 transition-transform group-data-[state=open]/detail:rotate-90" />
+                        Scholarly detail
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2 text-sm text-muted-foreground leading-relaxed pl-4 border-l-2 border-primary/15">
+                        {field.detail}
+                    </CollapsibleContent>
+                </Collapsible>
+            )}
+
             {/* Row 4: Enum options (if any) */}
             {field.options && (
                 <div className="mt-1 rounded-lg border border-border/60 overflow-hidden bg-muted/20">
@@ -132,8 +154,11 @@ function FieldRow({ field }: { field: ZMCSField }) {
 
             {/* Row 5: Help text cross-reference */}
             {field.helpText && (
-                <p className="text-xs text-muted-foreground/60 italic">
-                    💡 Calculator tooltip: <code className="bg-muted px-1 py-0.5 rounded text-[10px] not-italic">{field.helpText}</code>
+                <p className="text-xs text-muted-foreground/60 flex items-center gap-1.5">
+                    <Lightbulb className="w-3.5 h-3.5 shrink-0" weight="fill" />
+                    <span className="italic">
+                        Related guidance: <code className="bg-muted px-1 py-0.5 rounded text-[10px] not-italic">{field.helpText}</code>
+                    </span>
                 </p>
             )}
         </div>
@@ -142,10 +167,16 @@ function FieldRow({ field }: { field: ZMCSField }) {
 
 // ─── Group fields by their group property ────────────────────────────────────
 function GroupedFields({ fields }: { fields: ZMCSField[] }) {
+    const [showContentFields, setShowContentFields] = useState(false);
+
+    // Separate content fields from calculation fields
+    const contentFields = fields.filter((f) => f.category === 'content');
+    const visibleFields = showContentFields ? fields : fields.filter((f) => f.category !== 'content');
+
     // Collect fields into ordered groups
     const groups: { name: string; icon?: ZMCSField["groupIcon"]; fields: ZMCSField[] }[] = [];
 
-    fields.forEach((field) => {
+    visibleFields.forEach((field) => {
         const groupName = field.group || "General";
         const existing = groups.find((g) => g.name === groupName);
         if (existing) {
@@ -155,19 +186,41 @@ function GroupedFields({ fields }: { fields: ZMCSField[] }) {
         }
     });
 
+    const contentToggle = contentFields.length > 0 ? (
+        <div className="mb-4 flex items-center gap-3">
+            <button
+                onClick={() => setShowContentFields(!showContentFields)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+                {showContentFields ? <EyeSlash className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {showContentFields ? "Hide" : "Show"} UI content fields
+                <span className="text-[10px] text-muted-foreground/50">({contentFields.length})</span>
+            </button>
+            {!showContentFields && (
+                <span className="text-[10px] text-muted-foreground/40 italic">
+                    ZMCS configs include UI content fields (tooltips) that drive the calculator interface.
+                </span>
+            )}
+        </div>
+    ) : null;
+
     // If only one group (e.g., Metadata), skip the group headers
     if (groups.length <= 1) {
         return (
-            <div className="divide-y divide-border/50">
-                {fields.map((field, idx) => (
-                    <FieldRow key={idx} field={field} />
-                ))}
+            <div>
+                {contentToggle}
+                <div className="divide-y divide-border/50">
+                    {visibleFields.map((field, idx) => (
+                        <FieldRow key={idx} field={field} />
+                    ))}
+                </div>
             </div>
         );
     }
 
     return (
         <div className="space-y-8">
+            {contentToggle}
             {groups.map((group) => (
                 <div key={group.name}>
                     {/* Sub-group header */}
@@ -196,29 +249,35 @@ function GroupedFields({ fields }: { fields: ZMCSField[] }) {
     );
 }
 
-// ... existing imports
-
 export function MethodologyZMCS() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [copied, setCopied] = useState(false);
+    const [activeTab, setActiveTab] = useState("assets");
+    const location = useLocation();
 
     // Get preset from URL or default to 'bradford'
     const presetParam = searchParams.get("preset");
     const selectedPreset = (presetParam && ZAKAT_PRESETS[presetParam]) ? presetParam : "bradford";
     const selectedConfig = ZAKAT_PRESETS[selectedPreset];
 
-    // Scroll to section if hash is present (handling hydration timing)
+    // Scroll to section if hash is present (handling hydration timing + field-level deep links)
     useEffect(() => {
         if (window.location.hash) {
             const id = window.location.hash.replace("#", "");
-            const element = document.getElementById(id);
-            if (element) {
-                setTimeout(() => {
-                    element.scrollIntoView({ behavior: "smooth" });
-                }, 100);
+            // If hash contains a dot, it's a field path — find the right tab
+            if (id.includes(".")) {
+                const sectionId = ZMCS_DOCS.find(s =>
+                    s.fields.some(f => f.path === id)
+                )?.id;
+                if (sectionId) {
+                    setActiveTab(sectionId);
+                }
             }
+            setTimeout(() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+            }, 200);
         }
-    }, [location.hash]); // Re-run if hash changes
+    }, [location.hash]);
 
     const setSelectedPreset = (presetId: string) => {
         setSearchParams({ preset: presetId }, { replace: true });
@@ -451,7 +510,20 @@ export function MethodologyZMCS() {
                     These controls allow precise tuning of the engine to match any valid juristic opinion.
                 </p>
 
-                <Tabs defaultValue="assets" className="w-full">
+                {/* Cross-link to methodology comparison */}
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50 text-sm">
+                    <Scales className="w-4 h-4 text-primary shrink-0" weight="duotone" />
+                    <span className="text-muted-foreground">
+                        Want to compare how different methodologies handle these parameters?
+                        Use the{' '}
+                        <Link to="/methodology" className="text-primary hover:underline font-medium">
+                            Methodology Comparison
+                        </Link>{' '}
+                        tool for side-by-side analysis.
+                    </span>
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-transparent p-0 overflow-x-auto">
                         {ZMCS_DOCS.map((section) => (
                             <TabsTrigger
