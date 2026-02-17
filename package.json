@@ -15,7 +15,7 @@
     },
     "scripts": {        
         "test": "npm run test --workspaces",
-        "build:dev": "vite build --mode development"
+        "build:dev": "vite build --mode development",
         "test": "npm run test --workspaces"
     },
     "dependencies": {
