@@ -7,7 +7,7 @@
 
 **Zakat calculation made simple.** A guided, step-by-step application for accurate Islamic wealth purification.
 
-[Live Demo](https://zakatflow.org) · [Product Guide](PRODUCT.md) · [Methodology](https://zakatflow.org/methodology) · [Report an Issue](https://github.com/your-username/zakatflow/issues)
+[Live Demo](https://zakatflow.org) · [Product Guide](PRODUCT.md) · [Methodology](https://zakatflow.org/methodology) · [Report an Issue](https://github.com/naheed/zakah/issues)
 
 ---
 

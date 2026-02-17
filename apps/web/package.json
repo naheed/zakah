@@ -3,6 +3,10 @@
     "private": true,
     "version": "0.30.0",
     "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/naheed/zakah.git"
+    },
     "scripts": {
         "dev": "vite",
         "build": "vite build",

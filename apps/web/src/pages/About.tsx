@@ -122,7 +122,7 @@ export default function About() {
                   Yes — and it always will be.
                 </p>
                 <p>
-                  The entire codebase is open-sourced under <a href="https://www.gnu.org/licenses/agpl-3.0" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">AGPL-3.0</a>. You can audit every line of code, including the encryption and privacy logic. Naheed's sole intention is to spread good.
+                  The entire codebase is open-sourced under <a href="https://www.gnu.org/licenses/agpl-3.0" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">AGPL-3.0</a>. You can audit every line of code at <a href="https://www.github.com/naheed/zakah" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">github.com/naheed/zakah</a>. Naheed's sole intention is to spread good.
                 </p>
               </div>
             </details>

@@ -39,7 +39,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 2. **Clone your fork:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/zakatflow.git
+   git clone https://github.com/naheed/zakah.git
    cd zakatflow
    ```
 
