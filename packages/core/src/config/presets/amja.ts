@@ -35,7 +35,7 @@ import { ZakatMethodologyConfig } from '../types';
 //
 // SOURCES:
 //   - amjaonline.org/fatwa/en/82475  (401k & Shares)
-//   - amjaonline.org/fatwa/en/87289  (Stocks)
+//   - amjaonline.org/fatwa/en/1699   (Stocks)
 //   - amjaonline.org/fatwa/en/87102  (IRA)
 //   - amjaonline.org/fatwa/en/76458  (Mortgage & Debt)
 //   - amjaonline.org/fatwa/en/3171   (Jewelry)
