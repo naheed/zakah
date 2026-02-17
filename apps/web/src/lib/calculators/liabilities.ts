@@ -16,8 +16,7 @@
  */
 
 import { ZakatFormData } from '../zakatTypes';
-import { ZakatMethodologyConfig } from '../config/types';
-import { DEFAULT_CONFIG } from '../config/defaults';
+import { ZakatMethodologyConfig, DEFAULT_CONFIG } from '@zakatflow/core';
 
 // =============================================================================
 // Liability Calculation Engine (ZMCS v1.0)
