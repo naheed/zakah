@@ -1,4 +1,4 @@
-# Zakat Methodology Configuration Standard (ZMCS) v2.0.1
+# Zakat Methodology Configuration Standard (ZMCS) v1.0.1
 
 ## Overview
 
@@ -13,7 +13,7 @@ Any institution, scholar, or community can author a ZMCS configuration to fully 
 3. **Completeness** — The config provides values for *every* decision point in the calculation.
 4. **Documentation** — Every section carries human-readable `description` and `scholarly_basis` strings for UI rendering and transparency.
 
-## Supported Methodologies (v2.0)
+## Supported Methodologies (v1.0)
 
 | ID | Name | Key Features |
 |----|------|-------------|
@@ -36,10 +36,10 @@ Describes the configuration file itself. Required for versioning, attribution, a
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `id` | string | Yes | Unique slug identifier (e.g., `hanafi-standard-v2`). Must be URL-safe. |
+| `id` | string | Yes | Unique slug identifier (e.g., `hanafi-standard`). Must be URL-safe. |
 | `name` | string | Yes | Human-readable methodology name. |
 | `version` | string | Yes | Semantic version of this config file. |
-| `zmcs_version` | string | Yes | ZMCS schema version targeted (e.g., `2.0.0`). |
+| `zmcs_version` | string | Yes | ZMCS schema version targeted (e.g., `1.0.0`). |
 | `author` | string | Yes | Scholar, organization, or author name. |
 | `description` | string | Yes | Brief summary of the methodology's approach. |
 | `ui_label` | string | No | Short label for UI dropdowns. |
@@ -152,7 +152,7 @@ This is the most divergent area across methodologies.
 | `primary_residence.zakatable` | boolean | Yes | Always `false`. |
 | `rental_property.zakatable` | boolean | Yes | Property value zakatable? Usually `false`. |
 | `rental_property.income_zakatable` | boolean | Yes | Rental income zakatable? Usually `true`. |
-| `rental_property.income_rate` | number (0-1) | No | **v2.0.1**: Override Zakat rate for rental income. If set, rental income is taxed at this rate instead of the global 2.5%. Al-Qaradawi: `0.10` (10%, agricultural analogy). Omit for standard rate. |
+| `rental_property.income_rate` | number (0-1) | No | **v1.0.1**: Override Zakat rate for rental income. If set, rental income is taxed at this rate instead of the global 2.5%. Al-Qaradawi: `0.10` (10%, agricultural analogy). Omit for standard rate. |
 | `for_sale.zakatable` | boolean | Yes | Property for sale. Usually `true` (trade goods). |
 | `for_sale.rate` | number (0-1) | Yes | Rate on for-sale property. |
 | `land_banking.zakatable` | boolean | Yes | Land held for appreciation. Usually `true`. |
@@ -227,12 +227,12 @@ Defines how debts are deducted from wealth.
 
 ```json
 {
-  "$schema": "https://zakatflow.org/schemas/zmcs/v2",
+  "$schema": "https://zakatflow.org/schemas/zmcs/v1",
   "meta": {
-    "id": "hanafi-standard-v2",
+    "id": "hanafi-standard",
     "name": "Hanafi",
-    "version": "2.0.0",
-    "zmcs_version": "2.0.0",
+    "version": "1.0.0",
+    "zmcs_version": "1.0.0",
     "author": "ZakatFlow Official",
     "description": "Classical Hanafi: jewelry zakatable, full debt deduction, net accessible retirement, 100% investments."
   },
@@ -356,11 +356,11 @@ Defines how debts are deducted from wealth.
 | **Hanafi/Shafi'i/Maliki/Hanbali** | Net accessible | $65,000 |
 | **Imam Tahir Anwar** | Full balance | $100,000 |
 
-### Rental Income Treatment (v2.0.1)
+### Rental Income Treatment (v1.0.1)
 | Methodology | Income Zakatable? | Rate | Basis |
 |-------------|-------------------|------|-------|
 | **All except Al-Qaradawi** | Yes | 2.5% (global) | Rental income enters standard asset pool |
-| **Al-Qaradawi** | Yes | **10%** (override) | Agricultural analogy — rental buildings = land watered by rain (ʿushr rate). Implemented via `income_rate` override in ZMCS v2.0.1 multi-rate calculation. |
+| **Al-Qaradawi** | Yes | **10%** (override) | Agricultural analogy — rental buildings = land watered by rain (ʿushr rate). Implemented via `income_rate` override in ZMCS v1.0.1 multi-rate calculation. |
 
 ### Debt Deduction
 | Methodology | Method | Mortgage Treatment | Credit Card |
@@ -394,9 +394,58 @@ All registered presets are validated by `src/lib/__tests__/zmcs_compliance.test.
 
 ---
 
+## How ZMCS Drives the Calculation Engine
+
+The ZakatFlow engine is fully config-driven. No methodology-specific `if/else` branches exist in the calculator — every decision reads from the loaded ZMCS config.
+
+### Configuration Resolution
+```
+User selects "Hanafi" → engine loads HANAFI_CONFIG from preset registry
+Priority: explicit config > madhab preset > DEFAULT_CONFIG (Bradford)
+```
+
+### Asset Calculation
+For each asset class, the engine reads the config value:
+- Is jewelry zakatable? → `config.assets.precious_metals.jewelry.zakatable`
+- At what rate? → `config.assets.precious_metals.jewelry.rate`
+- Passive investments? → `config.assets.investments.passive_investments.rate`
+
+### Multi-Rate Support (v1.0.1)
+Some configs define rate overrides (e.g., `rental_property.income_rate = 0.10`). The engine separates override pools from the standard pool automatically and applies distinct Zakat rates per pool.
+
+### Liability Deduction
+`config.liabilities.method` determines the global deduction philosophy. Per-category rules (`housing`, `student_loans`, etc.) provide granular control.
+
+### Result
+The engine produces an identical output structure regardless of which config was loaded. Only the numbers change based on the methodology's rulings.
+
+---
+
+## Adding a New Methodology
+
+1. Copy an existing preset file from `packages/core/src/config/presets/`.
+2. Modify the values to match the scholar's rulings.
+3. Add scholarly citations in `description` and `scholarly_basis` fields.
+4. Register the preset in `packages/core/src/config/presets/index.ts`.
+5. The calculator immediately supports the new methodology — **no engine code changes needed**.
+6. Run compliance tests (`zmcs_compliance.test.ts`) to validate.
+7. Submit for scholar audit (see CONTRIBUTING.md, Track 3).
+
+---
+
+## Scalability Architecture
+
+The ZMCS config is **exhaustive by design**. Every decision point the calculator can encounter has a corresponding config field. This means:
+- No special-case code for individual methodologies (multi-rate overrides are config-driven too).
+- New asset classes can be added to the schema and all existing configs updated with defaults.
+- The schema is validated by Zod, so invalid configs are caught at load time.
+- Community configs go through the same validation pipeline as official presets.
+
+---
+
 ## Creating a Custom Configuration
 
-1. Start from a base preset (`src/lib/config/presets/*.ts`).
+1. Start from a base preset (`packages/core/src/config/presets/*.ts`).
 2. Modify the parameters to match your local fatwa or institutional ruling.
 3. Update `meta.id`, `meta.name`, `meta.author`, and `meta.description`.
 4. Add `description` and `scholarly_basis` strings to document your choices.
@@ -404,5 +453,5 @@ All registered presets are validated by `src/lib/__tests__/zmcs_compliance.test.
 
 ---
 
-*ZMCS v2.0.1 — February 14, 2026*
+*ZMCS v1.0.1 — February 17, 2026*
 *ZakatFlow — zakatflow.org*

@@ -42,10 +42,10 @@ import { ZakatMethodologyConfig } from '../types';
 
 export const HANAFI_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'hanafi-standard-v2',
+        id: 'hanafi-standard',
         name: 'Hanafi',
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Classical Hanafi: jewelry zakatable, full debt deduction, net accessible retirement, 100% investments.',
         ui_label: 'Hanafi',

@@ -27,7 +27,7 @@ import { ASSET_COLORS } from './utils';
 import { DEFAULT_CONFIG } from '../config/defaults';
 
 // =============================================================================
-// Enhanced Retirement Calculation Logic (ZMCS v2.0)
+// Enhanced Retirement Calculation Logic (ZMCS v1.0)
 // =============================================================================
 //
 // This function calculates the zakatable amount for a single retirement account
@@ -608,7 +608,7 @@ export function calculateEnhancedAssetBreakdown(
 }
 
 // =============================================================================
-// Rate Override Asset Extraction (ZMCS v2.0.1)
+// Rate Override Asset Extraction (ZMCS v1.0.1)
 // =============================================================================
 //
 // Some methodologies (e.g., Al-Qaradawi) apply a different Zakat rate to

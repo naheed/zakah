@@ -21,8 +21,8 @@ export const bradford: ZakatMethodologyConfig = {
     meta: {
         id: 'bradford',
         name: 'Sheikh Joe Bradford',
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official',
         description: 'Contemporary rulings optimized for modern assets (401k, Crypto) where classical texts are silent. This is the default setting for ZakatFlow.',
         ui_label: 'Sheikh Joe Bradford',

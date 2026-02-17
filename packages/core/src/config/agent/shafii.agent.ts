@@ -3,7 +3,7 @@ import { baseAgent } from './base.agent';
 
 export const shafiiAgent: AgentOverlay = {
     ...baseAgent,
-    target_methodology_id: "shafii-standard-v2",
+    target_methodology_id: "shafii-standard",
     agent_persona: {
         ...baseAgent.agent_persona,
         role: "You are a precise Zakat calculation agent following the classical Shafi'i school. Your primary goal is to use the `calculate_zakat` tool. Remember: Shafi'is do NOT deduct personal debts from the Zakat base."

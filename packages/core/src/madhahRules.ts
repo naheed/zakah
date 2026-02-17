@@ -205,7 +205,7 @@ export function getScholarlyDifferences(
             madhhabOpinion: '2.5% on accumulated rental cash (other methodologies)',
             supportingScholars: ['Dr. Yusuf Al-Qaradawi'],
             methodologyLink: '/methodology#realestate',
-            basis: 'Fiqh al-Zakah: rental income analogized to agricultural produce — 10% on net rent (after deductions) or 5% on gross rent. Implemented via ZMCS v2.0.1 multi-rate calculation: rental income is separated from the standard 2.5% pool and taxed at 10%.',
+            basis: 'Fiqh al-Zakah: rental income analogized to agricultural produce — 10% on net rent (after deductions) or 5% on gross rent. Implemented via ZMCS v1.0.1 multi-rate calculation: rental income is separated from the standard 2.5% pool and taxed at 10%.',
         });
         differences.push({
             topic: 'Professional Income (Zakat al-Mustafad)',

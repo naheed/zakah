@@ -19,7 +19,7 @@
 import { Coins, Bank, Gavel, Scales, Calculator, Scroll, Buildings, Wallet, UserMinus, Icon, CurrencyBtc, HouseLine, Briefcase, ChartLineUp, PiggyBank, HandCoins } from "@phosphor-icons/react";
 
 // =============================================================================
-// ZMCS UI Documentation Content (v2.0)
+// ZMCS UI Documentation Content (v1.0)
 // =============================================================================
 //
 // This file defines the structured content for the ZMCS specification page
@@ -65,7 +65,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "meta.id",
                 type: "string",
-                description: "Unique slug identifier for this configuration (e.g., 'hanafi-standard-v2'). Must be URL-safe.",
+                description: "Unique slug identifier for this configuration (e.g., 'hanafi-standard'). Must be URL-safe.",
                 required: true,
             },
             {
@@ -77,14 +77,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "meta.version",
                 type: "string",
-                description: "Semantic version of this config file (e.g., '2.0.0'). Tracks rule changes over time.",
+                description: "Semantic version of this config file (e.g., '1.0.0'). Tracks rule changes over time.",
                 required: true,
             },
             {
                 path: "meta.zmcs_version",
                 type: "string",
                 description: "ZMCS schema version this config targets. Enables forward-compatibility checking.",
-                default: "2.0.0",
+                default: "1.0.0",
                 required: true,
             },
             {

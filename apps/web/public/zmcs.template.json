@@ -1,9 +1,9 @@
 {
     "meta": {
-        "id": "zmcs-template-v2",
-        "name": "ZMCS Revision 2 Template",
-        "version": "2.0.0",
-        "zmcs_version": "2.0.0",
+        "id": "zmcs-template",
+        "name": "ZMCS Template",
+        "version": "1.0.0",
+        "zmcs_version": "1.0.0",
         "author": "ZakatFlow",
         "description": "Template configuration for Zakat Methodology Configuration Standard (ZMCS). Customize this file to define your own Zakat calculation methodology.",
         "ui_label": "Custom Methodology",

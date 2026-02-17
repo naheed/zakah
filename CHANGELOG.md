@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - **ZMCS Contributor Call**: Active solicitation for scholars and Islamic bodies to audit and verify methodology presets
 
 ### Changed
+- **ZMCS Version Normalization**: All ZMCS references normalized from internal v2.0 to public v1.0.0 (multi-rate support as v1.0.1) for first public release
 - **README**: Expanded as the primary Getting Started guide with three contribution tracks
 - **CONTRIBUTING.md**: Complete rewrite with style guides, code standards, and contribution workflows
 - **Technical Documentation**: Audit and update of all docs across web and MCP packages

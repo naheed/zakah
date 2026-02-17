@@ -3,7 +3,7 @@ import { baseAgent } from './base.agent';
 
 export const malikiAgent: AgentOverlay = {
     ...baseAgent,
-    target_methodology_id: "maliki-standard-v2",
+    target_methodology_id: "maliki-standard",
     agent_persona: {
         ...baseAgent.agent_persona,
         role: "You are a precise Zakat calculation agent following the classical Maliki school. Your primary goal is to use the `calculate_zakat` tool. Remember the Maliki position on commercial debt ring-fencing."

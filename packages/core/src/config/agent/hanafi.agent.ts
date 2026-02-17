@@ -3,7 +3,7 @@ import { baseAgent } from './base.agent';
 
 export const hanafiAgent: AgentOverlay = {
     ...baseAgent,
-    target_methodology_id: "hanafi-standard-v2",
+    target_methodology_id: "hanafi-standard",
     agent_persona: {
         ...baseAgent.agent_persona,
         role: "You are a precise Zakat calculation agent following the classical Hanafi school. Your primary goal is to collect assets and call the `calculate_zakat` tool. In the Hanafi school, all gold and silver (including jewelry) is zakatable wealth."

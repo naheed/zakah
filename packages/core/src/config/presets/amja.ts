@@ -46,10 +46,10 @@ import { ZakatMethodologyConfig } from '../types';
 
 export const AMJA_CONFIG: ZakatMethodologyConfig = {
     meta: {
-        id: 'amja-standard-v2',
+        id: 'amja-standard',
         name: 'AMJA (Assembly of Muslim Jurists of America)',
-        version: '2.0.0',
-        zmcs_version: '2.0.0',
+        version: '1.0.0',
+        zmcs_version: '1.0.0',
         author: 'ZakatFlow Official (based on AMJA fatwas)',
         description: 'AMJA collective ijtihād: net-withdrawable retirement, stocks as exploited assets (dividends only), jewelry exempt, currently-due debt deduction only.',
         ui_label: 'AMJA Standard',

@@ -37,9 +37,10 @@ import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
 
 const tocItems = [
     { id: "what-is-zmcs", number: 1, label: "What is ZMCS?" },
-    { id: "registry", number: 2, label: "Methodology Registry" },
-    { id: "config-reference", number: 3, label: "Configuration Reference" },
-    { id: "presets", number: 4, label: "Explorer & JSON" },
+    { id: "how-it-works", number: 2, label: "How It Works" },
+    { id: "registry", number: 3, label: "Methodology Registry" },
+    { id: "config-reference", number: 4, label: "Configuration Reference" },
+    { id: "presets", number: 5, label: "Explorer & JSON" },
 ];
 
 // ─── Type badge config ───────────────────────────────────────────────────────
@@ -240,7 +241,7 @@ export function MethodologyZMCS() {
     const handleDownloadTemplate = () => {
         const jsonString = JSON.stringify(ZMCS_TEMPLATE, null, 2);
         const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
-        saveAs(blob, "zmcs-v2.template.json");
+        saveAs(blob, "zmcs.template.json");
     };
 
     const headerContent = (
@@ -284,7 +285,7 @@ export function MethodologyZMCS() {
                     What is ZMCS?
                 </h2>
                 <p className="leading-relaxed">
-                    Zakat calculations define <strong>what</strong> assets are taxable, at <strong>what</strong> rate, and which deductions apply.
+                    Zakat calculations define <strong>what</strong> assets are zakatable, at <strong>what</strong> rate, and which deductions apply.
                     Historically, these rules were hardcoded into calculators, forcing users into a "black box."
                 </p>
                 <p className="leading-relaxed">
@@ -293,7 +294,61 @@ export function MethodologyZMCS() {
                 </p>
                 <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                     <li>Support multiple Methodologies instantly.</li>
+                    <li>Add new scholarly opinions without changing the calculation engine.</li>
+                    <li>Enable scholars and communities to author, share, and verify their own configs.</li>
                 </ul>
+            </section>
+
+            {/* Section 2: How It Works */}
+            <section id="how-it-works" className="space-y-6 scroll-mt-24">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <ShareNetwork className="w-6 h-6 text-primary" />
+                    How It Works
+                </h2>
+                <p className="leading-relaxed">
+                    The ZakatFlow engine reads the ZMCS config at runtime. Every parameter in the config corresponds to a decision point in the calculation.
+                    When a user selects a methodology, the engine loads the corresponding JSON config and uses its values for all calculations — <strong>no code changes required</strong>.
+                </p>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Config-Driven Architecture</CardTitle>
+                        <CardDescription>
+                            How a ZMCS configuration flows through the system from selection to result.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                            {[
+                                { step: "1", title: "User selects a methodology", desc: "Or a scholar submits a new ZMCS config file." },
+                                { step: "2", title: "Schema validation", desc: "The ZMCS loader validates the config against the Zod schema — invalid configs are caught before they reach the engine." },
+                                { step: "3", title: "Engine reads config parameters", desc: "For each asset class, the engine reads: Is jewelry zakatable? At what rate? What proxy applies to passive investments? How are retirement accounts treated?" },
+                                { step: "4", title: "Faithful calculation", desc: "The engine produces results faithful to that methodology's rulings. Only the numbers change — the output structure is identical regardless of which config was loaded." },
+                            ].map(({ step, title, desc }) => (
+                                <div key={step} className="flex gap-3 items-start">
+                                    <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0">
+                                        {step}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-sm">{title}</p>
+                                        <p className="text-sm text-muted-foreground">{desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <div className="p-4 bg-muted/30 rounded-lg border border-border">
+                    <h4 className="font-bold text-sm flex items-center gap-2 mb-2">
+                        <CheckCircle weight="fill" className="w-4 h-4 text-primary" />
+                        Automatic Scalability
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                        Adding a new methodology is as simple as creating a new JSON config file and registering it. The calculator automatically picks up the new config and applies it.
+                        No new code paths, no if/else branches, no special cases. The ZMCS schema is exhaustive by design — every decision point the calculator encounters has a corresponding config field.
+                    </p>
+                </div>
             </section>
 
             {/* Section 2: Methodology Registry */}
@@ -371,12 +426,15 @@ export function MethodologyZMCS() {
                         <GitBranch size={24} weight="duotone" />
                     </div>
                     <div>
-                        <h4 className="font-bold text-sm">Future Proofing & Contributions</h4>
+                        <h4 className="font-bold text-sm">Contribute & Verify</h4>
                         <p className="text-sm text-muted-foreground mt-1">
-                            The ZMCS standard is designed to be extensible. New Madhab opinions or modern fatwas (e.g., regarding crypto staking or DeFi yields) can be added as new configuration files without changing the core calculator engine code.
+                            The ZMCS standard is designed to be extensible. New Madhab opinions or modern fatwas can be added as new configuration files without changing the core calculator engine code.
+                            There are three ways to contribute: <strong>Web UI</strong> features, <strong>AI Agent</strong> tools (MCP), and <strong>ZMCS methodology presets</strong>.
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
-                            To contribute a preset, please submit a Pull Request to our <a href="#" className="text-primary hover:underline">GitHub repository</a> with the requisite scholarly citations.
+                            We are actively seeking scholars and Islamic bodies to audit and verify existing methodology presets. To contribute a preset or submit a verification,
+                            see our <a href="https://github.com/zakatflow/zakatflow" className="text-primary hover:underline">GitHub repository</a> and the{' '}
+                            <Link to="/methodology/zmcs/contributing" className="text-primary hover:underline">ZMCS Contributor Guide</Link>.
                         </p>
                     </div>
                 </div>
