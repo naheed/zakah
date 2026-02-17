@@ -31,6 +31,19 @@ interface Release {
 
 const RELEASES: Release[] = [
     {
+        version: "0.31.0",
+        date: "2026-02-16",
+        title: "Open Source Limitless Intelligence",
+        added: [
+            "Model Context Protocol (MCP): Connect ZakatFlow to ChatGPT/Claude for context-aware answers",
+            "Open Source: Repository is now public under AGPL-3.0",
+            "Deep Link Reports: Generate base64-encoded report links via MCP tools"
+        ],
+        changed: [
+            "Waitlist Removed: Application is now fully open for public use"
+        ]
+    },
+    {
         version: "0.30.0",
         date: "2026-02-16",
         title: "Real-Time Methodology Engine",

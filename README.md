@@ -22,6 +22,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Guided Wizard** | Simple mode for quick estimates, detailed mode for comprehensive analysis |
 | **Asset Intelligence** | Upload bank statements; AI extracts line items automatically |
 | **Methodology Engine** | **ZMCS v2.0** — 8 presets (Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Tahir Anwar, Qaradawi) |
+| **AI Companion** | **Model Context Protocol (MCP)** — Connect to Claude/ChatGPT for context-aware Q&A about your portfolio |
 | **Active Indicator** | Always-visible methodology status with smart fallback and one-click switching |
 | **Privacy Shield** | One-click blur mode for privacy in public spaces |
 | **Donation Tracking** | Track Zakat payments with Receipt Scanning (Gemini Flash) & Active Hawl progress |
@@ -74,7 +75,7 @@ ZakatFlow helps Muslims calculate their annual Zakat obligation with precision a
 | **Styling** | Tailwind CSS, Shadcn UI (Radix primitives) |
 | **State** | TanStack Query, React Context |
 | **Backend** | Supabase (Postgres, Auth, Edge Functions) |
-| **AI** | Google Gemini 3.0 Flash (document parsing) |
+| **AI** | Google Gemini 3.0 Flash (parsing), Model Context Protocol (MCP) |
 | **Visualization** | Nivo (Sankey charts), Recharts |
 | **PDF** | @react-pdf/renderer |
 | **Icons** | Phosphor Icons |
@@ -354,9 +355,10 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 | Bank Sync | ✅ Complete | Plaid Integration for real-time balances |
 | Methodology UX | ✅ Complete | Active Indicator & Context-Aware Switching |
 | Security Overhaul | ✅ Complete | Two-tier encryption, Plaid user-key encryption, AGPL-3.0 |
-| Open Source | 🟡 In Progress | AGPL license applied; repo prep for public launch |
+| Open Source | ✅ Complete | Repository public launch |
+| AI Companion (MCP) | ✅ Complete | Context-aware Q&A via Model Context Protocol |
 | Charity Directory | 📋 Planned | Search & filter vetted recipients |
-| ChatGPT App | 📋 Planned | Conversational Zakat calculation via OpenAI Apps SDK |
+| Mobile App | 📋 Planned | Native iOS/Android experience |
 
 ---
 
