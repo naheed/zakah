@@ -177,7 +177,7 @@ export const bradford: ZakatMethodologyConfig = {
         trusts: {
             revocable_rate: 1.0,
             irrevocable_rate: 1.0,
-            description: 'Trusts are look-through entities. Zakat is due on the underlying assets if the beneficiary has ownership/access.',
+            description: 'Trusts are look-through entities. Zakat is due on the underlying assets if the beneficiary has ownership/access. Bradford applies the principle of milk tām: if the grantor or beneficiary retains actual control, Zakat is due.',
             tooltip: 'Trusts are look-through entities. Zakat is due on the underlying assets if the beneficiary has ownership.',
         },
     },
