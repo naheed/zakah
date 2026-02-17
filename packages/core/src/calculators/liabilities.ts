@@ -37,7 +37,7 @@ import { DEFAULT_CONFIG } from '../config/defaults';
 //   - 'current_due': Monthly amount (1× monthly)
 //   - 'none': Not deductible
 //
-// BUGS FIXED (v2.0):
+// BUGS FIXED (v1.0):
 //   - Removed accidental 360× multiplier on housing 'full' (was monthlyMortgage * 12 * 30)
 //   - Fixed double-addition of studentLoansDue for 'full' type
 //   - Insurance and unpaid bills now governed by per-category config rules

@@ -13,9 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **v0.30.0** | ⚡ **Real-Time Methodology Engine** — Interactive "Theory vs Practice" Comparisons | Feb 16, 2026 |
 | **v0.29.0** | 🎨 **Visual & UX Polish** — "Financial Statement" Hero, Scroll Cues, Phosphor Icons | Feb 15, 2026 |
 | **v0.28.0** | 🔒 **Security & Classification Overhaul** — AGPL, Two-Tier Encryption, Upload & Plaid Fixes | Feb 15, 2026 |
-| **v0.27.2** | 🔧 **ZMCS v2.0.1** — Multi-rate calculation + rental income override | Feb 14, 2026 |
+| **v0.27.2** | 🔧 **ZMCS Multi-Rate Calculation** — Asset-class rate overrides + rental income | Feb 14, 2026 |
 | **v0.27.1** | 📖 **Docs Consolidation** + **Al-Qaradawi Methodology** (8 total) | Feb 14, 2026 |
-| **v0.27.0** | 📐 **ZMCS v2.0** (Foundational Standard + 3 Scholar Configs) | Feb 14, 2026 |
+| **v0.27.0** | 📐 **ZMCS Foundational Standard** (60+ Parameters + 3 Scholar Configs) | Feb 14, 2026 |
 | **v0.25.0** | 🧮 **Asset Class Expansion** (Service Business, Land Banking, REITs) | Feb 7, 2026 |
 | **v0.18.0** | ✨ **Product Reality** (Live Interactive Demo) | Jan 20, 2026 |
 | **v0.14.0** | 📚 **Jurisprudence Overhaul** (5 Distinct Madhabs) | Jan 11, 2026 |
@@ -123,12 +123,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### Added
-- **ZMCS v2.0.1 Multi-Rate Calculation Architecture** — Asset-class-specific Zakat rate overrides
+- **ZMCS v1.0.1 Multi-Rate Calculation Architecture** — Asset-class-specific Zakat rate overrides
   - New optional `rental_property.income_rate` schema field for per-methodology rate override
   - When set, rental income is separated from the standard 2.5% pool and taxed at the override rate
   - Formula: `totalZakat = (standardPool × globalRate) + (overridePool × overrideRate)`
   - `calculateRateOverrides()` function in `src/lib/calculators/assets.ts` for extensible override extraction
-  - Backward compatible: when no overrides configured, calculation is identical to v2.0.0
+  - Backward compatible: when no overrides configured, calculation is identical to v1.0.0
 - **6 new rental income rate override tests** — Multi-rate path validation, comparison with standard-rate methodologies, edge case coverage
 - **Rental Income Comparison Table** added to ZMCS Specification cross-methodology section
 
@@ -138,7 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - $20,000 net rent → $2,000 Zakat (vs $500 at standard 2.5%)
 - **`calculateZakat()` engine** — Refactored for multi-rate support with detailed logging
 - **Scholarly Differences UI** — Rental property difference now shows "10% applied" instead of "2.5% approximated"
-- **ZMCS Specification** updated to v2.0.1 with new `income_rate` field documentation
+- **ZMCS Specification** updated to v1.0.1 with new `income_rate` field documentation
 
 ### Fixed
 - Al-Qaradawi's unique rental income position is no longer approximated; it is now precisely calculated
@@ -165,7 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Design System Exceptions → merged into `docs/ENGINEERING_DESIGN.md` (Section 7)
 - **`docs/ENGINEERING_DESIGN.md`** — Updated to v0.27.0, ZMCS engine architecture, 8 presets
 - **`docs/ZAKAT_JURISPRUDENCE.md`** — Retirement section expanded for all 5 scholar positions (Bradford, AMJA, Tahir Anwar, Al-Qaradawi, Classical). Added distribution best practices
-- **`docs/CONTRIBUTING_METHODOLOGY.md`** — Rewritten for ZMCS v2.0 schema with full example config
+- **`docs/CONTRIBUTING_METHODOLOGY.md`** — Rewritten for ZMCS v1.0 schema with full example config
 - **`docs/ZMCS_SPECIFICATION.md`** — Cross-methodology tables updated with Al-Qaradawi
 - **`README.md`** — 8 methodologies, ZMCS feature, updated acknowledgments
 
@@ -188,10 +188,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix WorkSans italic font bug
   - Add machine-readable QR for YoY scanning
 
-## [0.27.0] - 2026-02-14 (ZMCS v2.0 — Foundational Standard)
+## [0.27.0] - 2026-02-14 (ZMCS v1.0 — Foundational Standard)
 
 ### Added
-- **ZMCS v2.0 Schema Overhaul**
+- **ZMCS v1.0 Schema Overhaul**
   - **Exhaustive Parameter Model**: 60+ configurable parameters covering every Zakat calculation decision point, each with documentation strings (`description`, `scholarly_basis`).
   - **3 New Scholar Methodologies**:
     - **AMJA** (Assembly of Muslim Jurists of America): Net-withdrawable retirement, exploited-asset view for stocks (dividends only), currently-due debt deduction only.
@@ -200,15 +200,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **New Schema Fields**: `passive_investments.treatment` (market_value/underlying_assets/income_only), `retirement.post_threshold_method`, `retirement.post_threshold_rate`, `retirement.roth_contributions_rate`, `retirement.roth_earnings_follow_traditional`, `retirement.distributions_always_zakatable`, per-liability type rules for `insurance`, `unpaid_bills`, `taxes`.
   - **New Liability Method**: `current_due_only` for AMJA strict debt deduction.
   - **Rich Documentation**: Every preset carries `description` and `scholarly_basis` strings with hadith references, fiqh citations, and fatwa URLs.
-- **ZMCS Specification v2.0** (`docs/ZMCS_SPECIFICATION.md`): Complete rewrite with full field reference tables, cross-methodology comparison charts, and complete JSON example.
-- **ZMCS UI Docs** (`src/content/zmcs-docs.ts`): Updated to match v2.0 schema with all new fields.
+- **ZMCS Specification v1.0** (`docs/ZMCS_SPECIFICATION.md`): Complete rewrite with full field reference tables, cross-methodology comparison charts, and complete JSON example.
+- **ZMCS UI Docs** (`src/content/zmcs-docs.ts`): Updated to match v1.0 schema with all new fields.
 
 ### Changed
 - **Bradford Jewelry Fix**: Corrected from `false` (exempt) to `true` (zakatable) to match Bradford's actual precautionary (Ahwat) position.
 - **Bradford Retirement Post-59.5**: Now uses 30% proxy on market value (was incorrectly using net-accessible).
 - **Bradford Roth IRA**: Contributions now at 30% proxy rate (was 100%).
 - **Madhab Type**: Extended with `'amja'` and `'tahir_anwar'` values.
-- **All Classical Presets**: Updated to ZMCS v2.0 schema with new fields (`insurance`, `unpaid_bills`, `taxes` per-liability rules), documentation strings, and scholarly basis citations.
+- **All Classical Presets**: Updated to ZMCS v1.0 schema with new fields (`insurance`, `unpaid_bills`, `taxes` per-liability rules), documentation strings, and scholarly basis citations.
 
 ### Fixed
 - **Critical: Liability Housing Bug**: Removed accidental `monthlyMortgage * 12 * 30` (360x multiplier) in housing 'full' deduction.

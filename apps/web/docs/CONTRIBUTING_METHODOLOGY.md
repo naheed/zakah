@@ -25,7 +25,7 @@ Create a new TypeScript file in `src/lib/config/presets/` (e.g., `my_methodology
 import { ZakatMethodologyConfig } from '../types';
 
 /**
- * My Custom Methodology — ZMCS v2.0 Configuration
+ * My Custom Methodology — ZMCS v1.0 Configuration
  *
  * Based on [source scholar/institution] rulings on Zakat calculation.
  * Key positions:
@@ -39,7 +39,7 @@ export const MY_METHODOLOGY_CONFIG: ZakatMethodologyConfig = {
     id: 'my-methodology-v1',
     name: 'My Custom Methodology',
     version: '1.0.0',
-    zmcs_version: '2.0.0',
+    zmcs_version: '1.0.0',
     author: 'Scholar Name / Institution',
     description: 'Brief summary of key positions and approach.',
     ui_label: 'My Methodology',

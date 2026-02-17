@@ -58,7 +58,7 @@ Most Zakat calculators are simple forms that apply one methodology with no trans
 
 ## Feature Showcase
 
-### Zakat Calculation Engine (ZMCS v2.0)
+### Zakat Calculation Engine (ZMCS v1.0)
 
 The engine is powered by the **Zakat Methodology Configuration Standard** — a JSON-based specification with **60+ configurable parameters** covering every Zakat calculation decision point. Each methodology is a validated configuration, not hardcoded logic.
 
