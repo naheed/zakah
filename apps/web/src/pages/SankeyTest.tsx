@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ZakatSankeyChart } from "@/components/zakat/ZakatSankeyChart";
 import { useState } from "react";
-import { EnhancedAssetBreakdown, AssetCategory } from "@zakatflow/core";
+import { EnhancedAssetBreakdown, CalculatedAssetCategory } from "@zakatflow/core";
 
 /**
  * SankeyTest - Test page for the enhanced Sankey chart
@@ -174,7 +174,7 @@ export default function SankeyTest() {
     ];
 
     const totalZakatable = zakatableCategories.reduce((sum, key) => {
-        const cat = enhancedBreakdown[key] as AssetCategory;
+        const cat = enhancedBreakdown[key] as CalculatedAssetCategory;
         return sum + (cat?.zakatableAmount || 0);
     }, 0);
 
@@ -285,7 +285,7 @@ export default function SankeyTest() {
                     <CardContent>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                             {zakatableCategories.map((key) => {
-                                const cat = enhancedBreakdown[key] as AssetCategory;
+                                const cat = enhancedBreakdown[key] as CalculatedAssetCategory;
                                 if (!cat || cat.total === 0) return null;
                                 return (
                                     <div key={key} className="p-3 rounded-lg bg-muted">

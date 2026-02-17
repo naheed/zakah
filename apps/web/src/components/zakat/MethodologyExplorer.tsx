@@ -128,7 +128,7 @@ const RuleCard = ({ title, icon: Icon, config, type, className, viewMode, calcul
             const zakatableAmount = calculationResult.enhancedBreakdown.investments.zakatableAmount;
             practiceValue = formatCurrency(zakatableAmount);
             practiceLabel = "Ahmed's $180,000 Investments";
-            practiceExplanation = rule.treatment === 'percentage'
+            practiceExplanation = (rule.treatment as string) === 'percentage'
                 ? `Only ${(rule.rate * 100).toFixed(0)}% is assessed (proxy for underlying assets).`
                 : "Full market value is assessed.";
         }
