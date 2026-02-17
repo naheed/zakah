@@ -5,7 +5,7 @@
 [![Live App](https://img.shields.io/badge/Live-zakatflow.org-blue.svg)](https://zakatflow.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-*Last updated: February 2026*
+*Last updated: February 17, 2026 (v0.32.0)*
 
 ---
 

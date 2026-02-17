@@ -1,7 +1,7 @@
 {
     "name": "zakat-flow-web",
     "private": true,
-    "version": "0.30.0",
+    "version": "0.32.0",
     "type": "module",
     "repository": {
         "type": "git",
