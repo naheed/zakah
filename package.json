@@ -10,6 +10,34 @@
         "test": "npm run test --workspaces"
     },
     "dependencies": {
-        "baseline-browser-mapping": "^2.9.19"
+        "@modelcontextprotocol/sdk": "^1.26.0",
+        "@phosphor-icons/react": "^2.1.10",
+        "@react-pdf/renderer": "^4.3.2",
+        "@react-spring/web": "^10.0.3",
+        "@supabase/supabase-js": "^2.95.3",
+        "@tanstack/react-query": "^5.90.21",
+        "baseline-browser-mapping": "^2.9.19",
+        "clsx": "^2.1.1",
+        "hono": "^4.11.9",
+        "react-hook-form": "^7.71.1",
+        "tailwind-merge": "^3.4.1"
+    },
+    "overrides": {
+        "react": "18.3.1",
+        "react-dom": "18.3.1"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.58.2",
+        "@types/node": "^25.2.3",
+        "@types/react": "^18.3.28",
+        "@typescript-eslint/eslint-plugin": "^8.56.0",
+        "@typescript-eslint/parser": "^8.56.0",
+        "autoprefixer": "^10.4.24",
+        "eslint": "^9.39.2",
+        "postcss": "^8.5.6",
+        "tailwindcss": "^4.1.18",
+        "typescript": "^5.9.3",
+        "vite": "^7.3.1",
+        "vitest": "^3.2.4"
     }
 }

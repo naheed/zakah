@@ -34,9 +34,10 @@ export function registerReportingTools(server: McpServer) {
             const encoded = btoa(jsonString);
 
             // Construct Link
-            // In dev: http://localhost:5173 
+            // In dev: http://localhost:8080 or http://localhost:5173 
             // In prod: https://zakatflow.org
-            const baseUrl = `https://zakatflow.org`;
+            const isDev = process.env.NODE_ENV === 'development';
+            const baseUrl = process.env.CLIENT_URL || (isDev ? 'http://localhost:8080' : 'https://zakatflow.org');
             const link = `${baseUrl}?data=${encoded}`;
 
             return {

@@ -13,6 +13,12 @@ import { registerReportingTools } from "./tools/reporting.js";
 const app = express();
 app.use(cors());
 
+// Logging Middleware
+app.use((req, res, next) => {
+    console.log(`[Request] ${req.method} ${req.url}`);
+    next();
+});
+
 // Transport Management (Map of transports for message routing)
 const sessions = new Map<string, { mcp: McpServer, transport: SSEServerTransport }>();
 
@@ -37,6 +43,7 @@ const handleMcpConnection = async (req: express.Request, res: express.Response) 
     const transport = new SSEServerTransport("/messages", res);
     const sessionId = transport.sessionId;
 
+    console.log(`Session created: ${sessionId}`);
     sessions.set(sessionId, { mcp, transport });
 
     transport.onclose = () => {
@@ -57,7 +64,11 @@ app.get("/", (req, res) => {
 
 app.post("/messages", async (req, res) => {
     const sessionId = req.query.sessionId as string;
+    console.log(`[Current Sessions]: ${Array.from(sessions.keys()).join(', ')}`);
+    console.log(`[POST /messages] SessionId: ${sessionId}`);
+
     if (!sessionId) {
+        console.error("Missing sessionId");
         res.status(400).send("Missing sessionId");
         return;
     }
@@ -66,11 +77,18 @@ app.post("/messages", async (req, res) => {
     if (session) {
         await session.transport.handlePostMessage(req, res);
     } else {
+        console.error(`Session not found: ${sessionId}`);
         res.status(404).send("Session not found");
     }
 });
 
+// Explicitly handle POST /mcp to debug/catch
+app.post("/mcp", (req, res) => {
+    console.error(`[Unexpected] POST /mcp received. Query: ${JSON.stringify(req.query)}`);
+    res.status(404).send("MCP POST should go to /messages?sessionId=...");
+});
+
 const PORT = 3001;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`MCP Server running on port ${PORT}`);
 });
