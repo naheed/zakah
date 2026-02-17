@@ -361,7 +361,7 @@ We welcome contributions across three tracks: **Web Application** features, **AI
 
 | Feature | Status | Description |
 |:---|:---|:---|
-| ZMCS v2.0 | Complete | Foundational standard with 8 methodologies, 60+ parameters |
+| ZMCS v1.0 | Complete | Foundational standard with 8 methodologies, 60+ parameters |
 | Core Calculator | Complete | Guided wizard with all asset classes |
 | Asset Intelligence | Complete | Extract line items from PDFs and images via Gemini |
 | Donation Tracking | Complete | Receipt scanning, Active Hawl, Cloud Sync |

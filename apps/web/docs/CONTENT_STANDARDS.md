@@ -1,4 +1,4 @@
-# ZakatFlow Content Standards (v2.0)
+# ZakatFlow Content Standards (v1.0)
 
 > **One Voice. One Truth.**
 > Whether in a tooltip, a legal disclaimer, or a user guide, we speak with one consistent voice.

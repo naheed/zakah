@@ -42,7 +42,7 @@
 //   overrideZakat = Σ(overrideAmount × overrideRate)
 //   totalZakat    = standardZakat + overrideZakat
 //
-// When no overrides are configured, the calculation is identical to v2.0.
+// When no overrides are configured, the calculation is identical to v1.0.
 
 import { ZakatFormData, ZakatCalculationResult, AssetBreakdown, EnhancedAssetBreakdown } from './zakatTypes';
 import {
@@ -108,7 +108,7 @@ export function calculateZakat(
   const isAboveNisab = netZakatableWealth >= nisab;
 
   // ═══════════════════════════════════════════════════════════════════════
-  // 4. Multi-Rate Zakat Calculation (v2.0.1)
+  // 4. Multi-Rate Zakat Calculation (v1.0.1)
   // ═══════════════════════════════════════════════════════════════════════
   //
   // Determine global Zakat rate (lunar or solar adjustment)

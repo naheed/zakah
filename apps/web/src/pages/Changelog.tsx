@@ -104,7 +104,7 @@ const RELEASES: Release[] = [
         date: "2026-02-14",
         title: "Methodology Engine (ZMCS)",
         added: [
-            "ZMCS v2.0: Schema-driven calculation engine for 8 methodologies",
+            "ZMCS v1.0: Schema-driven calculation engine for 8 methodologies",
             "New Scholars: AMJA, Imam Tahir Anwar, and Al-Qaradawi support",
             "Dynamic Nisab: Real-time gold/silver price fetching"
         ]

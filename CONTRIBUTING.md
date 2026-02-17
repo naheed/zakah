@@ -479,7 +479,7 @@ ZakatFlow's calculation logic is rooted in published scholarly methodology. Cont
 | [Contributing Guide](CONTRIBUTING.md) | `CONTRIBUTING.md` | This document — contribution workflow and style guides |
 | [Changelog](CHANGELOG.md) | `CHANGELOG.md` | Version history and release notes |
 | [Backlog](BACKLOG.md) | `BACKLOG.md` | Planned features and technical debt |
-| [ZMCS Specification](apps/web/docs/ZMCS_SPECIFICATION.md) | `apps/web/docs/` | Zakat Methodology Configuration Standard v2.0 |
+| [ZMCS Specification](apps/web/docs/ZMCS_SPECIFICATION.md) | `apps/web/docs/` | Zakat Methodology Configuration Standard v1.0 |
 | [Zakat Jurisprudence](apps/web/docs/ZAKAT_JURISPRUDENCE.md) | `apps/web/docs/` | Scholarly analysis and fiqh foundations |
 | [Engineering Design](apps/web/docs/ENGINEERING_DESIGN.md) | `apps/web/docs/` | Technical architecture deep dive |
 | [Security Architecture](apps/web/docs/SECURITY_ARCHITECTURE.md) | `apps/web/docs/` | Encryption, privacy, and threat model |

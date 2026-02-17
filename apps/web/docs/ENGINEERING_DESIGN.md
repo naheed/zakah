@@ -96,7 +96,7 @@ The heart of the application. Designed as a **deterministic, config-driven pipel
 
 ### 4.1 ZMCS: Zakat Methodology Configuration Standard
 
-The calculation engine is powered by ZMCS v2.0 — a JSON-based standard that encapsulates diverse juristic opinions into a structured configuration. Each methodology is a `ZakatMethodologyConfig` object validated against a Zod schema.
+The calculation engine is powered by ZMCS v1.0 — a JSON-based standard that encapsulates diverse juristic opinions into a structured configuration. Each methodology is a `ZakatMethodologyConfig` object validated against a Zod schema.
 
 > Full specification: [ZMCS_SPECIFICATION.md](ZMCS_SPECIFICATION.md)
 
