@@ -35,6 +35,8 @@ export interface ZMCSField {
     path: string;
     type: string;
     description: string;
+    /** Extended scholarly explanation, shown in an expandable "Scholarly detail" section. */
+    detail?: string;
     options?: { value: string; label: string }[];
     default?: string;
     required: boolean;
@@ -42,6 +44,8 @@ export interface ZMCSField {
     groupIcon?: Icon;
     /** Key in fiqhExplanations linking this config field to its user-facing WhyTooltip. */
     helpText?: string;
+    /** Field category: 'calculation' (default), 'content' (UI-facing text like tooltips), or 'metadata'. */
+    category?: 'calculation' | 'content' | 'metadata';
 }
 
 export interface ZMCSSection {
@@ -120,8 +124,9 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "meta.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining this section.",
+                description: "User-facing guidance text displayed in the calculator UI for this section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
+                category: "content",
             },
         ],
     },
@@ -149,8 +154,9 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "thresholds.nisab.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Nisab section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Nisab section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
+                category: "content",
             },
             {
                 path: "thresholds.nisab.gold_grams",
@@ -183,8 +189,9 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "thresholds.zakat_rate.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Zakat Rate section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Zakat Rate section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
+                category: "content",
             },
         ],
     },
@@ -212,9 +219,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.cash.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Cash section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Cash section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Cash",
+                category: "content",
             },
 
 
@@ -222,7 +230,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.precious_metals.jewelry.zakatable",
                 type: "boolean",
-                description: "Whether personal-use gold/silver jewelry is subject to Zakat. MAJOR DIVERGENCE: Hanafi/Bradford = Yes, Majority (Shafi'i/Maliki/Hanbali/AMJA) = No.",
+                description: "Whether personal-use gold and silver jewelry is subject to Zakat.",
+                detail: "Hanafi and Bradford methodologies hold all gold and silver as monetary by nature (thaman) and therefore zakatable. The majority view (Shafi'i, Maliki, Hanbali, AMJA) exempts jewelry worn for permissible personal adornment.",
                 required: true,
                 group: "Precious Metals",
                 groupIcon: Coins,
@@ -231,16 +240,17 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.precious_metals.jewelry.scholarly_basis",
                 type: "string",
-                description: "Scholarly evidence for the jewelry ruling (hadith, fiqh reference).",
+                description: "Citation of the scholarly evidence supporting this ruling. Include hadith references, fiqh texts, fatwa numbers, or institutional standards (e.g., AAOIFI Standard No. 9). This field is critical for scholarly audit and verification.",
                 required: false,
                 group: "Precious Metals",
             },
             {
                 path: "assets.precious_metals.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Precious Metals section (specifically jewelry).",
+                description: "User-facing guidance text displayed in the calculator UI for the Precious Metals section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Precious Metals",
+                category: "content",
             },
 
 
@@ -267,9 +277,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.crypto.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Crypto section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Crypto section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Cryptocurrency",
+                category: "content",
             },
 
 
@@ -287,7 +298,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.investments.passive_investments.rate",
                 type: "number (0-1)",
-                description: "Zakatable portion of passive investment market value. MAJOR DIVERGENCE: 1.0 = classical, 0.30 = Bradford proxy, 0.0 = AMJA income-only.",
+                description: "Zakatable portion of passive investment market value.",
+                detail: "1.0 = classical (full market value as trade goods). 0.30 = Bradford/AAOIFI proxy for underlying zakatable company assets. 0.0 = AMJA income-only view (only dividends zakatable, not principal).",
                 required: true,
                 group: "Investments",
                 helpText: "thirtyPercentRule",
@@ -314,9 +326,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.investments.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Investments section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Investments section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Investments",
+                category: "content",
             },
 
             // ── REITs ──
@@ -332,7 +345,8 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.retirement.zakatability",
                 type: "enum",
-                description: "Primary method for calculating zakatable amount of 401(k)/IRA retirement accounts. MOST DIVERGENT PARAMETER across methodologies.",
+                description: "Primary method for calculating the zakatable amount of retirement accounts (401k, IRA).",
+                detail: "This is the most divergent parameter across methodologies. Options range from full balance (strong ownership) to complete exemption, with net-accessible and conditional-age approaches in between.",
                 options: [
                     { value: "full", label: "Full Balance — 100% of vested balance (Strong Ownership / Imam Tahir Anwar)." },
                     { value: "net_accessible", label: "Net Accessible — Balance minus taxes and penalties (AMJA / Classical majority)." },
@@ -391,9 +405,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.retirement.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Retirement section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Retirement section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Retirement",
+                category: "content",
             },
 
 
@@ -430,9 +445,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.real_estate.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Real Estate section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Real Estate section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Real Estate",
+                category: "content",
             },
 
             // ── Business ──
@@ -456,9 +472,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.business.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Business section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Business section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Business",
+                category: "content",
             },
 
 
@@ -482,9 +499,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.debts_owed_to_user.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Debts Owed section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Debts Owed section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Debts Owed",
+                category: "content",
             },
 
 
@@ -511,9 +529,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "assets.trusts.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Trusts section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Trusts section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Trusts",
+                category: "content",
             },
         ],
     },
@@ -531,6 +550,7 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 path: "liabilities.method",
                 type: "enum",
                 description: "Global philosophy on how debts reduce zakatable wealth.",
+                detail: "Ranges from full deduction (Hanafi/Hanbali) where all debts offset wealth, to no deduction (Shafi'i) where debts have zero effect, with 12-month and current-due rules in between.",
                 options: [
                     { value: "full_deduction", label: "Full Deduction — All debts fully offset wealth (Hanafi/Hanbali/Imam Tahir Anwar)." },
                     { value: "no_deduction", label: "No Deduction — Debts do NOT reduce Zakat liability (Shafi'i)." },
@@ -653,9 +673,10 @@ export const ZMCS_DOCS: ZMCSSection[] = [
             {
                 path: "liabilities.tooltip",
                 type: "string",
-                description: "User-facing tooltip explaining the Liabilities section.",
+                description: "User-facing guidance text displayed in the calculator UI for the Liabilities section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
                 required: false,
                 group: "Liabilities",
+                category: "content",
             },
         ],
     },
