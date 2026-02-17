@@ -433,7 +433,7 @@ export function MethodologyZMCS() {
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
                             We are actively seeking scholars and Islamic bodies to audit and verify existing methodology presets. To contribute a preset or submit a verification,
-                            see our <a href="https://github.com/zakatflow/zakatflow" className="text-primary hover:underline">GitHub repository</a> and the{' '}
+                            see our <a href="https://www.github.com/naheed/zakah" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">GitHub repository</a> and the{' '}
                             <Link to="/methodology/zmcs/contributing" className="text-primary hover:underline">ZMCS Contributor Guide</Link>.
                         </p>
                     </div>
