@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZakatFlow</title>
+
+  <!-- Security Headers -->
+
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';
+      script-src 'self' https://cdn.plaid.com https://www.googletagmanager.com https://www.google-analytics.com 'unsafe-inline' 'wasm-unsafe-eval' 'unsafe-eval';
+      worker-src 'self' blob:;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https: blob:;
+      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.plaid.com https://api.metals.dev https://www.google-analytics.com https://www.googletagmanager.com;
+      frame-src 'self' https://cdn.plaid.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';" />
+
+  <!-- Plaid Link SDK -->
+  <link rel="preconnect" href="https://cdn.plaid.com">
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <meta name="description"
+    content="Calculate your Zakat with our comprehensive calculator based on authentic Islamic scholarship. Covers stocks, crypto, retirement accounts, and more." />
+  <meta name="author" content="ZakatFlow" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="canonical" href="https://zakatflow.org" />
+
+  <!-- Privacy Policy link for crawlers -->
+  <link rel="privacy-policy" href="https://www.zakatflow.org/privacy" />
+
+  <meta property="og:title" content="ZakatFlow - Islamic Zakat Calculator" />
+  <meta property="og:description"
+    content="Calculate your Zakat with our comprehensive calculator based on authentic Islamic scholarship. Covers stocks, crypto, retirement accounts, and more." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://zakatflow.org" />
+  <meta property="og:image" content="https://zakatflow.org/og-image.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@ZakatFlow" />
+  <meta name="twitter:image" content="https://zakatflow.org/og-image.png" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/apps/web/src/main.tsx"></script>
+
+  <!-- Fallback links for crawlers (hidden, rendered before React hydrates) -->
+  <noscript>
+    <a href="https://www.zakatflow.org/privacy">Privacy Policy</a>
+    <a href="https://www.zakatflow.org/terms">Terms of Service</a>
+  </noscript>
+</body>
+
+</html>

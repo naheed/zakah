@@ -17,7 +17,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { mapLegacyData, aggregateResults } from "@zakatflow/core";
-import { ZakatFormData } from '.@zakatflow/core';
+import { ZakatFormData } from '@zakatflow/core';
 
 describe('Document Parser Logic', () => {
 

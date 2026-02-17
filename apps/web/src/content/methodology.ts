@@ -629,6 +629,7 @@ export const debts = {
     id: "debts",
     number: 11,
     title: "Debts & Liabilities",
+    intro: "What you owe others can reduce your Zakatable wealth — but the schools differ on how.",
     icon: HandCoins,
     receivables: {
         title: "Owed TO You",

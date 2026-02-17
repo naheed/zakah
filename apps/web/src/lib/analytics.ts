@@ -94,6 +94,7 @@ export const AnalyticsEvents = {
         ERROR: "calculation_error",
         DEEP_LINK: "deep_link_landed",
         JUMP_TO_STEP: "jump_to_step",
+        HYDRATE: "deep_link_hydrate",
     },
     FEEDBACK: {
         REACTION: "feedback_reaction",

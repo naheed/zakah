@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { formatCurrency, formatPercent, EnhancedAssetBreakdown, AssetCategory } from "@zakatflow/core";
+import { formatCurrency, formatPercent, EnhancedAssetBreakdown, CalculatedAssetCategory } from "@zakatflow/core";
 import type { IconProps } from "@phosphor-icons/react";
 import {
     Wallet, TrendUp, PiggyBank, Coins, CurrencyBtc,
@@ -46,7 +46,7 @@ const getAssetIcon = (key: string) => {
 };
 
 // Ruling Text Helper
-const getRulingText = (key: string, cat: AssetCategory) => {
+const getRulingText = (key: string, cat: CalculatedAssetCategory) => {
     if (cat.zakatablePercent === 1) return "Fully accessible/zakatable";
     if (cat.zakatablePercent === 0) return "Exempt below threshold";
 
@@ -65,12 +65,12 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
     ] as const;
 
     const rows = assetKeys.map(key => {
-        const cat = enhancedBreakdown[key as keyof EnhancedAssetBreakdown] as AssetCategory;
+        const cat = enhancedBreakdown[key as keyof EnhancedAssetBreakdown] as CalculatedAssetCategory;
         if (!cat) return null;
         return { key, cat, Icon: getAssetIcon(key), ruling: getRulingText(key, cat) };
     }).filter((item): item is NonNullable<typeof item> =>
         item !== null && item.cat && item.cat.total > 0
-    ) as { key: string; cat: AssetCategory; Icon: React.ComponentType<any>; ruling: string }[];
+    ) as { key: string; cat: CalculatedAssetCategory; Icon: React.ComponentType<any>; ruling: string }[];
 
     return (
         <section className="flex-grow mt-8">
