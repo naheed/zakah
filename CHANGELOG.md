@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.32.0] - 2026-02-17
+
+### Added
+- **Documentation Overhaul**: Comprehensive contributor guide with three contribution tracks (Web UI, MCP/AI Agents, ZMCS Methodology Presets)
+- **Style Guide**: Code, content, and documentation standards for human and AI contributors
+- **ZMCS Contributor Call**: Active solicitation for scholars and Islamic bodies to audit and verify methodology presets
+
+### Changed
+- **README**: Expanded as the primary Getting Started guide with three contribution tracks
+- **CONTRIBUTING.md**: Complete rewrite with style guides, code standards, and contribution workflows
+- **Technical Documentation**: Audit and update of all docs across web and MCP packages
+
 ## [0.31.0] - 2026-02-16
 
 ### Added

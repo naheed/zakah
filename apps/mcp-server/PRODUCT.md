@@ -6,7 +6,7 @@
 [![MCP](https://img.shields.io/badge/MCP-1.0-blue.svg)](https://modelcontextprotocol.io)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
 
-*Last updated: February 2026*
+*Last updated: February 17, 2026 (v0.32.0)*
 
 ---
 
@@ -269,6 +269,17 @@ npx @modelcontextprotocol/inspector http://localhost:3001/mcp
 
 ---
 
+## Contributing
+
+We welcome contributions to the MCP server. See [Track 2: AI Agents](../../CONTRIBUTING.md#track-2-ai-agents-appsmcp-server) in the Contributing Guide for:
+
+- How to add a new MCP tool
+- Agent protocol authoring guidelines
+- Testing with MCP Inspector
+- Code standards and pull request process
+
+---
+
 ## License
 
 This project is licensed under the **GNU Affero General Public License v3.0**. See [LICENSE](../../LICENSE) for details.
@@ -276,5 +287,5 @@ This project is licensed under the **GNU Affero General Public License v3.0**. S
 ---
 
 <p align="center">
-  <strong>May Allah accept your Zakat and purify your wealth. 🤲</strong>
+  <strong>May Allah accept your Zakat and purify your wealth.</strong>
 </p>

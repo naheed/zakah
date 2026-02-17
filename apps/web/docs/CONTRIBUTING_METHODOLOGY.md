@@ -196,19 +196,50 @@ it('should apply [your unique rule] for my-methodology', () => {
 
 ---
 
-## Reference: The "Super Ahmed" Canonical Profile
+## Scholar Audit Process
 
-All methodologies are tested against "Super Ahmed" — a canonical test profile ensuring baseline rationality:
+ZakatFlow presets are authored based on published scholarly sources, but they carry greater authority when reviewed and certified by the relevant scholar or institution. We are actively seeking contributors to facilitate this process.
 
-| Asset | Value |
-| :--- | :--- |
-| Cash | $100,000 |
-| 401k (Vested) | $100,000 |
-| Passive Investments | $100,000 |
-| Gold Jewelry | $5,000 |
-| Age | 30 |
+### How to Submit a Preset for Audit
 
-**Expected Output**: Zakat Due > $0 for all methodologies (specific amount varies by config).
+1. **Open a GitHub issue** titled "ZMCS Audit Request: [Methodology Name]"
+2. **Include in the issue:**
+   - The preset file path (e.g., `packages/core/src/config/presets/hanafi.ts`)
+   - The scholar or institution you are submitting for review
+   - Relevant fatwa URLs, publication references, or contact information
+3. **Tag the issue** with the `zmcs-audit` label
+4. The maintainer will coordinate outreach to the scholar or institution
+
+### Upon Certification
+
+When a scholar or institution endorses a preset, the `meta.certification` field is populated:
+
+```typescript
+certification: {
+  certified_by: 'Scholar Name or Institution',
+  date: '2026-MM-DD',
+  url: 'https://link-to-endorsement-or-fatwa',
+}
+```
+
+The preset's status in the verification table (see [CONTRIBUTING.md](../../CONTRIBUTING.md)) is updated to "Verified."
+
+---
+
+## Preset Verification Status
+
+| Preset Key | Scholar / Institution | Verification Status | Certified By |
+|:---|:---|:---|:---|
+| `balanced` | Sheikh Joe Bradford | Awaiting audit | — |
+| `amja` | Assembly of Muslim Jurists of America | Awaiting audit | — |
+| `tahir_anwar` | Imam Tahir Anwar (Hanafi) | Awaiting audit | — |
+| `qaradawi` | Dr. Yusuf Al-Qaradawi | Awaiting audit | — |
+| `hanafi` | Hanafi Classical | Awaiting audit | — |
+| `shafii` | Shafi'i Classical | Awaiting audit | — |
+| `maliki` | Maliki Classical | Awaiting audit | — |
+| `hanbali` | Hanbali Classical | Awaiting audit | — |
+
+If you are a scholar, student of knowledge, or representative of an Islamic body and would like to audit a preset, please contact [naheed@vora.dev](mailto:naheed@vora.dev) or open an issue on [GitHub](https://github.com/naheed/zakah/issues).
 
 ---
 

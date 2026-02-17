@@ -31,6 +31,21 @@ interface Release {
 
 const RELEASES: Release[] = [
     {
+        version: "0.32.0",
+        date: "2026-02-17",
+        title: "Open Source Community Launch",
+        added: [
+            "Documentation Overhaul: Comprehensive contributor guide with three contribution tracks",
+            "Style Guide: Code, content, and documentation standards for human and AI contributors",
+            "ZMCS Contributor Call: Actively seeking scholars to audit and verify methodology presets"
+        ],
+        changed: [
+            "README: Expanded as the primary Getting Started guide with contribution tracks",
+            "CONTRIBUTING.md: Complete rewrite with style guides and contribution workflows",
+            "Technical Documentation: Audit and update of all docs across web and MCP packages"
+        ]
+    },
+    {
         version: "0.31.0",
         date: "2026-02-16",
         title: "Open Source Limitless Intelligence",

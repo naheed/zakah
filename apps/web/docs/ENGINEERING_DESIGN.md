@@ -3,7 +3,7 @@
 | **Author** | ZakatFlow Engineering Team |
 | :--- | :--- |
 | **Status** | Living Document |
-| **Last Updated** | February 15, 2026 (v0.28.0 — Security & Classification Overhaul) |
+| **Last Updated** | February 17, 2026 (v0.32.0 — Open Source Community Launch) |
 | **Audience** | Engineering, Product, Security, Open-Source Contributors |
 
 ## 1. Overview
@@ -25,13 +25,15 @@ ZakatFlow is an open-source, privacy-first Zakat calculation platform. It transf
 
 ### 2.1 System Context
 
-The system follows a **Hybrid Client-Server** model. Core calculation logic runs entirely client-side for privacy and speed. Persistence and third-party integrations leverage serverless Edge Functions.
+The system follows a **Hybrid Client-Server** model. Core calculation logic runs entirely client-side for privacy and speed. Persistence and third-party integrations leverage serverless Edge Functions. The shared `@zakatflow/core` library powers both the web application and the MCP server for AI assistant integration.
 
 ```mermaid
 graph TD
     Client[Client - React/Vite] -->|Reads/Writes| GuestVault[Guest Vault - LocalStorage/AES-256]
     Client -->|Syncs| SupabaseDB[Supabase - Postgres]
     Client -->|Auth| SupabaseAuth[GoTrue / Google OAuth]
+    Client -->|Uses| Core[@zakatflow/core - ZMCS Engine]
+    MCP[MCP Server - SSE/Stdio] -->|Uses| Core
     
     subgraph "Secure Enclave (Edge)"
         Edge[Edge Functions - Deno]

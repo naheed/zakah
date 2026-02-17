@@ -190,6 +190,26 @@ export default function About() {
         <StaggerItem variant="slide-up">
           <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-border before:to-transparent text-left">
 
+            {/* Item - Open Source Community v0.32.0 */}
+            <div className="relative flex items-start group">
+              <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
+              <div className="ml-12">
+                <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
+                <h3 className="text-lg font-medium">Open Source Community Launch</h3>
+                <p className="text-muted-foreground mt-1 text-sm">Repository is now public with comprehensive contributor guides. Three ways to contribute: Web UI, AI Agents (MCP), and scholarly methodology presets (ZMCS). Actively seeking scholars to audit and verify presets.</p>
+              </div>
+            </div>
+
+            {/* Item - AI Companion v0.31.0 */}
+            <div className="relative flex items-start group">
+              <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />
+              <div className="ml-12">
+                <span className="text-xs font-mono text-primary uppercase tracking-wider mb-1 block">Feb 2026</span>
+                <h3 className="text-lg font-medium">AI Companion (MCP)</h3>
+                <p className="text-muted-foreground mt-1 text-sm">Connect ZakatFlow to ChatGPT or Claude. Ask your AI about Zakat rulings and it calls the real calculation engine for accurate, methodology-aware answers.</p>
+              </div>
+            </div>
+
             {/* Item -2 - Real-Time Engine v0.30.0 */}
             <div className="relative flex items-start group">
               <div className="absolute left-0 ml-5 -translate-x-1/2 mt-1.5 w-3 h-3 bg-primary rounded-full border-2 border-background ring-4 ring-background" />

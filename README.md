@@ -260,6 +260,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development workflow.
 
 Each methodology is a complete ZMCS configuration — not hardcoded logic. New methodologies can be added without changing the engine. See [ZMCS Specification](apps/web/docs/ZMCS_SPECIFICATION.md) for the full standard.
 
+> **Call for Scholar Auditors:** We are actively seeking scholars, students of knowledge, and Islamic institutions to audit and verify these presets. If you can help, see [Track 3 in the Contributing Guide](CONTRIBUTING.md#track-3-zmcs-methodology-presets-packagescore) or contact [naheed@vora.dev](mailto:naheed@vora.dev).
+
 ---
 
 ## Deployment
@@ -319,7 +321,13 @@ npx playwright test
 
 ## Contributing
 
-We welcome contributions. Please see the [Contributing Guide](CONTRIBUTING.md) for setup instructions, coding standards, the monorepo build contract, and the pull request process.
+We welcome contributions across three tracks: **Web Application** features, **AI Agent** tools, and **ZMCS Methodology Presets**. Please see the [Contributing Guide](CONTRIBUTING.md) for setup instructions, coding standards, style guides, the monorepo build contract, and the pull request process.
+
+### Three Ways to Contribute
+
+1. **Web UI** (`apps/web`) — Build features for [zakatflow.org](https://zakatflow.org): wizard steps, reports, accessibility, and design.
+2. **AI Agents** (`apps/mcp-server`) — Add MCP tools, author agent protocols, and improve AI assistant integration.
+3. **ZMCS Presets** (`packages/core`) — Author, audit, or certify scholarly methodology configurations. We are actively seeking scholars to verify existing presets.
 
 ### Quick Start
 
