@@ -54,12 +54,10 @@ import {
 } from './calculators/assets';
 import { calculateTotalLiabilities } from './calculators/liabilities';
 import { calculateNisab, SILVER_PRICE_PER_OUNCE as DEFAULT_SILVER, GOLD_PRICE_PER_OUNCE as DEFAULT_GOLD } from './calculators/utils'; // Alias to avoid shadowing export *
-import { ZakatMethodologyConfig } from './config/types';
-import { DEFAULT_CONFIG } from './config/defaults';
-import { ZAKAT_PRESETS } from './config/presets';
+import { ZakatMethodologyConfig, DEFAULT_CONFIG, ZAKAT_PRESETS } from '@zakatflow/core';
 
 export * from './zakatTypes';
-export * from './config/types';
+export type { ZakatMethodologyConfig } from '@zakatflow/core';
 export * from './calculators/assets';
 export * from './calculators/liabilities';
 export {

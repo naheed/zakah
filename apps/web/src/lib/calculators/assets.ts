@@ -22,9 +22,8 @@ import {
     AssetItem,
     LiabilityItem,
 } from '../zakatTypes';
-import { ZakatMethodologyConfig } from '../config/types';
+import { ZakatMethodologyConfig, DEFAULT_CONFIG } from '@zakatflow/core';
 import { ASSET_COLORS } from './utils';
-import { DEFAULT_CONFIG } from '../config/defaults';
 
 // =============================================================================
 // Enhanced Retirement Calculation Logic (ZMCS v1.0)

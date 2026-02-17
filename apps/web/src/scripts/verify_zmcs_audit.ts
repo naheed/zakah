@@ -1,6 +1,5 @@
 import { calculateZakat } from '../lib/zakatCalculations';
-import { AMJA_CONFIG } from '../lib/config/presets/amja';
-import { QARADAWI_CONFIG } from '../lib/config/presets/qaradawi';
+import { AMJA_CONFIG, QARADAWI_CONFIG } from '@zakatflow/core';
 import { ZakatFormData } from '../lib/zakatTypes';
 import { defaultFormData } from '../lib/calculators/utils';
 
