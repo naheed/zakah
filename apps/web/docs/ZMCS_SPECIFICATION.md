@@ -28,6 +28,40 @@ Any institution, scholar, or community can author a ZMCS configuration to fully 
 
 ---
 
+### Tooltip Fields (UI Content)
+
+ZMCS configurations serve a dual purpose: they define the calculation rules **and** the user-facing content displayed in the calculator interface. Every major section supports a `tooltip` field — a human-readable string rendered in the UI to explain that section's ruling to end-users.
+
+| Field Pattern | Type | Required | Description |
+|---------------|------|----------|-------------|
+| `*.tooltip` | string | No | User-facing guidance text displayed in the calculator UI for the relevant section. Config authors should write clear, concise summaries that help end-users understand the ruling without requiring fiqh expertise. |
+
+**Where tooltips appear:**
+
+| Section | Tooltip Field |
+|---------|---------------|
+| Metadata | `meta.tooltip` |
+| Nisab | `thresholds.nisab.tooltip` |
+| Zakat Rate | `thresholds.zakat_rate.tooltip` |
+| Cash | `assets.cash.tooltip` |
+| Precious Metals | `assets.precious_metals.tooltip` |
+| Cryptocurrency | `assets.crypto.tooltip` |
+| Investments | `assets.investments.tooltip` |
+| Retirement | `assets.retirement.tooltip` |
+| Real Estate | `assets.real_estate.tooltip` |
+| Business | `assets.business.tooltip` |
+| Debts Owed | `assets.debts_owed_to_user.tooltip` |
+| Trusts | `assets.trusts.tooltip` |
+| Liabilities | `liabilities.tooltip` |
+
+**Authoring guidelines:**
+1. Write for a general Muslim audience — assume no fiqh training.
+2. Keep tooltips under 200 characters for clean UI rendering.
+3. Explain the *practical effect* of the ruling, not the juristic derivation.
+4. Use the `description` and `scholarly_basis` fields for detailed scholarly evidence.
+
+---
+
 ## Schema Reference
 
 ### 1. Metadata (`meta`)

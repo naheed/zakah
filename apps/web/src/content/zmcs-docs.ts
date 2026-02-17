@@ -116,10 +116,25 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: false,
             },
             {
+                path: "meta.certification.certified_by",
+                type: "string",
+                description: "Name of the certifying scholar or Shariah board that reviewed and approved this methodology configuration.",
+                required: false,
+                category: "metadata",
+            },
+            {
+                path: "meta.certification.date",
+                type: "string (ISO 8601)",
+                description: "Date of the certification or approval (e.g., '2025-01-15').",
+                required: false,
+                category: "metadata",
+            },
+            {
                 path: "meta.certification.url",
                 type: "string (url)",
                 description: "Link to the public fatwa, paper, or official ruling document.",
                 required: false,
+                category: "metadata",
             },
             {
                 path: "meta.tooltip",
@@ -173,6 +188,12 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
             },
             {
+                path: "thresholds.nisab.description",
+                type: "string",
+                description: "Methodology-specific notes explaining the rationale behind the chosen Nisab standard and values.",
+                required: false,
+            },
+            {
                 path: "thresholds.zakat_rate.lunar",
                 type: "number (0-1)",
                 description: "Zakat rate for Hijri (Lunar) calendar year (~354 days).",
@@ -185,6 +206,12 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 description: "Adjusted rate for Gregorian (Solar) year (~365 days). Accounts for the 11-day difference.",
                 default: "0.02577 (2.577%)",
                 required: true,
+            },
+            {
+                path: "thresholds.zakat_rate.description",
+                type: "string",
+                description: "Notes on how the Zakat rate was derived or any special considerations (e.g., solar year adjustment methodology).",
+                required: false,
             },
             {
                 path: "thresholds.zakat_rate.tooltip",
@@ -217,6 +244,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 helpText: "checkingAccounts",
             },
             {
+                path: "assets.cash.rate",
+                type: "number (0-1)",
+                description: "Rate applied to cash holdings. Universally 1.0 (100% of cash is zakatable).",
+                default: "1.0",
+                required: true,
+                group: "Cash",
+            },
+            {
                 path: "assets.cash.tooltip",
                 type: "string",
                 description: "User-facing guidance text displayed in the calculator UI for the Cash section. Config authors should write clear, concise summaries that help end-users understand the ruling.",
@@ -228,14 +263,52 @@ export const ZMCS_DOCS: ZMCSSection[] = [
 
             // ── Precious Metals / Jewelry ──
             {
+                path: "assets.precious_metals.investment_gold_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on gold held as investment (bullion, coins, bars). Always 1.0 — investment gold is universally zakatable.",
+                default: "1.0",
+                required: true,
+                group: "Precious Metals",
+                groupIcon: Coins,
+            },
+            {
+                path: "assets.precious_metals.investment_silver_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on silver held as investment. Always 1.0 — investment silver is universally zakatable.",
+                default: "1.0",
+                required: true,
+                group: "Precious Metals",
+            },
+            {
                 path: "assets.precious_metals.jewelry.zakatable",
                 type: "boolean",
                 description: "Whether personal-use gold and silver jewelry is subject to Zakat.",
                 detail: "Hanafi and Bradford methodologies hold all gold and silver as monetary by nature (thaman) and therefore zakatable. The majority view (Shafi'i, Maliki, Hanbali, AMJA) exempts jewelry worn for permissible personal adornment.",
                 required: true,
                 group: "Precious Metals",
-                groupIcon: Coins,
                 helpText: "jewelryExemption",
+            },
+            {
+                path: "assets.precious_metals.jewelry.rate",
+                type: "number (0-1)",
+                description: "Rate applied to jewelry if zakatable. Typically 1.0 (100% of market value).",
+                default: "1.0",
+                required: true,
+                group: "Precious Metals",
+            },
+            {
+                path: "assets.precious_metals.jewelry.conditions",
+                type: "string[]",
+                description: "Optional conditions affecting zakatability (e.g., 'personal_use', 'excessive_amount'). Empty array means no special conditions.",
+                required: false,
+                group: "Precious Metals",
+            },
+            {
+                path: "assets.precious_metals.jewelry.description",
+                type: "string",
+                description: "Methodology-specific explanation of the jewelry ruling and its rationale.",
+                required: false,
+                group: "Precious Metals",
             },
             {
                 path: "assets.precious_metals.jewelry.scholarly_basis",
@@ -266,6 +339,30 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 helpText: "cryptoCurrency",
             },
             {
+                path: "assets.crypto.trading_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on actively traded crypto assets and NFTs. Treated as trade goods (ʿurūḍ al-tijārah).",
+                default: "1.0",
+                required: true,
+                group: "Cryptocurrency",
+            },
+            {
+                path: "assets.crypto.staking.principal_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on the principal amount locked in staking/yield farming.",
+                default: "1.0",
+                required: true,
+                group: "Cryptocurrency",
+            },
+            {
+                path: "assets.crypto.staking.rewards_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on staking/yield rewards. May differ from principal if rewards are considered separate income.",
+                default: "1.0",
+                required: true,
+                group: "Cryptocurrency",
+            },
+            {
                 path: "assets.crypto.staking.vested_only",
                 type: "boolean",
                 description: "If true, only vested (claimable) staking rewards are counted. Unvested/locked rewards excluded.",
@@ -273,6 +370,20 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Cryptocurrency",
                 helpText: "stakedAssets",
+            },
+            {
+                path: "assets.crypto.description",
+                type: "string",
+                description: "Methodology-specific notes on the treatment of cryptocurrency and digital assets.",
+                required: false,
+                group: "Cryptocurrency",
+            },
+            {
+                path: "assets.crypto.scholarly_basis",
+                type: "string",
+                description: "Scholarly evidence for crypto treatment (e.g., thamaniyya analogy to gold/silver, AAOIFI guidance).",
+                required: false,
+                group: "Cryptocurrency",
             },
             {
                 path: "assets.crypto.tooltip",
@@ -317,9 +428,24 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 group: "Investments",
             },
             {
+                path: "assets.investments.dividends.zakatable",
+                type: "boolean",
+                description: "Whether dividend income is zakatable. Universally true across all methodologies.",
+                default: "true",
+                required: true,
+                group: "Investments",
+            },
+            {
                 path: "assets.investments.dividends.deduct_purification",
                 type: "boolean",
                 description: "If true, the haram purification percentage is deducted from dividends before Zakat calculation.",
+                required: true,
+                group: "Investments",
+            },
+            {
+                path: "assets.investments.reits_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on Equity REITs. Usually follows passive investment rate. Avoid Mortgage REITs (Shariah compliance concern).",
                 required: true,
                 group: "Investments",
             },
@@ -330,15 +456,6 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: false,
                 group: "Investments",
                 category: "content",
-            },
-
-            // ── REITs ──
-            {
-                path: "assets.investments.reits_rate",
-                type: "number (0-1)",
-                description: "Zakat rate on Equity REITs. Usually follows passive investment rate. Avoid Mortgage REITs (Shariah compliance concern).",
-                required: true,
-                group: "Investments",
             },
 
             // ── Retirement ──
@@ -379,6 +496,41 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 group: "Retirement",
             },
             {
+                path: "assets.retirement.post_threshold_rate",
+                type: "number (0-1)",
+                description: "Rate for the 'proxy_rate' post-threshold method (e.g., Bradford uses 0.30 / 30%).",
+                default: "0.30",
+                required: false,
+                group: "Retirement",
+            },
+            {
+                path: "assets.retirement.pension_vested_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on the vested balance of pension/defined-benefit plans.",
+                default: "1.0",
+                required: false,
+                group: "Retirement",
+            },
+            {
+                path: "assets.retirement.penalty_rate",
+                type: "number (0-1)",
+                description: "Early withdrawal penalty rate deducted from net-accessible calculation. US standard: 0.10 (10%).",
+                default: "0.10",
+                required: false,
+                group: "Retirement",
+            },
+            {
+                path: "assets.retirement.tax_rate_source",
+                type: "enum",
+                description: "How the tax rate for net-accessible calculation is determined.",
+                options: [
+                    { value: "user_input", label: "User Input — User enters their marginal tax rate." },
+                    { value: "flat_rate", label: "Flat Rate — Config specifies a fixed tax rate." },
+                ],
+                required: false,
+                group: "Retirement",
+            },
+            {
                 path: "assets.retirement.roth_contributions_rate",
                 type: "number (0-1)",
                 description: "Zakat rate on Roth IRA contributions (always accessible tax-free). Bradford: 0.30 (proxy). Most others: 1.0 (fully zakatable).",
@@ -414,18 +566,34 @@ export const ZMCS_DOCS: ZMCSSection[] = [
 
             // ── Real Estate ──
             {
+                path: "assets.real_estate.primary_residence.zakatable",
+                type: "boolean",
+                description: "Whether the primary residence is zakatable. Always false — personal dwelling is universally exempt.",
+                default: "false",
+                required: true,
+                group: "Real Estate",
+                groupIcon: HouseLine,
+            },
+            {
                 path: "assets.real_estate.rental_property.zakatable",
                 type: "boolean",
                 description: "Whether rental property market value itself is zakatable. Usually false (exploited asset — only income is zakatable).",
                 required: true,
                 group: "Real Estate",
-                groupIcon: HouseLine,
             },
             {
                 path: "assets.real_estate.rental_property.income_zakatable",
                 type: "boolean",
                 description: "Whether net rental income (in bank) is zakatable. Usually true.",
                 required: true,
+                group: "Real Estate",
+            },
+            {
+                path: "assets.real_estate.rental_property.income_rate",
+                type: "number (0-1)",
+                description: "Override Zakat rate for rental income (v1.0.1). If set, rental income uses this rate instead of the global 2.5%. Al-Qaradawi uses 0.10 (10%) based on the agricultural analogy (ʿushr rate). Omit to use the standard global rate.",
+                detail: "Al-Qaradawi argues that rental buildings are analogous to land watered by rain — the income produced requires minimal ongoing effort, justifying the higher ʿushr (10%) rate. This is implemented via the ZMCS v1.0.1 multi-rate calculation, which separates override pools from the standard pool.",
+                required: false,
                 group: "Real Estate",
             },
             {
@@ -436,9 +604,25 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 group: "Real Estate",
             },
             {
+                path: "assets.real_estate.for_sale.rate",
+                type: "number (0-1)",
+                description: "Zakat rate on property listed for sale. Typically 1.0 (full market value as trade goods).",
+                default: "1.0",
+                required: true,
+                group: "Real Estate",
+            },
+            {
                 path: "assets.real_estate.land_banking.zakatable",
                 type: "boolean",
                 description: "Whether undeveloped land held for long-term appreciation is zakatable.",
+                required: true,
+                group: "Real Estate",
+            },
+            {
+                path: "assets.real_estate.land_banking.rate",
+                type: "number (0-1)",
+                description: "Zakat rate on land held for appreciation. Typically 1.0 (full market value).",
+                default: "1.0",
                 required: true,
                 group: "Real Estate",
             },
@@ -453,13 +637,21 @@ export const ZMCS_DOCS: ZMCSSection[] = [
 
             // ── Business ──
             {
+                path: "assets.business.cash_receivables_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on business cash and accounts receivable. Usually 1.0 (fully zakatable as liquid assets).",
+                default: "1.0",
+                required: true,
+                group: "Business",
+                groupIcon: Briefcase,
+            },
+            {
                 path: "assets.business.inventory_rate",
                 type: "number (0-1)",
                 description: "Zakat rate on business inventory (raw materials, finished goods for sale).",
                 default: "1.0",
                 required: true,
                 group: "Business",
-                groupIcon: Briefcase,
             },
             {
                 path: "assets.business.fixed_assets_rate",
@@ -490,6 +682,14 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 groupIcon: HandCoins,
             },
             {
+                path: "assets.debts_owed_to_user.bad_debt_rate",
+                type: "number (0-1)",
+                description: "Zakat rate on doubtful/bad debts (borrower unable or unwilling to repay). Usually 0.0.",
+                default: "0.0",
+                required: true,
+                group: "Debts Owed",
+            },
+            {
                 path: "assets.debts_owed_to_user.bad_debt_on_recovery",
                 type: "boolean",
                 description: "If true, bad debts only become zakatable when actually recovered (pay Zakat on recovery year).",
@@ -503,6 +703,16 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: false,
                 group: "Debts Owed",
                 category: "content",
+            },
+
+            // ── Optional: Illiquid Assets ──
+            {
+                path: "assets.illiquid_assets.rate",
+                type: "number (0-1)",
+                description: "Zakat rate on illiquid assets (e.g., livestock, collectibles) not covered by other categories. Default 1.0.",
+                default: "1.0",
+                required: false,
+                group: "Illiquid Assets",
             },
 
 
@@ -582,6 +792,18 @@ export const ZMCS_DOCS: ZMCSSection[] = [
                 required: true,
                 group: "Personal Debt",
                 groupIcon: Bank,
+            },
+            {
+                path: "liabilities.personal_debt.cap",
+                type: "enum",
+                description: "Maximum cap on total personal debt deduction.",
+                options: [
+                    { value: "none", label: "No cap — deduct full qualifying debt amount." },
+                    { value: "total_assets", label: "Capped at total assets — debt deduction cannot exceed total asset value." },
+                    { value: "total_cash", label: "Capped at total cash — debt deduction cannot exceed liquid cash holdings." },
+                ],
+                required: false,
+                group: "Personal Debt",
             },
             {
                 path: "liabilities.personal_debt.types.housing",
