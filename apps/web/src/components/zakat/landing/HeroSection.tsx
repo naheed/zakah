@@ -64,10 +64,10 @@ export function HeroSection({ onNext, ctaRef }: HeroSectionProps) {
                         </Button>
 
                         <div className="flex flex-col gap-2 text-sm text-muted-foreground pt-1">
-                            <a href="#" className="flex items-center gap-2 hover:text-foreground transition-colors">
+                            <a href="/samples/sample-zakat-report.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-foreground transition-colors">
                                 <FilePdf className="w-4 h-4" /> {hero.previewPdf}
                             </a>
-                            <a href="#" className="flex items-center gap-2 hover:text-foreground transition-colors">
+                            <a href="/samples/sample-zakat-report.csv" download className="flex items-center gap-2 hover:text-foreground transition-colors">
                                 <FileCsv className="w-4 h-4" /> {hero.downloadCsv}
                             </a>
                         </div>
