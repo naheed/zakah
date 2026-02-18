@@ -28,7 +28,8 @@ import { Badge } from '@/components/ui/badge';
 import { Footer } from '@/components/zakat/Footer';
 import { getPrimaryUrl } from '@/lib/domainConfig';
 import { cn } from '@/lib/utils';
-import { formatCurrency, calculateZakat } from '@zakatflow/core';
+import { formatCurrency, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '@zakatflow/core';
+import { useNisab } from '@/hooks/useNisab';
 import { formatHijri } from '@zakatflow/core';
 import { Donation, ZAKAT_RECIPIENT_CATEGORIES, CalendarType } from '@/types/donations';
 import { AddDonationModal } from '@/components/donations/AddDonationModal';
@@ -61,6 +62,9 @@ export default function Donations() {
 
     // Zakat calculator persistence hook (for reading calculated amount)
     const { formData } = useZakatPersistence();
+    const { data: nisabData } = useNisab();
+    const liveSilverPrice = nisabData?.silver_price ?? SILVER_PRICE_PER_OUNCE;
+    const liveGoldPrice = nisabData?.gold_price ?? GOLD_PRICE_PER_OUNCE;
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [showHawlOnboarding, setShowHawlOnboarding] = useState(false);
@@ -82,7 +86,7 @@ export default function Donations() {
             // 2. Fallback: Check local calculator persistence
             else {
                 try {
-                    const result = calculateZakat(formData);
+                    const result = calculateZakat(formData, liveSilverPrice, liveGoldPrice);
                     if (result.zakatDue && result.zakatDue > 0) {
                         potentialAmount = result.zakatDue;
                     }

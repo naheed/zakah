@@ -39,8 +39,8 @@ export function NisabStep({ data, updateData, questionNumber }: NisabStepProps) 
   // Fallback to defaults if loading or error, but ideally show loading state
   // Using 0 as fallback or keeping old constants as backup?
   // Let's use the old constants as fallback to prevent UI breakage if API fails.
-  const SILVER_FALLBACK = 24.50;
-  const GOLD_FALLBACK = 2650;
+  const SILVER_FALLBACK = 73.00;
+  const GOLD_FALLBACK = 4900;
 
   const silverPrice = nisabData?.silver_price ?? SILVER_FALLBACK;
   const goldPrice = nisabData?.gold_price ?? GOLD_FALLBACK;

@@ -21,6 +21,7 @@ import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from './useAuth';
 import { useEncryptionKeys } from './useEncryptionKeys';
 import { ZakatFormData, Madhab, defaultFormData, calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '@zakatflow/core';
+import { useNisab } from './useNisab';
 import { useToast } from './use-toast';
 import { encryptSession, decryptSession } from '@/lib/sessionEncryption';
 // UUID removed in favor of crypto.randomUUID()
@@ -70,6 +71,9 @@ export function useSavedCalculations() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isReady, encrypt, decrypt } = useEncryptionKeys();
+  const { data: nisabData } = useNisab();
+  const liveSilverPrice = nisabData?.silver_price ?? SILVER_PRICE_PER_OUNCE;
+  const liveGoldPrice = nisabData?.gold_price ?? GOLD_PRICE_PER_OUNCE;
   const [calculations, setCalculations] = useState<SavedCalculation[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -108,7 +112,7 @@ export function useSavedCalculations() {
               let isAboveNisab = decrypted?.isAboveNisab;
 
               if (zakatDue === undefined && decrypted?.formData) {
-                const res = calculateZakat(decrypted.formData);
+                const res = calculateZakat(decrypted.formData, liveSilverPrice, liveGoldPrice);
                 zakatDue = res.zakatDue;
                 isAboveNisab = res.isAboveNisab;
               }
@@ -259,7 +263,7 @@ export function useSavedCalculations() {
     setLoading(false);
     isFetchingRef.current = false;
     hasFetchedRef.current = true;
-  }, [user, toast, isReady, decrypt]);
+  }, [user, toast, isReady, decrypt, liveSilverPrice, liveGoldPrice]);
 
   // Trigger initial fetch when user state is resolved or guest mode
   // This ensures the calculations list is populated on mount
@@ -281,7 +285,7 @@ export function useSavedCalculations() {
     formData: ZakatFormData,
     existingId?: string // Optional ID for updates/local logic
   ) => {
-    const result = calculateZakat(formData);
+    const result = calculateZakat(formData, liveSilverPrice, liveGoldPrice);
 
     // 1. Guest Mode: Save to Local History
     if (!user) {
