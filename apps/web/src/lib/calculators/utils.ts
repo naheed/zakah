@@ -182,13 +182,15 @@ export function parseMathExpression(expression: string): number {
 export function calculateNisab(
     silverPricePerOunce: number = SILVER_PRICE_PER_OUNCE,
     goldPricePerOunce: number = GOLD_PRICE_PER_OUNCE,
-    standard: NisabStandard = 'silver'
+    standard: NisabStandard = 'silver',
+    goldGrams: number = GOLD_NISAB_GRAMS,
+    silverGrams: number = SILVER_NISAB_GRAMS
 ): number {
     if (standard === 'gold') {
-        const nisabInOunces = GOLD_NISAB_GRAMS / GRAMS_PER_OUNCE;
+        const nisabInOunces = goldGrams / GRAMS_PER_OUNCE;
         return nisabInOunces * goldPricePerOunce;
     }
     // Silver standard (default)
-    const nisabInOunces = SILVER_NISAB_GRAMS / GRAMS_PER_OUNCE;
+    const nisabInOunces = silverGrams / GRAMS_PER_OUNCE;
     return nisabInOunces * silverPricePerOunce;
 }

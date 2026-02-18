@@ -111,6 +111,10 @@ export function calculateRetirementAccessible(
     // Apply withdrawal limit (e.g., employer caps early withdrawal at 50%)
     const accessiblePrincipal = vestedBalance * withdrawalLimit;
 
+    // Apply pension_vested_rate from config (e.g., 1.0 for most, could vary for custom configs)
+    const pensionVestedRate = rules.pension_vested_rate ?? 1.0;
+    const ratedPrincipal = accessiblePrincipal * pensionVestedRate;
+
     // Apply penalties (10% if under 59.5, 0% if over)
     const isUnderAge = age < 59.5;
     const penalty = isUnderAge ? (rules.penalty_rate ?? 0.10) : 0;
@@ -120,9 +124,9 @@ export function calculateRetirementAccessible(
 
     // Net factor = 1 - (tax + penalty), floored at 0
     const netFactor = Math.max(0, 1 - (effectiveTaxRate + penalty));
-    const result = accessiblePrincipal * netFactor;
+    const result = ratedPrincipal * netFactor;
 
-    console.log(`[ZMCS Retirement] Method: net_accessible, balance ${vestedBalance}, limit ${withdrawalLimit}, tax ${effectiveTaxRate}, penalty ${penalty} → ${result}`);
+    console.log(`[ZMCS Retirement] Method: net_accessible, balance ${vestedBalance}, limit ${withdrawalLimit}, vestedRate ${pensionVestedRate}, tax ${effectiveTaxRate}, penalty ${penalty} → ${result}`);
     return result;
 }
 
@@ -173,8 +177,16 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
     const invRules = config.assets.investments;
     total += data.activeInvestments * invRules.active_trading_rate;
 
-    // Passive investments
-    total += data.passiveInvestmentsValue * invRules.passive_investments.rate;
+    // Passive investments — respect treatment philosophy
+    const passiveTreatment = invRules.passive_investments.treatment;
+    if (passiveTreatment === 'income_only') {
+        // Income-only view: principal market value is exempt; only dividends (handled separately) are zakatable
+        // Do NOT add passive investment principal to total
+        console.log(`[ZMCS Assets] Passive investments: treatment=income_only → principal $${data.passiveInvestmentsValue} excluded`);
+    } else {
+        // market_value or underlying_assets: apply the rate to principal
+        total += data.passiveInvestmentsValue * invRules.passive_investments.rate;
+    }
 
     // REITs
     total += data.reitsValue * invRules.reits_rate;
@@ -209,11 +221,16 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
     total += calculateRetirementAccessible(data.fourOhOneKVestedBalance, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
     total += calculateRetirementAccessible(data.traditionalIRABalance, data.age, data.estimatedTaxRate, config, data.retirementWithdrawalAllowed, data.retirementWithdrawalLimit);
 
-    // Withdrawals (already net)
-    total += data.iraWithdrawals;
-    total += data.esaWithdrawals;
-    total += data.fiveTwentyNineWithdrawals;
-    total += data.hsaBalance;
+    // Withdrawals (already net) — guarded by distributions_always_zakatable config
+    const distAlwaysZakatable = config.assets.retirement.distributions_always_zakatable ?? true;
+    if (distAlwaysZakatable) {
+        total += data.iraWithdrawals;
+        total += data.esaWithdrawals;
+        total += data.fiveTwentyNineWithdrawals;
+        total += data.hsaBalance;
+    } else {
+        console.log('[ZMCS Assets] distributions_always_zakatable=false → withdrawals excluded');
+    }
 
     // Trusts
     const trustRules = config.assets.trusts || { revocable_rate: 1.0, irrevocable_rate: 1.0 };
@@ -261,9 +278,15 @@ export function calculateTotalAssets(data: ZakatFormData, config: ZakatMethodolo
         total += data.goodDebtOwedToYou * debtRules.good_debt_rate;
 
         if (debtRules.bad_debt_on_recovery) {
-            total += data.badDebtRecovered;
+            // Apply bad_debt_rate to recovered amount (typically 1.0 for recovered funds)
+            const badDebtRate = debtRules.bad_debt_rate ?? 1.0;
+            total += data.badDebtRecovered * badDebtRate;
         } else {
-            // If zakatable annually, we'd add bad debt here? Usually no.
+            // Bad debt is zakatable annually at the configured rate
+            const badDebtRate = debtRules.bad_debt_rate ?? 0.0;
+            if (badDebtRate > 0) {
+                total += data.badDebtRecovered * badDebtRate;
+            }
         }
     }
 

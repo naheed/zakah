@@ -102,7 +102,13 @@ export function calculateZakat(
   // ═══════════════════════════════════════════════════════════════════════
   const nisabStandard = effectiveConfig.thresholds.nisab.default_standard;
   const effectiveNisabStandard = data.nisabStandard || nisabStandard;
-  const nisab = calculateNisab(silverPrice, goldPrice, effectiveNisabStandard);
+  const nisab = calculateNisab(
+    silverPrice,
+    goldPrice,
+    effectiveNisabStandard,
+    effectiveConfig.thresholds.nisab.gold_grams,
+    effectiveConfig.thresholds.nisab.silver_grams
+  );
   const isAboveNisab = netZakatableWealth >= nisab;
 
   // ═══════════════════════════════════════════════════════════════════════
