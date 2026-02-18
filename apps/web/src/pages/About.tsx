@@ -22,24 +22,21 @@ import { ArticleLayout } from "@/components/layout/ArticleLayout";
 export default function About() {
   const headerContent = (
     <StaggerContainer className="text-center" staggerDelay={0.15}>
-      {/* Opening Quote Mark */}
-      <StaggerItem variant="fade">
-        <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none" aria-hidden="true">"</span>
-      </StaggerItem>
-
-      {/* Main Quote - First Part */}
+      {/* Headline */}
       <StaggerItem variant="slide-up">
-        <p className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground leading-relaxed -mt-8">
-          Islam is beautiful,
+        <p className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground leading-relaxed">
+          Zakat is worship.
           <br />
-          and our worship deserves perfection.
+          It deserves the same care you bring to your salah.
         </p>
       </StaggerItem>
 
-      {/* Quote - Second Part */}
+      {/* Trust Signals */}
       <StaggerItem variant="slide-up">
-        <p className="text-xl md:text-2xl lg:text-3xl font-serif text-muted-foreground mt-8 leading-relaxed">
-          Built with precision for your Akhirah and mine.
+        <p className="text-lg md:text-xl text-muted-foreground mt-6 leading-relaxed">
+          Eight scholarly methodologies. Open source code you can audit.
+          <br />
+          Built for the Ummah, by one of your own.
         </p>
       </StaggerItem>
 
@@ -70,19 +67,13 @@ export default function About() {
         </footer>
       </StaggerItem>
 
-      {/* Closing Quote Mark */}
-      <StaggerItem variant="fade">
-        <span className="text-6xl md:text-7xl font-serif text-tertiary/40 leading-none select-none mt-4 inline-block" aria-hidden="true">
-          "
-        </span>
-      </StaggerItem>
     </StaggerContainer>
   );
 
   return (
     <ArticleLayout
       title="About"
-      description="Islam is beautiful, and our worship deserves perfection. Learn about ZakatFlow's mission and values."
+      description="Zakat is worship. Eight scholarly methodologies, open source code, and precision tools — built for the Ummah."
       urlPath="/about"
       headerContent={headerContent}
       showBackButton={true}
