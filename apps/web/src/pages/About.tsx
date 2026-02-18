@@ -33,38 +33,36 @@ export default function About() {
 
       {/* Trust Signals */}
       <StaggerItem variant="slide-up">
-        <p className="text-lg md:text-xl text-muted-foreground mt-6 leading-relaxed">
+        <p className="text-lg md:text-xl text-muted-foreground mt-4 leading-relaxed">
           Eight scholarly methodologies. Open source code you can audit.
           <br />
           Built for the Ummah, by one of your own.
         </p>
       </StaggerItem>
 
-      {/* Decorative Divider */}
+      {/* Divider + Attribution (single block) */}
       <StaggerItem variant="fade">
-        <div className="flex items-center justify-center gap-3 my-10">
-          <div className="h-px w-12 bg-border" />
-          <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
-          <div className="h-px w-12 bg-border" />
+        <div className="mt-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-12 bg-border" />
+            <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+            <div className="h-px w-12 bg-border" />
+          </div>
+          <footer className="space-y-1">
+            <p className="text-base text-muted-foreground">Crafted with care in California,</p>
+            <p className="text-base">
+              by{" "}
+              <a
+                href="https://www.vora.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline decoration-primary/50 hover:decoration-primary transition-colors font-medium"
+              >
+                Naheed
+              </a>
+            </p>
+          </footer>
         </div>
-      </StaggerItem>
-
-      {/* Attribution */}
-      <StaggerItem variant="fade">
-        <footer className="space-y-1">
-          <p className="text-lg text-muted-foreground">Crafted with care in California,</p>
-          <p className="text-lg">
-            by{" "}
-            <a
-              href="https://www.vora.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground underline decoration-primary/50 hover:decoration-primary transition-colors font-medium"
-            >
-              Naheed
-            </a>
-          </p>
-        </footer>
       </StaggerItem>
 
     </StaggerContainer>
@@ -77,6 +75,7 @@ export default function About() {
       urlPath="/about"
       headerContent={headerContent}
       showBackButton={true}
+      hideTitle={true}
     >
       {/* FAQ Section */}
       <StaggerContainer className="w-full" staggerDelay={0.1}>
