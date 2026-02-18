@@ -20,6 +20,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useTheme } from "next-themes";
 import { calculateZakat, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, ZakatFormData } from "@zakatflow/core";
+import { useNisab } from "@/hooks/useNisab";
 import { trackEvent, setUserProperties, AnalyticsEvents } from "@/lib/analytics";
 import { useZakatPersistence } from "@/hooks/useZakatPersistence";
 import { content as c } from "@/content";
@@ -270,8 +271,13 @@ export function ZakatWizard() {
     }
   }, [savedCalculationId, currentStep, updatePresence]);
 
+  // Use live nisab prices, falling back to hardcoded constants
+  const { data: nisabData } = useNisab();
+  const liveSilverPrice = nisabData?.silver_price ?? SILVER_PRICE_PER_OUNCE;
+  const liveGoldPrice = nisabData?.gold_price ?? GOLD_PRICE_PER_OUNCE;
+
   // Calculate Zakat (Moved up to be available for Analytics effect)
-  const calculations = calculateZakat(formData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
+  const calculations = calculateZakat(formData, liveSilverPrice, liveGoldPrice);
 
 
 

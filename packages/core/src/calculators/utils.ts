@@ -34,8 +34,8 @@ export function createZakatReport(data: ZakatFormData, calculations: ZakatCalcul
 // --- Constants ---
 export const SILVER_NISAB_GRAMS = 595;
 export const GOLD_NISAB_GRAMS = 85;
-export const SILVER_PRICE_PER_OUNCE = 24.50; // Default, should be updated with real-time data
-export const GOLD_PRICE_PER_OUNCE = 2650; // Default, should be updated with real-time data
+export const SILVER_PRICE_PER_OUNCE = 73.00; // Fallback, overridden by live data from useNisab
+export const GOLD_PRICE_PER_OUNCE = 4900; // Fallback, overridden by live data from useNisab
 export const GRAMS_PER_OUNCE = 31.1035;
 
 export const ZAKAT_RATE = 0.025; // 2.5% for lunar year

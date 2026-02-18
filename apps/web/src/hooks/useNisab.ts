@@ -32,35 +32,32 @@ export function useNisab(date?: Date) {
     return useQuery({
         queryKey: ['nisab', dateStr],
         queryFn: async (): Promise<NisabData | null> => {
-            // 1. Try to get from DB
+            // 1. Try to get most recent entry on or before the requested date
+            // This handles weekends, holidays, and days before market updates
             const { data, error } = await supabase
                 .from('nisab_values')
                 .select('*')
-                .eq('date', dateStr)
-                .single();
+                .lte('date', dateStr)
+                .order('date', { ascending: false })
+                .limit(1)
+                .maybeSingle();
 
             if (data) {
                 return data as NisabData;
             }
 
-            // 2. If for today and missing, trigger Edge Function (Lazy Load)
-            // Only do this if we are looking for TODAY or a recent past date that should exist?
-            // For now, let's just trigger it if it's today.
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (dateStr === todayStr) {
-                const { data: funcData, error: funcError } = await supabase.functions.invoke('fetch-daily-nisab', {
-                    body: { mode: 'daily' }
-                });
+            // 2. No data at all in DB — trigger Edge Function to seed initial data
+            const { data: funcData, error: funcError } = await supabase.functions.invoke('fetch-daily-nisab', {
+                body: { mode: 'daily' }
+            });
 
-                if (funcError) {
-                    console.error("Failed to fetch latest nisab from Edge Function", funcError);
-                    return null;
-                }
+            if (funcError) {
+                console.error("Failed to fetch latest nisab from Edge Function", funcError);
+                return null;
+            }
 
-                // The function returns { success: true, latest: { ... } }
-                if (funcData?.latest) {
-                    return funcData.latest as NisabData;
-                }
+            if (funcData?.latest) {
+                return funcData.latest as NisabData;
             }
 
             return null;
