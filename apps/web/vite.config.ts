@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Look for .env in the monorepo root where Lovable Cloud auto-manages it
+  envDir: path.resolve(__dirname, "../.."),
   server: {
     host: "::",
     port: 8080,
