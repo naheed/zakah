@@ -95,23 +95,7 @@ export default function About() {
 
         <StaggerItem variant="slide-up">
           <div className="bg-card border rounded-xl overflow-hidden divide-y">
-            {/* Q1 */}
-            <details className="group p-6 cursor-pointer">
-              <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
-                Who is behind ZakatFlow?
-                <span className="transition-transform group-open:rotate-180 text-muted-foreground" aria-hidden="true">↓</span>
-              </summary>
-              <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <p>
-                  ZakatFlow was created by <span className="font-medium text-foreground">Naheed</span> from California. He serves on the Board of Trustees at West Valley Muslim Association in Los Gatos, where he previously served as Treasurer for four years.
-                </p>
-                <p>
-                  Outside of community work, Naheed is a Product Lead at Google.
-                </p>
-              </div>
-            </details>
-
-            {/* Q2 */}
+            {/* Q1 — Cost / Trust */}
             <details className="group p-6 cursor-pointer">
               <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
                 Is ZakatFlow free?
@@ -119,61 +103,110 @@ export default function About() {
               </summary>
               <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <p>
-                  Yes — and it always will be.
+                  Yes — completely free, with no ads, no premium tier, and no data monetization. It always will be.
                 </p>
                 <p>
-                  The entire codebase is open-sourced under <a href="https://www.gnu.org/licenses/agpl-3.0" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">AGPL-3.0</a>. You can audit every line of code at <a href="https://www.github.com/naheed/zakah" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">github.com/naheed/zakah</a>. Naheed's sole intention is to spread good.
-                </p>
-              </div>
-            </details>
-
-            {/* Q3 */}
-            <details className="group p-6 cursor-pointer">
-              <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
-                What is the end goal?
-                <span className="transition-transform group-open:rotate-180 text-muted-foreground" aria-hidden="true">↓</span>
-              </summary>
-              <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <p>
-                  ZakatFlow started as a personal project.
-                </p>
-                <p>
-                  Naheed built it because his own portfolio had become too complex for basic spreadsheets — 401(k)s, RSUs, crypto, and rental income all demanded different scholarly treatments. After exploring the nuances with AI and consulting published jurisprudence, he shared an early version with a few friends.
-                </p>
-                <p>
-                  Their response was clear: this problem isn't unique. Many Muslims with modern portfolios struggle to calculate Zakat with confidence.
-                </p>
-                <p>
-                  So here it is — built with precision, for the community, for free.
+                  The entire codebase is open-sourced under the{" "}
+                  <a href="https://www.gnu.org/licenses/agpl-3.0" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">AGPL-3.0</a>{" "}
+                  license. You can audit every line of code at{" "}
+                  <a href="https://www.github.com/naheed/zakah" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">github.com/naheed/zakah</a>.
+                  Naheed's sole intention is to spread good.
                 </p>
               </div>
             </details>
 
-            {/* Q4 */}
+            {/* Q2 — Accuracy / Trust */}
             <details className="group p-6 cursor-pointer">
               <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
-                Is there detailed documentation on the methodology?
+                How do I know the calculations are accurate?
                 <span className="transition-transform group-open:rotate-180 text-muted-foreground" aria-hidden="true">↓</span>
               </summary>
               <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <p>
-                  Yes. We maintain a comprehensive <Link to="/methodology" className="text-primary hover:underline font-medium">Methodology Page</Link> that documents the scholarly sources behind every calculation rule.
+                  Every calculation rule is documented, sourced, and transparent. ZakatFlow supports eight scholarly methodologies — Hanafi, Shafi'i, Maliki, Hanbali, Bradford, AMJA, Tahir Anwar, and Al-Qaradawi — so you can choose the one that aligns with your conviction.
                 </p>
                 <p>
-                  It covers the four Sunni schools (Hanafi, Shafi'i, Maliki, Hanbali), modern financial instruments (401k, crypto, stocks), and contemporary scholarly positions from AAOIFI and Sheikh Joe Bradford.
+                  We maintain a comprehensive{" "}
+                  <Link to="/methodology" className="text-primary hover:underline font-medium">Methodology Page</Link>{" "}
+                  that documents the scholarly sources behind every rule, including modern financial instruments like 401(k)s, crypto, stocks, and REITs.
+                </p>
+                <p>
+                  The calculation engine itself is open source and built on the{" "}
+                  <a href="https://www.github.com/naheed/zakah" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">ZMCS standard</a>{" "}
+                  — a schema-driven specification that anyone can audit and verify.
                 </p>
               </div>
             </details>
 
-            {/* Q5 */}
+            {/* Q3 — Privacy */}
             <details className="group p-6 cursor-pointer">
               <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
-                How can I provide feedback or help contribute?
+                Is my financial data safe?
                 <span className="transition-transform group-open:rotate-180 text-muted-foreground" aria-hidden="true">↓</span>
               </summary>
               <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <p>
-                  You can reach out to <a href="mailto:naheed@vora.dev" className="text-primary hover:underline font-medium">naheed@vora.dev</a>
+                  Your financial privacy is a trust we take seriously. ZakatFlow uses a local-first architecture — calculations happen in your browser, and sensitive data is encrypted before it ever leaves your device.
+                </p>
+                <p>
+                  If you connect a bank via Plaid, only balances are accessed — never your login credentials. Plaid connections use a user-controlled encryption key, meaning even ZakatFlow's servers cannot read your data without your passphrase.
+                </p>
+                <p>
+                  Because the code is open source, you do not have to take our word for it. You can verify every claim yourself.
+                </p>
+              </div>
+            </details>
+
+            {/* Q4 — Origin */}
+            <details className="group p-6 cursor-pointer">
+              <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
+                Who built this, and why?
+                <span className="transition-transform group-open:rotate-180 text-muted-foreground" aria-hidden="true">↓</span>
+              </summary>
+              <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <p>
+                  ZakatFlow was created by <span className="font-medium text-foreground">Naheed</span>, who serves on the Board of Trustees at West Valley Muslim Association in Los Gatos, California, where he previously served as Treasurer for four years. Outside of community work, Naheed is a Product Lead at Google.
+                </p>
+                <p>
+                  He built it because his own portfolio had become too complex for basic spreadsheets — 401(k)s, RSUs, crypto, and rental income all demanded different scholarly treatments. After consulting published jurisprudence and sharing an early version with friends, their response was clear: this problem is not unique.
+                </p>
+                <p>
+                  Many Muslims with modern portfolios struggle to calculate Zakat with confidence. So here it is — built with precision, for the community, for free.
+                </p>
+              </div>
+            </details>
+
+            {/* Q5 — Contribute */}
+            <details className="group p-6 cursor-pointer">
+              <summary className="flex items-center justify-between font-medium text-lg list-none outline-none focus-visible:ring-2 ring-primary/20 rounded">
+                How can I help?
+                <span className="transition-transform group-open:rotate-180 text-muted-foreground" aria-hidden="true">↓</span>
+              </summary>
+              <div className="mt-4 text-muted-foreground leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <p>
+                  Honestly? The simplest way is to <span className="font-medium text-foreground">use it and share it</span>. Tell a friend, mention it at your masjid, or forward it to someone who struggles with Zakat calculations every year. That alone makes a difference.
+                </p>
+                <p>
+                  If you find something that could be better — a confusing label, a missing asset type, a calculation that does not feel right — please{" "}
+                  <a href="https://github.com/naheed/zakah/issues" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">open an issue on GitHub</a>.
+                  No coding required. A clear description is enough.
+                </p>
+                <p>
+                  If you are a developer, there are three tracks to contribute:
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-1">
+                  <li><span className="font-medium text-foreground">Web UI</span> — improve the interface, accessibility, or performance</li>
+                  <li><span className="font-medium text-foreground">AI Agents (MCP)</span> — build tools that let ChatGPT or Claude talk to the Zakat engine</li>
+                  <li><span className="font-medium text-foreground">Methodology Presets (ZMCS)</span> — define scholarly rulesets as auditable, schema-driven configurations</li>
+                </ul>
+                <p>
+                  And if you are a <span className="font-medium text-foreground">scholar or student of knowledge</span>, we especially need your help verifying and auditing the methodology presets. Your expertise ensures that what we build actually serves the Ummah with integrity.
+                </p>
+                <p>
+                  Start with the{" "}
+                  <a href="https://github.com/naheed/zakah/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Contributing Guide</a>,
+                  or reach out directly to{" "}
+                  <a href="mailto:naheed@vora.dev" className="text-primary hover:underline font-medium">naheed@vora.dev</a>.
                 </p>
               </div>
             </details>
