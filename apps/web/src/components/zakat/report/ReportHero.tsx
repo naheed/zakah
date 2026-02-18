@@ -46,7 +46,7 @@ export function ReportHero({
     const decimalZakat = (zakatDue % 1).toFixed(2).substring(1); // .00
 
     // Madhab Label
-    const madhabLabel = madhab ? (madhab.charAt(0).toUpperCase() + madhab.slice(1) + " Madhab") : "Standard Madhab";
+    const madhabLabel = madhab ? (madhab.charAt(0).toUpperCase() + madhab.slice(1) + " Methodology") : "Standard Methodology";
 
     // Animation Variants
     const containerVariants = {
