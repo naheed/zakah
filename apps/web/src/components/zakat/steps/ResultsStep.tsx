@@ -214,7 +214,7 @@ export function ResultsStep({
       const report = createZakatReport(data, calculations, referralCode || undefined);
 
       // Use V2 PDF generator with unified object
-      await generateZakatPDFV2(report, calculationName, user?.email?.split('@')[0]);
+      await generateZakatPDFV2(report, calculationName, user?.email?.split('@')[0], stats ? { totalReferrals: stats.totalReferrals, totalZakatCalculated: stats.totalZakatCalculated, thresholdMet: stats.thresholdMet } : undefined);
       toast({
         title: "PDF Downloaded",
         description: "Your Zakat calculation report has been downloaded.",
@@ -258,6 +258,27 @@ export function ResultsStep({
       onEditCalculation();
     }
   };
+
+  // Empty state guard — no data to show
+  if (totalAssets === 0 && zakatDue === 0 && totalLiabilities === 0) {
+    return (
+      <div className="max-w-md mx-auto text-center py-20 space-y-6 animate-fade-in">
+        <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto">
+          <Warning className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No Calculation Data</h2>
+          <p className="text-sm text-muted-foreground">
+            There's nothing to show yet. Please start a new calculation by entering your asset details.
+          </p>
+        </div>
+        <Button onClick={handleReset} className="gap-2">
+          <ArrowCounterClockwise className="w-4 h-4" />
+          Start New Calculation
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20">

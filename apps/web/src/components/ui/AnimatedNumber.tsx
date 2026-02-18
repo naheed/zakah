@@ -38,8 +38,8 @@ export function AnimatedNumber({
     format,
     className,
     springOptions = {
-        stiffness: 50, // Softer spring
-        damping: 20,   // High damping = No bounce (Critically damped is roughly 2*sqrt(k))
+        stiffness: 150, // Snappy spring — settles ~3x faster
+        damping: 30,    // High damping = minimal overshoot
         mass: 1,
     }
 }: AnimatedNumberProps) {

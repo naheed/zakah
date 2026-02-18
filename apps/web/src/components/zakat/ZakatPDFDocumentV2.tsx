@@ -428,6 +428,11 @@ export interface ZakatPDFDataV2 {
     generatedAtHijri: string;
     reportId: string;
     referralCode?: string;
+    referralStats?: {
+        totalReferrals: number;
+        totalZakatCalculated: number | null;
+        thresholdMet: boolean;
+    };
 }
 
 // Helpers
@@ -655,7 +660,11 @@ export function ZakatPDFDocumentV2({
                             • Your Cycle of Good
                         </Text>
                         <Text style={[styles.footerCardText, { color: "#312E81" }]}>
-                            By sharing ZakatFlow, you helped <Text style={{ fontWeight: 700 }}>12 others</Text> evaluate their wealth. Your influence has facilitated <Text style={{ fontWeight: 700 }}>$45k</Text> in Zakat distributions.
+                            {data.referralStats && data.referralStats.totalReferrals > 0 ? (
+                                <>By sharing ZakatFlow, you helped <Text style={{ fontWeight: 700 }}>{data.referralStats.totalReferrals} {data.referralStats.totalReferrals === 1 ? 'person' : 'others'}</Text> evaluate their wealth.{data.referralStats.thresholdMet && data.referralStats.totalZakatCalculated != null ? <> Your influence has facilitated <Text style={{ fontWeight: 700 }}>{formatCompactCurrency(data.referralStats.totalZakatCalculated, data.currency)}</Text> in Zakat distributions.</> : null}</>
+                            ) : (
+                                <>Share ZakatFlow with family and friends to help them fulfill their obligation — and track your collective impact here.</>
+                            )}
                         </Text>
                         <Text style={[styles.footerCardSub, { color: "#4338CA" }]}>May this be a continuing charity (Sadaqah Jariyah) for you.</Text>
                     </View>
@@ -688,7 +697,8 @@ import { saveAs } from 'file-saver';
 export async function generateZakatPDFV2(
     report: ZakatReport,
     calculationName: string = "Zakat Calculation",
-    userName?: string
+    userName?: string,
+    referralStats?: { totalReferrals: number; totalZakatCalculated: number | null; thresholdMet: boolean }
 ) {
     const { input: data, output: calculations } = report;
 
@@ -719,7 +729,8 @@ export async function generateZakatPDFV2(
                 enhancedBreakdown: calculations.enhancedBreakdown as EnhancedAssetBreakdown, // Use actual breakdown!
                 generatedAt: new Date().toLocaleDateString(),
                 generatedAtHijri: "1447 AH",
-                reportId: report.meta.reportId // Use ID from report object
+                reportId: report.meta.reportId, // Use ID from report object
+                referralStats: referralStats || undefined,
             }}
             calculationName={calculationName}
         />
