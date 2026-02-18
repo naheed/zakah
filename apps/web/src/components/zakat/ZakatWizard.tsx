@@ -55,6 +55,7 @@ import { Button } from "@/components/ui/button";
 import { UploadedDocument } from "@zakatflow/core";
 import { SavedCalculation } from "@/hooks/useSavedCalculations";
 import { ActiveMethodologyIndicator } from "./ActiveMethodologyIndicator";
+import { Logo } from "./Logo";
 
 // Animation variants for step transitions
 const stepVariants = {
@@ -456,11 +457,18 @@ export function ZakatWizard() {
         <div className="sticky top-0 z-10 bg-card border-b border-border">
           <div className="max-w-4xl mx-auto px-4 py-3">
             <div className="flex items-center gap-2 mb-2">
+              {/* Logo — home link */}
+              <Logo size="sm" className="shrink-0" />
+
               {/* Step Navigator Button */}
               <StepNavigatorDrawer
-                steps={activeSteps}
-                currentStepIndex={currentStepIndex}
-                onStepSelect={goToStep}
+                steps={activeSteps.filter(s => s.id !== 'welcome')}
+                currentStepIndex={Math.max(0, currentStepIndex - (activeSteps[0]?.id === 'welcome' ? 1 : 0))}
+                onStepSelect={(idx) => {
+                  // Map back to real index (offset by 1 if welcome exists)
+                  const offset = activeSteps[0]?.id === 'welcome' ? 1 : 0;
+                  goToStep(idx + offset);
+                }}
               >
                 <Button variant="ghost" size="icon" className="shrink-0 -ml-2 min-h-12 min-w-12">
                   <List className="h-5 w-5" weight="bold" />
