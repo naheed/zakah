@@ -163,7 +163,7 @@ export function generateCSV(
 
     // 5. Methodology Glossary (The "Depth Bar")
     rows.push(["METHODOLOGY GLOSSARY"]);
-    rows.push(["Selected School", safe(methodologyName)]);
+    rows.push(["Selected Methodology", safe(methodologyName)]);
     rows.push(["Core Principle", safe("See Methodology page for details")]); // Rules object no longer has description directly
     rows.push(["Jewelry Ruling", safe(ruleExplanations.preciousMetals.sub)]);
     rows.push(["Retirement Ruling", safe(ruleExplanations.retirement.sub)]);

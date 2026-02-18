@@ -40,7 +40,7 @@ import {
 } from "@react-pdf/renderer";
 import { DOMAIN_CONFIG } from "@/lib/domainConfig";
 import { EnhancedAssetBreakdown, AssetCategory, ZakatFormData, ZakatReport, Madhab } from "@zakatflow/core";
-import QRCode from "qrcode";
+// QR code removed for cleaner reports
 import { getAssetRuleExplanations, getMethodologyDisplayName } from "@zakatflow/core";
 
 // Font imports from assets
@@ -453,15 +453,7 @@ function formatPercent(value: number): string {
     return `${(value * 100).toFixed(0)}%`;
 }
 
-// Generate QR Logic (Exported)
-async function generateQRDataUrl(data: object): Promise<string> {
-    const jsonStr = JSON.stringify(data);
-    return await QRCode.toDataURL(jsonStr, {
-        width: 120,
-        margin: 1,
-        color: { dark: COLORS.text, light: COLORS.white },
-    });
-}
+// QR code generation removed — was unused clutter in printed reports
 
 // Icon Helper (Simple geometric or text-based icons for PDF reliability)
 const AssetIcon = ({ type }: { type: string }) => {
@@ -496,11 +488,9 @@ const AssetIcon = ({ type }: { type: string }) => {
 export function ZakatPDFDocumentV2({
     data,
     calculationName,
-    qrDataUrl
 }: {
     data: ZakatPDFDataV2;
     calculationName?: string;
-    qrDataUrl?: string; // Kept but maybe unused in design? Design doesn't show QR. We'll hide it or put in footer lightly.
 }) {
     // Import logo inside component or top level? Top level is better. 
     // Wait, I can't changing imports here. I need to do it at the top of the file.
@@ -593,7 +583,7 @@ export function ZakatPDFDocumentV2({
                                 <Svg width={8} height={8} viewBox="0 0 24 24" style={{ marginRight: 2 }}>
                                     <Path d="M18,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C20,2.9,19.1,2,18,2z M6,4h5v8l-2.5-1.5L6,12V4z" fill={COLORS.primary} />
                                 </Svg>
-                                <Text>{data.madhabLabel || "Hanafi"} Madhab</Text>
+                                <Text>{data.madhabLabel || "Hanafi"} Methodology</Text>
                             </View>
                             {data.isAboveNisab && (
                                 <Text style={styles.nisabBadge}>Nisab Met</Text>
@@ -674,7 +664,6 @@ export function ZakatPDFDocumentV2({
                 {/* Bottom */}
                 <View style={styles.bottomRow}>
                     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                        {qrDataUrl && <Image src={qrDataUrl} style={{ width: 30, height: 30 }} />}
                         <Text style={styles.bottomText}>ZAKATFLOW 2026</Text>
                     </View>
                     <View>
@@ -689,7 +678,7 @@ export function ZakatPDFDocumentV2({
     );
 }
 
-export { generateQRDataUrl };
+// generateQRDataUrl export removed
 
 // Main Generator Function
 import { pdf } from "@react-pdf/renderer";
@@ -702,12 +691,6 @@ export async function generateZakatPDFV2(
     userName?: string
 ) {
     const { input: data, output: calculations } = report;
-
-    // Generate QR (optional)
-    const qrUrl = await generateQRDataUrl({
-        id: new Date().getTime().toString(),
-        net: calculations.netZakatableWealth
-    });
 
     // Create Document Component
     const doc = (
@@ -739,7 +722,6 @@ export async function generateZakatPDFV2(
                 reportId: report.meta.reportId // Use ID from report object
             }}
             calculationName={calculationName}
-            qrDataUrl={qrUrl}
         />
     );
 

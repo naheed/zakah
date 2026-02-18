@@ -4,7 +4,7 @@
 
 import { pdf } from "@react-pdf/renderer";
 import { ZakatFormData, calculateZakat, EnhancedAssetBreakdown } from "@zakatflow/core";
-import { ZakatPDFDocumentV2, ZakatPDFDataV2, generateQRDataUrl } from "@/components/zakat/ZakatPDFDocumentV2";
+import { ZakatPDFDocumentV2, ZakatPDFDataV2 } from "@/components/zakat/ZakatPDFDocumentV2";
 
 // Convert Gregorian to Hijri (simple approximation)
 function toHijriDate(date: Date): string {
@@ -78,23 +78,6 @@ export async function generateZakatPDFV2(
     const hijriStr = toHijriDate(date);
     const reportId = generateReportId();
 
-    // Build QR data
-    const qrData = {
-        v: "2.0",
-        id: reportId,
-        d: date.toISOString().split("T")[0],
-        c: formData.currency,
-        a: calculations.totalAssets,
-        l: calculations.totalLiabilities,
-        n: calculations.netZakatableWealth,
-        z: calculations.zakatDue,
-        m: formData.madhab || "balanced",
-        r: calculations.zakatRate,
-    };
-
-    // Generate QR code
-    const qrDataUrl = await generateQRDataUrl(qrData);
-
     // Calculate gross assets (before zakatable adjustments)
     const grossAssets = Object.values(calculations.enhancedBreakdown)
         .filter((cat): cat is { total: number } =>
@@ -133,7 +116,7 @@ export async function generateZakatPDFV2(
 
     // Generate PDF
     const blob = await pdf(
-        ZakatPDFDocumentV2({ data: pdfData, calculationName, qrDataUrl })
+        ZakatPDFDocumentV2({ data: pdfData, calculationName })
     ).toBlob();
 
     // Trigger download
