@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+    const navigate = useNavigate();
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +37,7 @@ interface ArticleLayoutProps {
     showBackButton?: boolean;
     backLink?: string;
     backLabel?: string;
+    hideTitle?: boolean;
 }
 
 export const ArticleLayout: React.FC<ArticleLayoutProps> = ({
@@ -49,8 +50,8 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({
     showBackButton = true,
     backLink = "/",
     backLabel = "Back to Calculator",
+    hideTitle = false,
 }) => {
-    const navigate = useNavigate();
 
     return (
         <>
@@ -83,9 +84,11 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({
                     {/* Header */}
                     <ScrollReveal delay={0.1}>
                         <header className="mb-12">
-                            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-serif">
-                                {title}
-                            </h1>
+                            {!hideTitle && (
+                                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-serif">
+                                    {title}
+                                </h1>
+                            )}
                             {headerContent}
                         </header>
                     </ScrollReveal>
