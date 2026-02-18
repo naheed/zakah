@@ -114,29 +114,29 @@ export function ReportHero({
                     variants={itemVariants}
                     className="col-span-1 md:col-span-12 lg:col-span-7 bg-surface-container-low rounded-2xl p-7 flex flex-col justify-center"
                 >
-                    <div className="flex flex-col sm:flex-row items-center justify-between text-center w-full mb-6 sm:mb-2 gap-4 sm:gap-0">
+                    <div className="flex flex-col sm:flex-row items-center justify-between text-center w-full mb-6 sm:mb-2 gap-4 sm:gap-2 flex-wrap">
                         {/* Step 1 */}
-                        <div className="flex flex-col items-center sm:items-start">
+                        <div className="flex flex-col items-center sm:items-start min-w-0">
                             <span className="text-[10px] uppercase text-muted-foreground font-bold mb-1 tracking-wider">Total Wealth</span>
-                            <span className="text-xl font-bold text-foreground">{formatCurrency(totalAssets, currency, 0)}</span>
+                            <span className="text-base sm:text-lg font-bold text-foreground tabular-nums truncate max-w-full">{formatCurrency(totalAssets, currency, 0)}</span>
                         </div>
 
                         {/* Operator */}
-                        <Minus weight="bold" className="text-muted-foreground/40 w-5 h-5 rotate-90 sm:rotate-0" />
+                        <Minus weight="bold" className="text-muted-foreground/40 w-4 h-4 rotate-90 sm:rotate-0 shrink-0" />
 
                         {/* Step 2 */}
-                        <div className="flex flex-col items-center sm:items-start">
+                        <div className="flex flex-col items-center sm:items-start min-w-0">
                             <span className="text-[10px] uppercase text-muted-foreground font-bold mb-1 tracking-wider">Needs & Liabilities</span>
-                            <span className="text-xl font-medium text-muted-foreground">({formatCurrency(totalLiabilities, currency, 0)})</span>
+                            <span className="text-base sm:text-lg font-medium text-muted-foreground tabular-nums truncate max-w-full">({formatCurrency(totalLiabilities, currency, 0)})</span>
                         </div>
 
                         {/* Operator */}
-                        <Equals weight="bold" className="text-muted-foreground/40 w-5 h-5 rotate-90 sm:rotate-0" />
+                        <Equals weight="bold" className="text-muted-foreground/40 w-4 h-4 rotate-90 sm:rotate-0 shrink-0" />
 
                         {/* Step 3 */}
-                        <div className="flex flex-col items-center sm:items-start">
+                        <div className="flex flex-col items-center sm:items-start min-w-0">
                             <span className="text-[10px] uppercase text-muted-foreground font-bold mb-1 tracking-wider">Wealth to Purify</span>
-                            <span className="text-2xl font-extrabold text-foreground">{formatCurrency(netZakatableWealth, currency, 0)}</span>
+                            <span className="text-lg sm:text-xl font-extrabold text-foreground tabular-nums truncate max-w-full">{formatCurrency(netZakatableWealth, currency, 0)}</span>
                         </div>
                     </div>
 
