@@ -19,22 +19,40 @@ import { Button } from "@/components/ui/button";
 import { content as c } from "@/content";
 import { Logo } from "../Logo";
 import { ArrowRight } from "@phosphor-icons/react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
-import { useState } from "react";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 
 interface StickyHeaderProps {
     onNext: () => void;
     /** Y offset (px) at which the header appears — typically the CTA button's offsetTop */
     showAfter?: number;
+    /** Ref to an element that, when visible, hides the sticky header (e.g. FinalCTA) */
+    hideWhenVisible?: React.RefObject<HTMLElement>;
 }
 
-export function StickyHeader({ onNext, showAfter = 600 }: StickyHeaderProps) {
+export function StickyHeader({ onNext, showAfter = 600, hideWhenVisible }: StickyHeaderProps) {
     const { scrollY } = useScroll();
-    const [visible, setVisible] = useState(false);
+    const [pastHero, setPastHero] = useState(false);
+    const [bottomCtaVisible, setBottomCtaVisible] = useState(false);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
-        setVisible(latest > showAfter);
+        setPastHero(latest > showAfter);
     });
+
+    // IntersectionObserver to detect when FinalCTA enters viewport
+    useEffect(() => {
+        const el = hideWhenVisible?.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => setBottomCtaVisible(entry.isIntersecting),
+            { threshold: 0.1 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [hideWhenVisible]);
+
+    const visible = pastHero && !bottomCtaVisible;
 
     return (
         <motion.header

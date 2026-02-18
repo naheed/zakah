@@ -32,11 +32,12 @@ interface LandingPageProps {
 
 export function LandingPage({ onNext }: LandingPageProps) {
     const ctaRef = useRef<HTMLButtonElement>(null);
+    const finalCtaRef = useRef<HTMLDivElement>(null);
 
     return (
         <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
-            {/* Sticky Header — slides in after Hero CTA scrolls away */}
-            <StickyHeader onNext={onNext} />
+            {/* Sticky Header — slides in after Hero CTA scrolls away, hides near FinalCTA */}
+            <StickyHeader onNext={onNext} hideWhenVisible={finalCtaRef} />
 
             {/* Section 1: Hero */}
             <HeroSection onNext={onNext} ctaRef={ctaRef} />
@@ -53,7 +54,6 @@ export function LandingPage({ onNext }: LandingPageProps) {
             <ThreeWaysIn onNext={onNext} />
 
             {/* Section 5: What's Covered (Gray bg) */}
-            {/* Note: WhatsCovered has its own internal bg-muted/10, but we wrap here for consistency/control */}
             <div className="bg-muted/30">
                 <WhatsCovered />
             </div>
@@ -62,7 +62,9 @@ export function LandingPage({ onNext }: LandingPageProps) {
             <PrivacySection />
 
             {/* Section 7: Final CTA */}
-            <FinalCTA onNext={onNext} />
+            <div ref={finalCtaRef}>
+                <FinalCTA onNext={onNext} />
+            </div>
 
             {/* Footer */}
             <Footer />
