@@ -122,7 +122,7 @@ export default function About() {
                 </p>
                 <p>
                   The calculation engine itself is open source and built on the{" "}
-                  <a href="https://www.github.com/naheed/zakah" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">ZMCS standard</a>{" "}
+                  <a href="https://zakatflow.org/methodology/zmcs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">ZMCS standard</a>{" "}
                   — a schema-driven specification that anyone can audit and verify.
                 </p>
               </div>
