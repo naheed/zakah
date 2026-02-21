@@ -1,5 +1,6 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
@@ -14,6 +15,10 @@ const anthropic = new Anthropic({
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || 'skip',
+});
+
+const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY || 'skip',
 });
 
 // We read the Ahmed Master Matrix natively to avoid TS compilation workspace errors 
@@ -311,19 +316,87 @@ async function evaluateOpenAI(): Promise<{ passed: number, failed: number }> {
     return { passed, failed };
 }
 
+async function evaluateGemini(): Promise<{ passed: number, failed: number }> {
+    console.log("\n==========================================================");
+    console.log("🤖 Provider: Google Gemini (gemini-2.5-pro)");
+    console.log("==========================================================");
+
+    if (!process.env.GEMINI_API_KEY) {
+        console.error("❌ Error: GEMINI_API_KEY is not set in .env. Skipping Gemini evaluations.");
+        return { passed: 0, failed: 0 };
+    }
+
+    let passed = 0;
+    let failed = 0;
+
+    for (const testCase of MASTER_MATRIX) {
+        console.log(`Evaluating Case: [${testCase.caseId}]`);
+        const prompt = buildPromptFromMatrixCase(testCase);
+
+        try {
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-pro',
+                contents: prompt,
+                config: {
+                    temperature: 0.1,
+                    tools: [{
+                        functionDeclarations: [{
+                            name: mcpToolSchema.name,
+                            description: mcpToolSchema.description,
+                            parameters: mcpToolSchema.input_schema as any
+                        }]
+                    }]
+                }
+            });
+
+            const functionCalls = response.functionCalls;
+
+            if (!functionCalls || functionCalls.length === 0 || functionCalls[0].name !== 'calculate_zakat') {
+                console.error(`  ❌ Failed: LLM did not call the calculate_zakat tool.`);
+                failed++;
+                continue;
+            }
+
+            const toolCall = functionCalls[0];
+            const args = toolCall.args as Record<string, any>;
+            const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
+            const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
+
+            let casePassed = true;
+            if (args.cash !== expectedCash) casePassed = false;
+            if (args.madhab !== testCase.madhab) casePassed = false;
+            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60 && args.age !== 60) casePassed = false;
+
+            if (casePassed) {
+                console.log(`  ✅ Passed`);
+                passed++;
+            } else {
+                console.error(`  ❌ Failed mapping. Expected cash=$${expectedCash}, madhab=${testCase.madhab}. Got:`, args);
+                failed++;
+            }
+        } catch (error) {
+            console.error(`  ❌ Error hitting Gemini API:`, error);
+            failed++;
+        }
+    }
+    return { passed, failed };
+}
+
 async function runAllEvaluations() {
     console.log("🚀 Starting Multi-Model Agentic Evaluation Framework for ZakatFlow MCP");
 
     const anthropicResults = await evaluateAnthropic();
     const openaiResults = await evaluateOpenAI();
+    const geminiResults = await evaluateGemini();
 
     console.log("\n==========================================================");
     console.log(`🎯 Final Evaluation Summary:`);
     console.log(`  - Anthropic: ${anthropicResults.passed} Passed, ${anthropicResults.failed} Failed`);
     console.log(`  - OpenAI:    ${openaiResults.passed} Passed, ${openaiResults.failed} Failed`);
+    console.log(`  - Gemini:    ${geminiResults.passed} Passed, ${geminiResults.failed} Failed`);
     console.log("==========================================================");
 
-    const totalFailed = anthropicResults.failed + openaiResults.failed;
+    const totalFailed = anthropicResults.failed + openaiResults.failed + geminiResults.failed;
 
     // We exit 0 if both are skipped (no keys) so CI doesn't crash unnecessarily without keys,
     // but we exit 1 if an actual evaluation ran and failed.
