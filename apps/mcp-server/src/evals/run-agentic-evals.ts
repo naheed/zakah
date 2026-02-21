@@ -1,4 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
@@ -8,7 +9,11 @@ import * as path from 'path';
 dotenv.config({ path: '../../.env' });
 
 const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: process.env.ANTHROPIC_API_KEY || 'skip',
+});
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || 'skip',
 });
 
 // We read the Ahmed Master Matrix natively to avoid TS compilation workspace errors 
@@ -179,21 +184,21 @@ Extract the relevant information and call the calculate_zakat tool. Do not guess
     `;
 }
 
-async function runEvaluations() {
-    console.log("🚀 Starting Agentic Evaluation Framework for ZakatFlow MCP");
-    console.log("Model: Claude 3.5 Sonnet");
+async function evaluateAnthropic(): Promise<{ passed: number, failed: number }> {
+    console.log("\n==========================================================");
+    console.log("🤖 Provider: Anthropic (Claude 3.5 Sonnet)");
     console.log("==========================================================");
 
     if (!process.env.ANTHROPIC_API_KEY) {
-        console.error("❌ Error: ANTHROPIC_API_KEY is not set in .env");
-        process.exit(1);
+        console.error("❌ Error: ANTHROPIC_API_KEY is not set in .env. Skipping Anthropic evaluations.");
+        return { passed: 0, failed: 0 };
     }
 
     let passed = 0;
     let failed = 0;
 
     for (const testCase of MASTER_MATRIX) {
-        console.log(`\nEvaluating Case: [${testCase.caseId}] - ${testCase.description}`);
+        console.log(`Evaluating Case: [${testCase.caseId}]`);
         const prompt = buildPromptFromMatrixCase(testCase);
 
         try {
@@ -203,12 +208,9 @@ async function runEvaluations() {
                 tools: [mcpToolSchema],
                 tool_choice: { type: "auto" },
                 temperature: 0.1,
-                messages: [
-                    { role: 'user', content: prompt }
-                ]
+                messages: [{ role: 'user', content: prompt }]
             });
 
-            // Find the tool call in the response
             const toolCall = response.content.find(block => block.type === 'tool_use');
 
             if (!toolCall || toolCall.type !== 'tool_use') {
@@ -218,48 +220,116 @@ async function runEvaluations() {
             }
 
             const args = toolCall.input as Record<string, any>;
-
             const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
             const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
 
             let casePassed = true;
-
-            if (args.cash !== expectedCash) {
-                console.error(`  ❌ Failed mapping: Expected cash=$${expectedCash}, but LLM sent cash=$${args.cash}`);
-                casePassed = false;
-            }
-            if (args.madhab !== testCase.madhab) {
-                console.error(`  ❌ Failed mapping: Expected madhab=${testCase.madhab}, but LLM sent madhab=${args.madhab}`);
-                casePassed = false;
-            }
-
-            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60) {
-                if (args.age !== 60) {
-                    console.error(`  ❌ Failed mapping: Expected age=60, but LLM sent age=${args.age}`);
-                    casePassed = false;
-                }
-            }
+            if (args.cash !== expectedCash) casePassed = false;
+            if (args.madhab !== testCase.madhab) casePassed = false;
+            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60 && args.age !== 60) casePassed = false;
 
             if (casePassed) {
-                console.log(`  ✅ Passed: LLM accurately mapped arguments to MCP tool.`);
-                console.log(`     Tool Args:`, JSON.stringify(args));
+                console.log(`  ✅ Passed`);
                 passed++;
             } else {
+                console.error(`  ❌ Failed mapping. Expected cash=$${expectedCash}, madhab=${testCase.madhab}. Got:`, args);
                 failed++;
             }
-
         } catch (error) {
             console.error(`  ❌ Error hitting Anthropic API:`, error);
             failed++;
         }
     }
+    return { passed, failed };
+}
+
+async function evaluateOpenAI(): Promise<{ passed: number, failed: number }> {
+    console.log("\n==========================================================");
+    console.log("🤖 Provider: OpenAI (gpt-4o)");
+    console.log("==========================================================");
+
+    if (!process.env.OPENAI_API_KEY) {
+        console.error("❌ Error: OPENAI_API_KEY is not set in .env. Skipping OpenAI evaluations.");
+        return { passed: 0, failed: 0 };
+    }
+
+    // Convert Anthropic tool schema to OpenAI function calling format
+    const openAITool = {
+        type: "function" as const,
+        function: {
+            name: mcpToolSchema.name,
+            description: mcpToolSchema.description,
+            parameters: mcpToolSchema.input_schema,
+        }
+    };
+
+    let passed = 0;
+    let failed = 0;
+
+    for (const testCase of MASTER_MATRIX) {
+        console.log(`Evaluating Case: [${testCase.caseId}]`);
+        const prompt = buildPromptFromMatrixCase(testCase);
+
+        try {
+            const response = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [{ role: 'user', content: prompt }],
+                tools: [openAITool],
+                tool_choice: "auto",
+                temperature: 0.1,
+            });
+
+            const toolCall = response.choices[0]?.message?.tool_calls?.[0];
+
+            if (!toolCall || toolCall.type !== 'function' || toolCall.function.name !== 'calculate_zakat') {
+                console.error(`  ❌ Failed: LLM did not call the calculate_zakat tool.`);
+                failed++;
+                continue;
+            }
+
+            const args = JSON.parse(toolCall.function.arguments);
+            const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
+            const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
+
+            let casePassed = true;
+            if (args.cash !== expectedCash) casePassed = false;
+            if (args.madhab !== testCase.madhab) casePassed = false;
+            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60 && args.age !== 60) casePassed = false;
+
+            if (casePassed) {
+                console.log(`  ✅ Passed`);
+                passed++;
+            } else {
+                console.error(`  ❌ Failed mapping. Expected cash=$${expectedCash}, madhab=${testCase.madhab}. Got:`, args);
+                failed++;
+            }
+        } catch (error) {
+            console.error(`  ❌ Error hitting OpenAI API:`, error);
+            failed++;
+        }
+    }
+    return { passed, failed };
+}
+
+async function runAllEvaluations() {
+    console.log("🚀 Starting Multi-Model Agentic Evaluation Framework for ZakatFlow MCP");
+
+    const anthropicResults = await evaluateAnthropic();
+    const openaiResults = await evaluateOpenAI();
 
     console.log("\n==========================================================");
-    console.log(`🎯 Evaluation Summary: ${passed} Passed, ${failed} Failed`);
+    console.log(`🎯 Final Evaluation Summary:`);
+    console.log(`  - Anthropic: ${anthropicResults.passed} Passed, ${anthropicResults.failed} Failed`);
+    console.log(`  - OpenAI:    ${openaiResults.passed} Passed, ${openaiResults.failed} Failed`);
+    console.log("==========================================================");
 
-    if (failed > 0) {
+    const totalFailed = anthropicResults.failed + openaiResults.failed;
+
+    // We exit 0 if both are skipped (no keys) so CI doesn't crash unnecessarily without keys,
+    // but we exit 1 if an actual evaluation ran and failed.
+    if (totalFailed > 0) {
         process.exit(1);
     }
 }
 
-runEvaluations().catch(console.error);
+runAllEvaluations().catch(console.error);
