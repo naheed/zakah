@@ -14,7 +14,15 @@ Execute these steps sequentially in an unbroken agentic loop:
 2. **Worker Implementation**: Adopt the appropriate worker persona (e.g., `/backend-ai-engineer` or `/ui-eng-designer`). Research the context, draft the code, and implement the solution strictly within their defined sandbox.
 3. **Commit & Push**: Commit the implementation safely and push the feature branch to GitHub (`git push -u origin <branch-name>`).
 4. **Formal Pull Request**: Open a Pull Request against the `main` branch using `gh pr create`.
-5. **Quality Assurance Audit**: Force a persona switch to the `/senior-tech-lead`. Audit the new PR. You *must* run the designated test suites (`vitest` or `playwright`) to mathematically prove the worker's code did not break the monorepo contract.
+5. **Quality Assurance Audit**: Force a persona switch to the `/senior-tech-lead`. Audit the new PR:
+   - **Write new tests first.** If the implementation added new logic, you MUST create or extend test files before declaring QA complete. Shipping new code without new tests is a DoD violation.
+   - **Scoped testing.** Run tests ONLY for the affected package(s), not the entire monorepo. Use the following commands based on the blast radius:
+     - `apps/mcp-server` only: `cd apps/mcp-server && npm test`
+     - `apps/web` only: `cd apps/web && npx vitest run`
+     - `packages/core` only: `cd packages/core && npx vitest run`
+     - Cross-package (e.g., `packages/core` + `apps/web`): `npx vitest run` (full repo)
+     - E2E (UI regression): `cd apps/web && npx playwright test e2e/static-pages-a11y.spec.ts`
+   - **Mathematically prove** the worker's code did not break the affected package's test contract.
 6. **Merge & Clean**: If (and only if) the tech lead audit passes and tests are green, merge the PR natively (`gh pr merge --squash`) and close the associated GitHub issue.
 
 ### Exception Handling
