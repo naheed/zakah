@@ -8,6 +8,10 @@
     "bugs": {
         "url": "https://github.com/naheed/zakah/issues"
     },
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
     "scripts": {
         "dev": "vite",
         "test": "vitest run",
@@ -100,6 +104,7 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@axe-core/playwright": "^4.11.1",
         "@playwright/test": "^1.58.2",
         "@types/node": "^22.19.3",
         "@types/react": "^18.3.23",

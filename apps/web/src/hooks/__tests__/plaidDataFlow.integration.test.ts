@@ -24,7 +24,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { mapToZakatCategory } from '../useAssetPersistence';
+import { mapToAssetCategory, inferAccountTypeFromStep } from '../useAssetPersistence';
 import { ZakatFormData, defaultFormData, calculateZakat } from '@zakatflow/core';
 
 // =============================================================================
@@ -35,67 +35,68 @@ describe('Plaid Data Flow - Account Type Mapping', () => {
 
     describe('Depository Accounts (Checking/Savings)', () => {
 
-        it('maps checking account to LIQUID', () => {
-            expect(mapToZakatCategory('CHECKING')).toBe('LIQUID');
-            expect(mapToZakatCategory('depository_checking')).toBe('LIQUID');
+        it('maps checking account to CASH_CHECKING', () => {
+            expect(mapToAssetCategory('CHECKING')).toBe('CASH_CHECKING');
+            expect(mapToAssetCategory('depository_checking')).toBe('CASH_CHECKING');
         });
 
-        it('maps savings account to LIQUID', () => {
-            expect(mapToZakatCategory('SAVINGS')).toBe('LIQUID');
-            expect(mapToZakatCategory('depository_savings')).toBe('LIQUID');
+        it('maps savings account to CASH_SAVINGS', () => {
+            expect(mapToAssetCategory('SAVINGS')).toBe('CASH_SAVINGS');
+            expect(mapToAssetCategory('depository_savings')).toBe('CASH_SAVINGS');
         });
 
-        it('maps money market to LIQUID', () => {
-            expect(mapToZakatCategory('MONEY_MARKET')).toBe('LIQUID');
+        it('maps money market to CASH_SAVINGS', () => {
+            expect(mapToAssetCategory('MONEY_MARKET')).toBe('CASH_SAVINGS');
         });
 
     });
 
     describe('Investment Accounts', () => {
 
-        it('maps brokerage account to PROXY_30', () => {
+        it('maps brokerage account sub-entities to INVESTMENT_STOCK', () => {
             // Plaid investment accounts typically contain stocks/ETFs
-            expect(mapToZakatCategory('BROKERAGE')).toBe('LIQUID'); // Default if not matched
-            expect(mapToZakatCategory('EQUITY')).toBe('PROXY_30');
-            expect(mapToZakatCategory('STOCK')).toBe('PROXY_30');
-            expect(mapToZakatCategory('ETF')).toBe('PROXY_30');
+            expect(mapToAssetCategory('BROKERAGE')).toBe('BROKERAGE'); // Default pass through if not explicitly mapped
+            expect(mapToAssetCategory('EQUITY')).toBe('INVESTMENT_STOCK');
+            expect(mapToAssetCategory('STOCK')).toBe('INVESTMENT_STOCK');
+            expect(mapToAssetCategory('ETF')).toBe('INVESTMENT_STOCK');
         });
 
-        it('maps mutual funds to PROXY_30', () => {
-            expect(mapToZakatCategory('MUTUAL_FUND')).toBe('PROXY_30');
+        it('maps mutual funds to INVESTMENT_MUTUAL_FUND', () => {
+            expect(mapToAssetCategory('MUTUAL_FUND')).toBe('INVESTMENT_MUTUAL_FUND');
         });
 
     });
 
     describe('Retirement Accounts', () => {
 
-        it('maps 401k to PROXY_30', () => {
-            expect(mapToZakatCategory('401K')).toBe('PROXY_30');
-            expect(mapToZakatCategory('401(k)')).toBe('LIQUID'); // Parenthesis not matched
+        it('maps 401k to RETIREMENT_401K', () => {
+            expect(mapToAssetCategory('401K')).toBe('RETIREMENT_401K');
+            expect(mapToAssetCategory('401(k)')).toBe('401(K)'); // Parenthesis not matched perfectly, passes through
         });
 
-        it('maps IRA to PROXY_30', () => {
-            expect(mapToZakatCategory('IRA')).toBe('PROXY_30');
-            expect(mapToZakatCategory('ROTH_IRA')).toBe('PROXY_30');
-            expect(mapToZakatCategory('TRADITIONAL_IRA')).toBe('PROXY_30');
+        it('maps IRA to RETIREMENT_IRA and ROTH_IRA to RETIREMENT_ROTH', () => {
+            expect(mapToAssetCategory('IRA')).toBe('RETIREMENT_IRA');
+            expect(mapToAssetCategory('ROTH_IRA')).toBe('RETIREMENT_ROTH');
+            expect(mapToAssetCategory('TRADITIONAL_IRA')).toBe('RETIREMENT_IRA');
         });
 
-        it('maps retirement general to PROXY_30', () => {
-            expect(mapToZakatCategory('RETIREMENT')).toBe('PROXY_30');
+        it('maps retirement general to RETIREMENT_401K', () => {
+            expect(mapToAssetCategory('RETIREMENT')).toBe('RETIREMENT_401K');
         });
 
     });
 
     describe('Credit/Liability Accounts', () => {
 
-        it('maps credit card debt to EXEMPT', () => {
-            // Note: Plain 'CREDIT_CARD' doesn't match - needs DEBT keyword
-            expect(mapToZakatCategory('CREDIT_CARD_DEBT')).toBe('EXEMPT');
+        it('maps credit card debt to LIABILITY_CREDIT_CARD', () => {
+            expect(mapToAssetCategory('CREDIT_CARD_DEBT')).toBe('LIABILITY_CREDIT_CARD');
+            expect(mapToAssetCategory('CREDIT_CARD')).toBe('LIABILITY_CREDIT_CARD');
         });
 
-        it('maps liabilities to EXEMPT', () => {
-            expect(mapToZakatCategory('LIABILITY')).toBe('EXEMPT');
-            // Note: Plain 'LOAN' doesn't match - needs DEBT/LIABILITY keyword
+        it('maps liabilities to LIABILITY_LOAN', () => {
+            expect(mapToAssetCategory('LIABILITY')).toBe('LIABILITY_LOAN');
+            expect(mapToAssetCategory('LOAN')).toBe('LIABILITY_LOAN');
+            expect(mapToAssetCategory('DEBT')).toBe('LIABILITY_LOAN');
         });
 
     });

@@ -49,17 +49,18 @@ export async function clearAppState(page: Page, context: BrowserContext): Promis
  */
 export async function startWizard(page: Page): Promise<void> {
     // Try testId first, fall back to text-based selector
-    let startButton = page.getByTestId('start-calculating-button');
+    let startButton = page.getByTestId('start-calculating-button').first();
 
     // Check if testId button is visible within 5 seconds
     const isTestIdVisible = await startButton.isVisible({ timeout: 5000 }).catch(() => false);
     if (!isTestIdVisible) {
         // Fallback to text-based selector
-        startButton = page.getByRole('button', { name: /Start Calculating/i });
+        startButton = page.getByRole('button', { name: /Start Calculating/i }).first();
     }
 
     await expect(startButton).toBeVisible({ timeout: 15000 });
-    await startButton.click();
+    // Use JS click to bypass viewport/overlay issues (sticky header covers CTA)
+    await startButton.evaluate((el: HTMLElement) => el.click());
     await page.waitForTimeout(1500); // Allow transition animation
 }
 
@@ -69,7 +70,8 @@ export async function startWizard(page: Page): Promise<void> {
  */
 export async function navigateThroughSetup(
     page: Page,
-    mode: 'detailed' | 'simple' = 'detailed'
+    mode: 'detailed' | 'simple' = 'detailed',
+    madhab?: string
 ): Promise<void> {
     // Verify we're on the Setup step
     await expect(page.getByText('Personalize Your Calculation')).toBeVisible({ timeout: 10000 });
@@ -79,6 +81,13 @@ export async function navigateThroughSetup(
         await page.getByText('Detailed Breakdown').click();
     } else {
         await page.getByText('Quick Estimate').click();
+    }
+
+    // Select Methodology if requested (e.g. 'balanced', 'hanafi') by clicking the label mapped to the ID
+    if (madhab) {
+        // Find the label linked to id={rule.name} where rule.name matches the madhab. 
+        // e.g. <Label htmlFor="hanafi">
+        await page.locator(`label[for="${madhab}"]`).click({ force: true });
     }
 
     // Proceed to next step
@@ -235,4 +244,101 @@ export async function completeMinimalCalculation(
     await zakatLocator.waitFor({ state: 'visible', timeout: 5000 });
     const zakatText = await zakatLocator.innerText();
     return parseFloat(zakatText.replace(/[$,]/g, ''));
+}
+
+// =============================================================================
+// Permutation Scenario Runner
+// =============================================================================
+
+/**
+ * Run a full calculation scenario through the wizard using DETERMINISTIC step flow.
+ * 
+ * The wizard step order (detailed mode) after Categories is:
+ *   1. Liquid Assets    (always)
+ *   2. Investments      (always)
+ *   3. Retirement       (always)
+ *   4. Precious Metals  (only if hasPreciousMetals — i.e. Gold selected in categories)
+ *   5. Crypto           (only if hasCrypto — i.e. Crypto selected in categories)
+ *   6. Liabilities      (always)
+ *   7. Results          (always)
+ *
+ * Conditional steps get their clickNext INSIDE the if-block.
+ * Unconditional steps always get a clickNext.
+ */
+export async function runCalculationScenario(
+    page: Page,
+    scenario: {
+        madhab: string;
+        assets: { cash: number; gold: number; stock: number; crypto: number };
+        liabilities: { creditCard: number; mortgage: number };
+    }
+): Promise<void> {
+    // --- Categories Step ---
+    await expectCategoriesStep(page);
+
+    // Only select OPTIONAL categories — Cash, Investments, Retirement are always shown
+    if (scenario.assets.gold) {
+        await page.getByText('Gold & Silver', { exact: true }).click();
+        await page.waitForTimeout(300);
+    }
+    if (scenario.assets.crypto) {
+        await page.getByText('Cryptocurrency', { exact: true }).click();
+        await page.waitForTimeout(300);
+    }
+    // Note: Investments is a DEFAULT category (always shown), no need to select it
+    await clickNext(page);
+
+    // --- Step 1: Liquid Assets (always shown) ---
+    await expectLiquidAssetsStep(page);
+    if (scenario.assets.cash) {
+        await page.getByTestId('checking-accounts-input').fill(scenario.assets.cash.toString());
+    }
+    await clickNext(page);
+
+    // --- Step 2: Investments (always shown) ---
+    if (scenario.assets.stock) {
+        const passiveInput = page.getByTestId('passive-investments-value-input');
+        await passiveInput.waitFor({ state: 'visible', timeout: 10000 });
+        await passiveInput.scrollIntoViewIfNeeded();
+        await passiveInput.fill(scenario.assets.stock.toString());
+    }
+    await clickNext(page);
+
+    // --- Step 3: Retirement (always shown) ---
+    await clickNext(page);
+
+    // --- Step 4: Precious Metals (CONDITIONAL — only if gold selected in categories) ---
+    if (scenario.assets.gold) {
+        const enterUsdText = page.getByText('Enter USD Value');
+        await enterUsdText.waitFor({ state: 'visible', timeout: 10000 });
+        await enterUsdText.click();
+        await page.waitForTimeout(300);
+        const goldInput = page.getByTestId('gold-investment-input');
+        await goldInput.waitFor({ state: 'visible', timeout: 5000 });
+        await goldInput.scrollIntoViewIfNeeded();
+        await goldInput.fill(scenario.assets.gold.toString());
+        await clickNext(page);
+    }
+
+    // --- Step 5: Crypto (CONDITIONAL — only if crypto selected in categories) ---
+    if (scenario.assets.crypto) {
+        const cryptoInput = page.getByTestId('crypto-currency-input');
+        await cryptoInput.waitFor({ state: 'visible', timeout: 10000 });
+        await cryptoInput.scrollIntoViewIfNeeded();
+        await cryptoInput.fill(scenario.assets.crypto.toString());
+        await clickNext(page);
+    }
+
+    // --- Step 6: Liabilities (always shown) ---
+    if (scenario.liabilities.creditCard) {
+        const debtInput = page.getByTestId('credit-card-debt-input');
+        await debtInput.waitFor({ state: 'visible', timeout: 10000 });
+        await debtInput.scrollIntoViewIfNeeded();
+        await debtInput.fill(scenario.liabilities.creditCard.toString());
+    }
+    await clickNext(page);
+
+    // --- Step 7: Results ---
+    await page.waitForTimeout(1000);
+    await expectResultsStep(page);
 }

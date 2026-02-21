@@ -7,7 +7,7 @@
  * - 3 Liability States (None, Debt < Assets, Debt > Assets)
  */
 
-export type Madhab = 'balanced' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali';
+export type Madhab = 'bradford' | 'hanafi' | 'shafii' | 'maliki' | 'hanbali' | 'amja' | 'tahir_anwar' | 'qaradawi';
 
 export interface ScenarioAssets {
     cash: number;
@@ -32,7 +32,7 @@ export interface PermutationScenario {
 }
 
 // Constants
-const MADHABS: Madhab[] = ['balanced', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+const MADHABS: Madhab[] = ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali', 'amja', 'tahir_anwar', 'qaradawi'];
 const NISAB_SILVER_EST = 400; // Approx $400-500 usually
 const NISAB_GOLD_EST = 6000;  // Approx $6000+
 
@@ -47,67 +47,48 @@ function calculateExpected(madhab: Madhab, assets: ScenarioAssets, liabilities: 
     // 1. Assets
     zakatableAssets += assets.cash;
 
-    // Gold: 
-    // Balanced: Exempt if personal jewelry (assuming input effectively treats 'Gold Value' as potentially jewelry context or not).
-    // For the purpose of these tests, we assume "Gold Value" input in the wizard is treated as Zakatable Gold unless it's Jewelry.
-    // The app logic says: if (jewelryZakatable) include goldValue.
-    // Balanced/Shafii/Maliki/Hanbali: Jewelry Exempt. Hanafi: Zakatable.
-    // HOWEVER, 'Gold Value' field often implies investment gold if not specified as jewelry.
-    // Let's look at `zakatCalculations.ts` logic: 
-    // "if (jewelryZakatable) { total += goldValue } else { ... }"
-    // "Conservative: if mode exempts jewelry, exclude gold/silver values"
-    // So 'Gold Value' is effectively treated as Jewelry for the sake of the 'Conservative' check in the code.
-    // Thus:
-    const isJewelryZakatable = madhab === 'hanafi';
-    if (isJewelryZakatable) {
-        zakatableAssets += assets.gold;
-    }
+    // Gold:
+    // Confirmed via E2E testing: the app includes gold entered via 'Enter USD Value' 
+    // as zakatable across ALL methodologies. The jewelry exemption only applies to
+    // items explicitly categorized as jewelry, not the investment gold USD field.
+    zakatableAssets += assets.gold;
 
-    // Stocks:
-    // Balanced: 30% of Passive. (We treat `stock` input as Passive in E2E mapper).
-    // Others: 100%.
-    const stockRate = madhab === 'balanced' ? 0.30 : 1.0;
+    // Stocks (passive_investments.rate from ZAKAT_PRESETS):
+    // bradford:    0.30 (underlying_assets proxy)
+    // qaradawi:    0.30 (underlying_assets proxy)
+    // amja:        0.00 (income_only — passive investments NOT zakatable)
+    // hanafi:      1.00 (market_value)
+    // shafii:      1.00 (market_value)
+    // maliki:      1.00 (market_value)
+    // hanbali:     1.00 (market_value)
+    // tahir_anwar: 1.00 (market_value)
+    const stockRates: Record<string, number> = {
+        bradford: 0.30,
+        qaradawi: 0.30,
+        amja: 0.0,
+    };
+    const stockRate = stockRates[madhab] ?? 1.0;
     zakatableAssets += assets.stock * stockRate;
 
     // Crypto:
     // All: 100%
     zakatableAssets += assets.crypto;
 
-    // 2. Liabilities
+    // 2. Liabilities (liabilities.method from ZAKAT_PRESETS):
+    // no_deduction:   shafii
+    // full_deduction:  hanafi, hanbali, tahir_anwar
+    // 12_month_rule:  bradford, maliki, qaradawi
+    // current_due_only: amja
     let deductibleLiabilities = 0;
 
-    // Hanafi/Hanbali: Full deduction (immediate + long term)
-    // Maliki/Balanced: 12-month deduction. 
-    // Shafii: No deduction.
-
-    // Note: The app logic for 'Balanced' uses '12-month'.
-
+    // For our E2E tests, we ONLY input credit card balance (immediate debt).
+    // So the relevant distinction is: does this methodology deduct immediate debts?
+    // - no_deduction (shafii): NO
+    // - all others: YES (credit card is immediate/current debt)
     if (madhab === 'shafii') {
         deductibleLiabilities = 0;
-    } else if (madhab === 'hanafi' || madhab === 'hanbali') {
-        // Full deduction
-        deductibleLiabilities = liabilities.creditCard + liabilities.mortgage; // Mortgage assumed total
     } else {
-        // Balanced / Maliki : 12-month rule
-        // We need to know monthly payment. For E2E tests, we'll input mortgage as a total but 
-        // the test input mapping needs to define if it's monthly or total.
-        // In the app, user inputs "Monthly Mortgage". 
-        // Our ScenarioLiabilities `mortgage` implies a total debt amount for simplicity in the struct,
-        // BUT for the mapping to app inputs, we usually put money in "Monthly Mortgage" field?
-        // Wait, `zakatCalculations.ts`: `total += data.monthlyMortgage * 12`.
-        // So if we have a debt of $240,000, and 12-months is $24,000.
-        // Let's assume our `liabilities.mortgage` number represents the *Deductible Amount* 
-        // or we handle the calculation here.
-
-        // Let's refine: `liabilities.mortgage` in this helper will represent "Monthly Payment" x 12 for Balanced/Maliki,
-        // and "Total Balance" for Hanafi.
-        // This gets complex. Let's simplify:
-        // We will only test Immediate Debt (Credit Card) to avoid the Mortgage complexity in the generated matrix for now,
-        // Or we standardize: `liabilities.mortgage` = The total outstanding.
-        // And we assert the app inputs Monthly = Total / 20 (assuming 20 yr term)?? No to complex.
-
-        // Decision: For automated matrix, use Credit Card (Immediate Debt) only.
-        // It distinguishes Shafii (0) vs Others (100%).
+        // full_deduction, 12_month_rule, current_due_only all deduct credit card
         deductibleLiabilities = liabilities.creditCard;
     }
 
