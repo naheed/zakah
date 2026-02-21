@@ -29,59 +29,83 @@ import {
 import { ExtractionLineItem } from '@/hooks/useDocumentParsingV2';
 
 /**
- * Maps extraction or Plaid legacy category IDs to Structural Asset Categories.
- * Preserves the true semantic identity (AssetCategory['id']) rather than mutating
- * into mathematical rules at import time.
+ * Maps extraction category IDs to Zakat calculation categories.
+ * Uses exact ID matching (no substring matching).
  */
-export function mapToAssetCategory(inferredCategory: string): string {
+export function mapToZakatCategory(inferredCategory: string): ZakatCategory {
     const cat = inferredCategory.toUpperCase();
 
-    // Map legacy Plaid / AI extraction strings to the new structural ZMCS categories.
-    // If the category is already a valid ZMCS structural class (e.g. INVESTMENT_STOCK from V2),
-    // we preserve it and pass it through.
-    const LEGACY_MAPPING_FALLBACKS: Record<string, string> = {
-        // Plaid & Legacy Core System Mappings -> ZMCS Structural Classes
-        'CHECKING': 'CASH_CHECKING',
-        'DEPOSITORY_CHECKING': 'CASH_CHECKING',
-        'SAVINGS': 'CASH_SAVINGS',
-        'DEPOSITORY_SAVINGS': 'CASH_SAVINGS',
-        'MONEY_MARKET': 'CASH_SAVINGS',
-        'CASH': 'CASH_ON_HAND',
+    const CATEGORY_TO_ZAKAT: Record<string, ZakatCategory> = {
+        // Cash = 100% Liquid
+        'CASH_CHECKING': 'LIQUID',
+        'CASH_SAVINGS': 'LIQUID',
+        'CASH_ON_HAND': 'LIQUID',
+        'CASH_DIGITAL_WALLET': 'LIQUID',
 
-        'EQUITY': 'INVESTMENT_STOCK',
-        'STOCK': 'INVESTMENT_STOCK',
-        'ETF': 'INVESTMENT_STOCK',
-        'MUTUAL_FUND': 'INVESTMENT_MUTUAL_FUND',
-        'MUTUAL_FUNDS': 'INVESTMENT_MUTUAL_FUND',
+        // Investments
+        'INVESTMENT_STOCK': 'PROXY_30',
+        'INVESTMENT_MUTUAL_FUND': 'PROXY_30',
+        'INVESTMENT_BOND': 'LIQUID',
+        'INVESTMENT_ACTIVE': 'PROXY_100',
+        'INVESTMENT_REIT': 'PROXY_30',
+        'INCOME_DIVIDEND': 'LIQUID',
 
-        'BOND': 'INVESTMENT_BOND',
-        'FIXED_INCOME': 'INVESTMENT_BOND',
+        // Retirement
+        'RETIREMENT_401K': 'PROXY_30',
+        'RETIREMENT_IRA': 'PROXY_30',
+        'RETIREMENT_ROTH': 'PROXY_30',
+        'RETIREMENT_HSA': 'EXEMPT',
 
-        '401K': 'RETIREMENT_401K',
-        'RETIREMENT': 'RETIREMENT_401K',
-        'IRA': 'RETIREMENT_IRA',
-        'ROTH_IRA': 'RETIREMENT_ROTH',
-        'TRADITIONAL_IRA': 'RETIREMENT_IRA',
+        // Crypto
+        'CRYPTO': 'PROXY_100',
+        'CRYPTO_STAKED': 'PROXY_100',
 
-        'CRYPTOCURRENCY': 'CRYPTO',
-        'DIGITAL_CURRENCY': 'CRYPTO',
+        // Commodities
+        'COMMODITY_GOLD': 'LIQUID',
+        'COMMODITY_SILVER': 'LIQUID',
 
-        'CREDIT_CARD_DEBT': 'LIABILITY_CREDIT_CARD',
-        'CREDIT_CARD': 'LIABILITY_CREDIT_CARD',
-        'LIABILITY': 'LIABILITY_LOAN',
-        'LOAN': 'LIABILITY_LOAN',
-        'DEBT': 'LIABILITY_LOAN',
-        'STUDENT_LOAN': 'LIABILITY_LOAN',
-        'MORTGAGE': 'LIABILITY_LOAN',
+        // Liabilities
+        'LIABILITY_CREDIT_CARD': 'EXEMPT',
+        'LIABILITY_LOAN': 'EXEMPT',
 
-        // Explicitly strip the old mathematical rules if they were somehow submitted
-        'PROXY_30': 'INVESTMENT_STOCK',
-        'PROXY_100': 'INVESTMENT_ACTIVE',
-        'LIQUID': 'CASH_ON_HAND',
-        'EXEMPT': 'OTHER',
+        // Other
+        'OTHER': 'LIQUID',
+
+        // Legacy category IDs (backward compat with old data)
+        'INVESTMENT_EQUITY': 'PROXY_30',
+        'INVESTMENT_FIXED_INCOME': 'LIQUID',
+        'INCOME_INTEREST': 'LIQUID',
+        'EXPENSE_UTILITY': 'EXEMPT',
+        'EXPENSE_GROCERY': 'EXEMPT',
+        'EXPENSE_TRANSPORT': 'EXEMPT',
+        'EXPENSE_INSURANCE': 'EXEMPT',
+        'EXPENSE': 'EXEMPT',
+        'CRYPTOCURRENCY': 'PROXY_100',
+
+        // Plaid and third-party legacy account/subtype mappings
+        'CHECKING': 'LIQUID',
+        'DEPOSITORY_CHECKING': 'LIQUID',
+        'SAVINGS': 'LIQUID',
+        'DEPOSITORY_SAVINGS': 'LIQUID',
+        'MONEY_MARKET': 'LIQUID',
+        'EQUITY': 'PROXY_30',
+        'STOCK': 'PROXY_30',
+        'ETF': 'PROXY_30',
+        'MUTUAL_FUND': 'PROXY_30',
+        'MUTUAL_FUNDS': 'PROXY_30',
+        '401K': 'PROXY_30',
+        'IRA': 'PROXY_30',
+        'ROTH_IRA': 'PROXY_30',
+        'TRADITIONAL_IRA': 'PROXY_30',
+        'RETIREMENT': 'PROXY_30',
+        'CREDIT_CARD_DEBT': 'EXEMPT',
+        'CREDIT_CARD': 'EXEMPT',
+        'LIABILITY': 'EXEMPT',
+        'LOAN': 'EXEMPT',
+        'DEBT': 'EXEMPT',
     };
 
-    return LEGACY_MAPPING_FALLBACKS[cat] ?? cat;
+    return CATEGORY_TO_ZAKAT[cat] ?? 'LIQUID';
 }
 
 // Infer account type from wizard step
@@ -300,19 +324,14 @@ export function useAssetPersistence() {
 
         console.log(`[createSnapshot] Snapshot created: ${snapshot.id}. Inserting ${lineItems.length} line items.`);
 
-        const lineItemsToInsert = lineItems.map(lineItem => {
-            const mappedAssetCategory = mapToAssetCategory(lineItem.inferredCategory);
-
-            return {
-                snapshot_id: snapshot.id,
-                description: lineItem.description || 'Unknown Asset',
-                amount: lineItem.amount || 0,
-                currency: 'USD', // Defaulting to USD for snapshot insertion, handled by core engine
-                raw_category: lineItem.inferredCategory || 'OTHER',
-                inferred_category: lineItem.inferredCategory || 'OTHER',
-                zakat_category: mappedAssetCategory,
-            };
-        });
+        const lineItemsToInsert = lineItems.map(item => ({
+            snapshot_id: snapshot.id,
+            description: item.description,
+            amount: item.amount,
+            raw_category: item.inferredCategory,
+            inferred_category: item.inferredCategory,
+            zakat_category: mapToZakatCategory(item.inferredCategory),
+        }));
 
         const { error: lineItemsError } = await supabase
             .from('asset_line_items')
