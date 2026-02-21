@@ -9,6 +9,8 @@
     },
     "scripts": {
         "dev": "tsx watch src/index.ts",
+        "test": "vitest run",
+        "test:watch": "vitest",
         "eval": "npm --workspace=apps/mcp-server/src/evals install && npm --workspace=apps/mcp-server/src/evals run evaluate",
         "eval:local": "tsx src/evals/run-agentic-evals.ts"
     },
@@ -30,6 +32,7 @@
         "@types/uuid": "^9.0.8",
         "ngrok": "^5.0.0-beta.2",
         "tsx": "^4.7.2",
-        "typescript": "^5.4.5"
+        "typescript": "^5.4.5",
+        "vitest": "^3.2.4"
     }
 }
