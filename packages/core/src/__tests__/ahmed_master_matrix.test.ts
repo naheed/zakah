@@ -20,7 +20,7 @@ import { ZakatFormData } from '../zakatTypes';
 // presets, every major edge case translates to exact, proven mathematical
 // outputs. When LLM evaluations run, they must match these outputs.
 
-interface AhmedMatrixCase {
+export interface AhmedMatrixCase {
     caseId: string;
     description: string;
     madhab: keyof typeof ZAKAT_PRESETS;
@@ -38,7 +38,7 @@ interface AhmedMatrixCase {
     };
 }
 
-const COMMON_AHMED_INPUTS: Partial<ZakatFormData> = {
+export const COMMON_AHMED_INPUTS: Partial<ZakatFormData> = {
     ...defaultFormData,
     cashOnHand: 50000,
     checkingAccounts: 25000,
@@ -54,7 +54,7 @@ const COMMON_AHMED_INPUTS: Partial<ZakatFormData> = {
     estimatedTaxRate: 0.25,
 };
 
-const MASTER_MATRIX: AhmedMatrixCase[] = [
+export const MASTER_MATRIX: AhmedMatrixCase[] = [
     // -------------------------------------------------------------------------
     // 1. Hanafi Presets (Full deductions, jewelry zakatable, net retirement, full equities)
     // -------------------------------------------------------------------------
