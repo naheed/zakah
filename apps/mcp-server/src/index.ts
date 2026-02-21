@@ -26,6 +26,8 @@ import { registerAgentProtocol } from "./tools/agent_protocol.js";
 import { registerMarketTools } from "./tools/market.js";
 import { registerDiscoveryTools } from "./tools/discovery.js";
 import { registerReportingTools } from "./tools/reporting.js";
+import { registerCompareMadhabs } from "./tools/compare_madhabs.js";
+import { registerWidgetTemplate } from "./widget/template.js";
 
 const app = express();
 app.use(cors());
@@ -48,6 +50,9 @@ const handleMcpConnection = async (req: express.Request, res: express.Response) 
         version: "1.0.0"
     });
 
+    // Register widget template (must be before tools that reference it)
+    registerWidgetTemplate(mcp);
+
     // Register all tools to this fresh instance
     registerCalculateZakat(mcp);
     registerParseBlob(mcp);
@@ -56,6 +61,7 @@ const handleMcpConnection = async (req: express.Request, res: express.Response) 
     registerMarketTools(mcp);
     registerDiscoveryTools(mcp);
     registerReportingTools(mcp);
+    registerCompareMadhabs(mcp);
 
     const transport = new SSEServerTransport("/messages", res);
     const sessionId = transport.sessionId;

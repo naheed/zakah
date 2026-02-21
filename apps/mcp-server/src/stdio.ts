@@ -4,6 +4,8 @@ import { registerCalculateZakat } from "./tools/calculate_zakat.js";
 import { registerParseBlob } from "./tools/parse_blob.js";
 import { registerInteractiveTools } from "./tools/interactive.js";
 import { registerAgentProtocol } from "./tools/agent_protocol.js";
+import { registerCompareMadhabs } from "./tools/compare_madhabs.js";
+import { registerWidgetTemplate } from "./widget/template.js";
 
 // Initialize MCP Server
 const mcp = new McpServer({
@@ -11,11 +13,15 @@ const mcp = new McpServer({
     version: "1.0.0"
 });
 
+// Register widget template (must be before tools that reference it)
+registerWidgetTemplate(mcp);
+
 // Register Tools
 registerCalculateZakat(mcp);
 registerParseBlob(mcp);
 registerInteractiveTools(mcp);
 registerAgentProtocol(mcp);
+registerCompareMadhabs(mcp);
 
 // Connect via Stdio
 async function main() {
