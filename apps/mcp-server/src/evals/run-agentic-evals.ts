@@ -396,10 +396,14 @@ async function runAllEvaluations() {
     console.log(`  - Gemini:    ${geminiResults.passed} Passed, ${geminiResults.failed} Failed`);
     console.log("==========================================================");
 
+    const totalPassed = anthropicResults.passed + openaiResults.passed + geminiResults.passed;
     const totalFailed = anthropicResults.failed + openaiResults.failed + geminiResults.failed;
 
-    // We exit 0 if both are skipped (no keys) so CI doesn't crash unnecessarily without keys,
-    // but we exit 1 if an actual evaluation ran and failed.
+    if (totalPassed === 0) {
+        console.error("\n❌ FATAL: No evaluations were successfully run. Please configure at least one API key (.env) to prove execution.");
+        process.exit(1);
+    }
+
     if (totalFailed > 0) {
         process.exit(1);
     }
