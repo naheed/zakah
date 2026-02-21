@@ -25,7 +25,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateZakat, defaultFormData } from '@zakatflow/core';
+import { calculateZakat, defaultFormData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, calculateNisab } from '@zakatflow/core';
 import { ZakatFormData, Madhab } from '@zakatflow/core';
 
 // ============================================================================
@@ -223,26 +223,29 @@ describe('Focused Variations - Testing Specific Rules', () => {
     });
 });
 
+const nisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
+
 describe('Edge Cases', () => {
 
-    it('Below nisab: $400 cash = $0 zakat', () => {
+    it('Below nisab dynamic limit = $0 zakat', () => {
         const formData: ZakatFormData = {
             ...defaultFormData,
-            cashOnHand: 400, // Below ~$514 nisab
+            cashOnHand: Math.floor(nisab) - 100, // Safe below dynamic nisab
         };
 
         const result = calculateZakat(formData);
         expect(result.zakatDue).toBe(0);
     });
 
-    it('Above nisab: $600 cash = zakatable', () => {
+    it('Above nisab dynamic limit = zakatable', () => {
+        const safeCash = Math.ceil(nisab) + 100;
         const formData: ZakatFormData = {
             ...defaultFormData,
-            cashOnHand: 600,
+            cashOnHand: safeCash,
         };
 
         const result = calculateZakat(formData);
-        expect(result.zakatDue).toBe(15); // $600 * 2.5%
+        expect(result.zakatDue).toBe(safeCash * 0.025);
     });
 
     it('High debt wipes out assets: $0 zakat', () => {

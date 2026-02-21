@@ -16,6 +16,8 @@
  */
 
 /**
+ * @vitest-environment node
+ * 
  * Privacy Vault Integration Tests
  * 
  * Tests the complete user journeys for the Privacy Vault feature.
@@ -39,6 +41,17 @@ import {
     encryptData,
     decryptData,
 } from '@/lib/CryptoService';
+
+// Mock IndexedDB for Node environment
+vi.mock('idb-keyval', () => {
+    const store = new Map();
+    return {
+        get: vi.fn(async (key) => store.get(key)),
+        set: vi.fn(async (key, val) => store.set(key, val)),
+        del: vi.fn(async (key) => store.delete(key)),
+        clear: vi.fn(async () => store.clear())
+    };
+});
 
 describe('Privacy Vault Integration Tests', () => {
     // Use a fresh vault instance for each test to avoid singleton state issues

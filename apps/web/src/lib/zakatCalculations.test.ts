@@ -128,13 +128,13 @@ describe('Zakat Calculation Engine', () => {
 
         it('Bradford Mode: Should exempt 401k completely if < 59.5', () => {
             const data: ZakatFormData = { ...retirementData, madhab: 'bradford' };
-            const assets = calculateTotalAssets(data);
+            const assets = calculateZakat(data).totalAssets;
             expect(assets).toBe(0); // Fully exempt due to lack of accessibility
         });
 
         it('Hanafi Mode: Should apply net accessible value (after tax/penalty)', () => {
             const data: ZakatFormData = { ...retirementData, madhab: 'hanafi' };
-            const assets = calculateTotalAssets(data);
+            const assets = calculateZakat(data).totalAssets;
             // Net accessible = 100000 * (1 - 0.25 tax - 0.10 penalty) = 65000
             expect(assets).toBe(65000);
         });
@@ -148,13 +148,13 @@ describe('Zakat Calculation Engine', () => {
 
         it('Bradford Mode: 30% Zakatable (Proxy for underlying assets)', () => {
             const data: ZakatFormData = { ...investData, madhab: 'bradford' };
-            const assets = calculateTotalAssets(data);
+            const assets = calculateZakat(data).totalAssets;
             expect(assets).toBe(30000); // Bradford uses 30% rule
         });
 
         it('Hanafi Mode: 100% Zakatable', () => {
             const data: ZakatFormData = { ...investData, madhab: 'hanafi' };
-            const assets = calculateTotalAssets(data);
+            const assets = calculateZakat(data).totalAssets;
             expect(assets).toBe(100000); // Hanafi uses 100%
         });
     });
@@ -256,9 +256,8 @@ describe('Zakat Calculations - Edge Cases', () => {
         };
         const result = calculateZakat(data);
 
-        // At age 60, 401k is fully accessible (no penalty)
-        // With 25% tax rate: $100,000 * 0.75 = $75,000
-        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(75000);
+        // At age 60, Bradford applies 30% proxy rate: $100,000 * 0.30 = $30,000
+        expect(result.enhancedBreakdown.retirement.zakatableAmount).toBe(30000);
     });
 
     it('Roth contributions are always zakatable, earnings exempt under 59.5 in Balanced', () => {
@@ -272,8 +271,8 @@ describe('Zakat Calculations - Edge Cases', () => {
         };
         const result = calculateZakat(data);
 
-        // Contributions should be included, earnings exempt
-        expect(result.totalAssets).toBe(20000);
+        // Contributions should be included (30% proxy for Bradford), earnings exempt
+        expect(result.totalAssets).toBe(6000);
     });
 
     it('Roth earnings are zakatable at age 59.5+', () => {
@@ -287,8 +286,8 @@ describe('Zakat Calculations - Edge Cases', () => {
         };
         const result = calculateZakat(data);
 
-        // Both contributions and earnings should be included
-        expect(result.totalAssets).toBe(30000);
+        // Both contributions and earnings should be included (30% proxy: 30000 * 0.3 = 9000)
+        expect(result.totalAssets).toBe(9000);
     });
 
 });

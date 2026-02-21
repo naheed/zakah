@@ -25,11 +25,16 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateZakat, defaultFormData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE } from '@zakatflow/core';
+import { calculateZakat, defaultFormData, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, calculateNisab } from '@zakatflow/core';
 import { ZakatFormData } from '@zakatflow/core';
 import type { Madhab } from '@zakatflow/core';
 
 const ALL_MADHABS: Madhab[] = ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+
+// Parametric bounds robust against dynamic price lookups
+const nisab = calculateNisab(SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE, 'silver');
+const safeCash = Math.ceil(nisab) + 1000;
+const expectSafeCashZakat = safeCash * 0.025;
 
 // =============================================================================
 // CATEGORY 1: LIQUID ASSETS (Universal - All Madhabs Agree)
@@ -342,7 +347,7 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
     it('401k under 59.5: Balanced EXEMPT, others taxed', () => {
         const baseData = {
             ...defaultFormData,
-            cashOnHand: 1000, // Small cash amount to ensure nisab is met
+            cashOnHand: safeCash, // Small cash amount to safely ensure nisab is met globally
             fourOhOneKVestedBalance: 100000,
             age: 40,
             isOver59Half: false,
@@ -351,7 +356,7 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
 
         // Bradford: Exempt (Bradford rule) - only cash zakatable
         const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(bradfordResult.zakatDue).toBe(25); // Only $1K cash
+        expect(bradfordResult.zakatDue).toBe(expectSafeCashZakat); // Only cash
 
         // Others: Net accessible (after tax) = $65K + cash
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -381,14 +386,14 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
     it('Traditional IRA under 59.5: Same as 401k', () => {
         const baseData = {
             ...defaultFormData,
-            cashOnHand: 1000, // Small cash to ensure nisab
+            cashOnHand: safeCash, // Small cash to ensure nisab safely globally
             traditionalIRABalance: 50000,
             age: 40,
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
         const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(bradfordResult.zakatDue).toBe(25); // Only cash
+        expect(bradfordResult.zakatDue).toBe(expectSafeCashZakat); // Only cash
 
         const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(shafiiResult.zakatDue).toBeGreaterThan(700);
@@ -408,14 +413,14 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
     it('Roth IRA earnings under 59.5: Balanced exempt, others penalized', () => {
         const baseData = {
             ...defaultFormData,
-            cashOnHand: 1000, // Small cash to ensure nisab
+            cashOnHand: safeCash, // Small cash to safely ensure global nisab
             rothIRAEarnings: 10000,
             age: 40,
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
         const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(bradfordResult.zakatDue).toBe(25); // Only cash, earnings exempt
+        expect(bradfordResult.zakatDue).toBe(expectSafeCashZakat); // Only cash, earnings exempt
 
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(hanafiResult.zakatDue).toBeGreaterThan(150); // After penalty
@@ -820,19 +825,19 @@ describe('13. Interest & Purification', () => {
 
 describe('Edge Cases', () => {
 
-    it('Below nisab: $400 = $0', () => {
+    it('Below nisab dynamic limit = $0', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            cashOnHand: 400,
+            cashOnHand: Math.floor(nisab) - 100, // Safe below nisab
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
         expect(result.zakatDue).toBe(0);
     });
 
-    it('At nisab: $600 = zakatable', () => {
+    it('Above nisab dynamic limit = zakatable', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            cashOnHand: 600,
+            cashOnHand: Math.ceil(nisab) + 100, // Safe above nisab
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
         expect(result.zakatDue).toBeGreaterThan(0);
