@@ -235,14 +235,14 @@ describe('Edge Cases', () => {
         expect(result.zakatDue).toBe(0);
     });
 
-    it('Above nisab: $600 cash = zakatable', () => {
+    it('Above nisab: $1600 cash = zakatable', () => {
         const formData: ZakatFormData = {
             ...defaultFormData,
-            cashOnHand: 600,
+            cashOnHand: 1600,
         };
 
         const result = calculateZakat(formData);
-        expect(result.zakatDue).toBe(15); // $600 * 2.5%
+        expect(result.zakatDue).toBe(40); // $1600 * 2.5%
     });
 
     it('High debt wipes out assets: $0 zakat', () => {

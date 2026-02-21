@@ -342,7 +342,7 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
     it('401k under 59.5: Balanced EXEMPT, others taxed', () => {
         const baseData = {
             ...defaultFormData,
-            cashOnHand: 1000, // Small cash amount to ensure nisab is met
+            cashOnHand: 2000, // Small cash amount to ensure nisab is met (Nisab is ~$1533)
             fourOhOneKVestedBalance: 100000,
             age: 40,
             isOver59Half: false,
@@ -351,7 +351,7 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
 
         // Bradford: Exempt (Bradford rule) - only cash zakatable
         const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(bradfordResult.zakatDue).toBe(25); // Only $1K cash
+        expect(bradfordResult.zakatDue).toBe(50); // Only $2K cash
 
         // Others: Net accessible (after tax) = $65K + cash
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
@@ -381,14 +381,14 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
     it('Traditional IRA under 59.5: Same as 401k', () => {
         const baseData = {
             ...defaultFormData,
-            cashOnHand: 1000, // Small cash to ensure nisab
+            cashOnHand: 2000, // Small cash to ensure nisab
             traditionalIRABalance: 50000,
             age: 40,
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
         const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(bradfordResult.zakatDue).toBe(25); // Only cash
+        expect(bradfordResult.zakatDue).toBe(50); // Only cash
 
         const shafiiResult = calculateZakat({ ...baseData, madhab: 'shafii' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(shafiiResult.zakatDue).toBeGreaterThan(700);
@@ -408,14 +408,14 @@ describe('5. Retirement - Madhab Differences ⭐', () => {
     it('Roth IRA earnings under 59.5: Balanced exempt, others penalized', () => {
         const baseData = {
             ...defaultFormData,
-            cashOnHand: 1000, // Small cash to ensure nisab
+            cashOnHand: 2000, // Small cash to ensure nisab
             rothIRAEarnings: 10000,
             age: 40,
             estimatedTaxRate: 0.25, // Decimal format (25%)
         };
 
         const bradfordResult = calculateZakat({ ...baseData, madhab: 'bradford' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
-        expect(bradfordResult.zakatDue).toBe(25); // Only cash, earnings exempt
+        expect(bradfordResult.zakatDue).toBe(50); // Only cash, earnings exempt
 
         const hanafiResult = calculateZakat({ ...baseData, madhab: 'hanafi' }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
         expect(hanafiResult.zakatDue).toBeGreaterThan(150); // After penalty
@@ -829,10 +829,10 @@ describe('Edge Cases', () => {
         expect(result.zakatDue).toBe(0);
     });
 
-    it('At nisab: $600 = zakatable', () => {
+    it('At nisab: $1600 = zakatable', () => {
         const result = calculateZakat({
             ...defaultFormData,
-            cashOnHand: 600,
+            cashOnHand: 1600,
         }, SILVER_PRICE_PER_OUNCE, GOLD_PRICE_PER_OUNCE);
 
         expect(result.zakatDue).toBeGreaterThan(0);

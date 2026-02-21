@@ -79,6 +79,8 @@ export function mapToZakatCategory(inferredCategory: string): ZakatCategory {
         'EXPENSE_GROCERY': 'EXEMPT',
         'EXPENSE_TRANSPORT': 'EXEMPT',
         'EXPENSE_INSURANCE': 'EXEMPT',
+        'EXPENSE': 'EXEMPT',
+        'CRYPTOCURRENCY': 'PROXY_100',
 
         // Plaid and third-party legacy account/subtype mappings
         'CHECKING': 'LIQUID',

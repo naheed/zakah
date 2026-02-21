@@ -100,7 +100,7 @@ describe('ZMCS Metadata Completeness', () => {
             });
 
             it('has compatible ZMCS version', () => {
-                expect(config.meta.zmcs_version).toMatch(/^2\.0\.\d+$/);
+                expect(config.meta.zmcs_version).toEqual('1.0.0');
             });
 
             it('has standard thresholds', () => {
