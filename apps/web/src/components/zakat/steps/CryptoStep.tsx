@@ -57,6 +57,7 @@ export function CryptoStep({ data, updateData, uploadedDocuments, onDocumentAdde
         value={data.cryptoCurrency}
         onChange={(value) => updateData({ cryptoCurrency: value })}
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'cryptoCurrency')}
+        testId="crypto-currency-input"
       />
       <CurrencyInput
         label={

@@ -94,7 +94,7 @@ export function ReportHero({
                                 Fulfilling the Third Pillar
                             </span>
                         </div>
-                        <div className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight break-words">
+                        <div className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight break-words" data-testid="zakat-due-amount">
                             <AnimatedNumber
                                 value={zakatDue}
                                 format={(v) => formatCurrency(v, currency, 0)}

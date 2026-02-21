@@ -19,7 +19,12 @@
         "test:coverage": "vitest run --coverage",
         "test:e2e": "playwright test",
         "test:e2e:ui": "playwright test --ui",
-        "test:e2e:headed": "playwright test --headed"
+        "test:e2e:headed": "playwright test --headed",
+        "test:e2e:smoke": "playwright test --grep @smoke",
+        "test:e2e:calc": "playwright test e2e/calculation-presets.spec.ts --project=chromium --workers=1",
+        "test:e2e:calc:legacy": "playwright test e2e/calculation-complete.spec.ts",
+        "test:e2e:fast": "playwright test --project=chromium",
+        "test:e2e:debug": "playwright test --ui --debug"
     },
     "dependencies": {
         "@zakatflow/core": "*",
