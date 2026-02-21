@@ -32,12 +32,8 @@ export type AccountType =
 
 export type ExtractionMethod = 'MANUAL' | 'PDF_PARSE' | 'PLAID_API' | 'COINBASE_API';
 
-export type ZakatCategory =
-    | 'LIQUID' // 100% Cash Treatment
-    | 'PROXY_30' // 30% Zakatable (Stocks)
-    | 'PROXY_100' // 100% Zakatable (Active Trading, Crypto)
-    | 'EXEMPT' // 0% (Personal Use, Unvested)
-    | 'CUSTOM'; // User override
+// Deprecated mathematical legacy types — mapped to raw asset category string IDs instead.
+export type ZakatCategory = string;
 
 export interface AssetPortfolio {
     id: string;

@@ -24,7 +24,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mapToZakatCategory, inferAccountTypeFromStep } from '../useAssetPersistence';
+import { mapToAssetCategory, inferAccountTypeFromStep } from '../useAssetPersistence';
 import { ZakatFormData, defaultFormData, calculateZakat } from '@zakatflow/core';
 
 // =============================================================================
@@ -33,60 +33,57 @@ import { ZakatFormData, defaultFormData, calculateZakat } from '@zakatflow/core'
 
 describe('Document Extraction - Category Mapping', () => {
 
-    describe('mapToZakatCategory', () => {
+    describe('mapToAssetCategory', () => {
 
-        it('maps bank statement categories to LIQUID', () => {
-            expect(mapToZakatCategory('CASH')).toBe('LIQUID');
-            expect(mapToZakatCategory('CHECKING')).toBe('LIQUID');
-            expect(mapToZakatCategory('SAVINGS')).toBe('LIQUID');
-            expect(mapToZakatCategory('HIGH_YIELD_SAVINGS')).toBe('LIQUID');
-            expect(mapToZakatCategory('MONEY_MARKET')).toBe('LIQUID');
+        it('maps bank statement categories to CASH equivalents', () => {
+            expect(mapToAssetCategory('CASH')).toBe('CASH_ON_HAND');
+            expect(mapToAssetCategory('CHECKING')).toBe('CASH_CHECKING');
+            expect(mapToAssetCategory('SAVINGS')).toBe('CASH_SAVINGS');
+            expect(mapToAssetCategory('HIGH_YIELD_SAVINGS')).toBe('HIGH_YIELD_SAVINGS'); // passed through
+            expect(mapToAssetCategory('MONEY_MARKET')).toBe('CASH_SAVINGS');
         });
 
-        it('maps crypto categories to PROXY_100 (100% zakatable)', () => {
-            expect(mapToZakatCategory('CRYPTO')).toBe('PROXY_100');
-            expect(mapToZakatCategory('CRYPTOCURRENCY')).toBe('PROXY_100');
-            expect(mapToZakatCategory('CRYPTO_WALLET')).toBe('PROXY_100');
+        it('maps crypto categories to CRYPTO', () => {
+            expect(mapToAssetCategory('CRYPTO')).toBe('CRYPTO');
+            expect(mapToAssetCategory('CRYPTOCURRENCY')).toBe('CRYPTO');
+            expect(mapToAssetCategory('CRYPTO_WALLET')).toBe('CRYPTO_WALLET'); // passed through
         });
 
-        it('maps investment categories to PROXY_30 (30% rule)', () => {
-            expect(mapToZakatCategory('EQUITY')).toBe('PROXY_30');
-            expect(mapToZakatCategory('STOCK')).toBe('PROXY_30');
-            expect(mapToZakatCategory('ETF')).toBe('PROXY_30');
-            expect(mapToZakatCategory('MUTUAL_FUND')).toBe('PROXY_30');
-            // Note: INDEX_FUND not explicitly mapped, defaults to LIQUID
+        it('maps investment categories to INVESTMENT_STOCK etc', () => {
+            expect(mapToAssetCategory('EQUITY')).toBe('INVESTMENT_STOCK');
+            expect(mapToAssetCategory('STOCK')).toBe('INVESTMENT_STOCK');
+            expect(mapToAssetCategory('ETF')).toBe('INVESTMENT_STOCK');
+            expect(mapToAssetCategory('MUTUAL_FUND')).toBe('INVESTMENT_MUTUAL_FUND');
+            // Note: INDEX_FUND not explicitly mapped, will pass through
         });
 
-        it('maps bond categories to LIQUID (100% zakatable)', () => {
-            expect(mapToZakatCategory('BOND')).toBe('LIQUID');
-            expect(mapToZakatCategory('FIXED_INCOME')).toBe('LIQUID');
-            // Note: TREASURY not explicitly mapped, defaults to LIQUID
+        it('maps bond categories to INVESTMENT_BOND', () => {
+            expect(mapToAssetCategory('BOND')).toBe('INVESTMENT_BOND');
+            expect(mapToAssetCategory('FIXED_INCOME')).toBe('INVESTMENT_BOND');
         });
 
-        it('maps retirement categories to PROXY_30 (special handling)', () => {
-            expect(mapToZakatCategory('RETIREMENT')).toBe('PROXY_30');
-            expect(mapToZakatCategory('401K')).toBe('PROXY_30');
-            expect(mapToZakatCategory('ROTH_IRA')).toBe('PROXY_30');
-            expect(mapToZakatCategory('TRADITIONAL_IRA')).toBe('PROXY_30');
+        it('maps retirement categories to structural equivalents', () => {
+            expect(mapToAssetCategory('RETIREMENT')).toBe('RETIREMENT_401K');
+            expect(mapToAssetCategory('401K')).toBe('RETIREMENT_401K');
+            expect(mapToAssetCategory('ROTH_IRA')).toBe('RETIREMENT_ROTH');
+            expect(mapToAssetCategory('TRADITIONAL_IRA')).toBe('RETIREMENT_IRA');
         });
 
-        it('maps liability categories to EXEMPT', () => {
-            expect(mapToZakatCategory('EXPENSE')).toBe('EXEMPT');
-            expect(mapToZakatCategory('LIABILITY')).toBe('EXEMPT');
-            expect(mapToZakatCategory('CREDIT_CARD_DEBT')).toBe('EXEMPT');
-            // Note: LOAN by itself doesn't match - needs 'DEBT' or 'LIABILITY' keyword
+        it('maps liability categories to LIABILITY equivalents', () => {
+            expect(mapToAssetCategory('EXPENSE')).toBe('EXPENSE'); // Pass through
+            expect(mapToAssetCategory('LIABILITY')).toBe('LIABILITY_LOAN');
+            expect(mapToAssetCategory('CREDIT_CARD_DEBT')).toBe('LIABILITY_CREDIT_CARD');
         });
 
-        it('defaults unknown categories to LIQUID (safe default)', () => {
-            expect(mapToZakatCategory('UNKNOWN')).toBe('LIQUID');
-            expect(mapToZakatCategory('')).toBe('LIQUID');
-            expect(mapToZakatCategory('RANDOM_CATEGORY')).toBe('LIQUID');
+        it('preserves unknown categories (legacy mapping strips to LIQUID but semantic retains it)', () => {
+            expect(mapToAssetCategory('UNKNOWN')).toBe('UNKNOWN');
+            expect(mapToAssetCategory('RANDOM_CATEGORY')).toBe('RANDOM_CATEGORY');
         });
 
-        it('handles case insensitivity', () => {
-            expect(mapToZakatCategory('cash')).toBe('LIQUID');
-            expect(mapToZakatCategory('Cash')).toBe('LIQUID');
-            expect(mapToZakatCategory('CASH')).toBe('LIQUID');
+        it('handles case insensitivity by returning uppercased', () => {
+            expect(mapToAssetCategory('cash')).toBe('CASH_ON_HAND');
+            expect(mapToAssetCategory('Cash')).toBe('CASH_ON_HAND');
+            expect(mapToAssetCategory('CASH')).toBe('CASH_ON_HAND');
         });
 
     });
@@ -220,15 +217,15 @@ describe('Document Extraction - Line Item Aggregation', () => {
             { description: 'Cash Reserve', amount: 5000, inferredCategory: 'CASH' },
         ];
 
-        // The mapToZakatCategory function would be used to categorize each
+        // The mapToAssetCategory function would be used to categorize each
         const categories = lineItems.map(item => ({
             ...item,
-            zakatCategory: mapToZakatCategory(item.inferredCategory)
+            assetCategory: mapToAssetCategory(item.inferredCategory)
         }));
 
-        expect(categories[0].zakatCategory).toBe('PROXY_30'); // Stock
-        expect(categories[1].zakatCategory).toBe('PROXY_30'); // ETF
-        expect(categories[2].zakatCategory).toBe('LIQUID'); // Cash
+        expect(categories[0].assetCategory).toBe('INVESTMENT_STOCK'); // Stock
+        expect(categories[1].assetCategory).toBe('INVESTMENT_STOCK'); // ETF
+        expect(categories[2].assetCategory).toBe('CASH_ON_HAND'); // Cash
     });
 
 });
