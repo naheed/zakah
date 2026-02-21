@@ -59,6 +59,7 @@ export function mapToZakatCategory(inferredCategory: string): ZakatCategory {
         // Crypto
         'CRYPTO': 'PROXY_100',
         'CRYPTO_STAKED': 'PROXY_100',
+        'CRYPTO_WALLET': 'PROXY_100',
 
         // Commodities
         'COMMODITY_GOLD': 'LIQUID',
