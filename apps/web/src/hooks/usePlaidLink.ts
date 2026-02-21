@@ -33,6 +33,7 @@ import { useEncryptionKeys } from '@/hooks/useEncryptionKeys';
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { persistPlaidDataWithUserKey } from '@/lib/plaidEncryptedPersistence';
 import { useAssetPersistence } from '@/hooks/useAssetPersistence';
+import { trackEvent } from '@/lib/analytics';
 
 export type PlaidLinkStatus = 'idle' | 'loading_token' | 'ready' | 'open' | 'exchanging' | 'success' | 'error';
 
@@ -103,14 +104,14 @@ export function usePlaidLink() {
     const getAccessToken = useCallback(async () => {
         // First try getSession, then fallback to getUser for fresh token
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        
+
         if (sessionError) {
             console.error('[Plaid] Session error:', sessionError);
             throw new Error(sessionError.message);
         }
 
         let token = sessionData.session?.access_token;
-        
+
         // If no session token, try refreshing
         if (!token) {
             console.log('[Plaid] No session token, attempting refresh...');
@@ -257,6 +258,9 @@ export function usePlaidLink() {
                             title: 'Bank connected!',
                             description: `${metadata.institution?.name || 'Account'} linked successfully`,
                         });
+
+                        // Fire GA4 Telemetry event as per PM requirement
+                        trackEvent('Plaid', 'plaid_investment_sync_success', metadata.institution?.name);
 
                         resolve({
                             success: true,

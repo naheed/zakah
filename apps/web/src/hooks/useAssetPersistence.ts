@@ -79,6 +79,28 @@ export function mapToZakatCategory(inferredCategory: string): ZakatCategory {
         'EXPENSE_GROCERY': 'EXEMPT',
         'EXPENSE_TRANSPORT': 'EXEMPT',
         'EXPENSE_INSURANCE': 'EXEMPT',
+
+        // Plaid and third-party legacy account/subtype mappings
+        'CHECKING': 'LIQUID',
+        'DEPOSITORY_CHECKING': 'LIQUID',
+        'SAVINGS': 'LIQUID',
+        'DEPOSITORY_SAVINGS': 'LIQUID',
+        'MONEY_MARKET': 'LIQUID',
+        'EQUITY': 'PROXY_30',
+        'STOCK': 'PROXY_30',
+        'ETF': 'PROXY_30',
+        'MUTUAL_FUND': 'PROXY_30',
+        'MUTUAL_FUNDS': 'PROXY_30',
+        '401K': 'PROXY_30',
+        'IRA': 'PROXY_30',
+        'ROTH_IRA': 'PROXY_30',
+        'TRADITIONAL_IRA': 'PROXY_30',
+        'RETIREMENT': 'PROXY_30',
+        'CREDIT_CARD_DEBT': 'EXEMPT',
+        'CREDIT_CARD': 'EXEMPT',
+        'LIABILITY': 'EXEMPT',
+        'LOAN': 'EXEMPT',
+        'DEBT': 'EXEMPT',
     };
 
     return CATEGORY_TO_ZAKAT[cat] ?? 'LIQUID';
