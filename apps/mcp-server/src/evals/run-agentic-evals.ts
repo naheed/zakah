@@ -6,8 +6,9 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Load environment variables (.env at monorepo root)
+// Load environment variables (.env and .env.local at monorepo root)
 dotenv.config({ path: '../../.env' });
+dotenv.config({ path: '../../.env.local', override: true });
 
 const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY || 'skip',
