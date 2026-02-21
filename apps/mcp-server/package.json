@@ -17,6 +17,7 @@
     "dependencies": {
         "@modelcontextprotocol/ext-apps": "^1.0.1",
         "@modelcontextprotocol/sdk": "^1.0.1",
+        "@supabase/supabase-js": "^2.97.0",
         "@zakatflow/core": "*",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
