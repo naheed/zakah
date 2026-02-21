@@ -20,7 +20,7 @@
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { AccountType } from '@/types/assets';
 import { plaidSubtypeToAccountType, ACCOUNT_TYPE_ZAKAT_FIELD_OVERRIDE } from '@/lib/accountImportMapper';
-import { mapToZakatCategory } from '@/hooks/useAssetPersistence';
+import { mapToAssetCategory } from '@/hooks/useAssetPersistence';
 
 /** Account payload returned by plaid-exchange-token */
 export interface PlaidAccountPayload {
@@ -219,7 +219,7 @@ export async function persistPlaidDataWithUserKey(
                                 amount: li.amount,
                                 raw_category: li.inferredCategory,
                                 inferred_category: li.inferredCategory,
-                                zakat_category: mapToZakatCategory(li.inferredCategory),
+                                zakat_category: mapToAssetCategory(li.inferredCategory),
                             }));
 
                             const { error: liError } = await supabase
