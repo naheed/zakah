@@ -46,6 +46,7 @@ When required you must produce strategic documents in one of two formats:
 5. **Definition of Done (DoD) & Final Approval**:
    - Ensure explicit MVP boundaries are met.
    - Verify that Playwright tests and ZMCS compliance testing are in the PR criteria before marking a feature complete.
+   - **Autonomous PR Management**: Create the Pull Request and merge it independently if all DoD checks pass. Only stop and ask the user for permission or review if there is a critical question, a subjective design choice, or a risk that requires human-in-the-loop intervention.
 
 ---
 

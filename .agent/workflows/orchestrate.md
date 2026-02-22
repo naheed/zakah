@@ -8,7 +8,7 @@ When the user invokes `/orchestrate [Issue/Feature]`, you are acting as the exec
 
 ## The Automated Lifecycle
 
-Execute these steps sequentially in an unbroken agentic loop:
+Execute these steps sequentially in an unbroken agentic loop. You should create PRs and merge them autonomously if all tests pass. **Only halt and ask the user for permission if there is a critical question or subjective decision that explicitly requires human-in-the-loop oversight.**
 
 1. **State Initialization**: Run `uuidgen > .agents/.current_run` to start the telemetry session. Then log your own start:
    `npx tsx .agents/telemetry/cli.ts --run_id="$(cat .agents/.current_run)" --agent="/orchestrate" --action="START" --reason="Initiating orchestration run"`
