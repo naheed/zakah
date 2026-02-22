@@ -26,6 +26,7 @@ import {
     AVAILABLE_PRESETS,
 } from "@zakatflow/core";
 import { WIDGET_URI } from "../widget/template.js";
+import { recordAnonymousCalculation, getDefaultSessionId } from "../analytics.js";
 
 const MADHAB_IDS = ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali', 'amja', 'qaradawi', 'tahir_anwar'] as const;
 
@@ -102,6 +103,12 @@ export function registerCompareMadhabs(server: McpServer) {
   Investment Rate: ${((c.keyRules?.passiveInvestmentRate ?? 1) * 100)}%
   Liability Method: ${c.keyRules?.liabilityMethod}`;
             });
+
+            // Record anonymized event using first valid result (fire-and-forget)
+            const firstValid = comparisons.find(c => !('error' in c && c.error) && c.totalAssets !== undefined);
+            if (firstValid && firstValid.totalAssets !== undefined && firstValid.zakatDue !== undefined) {
+                recordAnonymousCalculation(getDefaultSessionId(), firstValid.totalAssets, firstValid.zakatDue).catch(() => { });
+            }
 
             return {
                 content: [
