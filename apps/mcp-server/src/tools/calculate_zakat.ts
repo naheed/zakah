@@ -255,6 +255,31 @@ export function registerCalculateZakat(server: McpServer) {
             // Record anonymized event (fire-and-forget, never blocks response)
             recordAnonymousCalculation(getDefaultSessionId(), result.totalAssets, result.zakatDue).catch(() => { });
 
+            // Build methodology notes for the model narration
+            const notes: string[] = [];
+
+            // Explain stock rate if methodology uses something other than 100%
+            const invRules = preset?.assets?.investments;
+            if (invRules?.passive_investments && formData.passiveInvestmentsValue > 0) {
+                const rate = invRules.passive_investments.rate;
+                const treatment = invRules.passive_investments.treatment;
+                if (rate !== 1.0) {
+                    const pct = (rate * 100).toFixed(0);
+                    const inputVal = formData.passiveInvestmentsValue;
+                    const zakatableVal = inputVal * rate;
+                    const reason = treatment === 'underlying_assets'
+                        ? 'underlying zakatable company assets (AAOIFI proxy)'
+                        : treatment === 'income_only'
+                            ? 'income/dividends only'
+                            : `${pct}% of market value`;
+                    notes.push(`${methodologyName} values passive stock investments at ${pct}% (${reason}). Your $${inputVal.toLocaleString()} in stocks counts as $${zakatableVal.toLocaleString()} for Zakat purposes.`);
+                }
+            }
+
+            const methodologyNote = notes.length > 0
+                ? `\nMethodology Notes:\n${notes.map(n => `• ${n}`).join('\n')}\n`
+                : '';
+
             return {
                 content: [
                     {
@@ -267,7 +292,7 @@ Nisab Threshold: $${result.nisab.toLocaleString()}
 Exceeds Nisab: ${result.isAboveNisab ? 'Yes' : 'No'}
 Zakat Due: $${result.zakatDue.toLocaleString()}
 Methodology: ${methodologyName}
-
+${methodologyNote}
 Full Report: ${reportLink}
 
 Note: ZakatFlow provides calculations based on scholarly methodologies, not fatwas. Consult a qualified scholar for personal rulings.`
