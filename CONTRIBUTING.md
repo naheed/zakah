@@ -52,7 +52,7 @@ If you are a scholar and would like to audit a preset, please open an issue or c
 
 1. **Fork and clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/zakah.git
+   git clone https://github.com/naheed/zakah.git
    cd zakah
    npm install
    ```
