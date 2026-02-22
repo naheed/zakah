@@ -88,7 +88,7 @@ export function ZakatPersistenceProvider({ children }: { children: ReactNode }) 
 
                         // Validate/Safety check? (Basic check)
                         if (loadedData && typeof loadedData === 'object') {
-                            setFormData(loadedData);
+                            setFormData({ ...defaultFormData, ...loadedData });
                             setStepIndex(17); // Results Step Index
                             setReportReady(true);
                             setIsLoaded(true);
