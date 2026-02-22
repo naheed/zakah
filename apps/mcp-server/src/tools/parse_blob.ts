@@ -21,8 +21,15 @@ import { z } from "zod";
 export function registerParseBlob(server: McpServer) {
     server.tool(
         "parse_blob_input",
+        "Parse unstructured text describing financial assets and extract structured asset values.",
         {
             blob: z.string().describe("The unstructured user text describing their assets."),
+        },
+        {
+            title: "Parse Financial Text",
+            readOnlyHint: true,
+            destructiveHint: false,
+            openWorldHint: false,
         },
         async ({ blob }: { blob: string }) => {
             const content: any[] = [];

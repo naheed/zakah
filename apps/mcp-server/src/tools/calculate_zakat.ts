@@ -29,7 +29,13 @@ export function registerCalculateZakat(server: McpServer) {
         server,
         "calculate_zakat",
         {
+            title: "Calculate Zakat",
             description: "Calculate Zakat obligation based on Islamic jurisprudence. Supports ALL asset categories: cash, precious metals, crypto, investments, retirement, trusts, real estate, business, illiquid assets, and detailed liabilities. Returns structured calculation data rendered as an interactive widget. NOTE: ZakatFlow provides calculations, not fatwas. Users should consult a qualified scholar for personal rulings.",
+            annotations: {
+                readOnlyHint: true,
+                destructiveHint: false,
+                openWorldHint: false,
+            },
             inputSchema: {
                 // ─── Liquid Assets ───────────────────────────────────────
                 cash: z.number().describe("Total liquid cash: checking accounts, savings, cash on hand, digital wallets (PayPal/Venmo/CashApp), and foreign currency combined."),

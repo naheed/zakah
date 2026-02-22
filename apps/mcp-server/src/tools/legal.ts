@@ -93,6 +93,12 @@ export function registerLegalTools(server: McpServer) {
         {
             document: z.enum(["privacy", "terms"]).describe("Which legal document to view: 'privacy' for Privacy Policy, 'terms' for Terms of Service."),
         },
+        {
+            title: "View Legal Documents",
+            readOnlyHint: true,
+            destructiveHint: false,
+            openWorldHint: false,
+        },
         async (params) => {
             const { document } = params;
 
