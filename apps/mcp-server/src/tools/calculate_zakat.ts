@@ -20,6 +20,7 @@ import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import { z } from "zod";
 import { calculateZakat, ZakatFormData, defaultFormData, ZAKAT_PRESETS } from "@zakatflow/core";
 import { WIDGET_URI } from "../widget/template.js";
+import { recordAnonymousCalculation, getDefaultSessionId } from "../analytics.js";
 
 export function registerCalculateZakat(server: McpServer) {
     registerAppTool(
@@ -93,6 +94,9 @@ export function registerCalculateZakat(server: McpServer) {
                 methodologyId: selectedMadhab,
                 reportLink,
             };
+
+            // Record anonymized event (fire-and-forget, never blocks response)
+            recordAnonymousCalculation(getDefaultSessionId(), result.totalAssets, result.zakatDue).catch(() => { });
 
             return {
                 content: [
