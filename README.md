@@ -24,6 +24,9 @@ ZakatFlow's documentation is optimized for both Human and AI "Agent Swarm" workf
 ### For Human Onboarding:
 - **[CONTRIBUTING.md](CONTRIBUTING.md)**: Start here. Covers local dev setup, PR processes, and how to contribute methodologies.
 - **[System Design](apps/web/docs/architecture/system-design.md)**: End-to-end architecture diagrams (React -> Edge Functions -> Postgres).
+- **[Core ZMCS Architecture](docs/architecture/ZMCS.md)**: Why we chose Configuration-Driven schemas over code for scholars.
+- **[Compute Pipeline](docs/architecture/COMPUTE_PIPELINE.md)**: How we compute all methodologies in O(1) pass.
+- **[Presentation & Export Layer](docs/architecture/PRESENTATION_DATA.md)**: Visual conservation proofs (Sankey) and PDF/CSV parity.
 - **[Web UI Product Guide](apps/web/PRODUCT.md)**: Feature overview for the web app frontend.
 - **[MCP Server Guide](apps/mcp-server/PRODUCT.md)**: Connecting ZakatFlow tools to AI assistants (Claude, ChatGPT).
 - **[Monorepo Contract](apps/web/docs/rules/monorepo.md)**: The strict build rules governing our Lovable `package.json` resolution.
