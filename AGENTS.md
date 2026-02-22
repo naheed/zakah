@@ -14,9 +14,11 @@ Use standard prompt commands (e.g., `/product-manager`) to invoke these workflow
 ### Orchestrators (Context Holders)
 - **`/product-manager`**: Scopes the "Job to be Done", defines Acceptance Criteria, and specifies Google Analytics tracking events. Controls the feature loop.
 - **`/senior-tech-lead`**: Staff-level architect. Audits system design, end-to-end security (AES-256-GCM), database definitions, and API scalability.
+- **`/product-marketing-manager`**: Directs GTM (Go-To-Market) strategy, compiles Changelog release notes, and ensures SEO/Analytics alignment.
 
 ### Specialist Workers (Execution)
-- **`/backend-ai-engineer`**: Supabase Edge Functions, Plaid sync, Postgres SQL, and MCP server AI robustness (prompt injection guards). 
+- **`/backend-engineer`**: Supabase Edge Functions, Plaid ecosystem sync, and pure Postgres SQL logic.
+- **`/ai-engineer`**: MCP server capabilities, LLM system robustness, and prompt injection guards (OpenAI Standard).
 - **`/ui-eng-designer`**: Implements React components using `shadcn/ui` and strict Tailwind semantic tokens. Responsible for WCAG 2.1 AA execution.
 - **`/ui-designer`**: Pure visual layout, typography scaling, and translating user needs into semantic CSS tokens.
 - **`/ux-writer`**: Crafts the "Dignified Guide" copy for Web UI and tunes LLM agent prompts (`agent_protocol.ts`). 
