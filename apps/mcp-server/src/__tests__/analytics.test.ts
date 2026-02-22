@@ -81,8 +81,8 @@ describe('Analytics — getDefaultSessionId', () => {
 // ---------------------------------------------------------------------------
 
 describe('Analytics — recordAnonymousCalculation', () => {
-    it('returns silently when Supabase is not configured', async () => {
-        // Without SUPABASE env vars, getSupabaseAdmin() returns null
+    it('returns silently when gateway is not configured', async () => {
+        // Without MCP_GATEWAY_SECRET, isGatewayConfigured() returns false
         // recordAnonymousCalculation should just return without error
         await expect(
             recordAnonymousCalculation('test-session', 10000, 250)

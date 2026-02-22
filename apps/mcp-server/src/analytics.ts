@@ -8,19 +8,18 @@
  */
 
 /**
- * Anonymized calculation analytics — server-side equivalent of the
- * `track-zakat-calculation` Supabase Edge Function.
+ * Anonymized calculation analytics — routes through the mcp-gateway
+ * edge function instead of using the service role key directly.
  *
  * Privacy guarantees (identical to the web app):
  *   1. Session hash: SHA-256 of sessionId + date (no PII)
  *   2. Values rounded: assets → nearest $1,000, zakat → nearest $100
  *   3. Deduplication: UNIQUE(session_hash, event_date) prevents double-counting
- *   4. Service role writes only (no public RLS policies)
- *   5. Fire-and-forget: errors are logged, never block the user
+ *   4. Fire-and-forget: errors are logged, never block the user
  */
 
 import { createHash, randomUUID } from 'node:crypto';
-import { getSupabaseAdmin } from './supabase.js';
+import { callGateway, isGatewayConfigured } from './gateway.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -72,8 +71,7 @@ export async function recordAnonymousCalculation(
     totalAssets: number,
     zakatDue: number
 ): Promise<void> {
-    const supabase = getSupabaseAdmin();
-    if (!supabase) return; // Graceful fallback: no Supabase = no analytics
+    if (!isGatewayConfigured()) return; // Graceful fallback: no gateway = no analytics
 
     // Validate
     if (totalAssets < 0 || totalAssets > MAX_TOTAL_ASSETS) return;
@@ -86,34 +84,18 @@ export async function recordAnonymousCalculation(
 
     // Generate deduplication hash
     const sessionHash = generateSessionHash(sessionId);
-    const today = new Date().toISOString().split('T')[0];
 
     try {
-        // Insert event (deduplicated by session_hash + event_date)
-        const { data: insertData, error: insertError } = await supabase
-            .from('zakat_anonymous_events')
-            .upsert(
-                {
-                    session_hash: sessionHash,
-                    event_date: today,
-                    total_assets: roundedAssets,
-                    zakat_due: roundedZakat,
-                    source: SOURCE,
-                },
-                { onConflict: 'session_hash,event_date', ignoreDuplicates: true }
-            )
-            .select();
+        // Track calculation event via gateway
+        await callGateway('track_calculation', {
+            session_hash: sessionHash,
+            total_assets: roundedAssets,
+            zakat_due: roundedZakat,
+            source: SOURCE,
+        });
 
-        if (insertError) {
-            console.error('[Analytics] Error inserting event:', insertError.message);
-            return;
-        }
-
-        // Only update aggregates for new events (not duplicates)
-        const isNewEvent = insertData && insertData.length > 0;
-        if (!isNewEvent) return;
-
-        // Update aggregate periods
+        // Update aggregates via gateway
+        const today = new Date().toISOString().split('T')[0];
         const currentMonth = today.substring(0, 7); // YYYY-MM
         const currentYear = today.substring(0, 4);   // YYYY
 
@@ -124,45 +106,14 @@ export async function recordAnonymousCalculation(
         ];
 
         for (const period of periods) {
-            const { error: rpcError } = await supabase.rpc('increment_usage_aggregate', {
-                p_period_type: period.period_type,
-                p_period_value: period.period_value,
-                p_assets: roundedAssets,
-                p_zakat: roundedZakat,
-            });
-
-            if (rpcError) {
-                console.error(`[Analytics] Error updating ${period.period_type} aggregate:`, rpcError.message);
-                // Fallback: try direct update
-                const { data: existing } = await supabase
-                    .from('zakat_usage_aggregates')
-                    .select('*')
-                    .eq('period_type', period.period_type)
-                    .eq('period_value', period.period_value)
-                    .single();
-
-                if (existing) {
-                    await supabase
-                        .from('zakat_usage_aggregates')
-                        .update({
-                            unique_sessions: existing.unique_sessions + 1,
-                            total_assets: existing.total_assets + roundedAssets,
-                            total_zakat: existing.total_zakat + roundedZakat,
-                            calculation_count: existing.calculation_count + 1,
-                            updated_at: new Date().toISOString(),
-                        })
-                        .eq('period_type', period.period_type)
-                        .eq('period_value', period.period_value);
-                } else {
-                    await supabase.from('zakat_usage_aggregates').insert({
-                        period_type: period.period_type,
-                        period_value: period.period_value,
-                        unique_sessions: 1,
-                        total_assets: roundedAssets,
-                        total_zakat: roundedZakat,
-                        calculation_count: 1,
-                    });
-                }
+            try {
+                await callGateway('update_aggregates', {
+                    ...period,
+                    assets: roundedAssets,
+                    zakat: roundedZakat,
+                });
+            } catch (e) {
+                console.error(`[Analytics] Error updating ${period.period_type} aggregate:`, (e as Error).message);
             }
         }
 

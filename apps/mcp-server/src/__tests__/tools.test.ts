@@ -509,12 +509,11 @@ describe('delete_my_data tool — logic validation', () => {
         expect(confirm).toBe(true);
     });
 
-    it('graceful fallback when Supabase is not configured', async () => {
-        // getSupabaseAdmin returns null when not configured
-        const { getSupabaseAdmin } = await import('../supabase.js');
-        const admin = getSupabaseAdmin();
-        // In test env, Supabase is not configured
-        expect(admin).toBeNull();
+    it('graceful fallback when gateway is not configured', async () => {
+        // isGatewayConfigured returns false when MCP_GATEWAY_SECRET is not set
+        const { isGatewayConfigured } = await import('../gateway.js');
+        // In test env, gateway is not configured
+        expect(isGatewayConfigured()).toBe(false);
     });
 
     it('privacy policy §4a.4 references delete_my_data tool', async () => {

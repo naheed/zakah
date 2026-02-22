@@ -9,7 +9,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getSupabaseAdmin } from "../supabase.js";
+import { callGateway, isGatewayConfigured } from "../gateway.js";
 
 export function registerDeleteData(server: McpServer) {
     server.tool(
@@ -22,94 +22,83 @@ export function registerDeleteData(server: McpServer) {
         async (params) => {
             const { chatgpt_user_id, confirm } = params;
 
-            const supabase = getSupabaseAdmin();
-            if (!supabase) {
+            if (!isGatewayConfigured()) {
                 return {
                     content: [{
                         type: "text" as const,
-                        text: "Data deletion is not available at this time (database not configured). Please contact privacy@vora.dev for manual deletion."
+                        text: "Data deletion is not available at this time (gateway not configured). Please contact privacy@vora.dev for manual deletion."
                     }]
                 };
             }
 
-            // Look up user
-            const { data: user, error: findError } = await supabase
-                .from('chatgpt_users')
-                .select('id, chatgpt_user_id, created_at')
-                .eq('chatgpt_user_id', chatgpt_user_id)
-                .maybeSingle();
+            // Preview mode — check if user exists via gateway
+            let userData: { deleted?: boolean; reason?: string; user_id?: string } | null = null;
+            try {
+                // Use find_or_create_user to check existence (it won't create if user exists)
+                const user = await callGateway<{ id: string; created_at: string }>('find_or_create_user', {
+                    chatgpt_user_id,
+                });
 
-            if (findError) {
+                if (!user) {
+                    return {
+                        content: [{
+                            type: "text" as const,
+                            text: `No data found for ChatGPT user ID "${chatgpt_user_id}". You may not have any stored data with ZakatFlow, or the ID may be incorrect. No action was taken.`
+                        }]
+                    };
+                }
+
+                // Get session count for preview
+                let sessionCount = 0;
+                try {
+                    const sessions = await callGateway<unknown[]>('get_sessions', {
+                        user_id: user.id,
+                        limit: 50,
+                    });
+                    sessionCount = sessions?.length || 0;
+                } catch {
+                    // Ignore — session count is informational
+                }
+
+                // Preview mode
+                if (!confirm) {
+                    return {
+                        content: [{
+                            type: "text" as const,
+                            text: `📋 **Data Deletion Preview** (no data was deleted)\n\nFound the following data for your ChatGPT account:\n- **1 user record** (created ${user.created_at})\n- **${sessionCount} calculation session(s)**\n\nTo proceed with permanent deletion, call this tool again with \`confirm: true\`.\n\n⚠️ This action is irreversible. Anonymized analytics (rounded totals) will be retained per our Privacy Policy §4a.3 as they contain no personally identifiable information.`
+                        }]
+                    };
+                }
+
+                // Execute deletion via gateway
+                userData = await callGateway<{ deleted: boolean; user_id: string }>('delete_user_data', {
+                    chatgpt_user_id,
+                });
+
+                if (userData?.deleted) {
+                    return {
+                        content: [{
+                            type: "text" as const,
+                            text: `✅ **Data Deletion Complete**\n\nThe following data has been permanently deleted:\n- **1 user record** for ChatGPT user "${chatgpt_user_id}"\n- **${sessionCount} calculation session(s)**\n\nAnonymized aggregate analytics (rounded asset/Zakat totals with no identifying information) are retained per our Privacy Policy §4a.3.\n\nIf you use ZakatFlow again through ChatGPT, a new user record will be created automatically.`
+                        }]
+                    };
+                } else {
+                    return {
+                        content: [{
+                            type: "text" as const,
+                            text: `No data found for ChatGPT user ID "${chatgpt_user_id}". No action was taken.`
+                        }]
+                    };
+                }
+
+            } catch (e) {
                 return {
                     content: [{
                         type: "text" as const,
-                        text: `Error looking up your data: ${findError.message}. Please try again or contact privacy@vora.dev.`
+                        text: `Error during data deletion: ${(e as Error).message}. Please try again or contact privacy@vora.dev.`
                     }]
                 };
             }
-
-            if (!user) {
-                return {
-                    content: [{
-                        type: "text" as const,
-                        text: `No data found for ChatGPT user ID "${chatgpt_user_id}". You may not have any stored data with ZakatFlow, or the ID may be incorrect. No action was taken.`
-                    }]
-                };
-            }
-
-            // Count sessions for preview/summary
-            const { count: sessionCount } = await supabase
-                .from('chatgpt_sessions')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id);
-
-            const sessionsFound = sessionCount || 0;
-
-            // Preview mode — don't delete
-            if (!confirm) {
-                return {
-                    content: [{
-                        type: "text" as const,
-                        text: `📋 **Data Deletion Preview** (no data was deleted)\n\nFound the following data for your ChatGPT account:\n- **1 user record** (created ${user.created_at})\n- **${sessionsFound} calculation session(s)**\n\nTo proceed with permanent deletion, call this tool again with \`confirm: true\`.\n\n⚠️ This action is irreversible. Anonymized analytics (rounded totals) will be retained per our Privacy Policy §4a.3 as they contain no personally identifiable information.`
-                    }]
-                };
-            }
-
-            // Execute deletion — sessions first (FK dependency), then user
-            const { error: deleteSessionsError } = await supabase
-                .from('chatgpt_sessions')
-                .delete()
-                .eq('user_id', user.id);
-
-            if (deleteSessionsError) {
-                return {
-                    content: [{
-                        type: "text" as const,
-                        text: `Error deleting sessions: ${deleteSessionsError.message}. Please contact privacy@vora.dev for assistance.`
-                    }]
-                };
-            }
-
-            const { error: deleteUserError } = await supabase
-                .from('chatgpt_users')
-                .delete()
-                .eq('id', user.id);
-
-            if (deleteUserError) {
-                return {
-                    content: [{
-                        type: "text" as const,
-                        text: `Sessions deleted but error removing user record: ${deleteUserError.message}. Please contact privacy@vora.dev to complete the deletion.`
-                    }]
-                };
-            }
-
-            return {
-                content: [{
-                    type: "text" as const,
-                    text: `✅ **Data Deletion Complete**\n\nThe following data has been permanently deleted:\n- **1 user record** for ChatGPT user "${chatgpt_user_id}"\n- **${sessionsFound} calculation session(s)**\n\nAnonymized aggregate analytics (rounded asset/Zakat totals with no identifying information) are retained per our Privacy Policy §4a.3.\n\nIf you use ZakatFlow again through ChatGPT, a new user record will be created automatically.`
-                }]
-            };
         }
     );
 }
