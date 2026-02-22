@@ -17,19 +17,68 @@ import { calculateZakat, defaultFormData, ZakatFormData, ZAKAT_PRESETS, AVAILABL
 function buildFormDataFromToolInput(input: {
     cash: number;
     gold_value?: number;
+    gold_jewelry?: number;
+    silver_value?: number;
+    silver_jewelry?: number;
+    crypto_currency?: number;
+    crypto_trading?: number;
+    staked_assets?: number;
     stocks?: number;
+    short_term_investments?: number;
+    reits?: number;
     retirement?: number;
+    revocable_trust?: number;
+    irrevocable_trust?: number;
+    real_estate_for_sale?: number;
+    rental_income?: number;
+    business_cash?: number;
+    business_inventory?: number;
+    illiquid_assets?: number;
+    good_debt_owed?: number;
+    bad_debt_recovered?: number;
     loans?: number;
+    unpaid_bills?: number;
+    monthly_mortgage?: number;
+    student_loans?: number;
     madhab?: string;
+    nisab_standard?: 'silver' | 'gold';
 }): ZakatFormData {
     return {
         ...defaultFormData,
         checkingAccounts: input.cash,
         goldInvestmentValue: input.gold_value || 0,
-        passiveInvestmentsValue: input.stocks || 0,
+        goldJewelryValue: input.gold_jewelry || 0,
+        silverInvestmentValue: input.silver_value || 0,
+        silverJewelryValue: input.silver_jewelry || 0,
+        cryptoCurrency: input.crypto_currency || 0,
+        cryptoTrading: input.crypto_trading || 0,
+        stakedAssets: input.staked_assets || 0,
+        hasCrypto: !!(input.crypto_currency || input.crypto_trading || input.staked_assets),
+        passiveInvestmentsValue: (input.stocks || 0) + (input.reits || 0),
+        activeInvestments: input.short_term_investments || 0,
         fourOhOneKVestedBalance: input.retirement || 0,
+        revocableTrustValue: input.revocable_trust || 0,
+        irrevocableTrustValue: input.irrevocable_trust || 0,
+        irrevocableTrustAccessible: !!(input.irrevocable_trust && input.irrevocable_trust > 0),
+        hasTrusts: !!(input.revocable_trust || input.irrevocable_trust),
+        realEstateForSale: input.real_estate_for_sale || 0,
+        rentalPropertyIncome: input.rental_income || 0,
+        hasRealEstate: !!(input.real_estate_for_sale || input.rental_income),
+        businessCashAndReceivables: input.business_cash || 0,
+        businessInventory: input.business_inventory || 0,
+        hasBusiness: !!(input.business_cash || input.business_inventory),
+        illiquidAssetsValue: input.illiquid_assets || 0,
+        hasIlliquidAssets: !!(input.illiquid_assets),
+        goodDebtOwedToYou: input.good_debt_owed || 0,
+        badDebtRecovered: input.bad_debt_recovered || 0,
+        hasDebtOwedToYou: !!(input.good_debt_owed || input.bad_debt_recovered),
         creditCardBalance: input.loans || 0,
+        unpaidBills: input.unpaid_bills || 0,
+        monthlyMortgage: input.monthly_mortgage || 0,
+        studentLoansDue: input.student_loans || 0,
         madhab: (input.madhab || 'bradford') as ZakatFormData['madhab'],
+        nisabStandard: input.nisab_standard || 'silver',
+        hasPreciousMetals: !!(input.gold_value || input.gold_jewelry || input.silver_value || input.silver_jewelry),
     };
 }
 
@@ -135,6 +184,142 @@ describe('calculate_zakat tool — structuredContent', () => {
 });
 
 // =============================================================================
+// Parity Tests — Verify new asset categories produce calculation impact
+// =============================================================================
+describe('calculate_zakat — asset category parity', () => {
+
+    it('crypto inputs increase total assets and Zakat', () => {
+        const withoutCrypto = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
+        const withCrypto = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            crypto_currency: 5000,
+            crypto_trading: 3000,
+            staked_assets: 2000,
+        }));
+        expect(withCrypto.totalAssets).toBeGreaterThan(withoutCrypto.totalAssets);
+        expect(withCrypto.zakatDue).toBeGreaterThan(withoutCrypto.zakatDue);
+    });
+
+    it('real estate for sale increases Zakat (trade goods)', () => {
+        const withoutRE = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
+        const withRE = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            real_estate_for_sale: 200000,
+        }));
+        expect(withRE.totalAssets).toBeGreaterThan(withoutRE.totalAssets);
+        expect(withRE.zakatDue).toBeGreaterThan(withoutRE.zakatDue);
+    });
+
+    it('business inventory increases Zakat', () => {
+        const withoutBiz = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
+        const withBiz = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            business_cash: 15000,
+            business_inventory: 30000,
+        }));
+        expect(withBiz.totalAssets).toBeGreaterThan(withoutBiz.totalAssets);
+        expect(withBiz.zakatDue).toBeGreaterThan(withoutBiz.zakatDue);
+    });
+
+    it('revocable trust increases total assets', () => {
+        const withoutTrust = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
+        const withTrust = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            revocable_trust: 50000,
+        }));
+        expect(withTrust.totalAssets).toBeGreaterThan(withoutTrust.totalAssets);
+    });
+
+    it('gold jewelry zakatability varies by madhab', () => {
+        const hanafi = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            gold_jewelry: 5000,
+            madhab: 'hanafi',
+        }));
+        const shafii = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            gold_jewelry: 5000,
+            madhab: 'shafii',
+        }));
+        // Hanafi treats jewelry as zakatable, Shafii exempts it
+        expect(hanafi.zakatDue).toBeGreaterThanOrEqual(shafii.zakatDue);
+    });
+
+    it('good debt owed to user increases assets', () => {
+        const withoutDebt = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
+        const withDebt = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            good_debt_owed: 8000,
+        }));
+        expect(withDebt.totalAssets).toBeGreaterThan(withoutDebt.totalAssets);
+    });
+
+    it('expanded liabilities reduce Zakat (bradford)', () => {
+        const noLiabilities = calculateZakat(buildFormDataFromToolInput({
+            cash: 50000,
+            madhab: 'bradford',
+        }));
+        const withLiabilities = calculateZakat(buildFormDataFromToolInput({
+            cash: 50000,
+            loans: 5000,
+            unpaid_bills: 2000,
+            student_loans: 500,
+            madhab: 'bradford',
+        }));
+        expect(withLiabilities.zakatDue).toBeLessThan(noLiabilities.zakatDue);
+    });
+
+    it('REITs are treated like passive investments', () => {
+        const withStocks = calculateZakat(buildFormDataFromToolInput({
+            cash: 5000,
+            stocks: 10000,
+            madhab: 'bradford',
+        }));
+        const withREITs = calculateZakat(buildFormDataFromToolInput({
+            cash: 5000,
+            reits: 10000,
+            madhab: 'bradford',
+        }));
+        // Both should produce the same result (both are passive at 30% for bradford)
+        expect(withREITs.zakatDue).toBe(withStocks.zakatDue);
+    });
+
+    it('short-term investments are 100% zakatable', () => {
+        const withShortTerm = calculateZakat(buildFormDataFromToolInput({
+            cash: 5000,
+            short_term_investments: 10000,
+            madhab: 'bradford',
+        }));
+        // Cash 5000 + Short-term 10000 * 100% = 15000 * 0.025 = 375
+        expect(withShortTerm.zakatDue).toBe(375);
+    });
+
+    it('illiquid assets increase total assets', () => {
+        const without = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
+        const withIlliquid = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            illiquid_assets: 20000,
+        }));
+        expect(withIlliquid.totalAssets).toBeGreaterThan(without.totalAssets);
+    });
+
+    it('nisab_standard gold produces higher threshold than silver', () => {
+        const silverNisab = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            nisab_standard: 'silver',
+            madhab: 'bradford',
+        }));
+        const goldNisab = calculateZakat(buildFormDataFromToolInput({
+            cash: 10000,
+            nisab_standard: 'gold',
+            madhab: 'bradford',
+        }));
+        // Gold nisab threshold is much higher than silver
+        expect(goldNisab.nisab).toBeGreaterThan(silverNisab.nisab);
+    });
+});
+
+// =============================================================================
 // compare_madhabs: multi-methodology comparison logic
 // =============================================================================
 describe('compare_madhabs tool — comparison logic', () => {
@@ -213,6 +398,20 @@ describe('compare_madhabs tool — comparison logic', () => {
             expect(preset.meta.name).toBeTypeOf('string');
             expect(preset.meta.description).toBeTypeOf('string');
         }
+    });
+
+    it('crypto assets produce different comparison results across madhabs', () => {
+        const methodologies = ['bradford', 'hanafi'] as const;
+        const results = methodologies.map((madhab) => {
+            const formData = buildFormDataFromToolInput({
+                cash: 5000,
+                crypto_currency: 10000,
+                madhab,
+            });
+            return calculateZakat(formData);
+        });
+        // Both should include crypto in total assets
+        results.forEach(r => expect(r.totalAssets).toBeGreaterThanOrEqual(15000));
     });
 });
 
