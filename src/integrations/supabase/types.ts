@@ -152,6 +152,83 @@ export type Database = {
           },
         ]
       }
+      chatgpt_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          is_above_nisab: boolean | null
+          methodology: string | null
+          session_data: Json | null
+          total_assets: number | null
+          updated_at: string
+          user_id: string
+          zakat_due: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_above_nisab?: boolean | null
+          methodology?: string | null
+          session_data?: Json | null
+          total_assets?: number | null
+          updated_at?: string
+          user_id: string
+          zakat_due?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_above_nisab?: boolean | null
+          methodology?: string | null
+          session_data?: Json | null
+          total_assets?: number | null
+          updated_at?: string
+          user_id?: string
+          zakat_due?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatgpt_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "chatgpt_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatgpt_users: {
+        Row: {
+          chatgpt_user_id: string
+          created_at: string
+          display_name: string | null
+          encrypted_profile: string | null
+          id: string
+          last_seen_at: string | null
+          preferred_madhab: string | null
+          updated_at: string
+        }
+        Insert: {
+          chatgpt_user_id: string
+          created_at?: string
+          display_name?: string | null
+          encrypted_profile?: string | null
+          id?: string
+          last_seen_at?: string | null
+          preferred_madhab?: string | null
+          updated_at?: string
+        }
+        Update: {
+          chatgpt_user_id?: string
+          created_at?: string
+          display_name?: string | null
+          encrypted_profile?: string | null
+          id?: string
+          last_seen_at?: string | null
+          preferred_madhab?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       classification_feedback: {
         Row: {
           account_type: string | null
@@ -496,6 +573,7 @@ export type Database = {
           access_token: string
           consent_expiration_time: string | null
           created_at: string | null
+          encrypted_metadata: string | null
           error_code: string | null
           error_message: string | null
           id: string
@@ -510,6 +588,7 @@ export type Database = {
           access_token: string
           consent_expiration_time?: string | null
           created_at?: string | null
+          encrypted_metadata?: string | null
           error_code?: string | null
           error_message?: string | null
           id?: string
@@ -524,6 +603,7 @@ export type Database = {
           access_token?: string
           consent_expiration_time?: string | null
           created_at?: string | null
+          encrypted_metadata?: string | null
           error_code?: string | null
           error_message?: string | null
           id?: string
@@ -695,6 +775,7 @@ export type Database = {
           event_date: string
           id: string
           session_hash: string
+          source: string
           total_assets: number
           zakat_due: number
         }
@@ -703,6 +784,7 @@ export type Database = {
           event_date?: string
           id?: string
           session_hash: string
+          source?: string
           total_assets?: number
           zakat_due?: number
         }
@@ -711,6 +793,7 @@ export type Database = {
           event_date?: string
           id?: string
           session_hash?: string
+          source?: string
           total_assets?: number
           zakat_due?: number
         }
