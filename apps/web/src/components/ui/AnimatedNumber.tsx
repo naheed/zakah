@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from "react";
+import { useEffect, forwardRef } from "react";
 import { useSpring, useMotionValue, useTransform, motion } from "framer-motion";
 
 interface AnimatedNumberProps {
@@ -26,23 +26,23 @@ interface AnimatedNumberProps {
     /** Spring config for the animation */
     springOptions?: {
         bounce?: number;
-        duration?: number; // Note: frame-motion spring duration is calculated from stiffness/damping usually, but we can try to approximate or use specific spring tweaks
+        duration?: number;
         stiffness?: number;
         damping?: number;
         mass?: number;
     };
 }
 
-export function AnimatedNumber({
+export const AnimatedNumber = forwardRef<HTMLSpanElement, AnimatedNumberProps>(function AnimatedNumber({
     value,
     format,
     className,
     springOptions = {
-        stiffness: 150, // Snappy spring — settles ~3x faster
-        damping: 30,    // High damping = minimal overshoot
+        stiffness: 150,
+        damping: 30,
         mass: 1,
     }
-}: AnimatedNumberProps) {
+}, ref) {
     const motionValue = useMotionValue(0);
     const springValue = useSpring(motionValue, springOptions);
 
@@ -60,5 +60,5 @@ export function AnimatedNumber({
         return Math.round(latest).toLocaleString();
     });
 
-    return <motion.span className={className}>{displayValue}</motion.span>;
-}
+    return <motion.span ref={ref} className={className}>{displayValue}</motion.span>;
+});
