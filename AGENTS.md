@@ -13,7 +13,7 @@ Use standard prompt commands (e.g., `/product-manager`) to invoke these workflow
 
 ### Orchestrators (Context Holders)
 - **`/product-manager`**: Scopes the "Job to be Done", defines Acceptance Criteria, and specifies Google Analytics tracking events. Controls the feature loop.
-- **`/senior-tech-lead`**: Final gatekeeper. Audits PRs for end-to-end security (AES-256-GCM), tests passing, and architecture scalability.
+- **`/senior-tech-lead`**: Staff-level architect. Audits system design, end-to-end security (AES-256-GCM), database definitions, and API scalability.
 
 ### Specialist Workers (Execution)
 - **`/backend-ai-engineer`**: Supabase Edge Functions, Plaid sync, Postgres SQL, and MCP server AI robustness (prompt injection guards). 
@@ -23,6 +23,7 @@ Use standard prompt commands (e.g., `/product-manager`) to invoke these workflow
 - **`/developer-relations`**: Creates and maintains developer-facing artifacts, API docs, and architecture readmes. 
 
 ### Guardrails (Compliance)
+- **`/qa-engineer`**: Final gatekeeper (SDET). Mathematically proves test contracts, enforces Vitest/Playwright coverage, and hunts edge cases before PR merge.
 - **`/product-counsel`**: Ensures Secular (Privacy/GDPR) and Fiqh (Islamic Jurisprudence) compliance. Audits methodology shifts and triggers "ZMCS Audit Requests".
 
 *For the complete Agile iteration loop, refer to the [Orchestrator Workflow](.agent/workflows/orchestrate.md).*
