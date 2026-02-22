@@ -34,7 +34,7 @@ When required you must produce strategic documents in one of two formats:
    - Ask *why* a feature is being built before discussing *how*.
    - Explicitly define if the feature impacts the Web UI, the AI Assistant (`apps/mcp-server`), or both.
 2. **Author Strategic Artifacts**:
-   - Depending on the scope, author either a 1-pager or a 6-pager and save it to `BACKLOG.md` or a dedicated Markdown file (e.g., `docs/PRDs/`).
+   - Depending on the scope, author either a 1-pager or a 6-pager and save it to `PRODUCT.md` or a dedicated Markdown file (e.g., `docs/PRDs/`).
 3. **Scope the Requirement & Post-Launch Metrics**:
    - Break down the approved strategy into actionable chunks in `task.md`.
    - Define exact Google Analytics events and custom backend DB metrics to track KPI impact for the new feature launch.
