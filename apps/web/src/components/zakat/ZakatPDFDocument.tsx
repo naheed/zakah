@@ -455,6 +455,7 @@ export interface ZakatPDFData {
     business: number;
     otherAssets: number;
   };
+  formData?: any; // To access original form values for liabilities
 }
 
 interface ZakatPDFDocumentProps {
@@ -978,7 +979,82 @@ export function ZakatPDFDocument({ data, calculationName }: ZakatPDFDocumentProp
           </View>
         </View>
 
-        {/* Purification Alert */}
+        {/* Liabilities Breakdown List */}
+        {data.totalLiabilities > 0 && data.formData && (
+          <View style={{ marginBottom: 12 }}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionAccent, { backgroundColor: COLORS.danger }]} />
+              <Text style={styles.sectionLabel}>LIABILITIES DEDUCTED</Text>
+            </View>
+            <View style={styles.tableBox}>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderText, { flex: 1, marginLeft: 16 }]}>DEBT CATEGORY</Text>
+                <Text style={[styles.tableHeaderText, { width: 100, textAlign: "center" }]}>RULE / METHOD</Text>
+                <Text style={[styles.tableHeaderText, { width: 80, textAlign: "right" }]}>DEDUCTION</Text>
+              </View>
+              {(() => {
+                const effectiveConfig = require('@zakatflow/core').MADHAB_RULES[data.calculationMode || 'bradford'] ? (require('@zakatflow/core').ZAKAT_PRESETS[data.calculationMode || 'bradford'] || require('@zakatflow/core').DEFAULT_CONFIG) : require('@zakatflow/core').DEFAULT_CONFIG;
+                const liabRules = effectiveConfig.liabilities;
+                const personalRules = liabRules.personal_debt;
+                const types = personalRules.types || {};
+
+                const liabilityFields = [
+                  { key: 'monthlyLivingExpenses', label: 'Living Expenses', ruleType: types.living_expenses, isRecurring: true },
+                  { key: 'insuranceExpenses', label: 'Insurance', ruleType: types.insurance, isRecurring: false },
+                  { key: 'creditCardBalance', label: 'Credit Card Balance', ruleType: types.credit_cards, isRecurring: false },
+                  { key: 'unpaidBills', label: 'Unpaid Bills', ruleType: types.unpaid_bills, isRecurring: false },
+                  { key: 'monthlyMortgage', label: 'Housing/Mortgage', ruleType: types.housing, isRecurring: true },
+                  { key: 'studentLoansDue', label: 'Student Loans', ruleType: types.student_loans, isRecurring: true },
+                  { key: 'propertyTax', label: 'Property Tax', ruleType: types.taxes, isRecurring: false },
+                  { key: 'lateTaxPayments', label: 'Late Tax Payments', ruleType: types.taxes, isRecurring: false },
+                ];
+
+                return liabilityFields.map((l, idx) => {
+                  const val = data.formData[l.key] as number | undefined;
+                  if (!val || val <= 0) return null;
+
+                  let ruleDesc = l.ruleType || "Global Fallback";
+                  let deduction = 0;
+                  let multiplier = 1;
+
+                  if (liabRules.method === 'no_deduction') {
+                    deduction = 0;
+                    ruleDesc = "Not Deductible";
+                  } else if (personalRules.deductible) {
+                    if (personalRules.types) {
+                      const rule = l.ruleType;
+                      if (rule === 'full' || rule === '12_months') multiplier = l.isRecurring ? 12 : 1;
+                      else if (rule === 'none') multiplier = 0;
+                      else multiplier = 1;
+                    } else {
+                      const isAnnual = liabRules.method === 'full_deduction' || liabRules.method === '12_month_rule';
+                      multiplier = isAnnual && l.isRecurring ? 12 : 1;
+                    }
+                    deduction = val * multiplier;
+                    if (l.isRecurring && multiplier === 12) ruleDesc = "Annualized (12 Mo.)";
+                    else if (multiplier === 1) ruleDesc = l.isRecurring ? "Current Mo." : "Full Value";
+                    else if (multiplier === 0) ruleDesc = "Not Deductible";
+                  }
+
+                  if (deduction <= 0) return null;
+
+                  return (
+                    <View key={`v1-liab-${idx}`} style={styles.tableRow}>
+                      <View style={[styles.colorDot, { backgroundColor: COLORS.danger }]} />
+                      <Text style={styles.assetName}>{l.label}</Text>
+                      <View style={{ width: 100, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 7, color: COLORS.textMuted }}>{ruleDesc}</Text>
+                      </View>
+                      <Text style={[styles.assetValue, { color: COLORS.danger }]}>
+                        -{formatCurrency(deduction, data.currency)}
+                      </Text>
+                    </View>
+                  );
+                });
+              })()}
+            </View>
+          </View>
+        )}
         {totalPurification > 0 && (
           <View style={styles.alertBox}>
             <Text style={styles.alertTitle}>⚠ Purification Required</Text>

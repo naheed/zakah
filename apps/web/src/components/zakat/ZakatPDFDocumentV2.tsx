@@ -428,6 +428,7 @@ export interface ZakatPDFDataV2 {
     generatedAtHijri: string;
     reportId: string;
     referralCode?: string;
+    formData?: ZakatFormData;
     referralStats?: {
         totalReferrals: number;
         totalZakatCalculated: number | null;
@@ -636,6 +637,85 @@ export function ZakatPDFDocumentV2({
                     {categories.length === 0 && (
                         <Text style={{ padding: 20, textAlign: 'center', color: COLORS.textMuted }}>No assets recorded.</Text>
                     )}
+
+                    {/* Liabilities Table */}
+                    {data.totalLiabilities > 0 && data.formData && (
+                        <View style={{ marginTop: 16 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+                                <Text style={[styles.dateLabel, { color: COLORS.danger }]}>LIABILITIES DEDUCTED</Text>
+                            </View>
+                            <View style={styles.tableHeaderRow}>
+                                <Text style={[styles.tableHeaderCell, styles.col1]}>Debt Category</Text>
+                                <Text style={[styles.tableHeaderCell, styles.col2]}>Amount</Text>
+                                <Text style={[styles.tableHeaderCell, styles.col3]}>Rule</Text>
+                                <Text style={[styles.tableHeaderCell, styles.col4]}>Deduction</Text>
+                            </View>
+
+                            {(() => {
+                                const effectiveConfig = require('@zakatflow/core').MADHAB_RULES[data.madhab || 'bradford'] ? (require('@zakatflow/core').ZAKAT_PRESETS[data.madhab || 'bradford'] || require('@zakatflow/core').DEFAULT_CONFIG) : require('@zakatflow/core').DEFAULT_CONFIG;
+                                const liabRules = effectiveConfig.liabilities;
+                                const personalRules = liabRules.personal_debt;
+                                const types = personalRules.types || {};
+
+                                const liabilityFields = [
+                                    { key: 'monthlyLivingExpenses', label: 'Living Expenses', ruleType: types.living_expenses, isRecurring: true },
+                                    { key: 'insuranceExpenses', label: 'Insurance', ruleType: types.insurance, isRecurring: false },
+                                    { key: 'creditCardBalance', label: 'Credit Card Balance', ruleType: types.credit_cards, isRecurring: false },
+                                    { key: 'unpaidBills', label: 'Unpaid Bills', ruleType: types.unpaid_bills, isRecurring: false },
+                                    { key: 'monthlyMortgage', label: 'Housing/Mortgage', ruleType: types.housing, isRecurring: true },
+                                    { key: 'studentLoansDue', label: 'Student Loans', ruleType: types.student_loans, isRecurring: true },
+                                    { key: 'propertyTax', label: 'Property Tax', ruleType: types.taxes, isRecurring: false },
+                                    { key: 'lateTaxPayments', label: 'Late Tax Payments', ruleType: types.taxes, isRecurring: false },
+                                ];
+
+                                return liabilityFields.map((l, idx) => {
+                                    const val = data.formData![l.key as keyof ZakatFormData] as number | undefined;
+                                    if (!val || val <= 0) return null;
+
+                                    let ruleDesc = l.ruleType || "Global Fallback";
+                                    let deduction = 0;
+                                    let multiplier = 1;
+
+                                    if (liabRules.method === 'no_deduction') {
+                                        deduction = 0;
+                                        ruleDesc = "Not Deductible";
+                                    } else if (personalRules.deductible) {
+                                        if (personalRules.types) {
+                                            const rule = l.ruleType;
+                                            if (rule === 'full' || rule === '12_months') multiplier = l.isRecurring ? 12 : 1;
+                                            else if (rule === 'none') multiplier = 0;
+                                            else multiplier = 1; // current_due
+                                        } else {
+                                            const isAnnual = liabRules.method === 'full_deduction' || liabRules.method === '12_month_rule';
+                                            multiplier = isAnnual && l.isRecurring ? 12 : 1;
+                                        }
+                                        deduction = val * multiplier;
+                                        if (l.isRecurring && multiplier === 12) ruleDesc = "Annualized (12 Mo.)";
+                                        else if (multiplier === 1) ruleDesc = l.isRecurring ? "Current Mo." : "Full Value";
+                                        else if (multiplier === 0) ruleDesc = "Not Deductible";
+                                    }
+
+                                    if (deduction <= 0) return null;
+
+                                    return (
+                                        <View key={`liab-${idx}`} style={styles.tableRow}>
+                                            <View style={[styles.col1, { flexDirection: 'row', alignItems: 'center' }]}>
+                                                <View>
+                                                    <Text style={styles.categoryLabel}>{l.label}</Text>
+                                                    <Text style={styles.categorySub}>Personal Debt</Text>
+                                                </View>
+                                            </View>
+                                            <Text style={[styles.col2, styles.cellMono]}>{formatCurrency(val, data.currency, 0)}</Text>
+                                            <View style={[styles.col3, { alignItems: 'center' }]}>
+                                                <Text style={[styles.weightBadge, { backgroundColor: COLORS.dangerBg, color: COLORS.danger }]}>{ruleDesc}</Text>
+                                            </View>
+                                            <Text style={[styles.col4, styles.cellBold]}>-{formatCurrency(deduction, data.currency, 0)}</Text>
+                                        </View>
+                                    );
+                                });
+                            })()}
+                        </View>
+                    )}
                 </View>
 
                 {/* Footer Cards */}
@@ -730,6 +810,7 @@ export async function generateZakatPDFV2(
                 generatedAt: new Date().toLocaleDateString(),
                 generatedAtHijri: "1447 AH",
                 reportId: report.meta.reportId, // Use ID from report object
+                formData: data, // Pass in original form payload for liability itemization
                 referralStats: referralStats || undefined,
             }}
             calculationName={calculationName}
