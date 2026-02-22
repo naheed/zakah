@@ -63,7 +63,14 @@ export function CurrencyInput({
   documentContributions = [],
   testId,
 }: CurrencyInputProps) {
-  const [inputValue, setInputValue] = useState(value > 0 ? value.toString() : "");
+  // Helper: strip commas from a string for numeric parsing
+  const stripCommas = (str: string) => str.replace(/,/g, '');
+
+  // Helper: format a number with US locale commas (e.g., 50000 → "50,000")
+  const formatWithCommas = (num: number) =>
+    num > 0 ? num.toLocaleString('en-US', { maximumFractionDigits: 10 }) : '';
+
+  const [inputValue, setInputValue] = useState(value > 0 ? formatWithCommas(value) : "");
   const [isFocused, setIsFocused] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +84,7 @@ export function CurrencyInput({
   useEffect(() => {
     // Only update if the value was changed externally (not by user input)
     if (value !== lastExternalValue.current && !isFocused) {
-      setInputValue(value > 0 ? value.toString() : "");
+      setInputValue(value > 0 ? formatWithCommas(value) : "");
       setError(null);
       lastExternalValue.current = value;
     }
@@ -87,23 +94,20 @@ export function CurrencyInput({
     const newValue = e.target.value;
     setInputValue(newValue);
 
-    // Strict Validation: Allow only numbers, math operators, parens, decimal, and spaces
-    // Regex: Start to end must be valid chars
-    const isValid = /^[0-9+\-*/().\s]*$/.test(newValue);
+    // Strip commas before validation and parsing
+    const stripped = stripCommas(newValue);
+
+    // Strict Validation: Allow only numbers, math operators, parens, decimal, commas, and spaces
+    const isValid = /^[0-9+\-*/().\s,]*$/.test(newValue);
 
     if (!isValid) {
       setError("Invalid character: Only numbers and math symbols allowed");
-      // Still allow typing so they can delete, but don't parse result yet or maybe handle gracefully?
-      // Actually, we usually want to let them type but show error.
-      // We do NOT update the parent with invalid data, or pass 0?
-      // Let's pass 0 if invalid to stay safe, or keep prior value?
-      // Passing 0 avoids breaking calculations downstream with NaNs
       onChange(0);
       return;
     }
 
     setError(null);
-    const parsed = parseMathExpression(newValue);
+    const parsed = parseMathExpression(stripped);
     onChange(parsed);
     lastExternalValue.current = parsed;
   };
@@ -111,9 +115,34 @@ export function CurrencyInput({
   const handleBlur = () => {
     setIsFocused(false);
     if (inputValue) {
-      const parsed = parseMathExpression(inputValue);
-      setInputValue(parsed > 0 ? parsed.toString() : "");
+      const parsed = parseMathExpression(stripCommas(inputValue));
+      // On blur, show the formatted number with commas
+      setInputValue(parsed > 0 ? formatWithCommas(parsed) : "");
       lastExternalValue.current = parsed;
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData('text');
+    // If pasted text contains commas, strip them and let handleChange process it
+    if (pasted.includes(',')) {
+      e.preventDefault();
+      const stripped = stripCommas(pasted).trim();
+      const input = e.currentTarget;
+      const start = input.selectionStart ?? 0;
+      const end = input.selectionEnd ?? 0;
+      const before = inputValue.substring(0, start);
+      const after = inputValue.substring(end);
+      const newValue = before + stripped + after;
+      setInputValue(newValue);
+
+      const isValid = /^[0-9+\-*/().\s,]*$/.test(newValue);
+      if (isValid) {
+        setError(null);
+        const parsed = parseMathExpression(stripCommas(newValue));
+        onChange(parsed);
+        lastExternalValue.current = parsed;
+      }
     }
   };
 
@@ -179,6 +208,7 @@ export function CurrencyInput({
             onChange={handleChange}
             onFocus={() => setIsFocused(true)}
             onBlur={handleBlur}
+            onPaste={handlePaste}
             placeholder={shouldFloat ? placeholder : undefined}
             aria-label={typeof label === 'string' ? label : fieldName || 'Currency input'}
             aria-invalid={!!error}

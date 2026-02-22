@@ -26,7 +26,7 @@ apps/mcp-server/
 │   ├── index.ts                  # Server bootstrap + tool registration
 │   ├── stdio.ts                  # MCP stdio transport
 │   ├── crypto.ts                 # AES-256-GCM encryption (Privacy Vault)
-│   ├── supabase.ts               # Dual-client: anon + service-role
+│   ├── supabase.ts               # Gateway client via edge functions
 │   ├── identity/
 │   │   └── chatgpt.ts            # ChatGPT user CRUD + session writes
 │   ├── session/
@@ -75,7 +75,7 @@ cp apps/mcp-server/.env.example apps/mcp-server/.env.local
 |----------|----------|-------------|
 | `SUPABASE_URL` | Optional | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Optional | Publishable anon key (respects RLS) |
-| `SUPABASE_SERVICE_KEY` | Optional | Service role key (**never expose publicly**) |
+| `MCP_GATEWAY_SECRET` | Optional | Shared secret for mcp-gateway edge function |
 | `ENCRYPTION_MASTER_KEY` | Optional | 64-char hex string for AES-256-GCM encryption |
 | `NODE_ENV` | Optional | `development` or `production` |
 | `CLIENT_URL` | Optional | ZakatFlow web app URL for deep-links |
@@ -99,25 +99,38 @@ npx @modelcontextprotocol/inspector node dist/index.js
 
 ## MCP Tools
 
-### `calculate_zakat`
+### Core Calculation
+- **`calculate_zakat`**: Computes Zakat obligation for a given set of financial inputs. Returns both narrated text and `structuredContent`.
+- **`compare_madhabs`**: Runs financial data through multiple methodologies for a side-by-side comparison.
 
-Computes Zakat obligation for a given set of financial inputs. Returns both narrated text (for the AI to summarize) and `structuredContent` (for the widget to render).
+### Document Analysis
+- **`parse_blob`**: Extracts and structures data from OCR'd financial documents into zakatable line items.
 
-**Inputs:**
+### Market & Reference
+- **`marketTools`**: Fetches real-time precious metals and currency exchange rates.
+- **`discoveryTools`**: Provides rules and insights regarding specific madhab calculations.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `cash` | `number` | Cash, checking, and savings (required) |
-| `gold_value` | `number?` | Value of gold in USD |
-| `silver_value` | `number?` | Value of silver in USD |
-| `long_term_investments` | `number?` | Passive stocks/funds (subject to methodology-specific rates) |
-| `retirement_total` | `number?` | 401(k)/IRA vested balance |
-| `loans` | `number?` | Immediate debts due now |
-| `madhab` | `string?` | Methodology: `bradford`, `hanafi`, `shafii`, `maliki`, `hanbali`, `amja`, `qaradawi` |
+### Compliance & Management
+- **`reportingTools`**: Generates calculation history summaries or full ledger reports.
+- **`legalTools`**: Retrieves disclaimers, privacy policies, and Shariah-compliance caveats.
+- **`delete_data`**: Handles user identity or session deletion (GDPR/privacy compliance).
 
-### `compare_madhabs`
+### Agentic Protocols
+- **`agentProtocol`**: Exposes the OpenClaw orchestration hooks and inter-agent routing.
+- **`interactiveTools`**: Exposes the Apps SDK widget template lifecycle methods.
 
-Runs the same financial data through multiple methodologies and returns a side-by-side comparison with key rule differences (passive investment rates, liability methods, nisab standards).
+---
+
+## Interactive Widgets & CSP (Apps SDK)
+
+The `calculate_zakat` tool returns `structuredContent` that is intended to be rendered interactively within the ChatGPT or Claude UI via the Apps SDK. The MCP server registers a `ui://zakatflow/calculator-widget.html` template.
+
+For maximum security, the widget enforces a strict Content Security Policy (CSP):
+- **`domain`**: `https://mcp.zakatflow.org`
+- **`connectDomains`**: Whitelists only the Supabase backend URL (`https://pcwdpsoheoiiavkeyeyx.supabase.co`).
+- **`resourceDomains`**: Whitelists `https://*.oaistatic.com` for OpenAI static asset interactions.
+
+The widget bridge securely receives messages via `window.addEventListener('message')` to render methodology badges, detailed breakdowns, and nisab checks without executing untrusted external scripts.
 
 ---
 

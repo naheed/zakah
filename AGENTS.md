@@ -20,8 +20,9 @@ Use standard prompt commands (e.g., `/product-manager`) to invoke these workflow
 - **`/ui-eng-designer`**: Implements React components using `shadcn/ui` and strict Tailwind semantic tokens. Responsible for WCAG 2.1 AA execution.
 - **`/ui-designer`**: Pure visual layout, typography scaling, and translating user needs into semantic CSS tokens.
 - **`/ux-writer`**: Crafts the "Dignified Guide" copy for Web UI and tunes LLM agent prompts (`agent_protocol.ts`). 
+- **`/developer-relations`**: Creates and maintains developer-facing artifacts, API docs, and architecture readmes. 
 
 ### Guardrails (Compliance)
 - **`/product-counsel`**: Ensures Secular (Privacy/GDPR) and Fiqh (Islamic Jurisprudence) compliance. Audits methodology shifts and triggers "ZMCS Audit Requests".
 
-*For the complete Agile iteration loop, refer to the [Playbook](.agent/workflows/playbook.md).*
+*For the complete Agile iteration loop, refer to the [Orchestrator Workflow](.agent/workflows/orchestrate.md).*
