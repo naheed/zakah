@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/*
+ * ZakatFlow ChatGPT Widget — Design Tokens
+ * Uses CSS custom properties for theming compatibility with ChatGPT host styles.
+ * The MCP Apps bridge injects --mcp-ui-* variables from the ChatGPT host.
+ */
+
+:root {
+    /* Brand Colors */
+    --zf-primary: #1a1a2e;
+    --zf-primary-light: #2d2d4e;
+    --zf-accent: #16a34a;
+    --zf-accent-light: #22c55e;
+
+    /* Semantic Colors */
+    --zf-success: #16a34a;
+    --zf-warning: #ea580c;
+    --zf-info: #2563eb;
+    --zf-muted: #64748b;
+
+    /* Surfaces */
+    --zf-bg: transparent;
+    --zf-card-bg: #ffffff;
+    --zf-border: #e2e8f0;
+
+    /* Typography */
+    --zf-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --zf-text: #1a1a2e;
+    --zf-text-muted: #64748b;
+}
+
+/* Dark mode adaptation via MCP host theme */
+[data-theme="dark"] {
+    --zf-card-bg: #1e1e2e;
+    --zf-border: #334155;
+    --zf-text: #f1f5f9;
+    --zf-text-muted: #94a3b8;
+}
+
+/* Base Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--zf-font);
+    color: var(--zf-text);
+    background: var(--zf-bg);
+    line-height: 1.5;
+}
+
+#root {
+    min-height: 100%;
+}
