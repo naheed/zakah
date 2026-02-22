@@ -45,7 +45,13 @@ function getRuleLabel(rule: string | undefined, isRecurring: boolean, multiplier
 }
 
 export function ReportLiabilitiesTable({ formData, madhab, totalLiabilities, currency }: ReportLiabilitiesTableProps) {
-    if (totalLiabilities <= 0) return null;
+    // Determine if user has ANY liability inputs (regardless of deduction)
+    const hasAnyInputs = LIABILITY_FIELDS.some(field => {
+        const val = formData[field.key as keyof ZakatFormData] as number | undefined;
+        return val && val > 0;
+    });
+
+    if (!hasAnyInputs) return null;
 
     const effectiveConfig = ZAKAT_PRESETS[madhab || 'bradford'] || DEFAULT_CONFIG;
     const liabRules = effectiveConfig.liabilities;
@@ -77,7 +83,7 @@ export function ReportLiabilitiesTable({ formData, madhab, totalLiabilities, cur
         }
 
         const deduction = val * multiplier;
-        if (deduction <= 0) return null;
+        // Even if deduction is 0, we render it so the user sees their input wasn't lost
 
         return {
             label: field.label,
@@ -144,7 +150,7 @@ export function ReportLiabilitiesTable({ formData, madhab, totalLiabilities, cur
                             </span>
                         </div>
                         <div className="col-span-3 text-right text-sm font-semibold text-destructive tabular-nums">
-                            −{formatCurrency(row.deduction, currency, 0)}
+                            {row.deduction > 0 ? `−${formatCurrency(row.deduction, currency, 0)}` : formatCurrency(0, currency, 0)}
                         </div>
                     </div>
                 ))}
@@ -157,7 +163,7 @@ export function ReportLiabilitiesTable({ formData, madhab, totalLiabilities, cur
                     </div>
                     <div className="col-span-5" />
                     <div className="col-span-3 text-right text-sm font-bold text-destructive tabular-nums">
-                        −{formatCurrency(totalLiabilities, currency, 0)}
+                        {totalLiabilities > 0 ? `−${formatCurrency(totalLiabilities, currency, 0)}` : formatCurrency(0, currency, 0)}
                     </div>
                 </div>
             </div>

@@ -137,7 +137,16 @@ export function generateCSV(
     rows.push([]);
 
     // 4. Liabilities Breakdown
-    if (totalLiabilities > 0) {
+    const hasAnyInputs = [
+        'monthlyLivingExpenses', 'insuranceExpenses', 'creditCardBalance',
+        'unpaidBills', 'monthlyMortgage', 'studentLoansDue',
+        'propertyTax', 'lateTaxPayments'
+    ].some(key => {
+        const val = formData[key as keyof typeof formData] as number | undefined;
+        return val && val > 0;
+    });
+
+    if (hasAnyInputs) {
         rows.push(["LIABILITIES DEDUCTED"]);
         rows.push(["Type", "Description", "Amount", "Deductible %", "Deduction", "Rule"]);
 
@@ -196,9 +205,8 @@ export function generateCSV(
 
                 }
 
-                if (deduction > 0) {
-                    rows.push(["Liability", safe(l.label), money(val), "100%", money(deduction), safe(ruleDesc)]);
-                }
+                // Always push the row to show the user's input
+                rows.push(["Liability", safe(l.label), money(val), "100%", money(deduction), safe(ruleDesc)]);
             }
         });
         rows.push([]);
