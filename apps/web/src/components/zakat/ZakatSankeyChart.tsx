@@ -44,6 +44,7 @@ interface SankeyNode {
   isZakat?: boolean;
   isRetained?: boolean;
   isExempt?: boolean;
+  isLiability?: boolean;
   value?: number;
 }
 
@@ -54,7 +55,7 @@ interface SankeyLink {
   startColor: string;
   endColor: string;
   assetName: string;
-  type: 'zakat' | 'retained' | 'exempt';
+  type: 'zakat' | 'retained' | 'exempt' | 'liability';
 }
 
 // Helper to sanitize IDs for Nivo
@@ -154,6 +155,17 @@ export function ZakatSankeyChart({
       isRetained: true
     });
 
+    // Liabilities node (only if liabilities exist)
+    const hasLiabilities = liabilities > 0.01;
+    if (hasLiabilities) {
+      nodes.push({
+        id: "Liabilities",
+        displayName: "Liabilities",
+        nodeColor: "#dc2626", // Red-600
+        isLiability: true
+      });
+    }
+
     if (hasExemptionRules) {
       nodes.push({
         id: "Exempt",
@@ -171,12 +183,15 @@ export function ZakatSankeyChart({
       // 1. Calculate Splits
       const exemptAmount = asset.grossValue - asset.netValue;
 
-      // Of the Net Value, 2.5% is Zakat, 97.5% is Retained
-      // Note: We use the global zakat rate logic to be consistent with calculator
-      // Zakat Contribution = (Asset Net / Total Net) * Zakat Due
-      // This handles cases where Zakat might be capped or adjusted globally, though usually it's strict 2.5%
+      // Of the Net Value, distribute to: Zakat, Liabilities (proportional), and Retained
       const zakatContribution = totalNetVal > 0 ? (asset.netValue / totalNetVal) * zakatDue : 0;
-      const retainedAmount = asset.netValue - zakatContribution;
+
+      // Distribute liabilities proportionally across net-value assets
+      const liabilityContribution = hasLiabilities && totalNetVal > 0
+        ? (asset.netValue / totalNetVal) * liabilities
+        : 0;
+
+      const retainedAmount = asset.netValue - zakatContribution - liabilityContribution;
 
       // 2. Create Links
 
@@ -190,6 +205,19 @@ export function ZakatSankeyChart({
           endColor: "#16a34a",
           assetName: asset.id,
           type: "zakat"
+        });
+      }
+
+      // Link -> Liabilities (proportional deduction)
+      if (hasLiabilities && liabilityContribution > 0.01) {
+        links.push({
+          source: getSafeId(asset.id),
+          target: "Liabilities",
+          value: liabilityContribution,
+          startColor: asset.color,
+          endColor: "#dc2626",
+          assetName: asset.id,
+          type: "liability"
         });
       }
 
@@ -212,7 +240,7 @@ export function ZakatSankeyChart({
           source: getSafeId(asset.id),
           target: "Exempt",
           value: exemptAmount,
-          startColor: asset.color, // Or use gray startColor: "#94a3b8"
+          startColor: asset.color,
           endColor: "#94a3b8",
           assetName: asset.id,
           type: "exempt"
@@ -257,20 +285,19 @@ export function ZakatSankeyChart({
   // We want: Zakat (Top Right), Retained (Middle Right), Exempt (Bottom Right)
   // Assets (Left) sorted by value
   const sortNodes = (a: SankeyNode, b: SankeyNode) => {
-    // 1. Zakat always first
+    // 1. Zakat always first (top)
     if (a.isZakat) return -1;
     if (b.isZakat) return 1;
 
-    // 2. Exempt always last
+    // 2. Exempt always last (bottom)
     if (a.isExempt) return 1;
     if (b.isExempt) return -1;
 
-    // 3. Retained Middle (implicitly handled if Zakat is top and Exempt is bottom)
+    // 3. Liabilities before Retained (second from bottom)
+    if (a.isLiability && b.isRetained) return 1;
+    if (b.isLiability && a.isRetained) return -1;
 
     // 4. Sources sort by value (Descending)
-    // Note: Sankey computes node.value as sum of links. 
-    // For source nodes, this equals grossValue.
-    // For target nodes, it equals total flow in.
     return (b.value || 0) - (a.value || 0);
   };
 
@@ -320,8 +347,9 @@ export function ZakatSankeyChart({
                 {formatCurrency(node.value || 0, currency)}
               </div>
               {node.isZakat && <div className="text-[10px] text-muted-foreground mt-1">Total Zakat Due</div>}
-              {node.isRetained && <div className="text-[10px] text-muted-foreground mt-1">Wealth retained after Zakat</div>}
+              {node.isRetained && <div className="text-[10px] text-muted-foreground mt-1">Wealth retained after Zakat & deductions</div>}
               {node.isExempt && <div className="text-[10px] text-muted-foreground mt-1">Assets exempt from Zakat rules</div>}
+              {node.isLiability && <div className="text-[10px] text-muted-foreground mt-1">Deducted liabilities (debts & expenses)</div>}
               {node.isSource && <div className="text-[10px] text-muted-foreground mt-1">Gross Asset Value</div>}
             </div>
           )}
@@ -336,8 +364,9 @@ export function ZakatSankeyChart({
               </div>
               <div className="text-[10px] text-muted-foreground mt-1 italic">
                 {link.type === 'zakat' && "2.5% Contribution"}
-                {link.type === 'retained' && "Retained Wealth (97.5%)"}
+                {link.type === 'retained' && "Retained Wealth"}
                 {link.type === 'exempt' && "Exempt Amount"}
+                {link.type === 'liability' && "Liability Deduction"}
               </div>
             </div>
           )}
