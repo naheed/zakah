@@ -155,7 +155,7 @@ ZakatFlow handles sensitive financial data with a defense-in-depth architecture.
 - **Account Deletion** — Full cascade: data deletion, Plaid token revocation, auth identity removal
 - **Open Source** — Entire codebase is AGPL-3.0; encryption and privacy claims are independently verifiable
 
-For technical details, see [Security Architecture](docs/SECURITY_ARCHITECTURE.md).
+For technical details, see [Security Architecture](docs/SECURITY.md).
 
 ---
 
@@ -228,7 +228,7 @@ This means:
 | [ZMCS Specification](docs/ZMCS_SPECIFICATION.md) | Methodology configuration standard |
 | [Zakat Jurisprudence](docs/ZAKAT_JURISPRUDENCE.md) | Scholarly analysis and fiqh foundations |
 | [Engineering Design](docs/ENGINEERING_DESIGN.md) | Technical architecture |
-| [Security Architecture](docs/SECURITY_ARCHITECTURE.md) | Encryption and privacy |
+| [Security Architecture](docs/SECURITY.md) | Encryption and privacy |
 | [Content Standards](docs/CONTENT_STANDARDS.md) | Writing guidelines |
 | [Contributing Methodology](docs/CONTRIBUTING_METHODOLOGY.md) | Adding a new scholarly methodology |
 

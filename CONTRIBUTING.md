@@ -84,7 +84,7 @@ To prevent documentation bloat and ensure precise AI Agent orchestration, all te
 - **UI & Accessibility:** [React Style Guide](apps/web/docs/rules/react-style.md)
 - **Copy & Terminology:** [Content Voice](apps/web/docs/rules/content-voice.md)
 - **Databases & Encryption:** [Backend Architecture](apps/web/docs/rules/backend-architecture.md)
-- **AI Agent Topologies:** [AGENTS.md](AGENTS.md) / [Playbook](.agent/workflows/playbook.md)
+- **AI Agent Topologies:** [AGENTS.md](AGENTS.md) / [Orchestrator Workflow](.agent/workflows/orchestrate.md)
 
 ---
 

@@ -1,8 +1,10 @@
 # Agents & Workflows
 
-This directory (`.agents/`) is the central repository for administrative AI and multi-agent orchestration code, separate from the primary application logic in `apps/` and `packages/`. 
+This directory (`.agents/`) is the central repository for **AI telemetry and logging infrastructure**. 
 
-As we advance our AI capabilities using open-source agent frameworks (e.g., OpenClaw, AutoGen) and our own native orchestrators, we need to track how well these agents collaborate, route tasks, and self-reflect.
+> **Note:** The actual agent persona definition files (like `/product-manager` or `/developer-relations`) and their execution rules are located in the sister directory: `.agent/workflows/`.
+
+As we advance our AI capabilities using open-source agent frameworks (e.g., OpenClaw, AutoGen) and our own native orchestrators, we use `.agents/...` to track how well these agents collaborate, route tasks, and self-reflect.
 
 ## What's in Here?
 
