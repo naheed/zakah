@@ -39,7 +39,7 @@ import {
     Path,
 } from "@react-pdf/renderer";
 import { DOMAIN_CONFIG } from "@/lib/domainConfig";
-import { EnhancedAssetBreakdown, AssetCategory, ZakatFormData, ZakatReport, Madhab } from "@zakatflow/core";
+import { EnhancedAssetBreakdown, AssetCategory, ZakatFormData, ZakatReport, Madhab, ZAKAT_PRESETS, DEFAULT_CONFIG } from "@zakatflow/core";
 // QR code removed for cleaner reports
 import { getAssetRuleExplanations, getMethodologyDisplayName } from "@zakatflow/core";
 
@@ -652,10 +652,10 @@ export function ZakatPDFDocumentV2({
                             </View>
 
                             {(() => {
-                                const effectiveConfig = require('@zakatflow/core').MADHAB_RULES[data.madhab || 'bradford'] ? (require('@zakatflow/core').ZAKAT_PRESETS[data.madhab || 'bradford'] || require('@zakatflow/core').DEFAULT_CONFIG) : require('@zakatflow/core').DEFAULT_CONFIG;
+                                const effectiveConfig = ZAKAT_PRESETS[data.madhab || 'bradford'] || DEFAULT_CONFIG;
                                 const liabRules = effectiveConfig.liabilities;
                                 const personalRules = liabRules.personal_debt;
-                                const types = personalRules.types || {};
+                                const types = (personalRules.types || {}) as Record<string, string>;
 
                                 const liabilityFields = [
                                     { key: 'monthlyLivingExpenses', label: 'Living Expenses', ruleType: types.living_expenses, isRecurring: true },

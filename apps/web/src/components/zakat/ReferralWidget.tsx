@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -55,7 +55,7 @@ function getShareMessages(inviteUrl: string) {
   };
 }
 
-export function ReferralWidget({ currency = 'USD', variant = 'compact', title }: ReferralWidgetProps) {
+export const ReferralWidget = forwardRef<HTMLDivElement, ReferralWidgetProps>(function ReferralWidget({ currency = 'USD', variant = 'compact', title }, ref) {
   const { toast } = useToast();
   const {
     referralCode,
@@ -456,4 +456,4 @@ export function ReferralWidget({ currency = 'USD', variant = 'compact', title }:
       </CardContent>
     </Card>
   );
-}
+});

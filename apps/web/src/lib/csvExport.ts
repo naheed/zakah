@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ZakatReport } from "@zakatflow/core";
+import { ZakatReport, ZAKAT_PRESETS, DEFAULT_CONFIG } from "@zakatflow/core";
 import type { CalculatedAssetCategory, AssetItem } from "@zakatflow/core";
 import { format } from "date-fns";
 import { saveAs } from "file-saver";
@@ -142,10 +142,10 @@ export function generateCSV(
         rows.push(["Type", "Description", "Amount", "Deductible %", "Deduction", "Rule"]);
 
         // Resolve config for methodology rules (analogous to calculateTotalLiabilities)
-        const effectiveConfig = MADHAB_RULES[madhab || 'bradford'] ? (require('@zakatflow/core').ZAKAT_PRESETS[madhab || 'bradford'] || require('@zakatflow/core').DEFAULT_CONFIG) : require('@zakatflow/core').DEFAULT_CONFIG;
+        const effectiveConfig = ZAKAT_PRESETS[madhab || 'bradford'] || DEFAULT_CONFIG;
         const liabRules = effectiveConfig.liabilities;
         const personalRules = liabRules.personal_debt;
-        const types = personalRules.types || {};
+        const types = (personalRules.types || {}) as Record<string, string>;
 
         const liabilityFields = [
             { key: 'monthlyLivingExpenses', label: 'Living Expenses', ruleType: types.living_expenses, isRecurring: true },

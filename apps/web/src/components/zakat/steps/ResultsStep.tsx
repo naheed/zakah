@@ -42,6 +42,7 @@ import { NumberTicker } from "@/components/ui/number-ticker";
 import { ReportHeader } from "../report/ReportHeader";
 import { ReportHero } from "../report/ReportHero";
 import { ReportAssetTable } from "../report/ReportAssetTable";
+import { ReportLiabilitiesTable } from "../report/ReportLiabilitiesTable";
 import { ReportFooter } from "../report/ReportFooter";
 import { Card } from "@/components/ui/card"; // Assuming Card is available or standard div is fine
 import {
@@ -414,6 +415,13 @@ export function ResultsStep({
 
         <ReportAssetTable
           enhancedBreakdown={enhancedBreakdown}
+          currency={currency}
+        />
+
+        <ReportLiabilitiesTable
+          formData={data}
+          madhab={data.madhab || 'bradford'}
+          totalLiabilities={totalLiabilities}
           currency={currency}
         />
 
