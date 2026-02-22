@@ -175,6 +175,16 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'studentLoansDue')}
         testId="student-loans-due-input"
       />
+      {data.studentLoansDue > 5000 && (
+        <div className="p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex gap-2 items-start animate-fade-in">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <strong>High Amount Detected:</strong> Are you entering your <em>total</em> student loan balance?
+            <br />
+            Please only enter <strong>ONE month's payment</strong> installment. The calculator automatically annualizes this for methodologies that deduct 12 months.
+          </div>
+        </div>
+      )}
     </AssetStepWrapper>
   );
 }

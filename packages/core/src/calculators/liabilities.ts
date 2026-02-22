@@ -85,7 +85,8 @@ export function calculateTotalLiabilities(
             switch (rule) {
                 case 'full':
                 case 'current_due':
-                    return amount; // Full outstanding balance
+                case '12_months':
+                    return amount; // Full outstanding balance currently due
                 case 'none':
                 default:
                     return 0;
@@ -128,10 +129,10 @@ export function calculateTotalLiabilities(
         }
 
         // ── Student Loans ──
-        const studentDeduction = calcLumpSum(data.studentLoansDue, types.student_loans);
+        const studentDeduction = calcRecurring(data.studentLoansDue, types.student_loans);
         total += studentDeduction;
         if (studentDeduction > 0) {
-            console.log(`[ZMCS Liabilities] Student loans: ${data.studentLoansDue} × rule '${types.student_loans}' = ${studentDeduction}`);
+            console.log(`[ZMCS Liabilities] Student loans: ${data.studentLoansDue}/mo × rule '${types.student_loans}' = ${studentDeduction}`);
         }
 
         // ── Tax Payments ──

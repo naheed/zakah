@@ -219,7 +219,7 @@ export const TAHIR_ANWAR_CONFIG: ZakatMethodologyConfig = {
             deductible: true,
             types: {
                 housing: '12_months',
-                student_loans: 'full',
+                student_loans: '12_months',
                 credit_cards: 'full',
                 living_expenses: '12_months',
                 insurance: 'full',

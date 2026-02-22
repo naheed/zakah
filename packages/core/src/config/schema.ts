@@ -539,7 +539,7 @@ export const LiabilitiesSchema = z.object({
              * - 'current_due': Only current payment due.
              * - 'none': Not deductible.
              */
-            student_loans: z.enum(['full', 'current_due', 'none'])
+            student_loans: z.enum(['full', 'current_due', '12_months', 'none'])
                 .describe("Student loan deduction: 'full' = total due, 'current_due' = monthly payment, 'none' = no deduction."),
 
             /**
