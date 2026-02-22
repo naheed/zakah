@@ -19,4 +19,10 @@ export interface AgentEvent {
 
     /** Whether the agent detected its own prior hallucination/error during self-reflection */
     hallucination_detected?: boolean;
+
+    /** Execution duration in milliseconds (computed automatically) */
+    duration_ms?: number;
+
+    /** Number of files modified during this execution (computed automatically) */
+    files_modified?: number;
 }
