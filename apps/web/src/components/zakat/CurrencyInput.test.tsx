@@ -15,7 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CurrencyInput } from './CurrencyInput';
 import { describe, it, expect, vi } from 'vitest';
 import '@testing-library/jest-dom';
@@ -91,7 +93,71 @@ describe('CurrencyInput', () => {
         // Check for correct type
         expect(input).toHaveAttribute('type', 'text');
 
-        // Check formatted value presence
+        // Check formatted value presence (now shows with commas for values > 999)
         expect(input).toHaveValue('100');
+    });
+
+    // === Comma Input Tests (Issue #60) ===
+
+    it('accepts comma-separated values and parses them correctly', () => {
+        const handleChange = vi.fn();
+        render(<CurrencyInput label="Comma Input" value={0} onChange={handleChange} />);
+
+        const input = screen.getByLabelText('Comma Input');
+        fireEvent.change(input, { target: { value: '50,000' } });
+
+        // Should not show error
+        expect(screen.queryByText(/Invalid character/i)).not.toBeInTheDocument();
+        // Should call onChange with the stripped numeric value
+        expect(handleChange).toHaveBeenCalledWith(50000);
+    });
+
+    it('accepts values with multiple commas', () => {
+        const handleChange = vi.fn();
+        render(<CurrencyInput label="Multi Comma" value={0} onChange={handleChange} />);
+
+        const input = screen.getByLabelText('Multi Comma');
+        fireEvent.change(input, { target: { value: '1,250,000' } });
+
+        expect(screen.queryByText(/Invalid character/i)).not.toBeInTheDocument();
+        expect(handleChange).toHaveBeenCalledWith(1250000);
+    });
+
+    it('handles comma-separated values with decimals', () => {
+        const handleChange = vi.fn();
+        render(<CurrencyInput label="Comma Decimal" value={0} onChange={handleChange} />);
+
+        const input = screen.getByLabelText('Comma Decimal');
+        fireEvent.change(input, { target: { value: '1,250,000.50' } });
+
+        expect(screen.queryByText(/Invalid character/i)).not.toBeInTheDocument();
+        expect(handleChange).toHaveBeenCalledWith(1250000.50);
+    });
+
+    it('auto-formats with commas on blur', async () => {
+        const Wrapper = () => {
+            const [val, setVal] = useState(0);
+            return <CurrencyInput label="Blur Format" value={val} onChange={setVal} />;
+        };
+        const user = userEvent.setup();
+        render(<Wrapper />);
+
+        const input = screen.getByLabelText('Blur Format');
+        await user.click(input);
+        await user.type(input, '50000');
+        // Tab away to trigger blur
+        await user.tab();
+
+        // After blur, the display value should be comma-formatted
+        expect(input).toHaveValue('50,000');
+    });
+
+    it('displays externally set values with comma formatting', () => {
+        const handleChange = vi.fn();
+        render(<CurrencyInput label="External Value" value={1250000} onChange={handleChange} />);
+
+        const input = screen.getByLabelText('External Value');
+        // Initial render should show comma-formatted
+        expect(input).toHaveValue('1,250,000');
     });
 });
