@@ -1,3 +1,3 @@
-1. **Accomplishments**: Enhanced `cli.ts` to automatically log `duration_ms` and `files_modified`. It reads the start time from prior START events and uses `child_process.execSync` to capture the true `git status` footprint. Merged via PR #82.
+1. **Accomplishments**: Crafted a detailed Eval Strategy for text vs UI queries per user request based on OpenAI SDK guidelines.
 2. **Blockers**: None.
 3. **Recommended Next Agent**: Handoff to User.
