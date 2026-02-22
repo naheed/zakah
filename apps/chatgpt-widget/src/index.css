@@ -1,19 +1,18 @@
 @import "tailwindcss";
 
 /*
- * ZakatFlow ChatGPT Widget — Design Tokens
- * Uses CSS custom properties for theming compatibility with ChatGPT host styles.
- * The MCP Apps bridge injects --mcp-ui-* variables from the ChatGPT host.
+ * ZakatFlow ChatGPT Widget — Design System
+ * CSS custom properties for theming + MCP host compatibility.
  */
 
 :root {
-    /* Brand Colors */
+    /* Brand */
     --zf-primary: #1a1a2e;
     --zf-primary-light: #2d2d4e;
     --zf-accent: #16a34a;
     --zf-accent-light: #22c55e;
 
-    /* Semantic Colors */
+    /* Semantic */
     --zf-success: #16a34a;
     --zf-warning: #ea580c;
     --zf-info: #2563eb;
@@ -24,13 +23,12 @@
     --zf-card-bg: #ffffff;
     --zf-border: #e2e8f0;
 
-    /* Typography */
+    /* Type */
     --zf-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --zf-text: #1a1a2e;
     --zf-text-muted: #64748b;
 }
 
-/* Dark mode adaptation via MCP host theme */
 [data-theme="dark"] {
     --zf-card-bg: #1e1e2e;
     --zf-border: #334155;
@@ -38,7 +36,7 @@
     --zf-text-muted: #94a3b8;
 }
 
-/* Base Styles */
+/* === Base === */
 body {
     margin: 0;
     padding: 0;
@@ -46,8 +44,132 @@ body {
     color: var(--zf-text);
     background: var(--zf-bg);
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-#root {
-    min-height: 100%;
+/* === Shared Components === */
+
+.zf-card {
+    border: 1px solid var(--zf-border);
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+    background: var(--zf-card-bg);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+.zf-badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    letter-spacing: 0.01em;
+}
+
+.zf-badge--success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.zf-badge--warning {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.zf-badge--info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+[data-theme="dark"] .zf-badge--success {
+    background: rgb(21 128 61 / 0.2);
+    color: #4ade80;
+}
+
+[data-theme="dark"] .zf-badge--warning {
+    background: rgb(194 65 12 / 0.2);
+    color: #fb923c;
+}
+
+[data-theme="dark"] .zf-badge--info {
+    background: rgb(29 78 216 / 0.2);
+    color: #60a5fa;
+}
+
+.zf-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border-radius: 0.625rem;
+    background: var(--zf-primary);
+    color: white;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 150ms ease, transform 100ms ease;
+}
+
+.zf-cta:hover {
+    background: var(--zf-primary-light);
+    transform: translateY(-1px);
+}
+
+.zf-cta:active {
+    transform: translateY(0);
+}
+
+.zf-disclaimer {
+    font-size: 0.6875rem;
+    color: var(--zf-text-muted);
+    text-align: center;
+    margin-top: 0.75rem;
+}
+
+.zf-rule-tag {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .zf-rule-tag {
+    background: #1e293b;
+    color: #94a3b8;
+}
+
+/* === Animations === */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 400ms ease-out both;
+}
+
+.animate-slide-up {
+    animation: slideUp 350ms ease-out both;
 }

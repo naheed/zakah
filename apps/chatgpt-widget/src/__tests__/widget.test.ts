@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { ZakatResult, ComparisonResult, MethodologyEntry } from '../types';
+import type { ZakatResult, ComparisonResult, SessionProgress, SessionAsset } from '../types';
 
 // ---------------------------------------------------------------------------
 // Type Contract Tests — ensure structuredContent shapes match MCP server
@@ -107,9 +107,64 @@ describe('Widget Types — ComparisonResult', () => {
     });
 });
 
+describe('Widget Types — SessionProgress', () => {
+    const validSession: SessionProgress = {
+        type: 'session_progress',
+        sessionId: '123e4567-e89b-12d3-a456-426614174000',
+        assets: [
+            { type: 'cash', amount: 5000 },
+            { type: 'stocks', amount: 10000 },
+            { type: 'loans', amount: 2000 },
+        ],
+        runningZakat: 325,
+        methodology: 'bradford',
+        nextHint: 'Do you have any gold or silver investments?',
+    };
+
+    it('has type "session_progress"', () => {
+        expect(validSession.type).toBe('session_progress');
+    });
+
+    it('has sessionId string', () => {
+        expect(validSession.sessionId).toBeTypeOf('string');
+    });
+
+    it('has array of assets', () => {
+        expect(Array.isArray(validSession.assets)).toBe(true);
+        expect(validSession.assets.length).toBe(3);
+    });
+
+    it('each asset has type and amount', () => {
+        for (const asset of validSession.assets) {
+            expect(asset.type).toBeTypeOf('string');
+            expect(asset.amount).toBeTypeOf('number');
+        }
+    });
+
+    it('asset types are valid enums', () => {
+        const validTypes: SessionAsset['type'][] = ['cash', 'gold', 'silver', 'stocks', 'retirement', 'loans'];
+        for (const asset of validSession.assets) {
+            expect(validTypes).toContain(asset.type);
+        }
+    });
+
+    it('runningZakat is optional number', () => {
+        expect(validSession.runningZakat).toBeTypeOf('number');
+    });
+
+    it('nextHint is optional string', () => {
+        expect(validSession.nextHint).toBeTypeOf('string');
+    });
+
+    it('loans are tracked as liabilities', () => {
+        const loans = validSession.assets.filter(a => a.type === 'loans');
+        expect(loans).toHaveLength(1);
+        expect(loans[0].amount).toBe(2000);
+    });
+});
+
 describe('Widget Package Structure', () => {
     it('exports types correctly', async () => {
-        // Verify the module can be imported without errors
         const types = await import('../types');
         expect(types).toBeDefined();
     });
@@ -122,5 +177,21 @@ describe('Widget Package Structure', () => {
     it('MethodologyComparisonCard component exists', async () => {
         const mod = await import('../components/MethodologyComparisonCard');
         expect(typeof mod.MethodologyComparisonCard).toBe('function');
+    });
+
+    it('SessionProgressCard component exists', async () => {
+        const mod = await import('../components/SessionProgressCard');
+        expect(typeof mod.SessionProgressCard).toBe('function');
+    });
+
+    it('all 3 components are importable from components/', async () => {
+        const [a, b, c] = await Promise.all([
+            import('../components/ZakatResultCard'),
+            import('../components/MethodologyComparisonCard'),
+            import('../components/SessionProgressCard'),
+        ]);
+        expect(a.ZakatResultCard).toBeDefined();
+        expect(b.MethodologyComparisonCard).toBeDefined();
+        expect(c.SessionProgressCard).toBeDefined();
     });
 });
