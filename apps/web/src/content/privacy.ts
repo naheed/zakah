@@ -16,7 +16,7 @@
  */
 
 import { ElementType } from "react";
-import { Shield, Lock, Eye, Clock, Warning, UserCircle, FileText, Robot, LockKey, UsersThree, Gavel, Buildings, Prohibit, ArrowsClockwise, Eraser, Files, AddressBook } from "@phosphor-icons/react";
+import { Shield, Lock, Eye, Clock, Warning, UserCircle, FileText, Robot, LockKey, UsersThree, Gavel, Buildings, Prohibit, ArrowsClockwise, Eraser, Files, AddressBook, ChatCircleDots } from "@phosphor-icons/react";
 
 export interface HighlightItem {
     icon: ElementType;
@@ -56,6 +56,10 @@ export const privacyHighlights: HighlightItem[] = [
     {
         icon: Warning,
         text: "Uploaded documents are processed by AI and immediately discarded — only extracted values are kept"
+    },
+    {
+        icon: ChatCircleDots,
+        text: "ChatGPT calculations are processed in-memory and discarded — only anonymized, rounded totals are stored for aggregate metrics"
     }
 ];
 
@@ -165,6 +169,51 @@ export const privacySections: SectionContent[] = [
                     "Your raw documents are processed in ephemeral memory—they exist only for the seconds it takes to read them.",
                     "We never use your personal financial data to train public AI models."
                 ]
+            }
+        ]
+    },
+    {
+        id: "chatgpt",
+        title: "AI Assistant & MCP Server (ChatGPT Integration)",
+        content: `When you use ZakatFlow through ChatGPT or other AI assistants, your financial data is processed by our Model Context Protocol (MCP) server. This section describes how your data is handled in this context, including what we call the "privacy gap" — the distinction between data handled by OpenAI and data handled by ZakatFlow.`,
+        subsections: [
+            {
+                title: "4a.1 Data Flow",
+                content: "When ChatGPT calls ZakatFlow to calculate your Zakat, the following data flow occurs:",
+                listItems: [
+                    "Your financial inputs (asset values, liabilities) are sent from ChatGPT to our MCP server",
+                    "Our server computes your Zakat obligation in-memory using our calculation engine",
+                    "The calculation result is returned to ChatGPT for display",
+                    "Your raw financial inputs are immediately discarded — they are NOT stored on our servers in any form"
+                ],
+                note: "Important: When ChatGPT sends your data to ZakatFlow, it leaves OpenAI's infrastructure. Our privacy protections (described below) apply, but OpenAI's privacy policies no longer govern this data. This is the 'privacy gap' you should be aware of."
+            },
+            {
+                title: "4a.2 What We Store",
+                content: "We store the following data from ChatGPT interactions:",
+                listItems: [
+                    "Anonymized Analytics: A cryptographic hash (SHA-256) of your session ID combined with the date — this cannot be reversed to identify you. Rounded asset totals (nearest $1,000) and Zakat amounts (nearest $100) for aggregate metrics only.",
+                    "ChatGPT User Identity: If provided by OpenAI, your ChatGPT user identifier may be stored to enable session continuity. This is an opaque ID that cannot identify you personally.",
+                    "Encrypted Session State: If you use multi-step calculations, your in-progress data is encrypted with AES-256-GCM before storage. We cannot read this data in plaintext."
+                ]
+            },
+            {
+                title: "4a.3 What We Do NOT Store or Do",
+                listItems: [
+                    "We do NOT store your raw financial inputs (cash, investments, debts, etc.) in plaintext",
+                    "We do NOT use your data to train any AI models",
+                    "We do NOT sell, share, or rent your data to third parties",
+                    "We do NOT track your IP address, browser, or device information from ChatGPT sessions",
+                    "We do NOT link ChatGPT calculations to any ZakatFlow web account"
+                ]
+            },
+            {
+                title: "4a.4 Session Data Deletion",
+                content: "You may request deletion of your ChatGPT session data at any time by contacting privacy@vora.dev with your ChatGPT user ID. Anonymized aggregate analytics (rounded totals) cannot be deleted as they contain no personally identifiable information."
+            },
+            {
+                title: "4a.5 Source Tracking",
+                content: "We tag analytics events with a 'source' field (e.g., 'web' or 'chatgpt') to understand how our calculator is used across platforms. This helps us improve the service but does not identify individual users."
             }
         ]
     },
@@ -313,7 +362,7 @@ export const privacySections: SectionContent[] = [
     {
         id: "children",
         title: "Children's Privacy",
-        content: "The Service is not intended for use by individuals under the age of 18. We do not knowingly collect personal information from children."
+        content: "The Service is not intended for use by individuals under the age of 13, consistent with OpenAI's age requirements for ChatGPT. Users under the age of 18 should use the Service only under the supervision of a parent or guardian, as Zakat calculations involve financial data that requires adult judgment. We do not knowingly collect personal information from children under 13."
     },
     {
         id: "changes",
