@@ -170,7 +170,17 @@ export function registerWidgetTemplate(server: McpServer) {
                     _meta: {
                         ui: {
                             prefersBorder: true,
+                            domain: "https://mcp.zakatflow.org",
+                            csp: {
+                                connectDomains: [
+                                    "https://pcwdpsoheoiiavkeyeyx.supabase.co",
+                                ],
+                                resourceDomains: [
+                                    "https://*.oaistatic.com",
+                                ],
+                            },
                         },
+                        "openai/widgetDescription": "Interactive Zakat calculation showing amount due, methodology breakdown, and link to full report on ZakatFlow.org.",
                     },
                 },
             ],

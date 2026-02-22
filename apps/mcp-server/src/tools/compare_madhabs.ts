@@ -35,7 +35,13 @@ export function registerCompareMadhabs(server: McpServer) {
         server,
         "compare_madhabs",
         {
+            title: "Compare Methodologies",
             description: "Compare Zakat calculations across 2-4 Islamic jurisprudence methodologies side-by-side. Supports ALL asset categories for accurate comparison. Shows how different schools of thought affect the Zakat obligation for the same financial inputs. NOTE: ZakatFlow provides calculations, not fatwas.",
+            annotations: {
+                readOnlyHint: true,
+                destructiveHint: false,
+                openWorldHint: false,
+            },
             inputSchema: {
                 methodologies: z.array(
                     z.enum(MADHAB_IDS)

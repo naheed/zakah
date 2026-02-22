@@ -24,7 +24,14 @@ export function registerInteractiveTools(server: McpServer) {
     // Tool to start a session
     server.tool(
         "start_session",
+        "Start a new interactive Zakat calculation session for step-by-step asset entry.",
         {},
+        {
+            title: "Start Session",
+            readOnlyHint: false,
+            destructiveHint: false,
+            openWorldHint: false,
+        },
         async () => {
             const session = SessionStore.create();
             return {
@@ -37,10 +44,17 @@ export function registerInteractiveTools(server: McpServer) {
     // Tool to add assets
     server.tool(
         "add_asset",
+        "Add an asset to an existing Zakat calculation session.",
         {
             sessionId: z.string().describe("The widget session ID received from previous turns."),
             assetType: z.enum(['cash', 'gold', 'silver', 'stocks', 'retirement', 'loans']),
             amount: z.number().describe("The value or amount of the asset."),
+        },
+        {
+            title: "Add Asset",
+            readOnlyHint: false,
+            destructiveHint: false,
+            openWorldHint: false,
         },
         async ({ sessionId, assetType, amount }) => {
             const session = SessionStore.get(sessionId);

@@ -19,6 +19,12 @@ export function registerDeleteData(server: McpServer) {
             chatgpt_user_id: z.string().describe("Your ChatGPT user ID (provided by OpenAI). Ask the user to confirm their identity before proceeding."),
             confirm: z.boolean().describe("Must be true to execute deletion. Set to false to preview what would be deleted without actually deleting."),
         },
+        {
+            title: "Delete My Data",
+            readOnlyHint: false,
+            destructiveHint: true,
+            openWorldHint: false,
+        },
         async (params) => {
             const { chatgpt_user_id, confirm } = params;
 

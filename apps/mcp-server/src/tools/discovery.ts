@@ -30,7 +30,14 @@ export function registerDiscoveryTools(server: McpServer) {
     // 1. List Methodologies
     server.tool(
         "list_methodologies",
+        "List all available Zakat calculation methodologies supported by ZakatFlow.",
         {},
+        {
+            title: "List Methodologies",
+            readOnlyHint: true,
+            destructiveHint: false,
+            openWorldHint: false,
+        },
         async () => {
             const list = AVAILABLE_PRESETS.map(p => ({
                 id: p.meta.id,
@@ -51,8 +58,15 @@ export function registerDiscoveryTools(server: McpServer) {
     // 2. Get Nisab Info
     server.tool(
         "get_nisab_info",
+        "Get the current Nisab threshold for a specific methodology.",
         {
             methodology_id: z.string().optional().describe("ID of the methodology to check. Defaults to 'bradford'."),
+        },
+        {
+            title: "Get Nisab Info",
+            readOnlyHint: true,
+            destructiveHint: false,
+            openWorldHint: false,
         },
         async ({ methodology_id }) => {
             const preset = ZAKAT_PRESETS[methodology_id || 'bradford'] || ZAKAT_PRESETS['bradford'];

@@ -26,8 +26,15 @@ import {
 export function registerMarketTools(server: McpServer) {
     server.tool(
         "get_market_prices",
+        "Get current gold and silver market prices used for Nisab threshold calculations.",
         {
             currency: z.string().default("USD").describe("Currency to return prices in (Currently only USD supported).")
+        },
+        {
+            title: "Get Market Prices",
+            readOnlyHint: true,
+            destructiveHint: false,
+            openWorldHint: false,
         },
         async () => {
             const goldPerGram = GOLD_PRICE_PER_OUNCE / GRAMS_PER_OUNCE;

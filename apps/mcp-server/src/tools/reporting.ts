@@ -22,6 +22,7 @@ import { defaultFormData, ZakatFormData } from "@zakatflow/core";
 export function registerReportingTools(server: McpServer) {
     server.tool(
         "create_report_link",
+        "Generate a deep link to a full Zakat calculation report on ZakatFlow.org.",
         {
             cash: z.number().optional(),
             gold_value: z.number().optional(),
@@ -30,6 +31,12 @@ export function registerReportingTools(server: McpServer) {
             retirement: z.number().optional(),
             loans: z.number().optional(),
             madhab: z.enum(['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali', 'amja', 'qaradawi']).optional(),
+        },
+        {
+            title: "Create Report Link",
+            readOnlyHint: true,
+            destructiveHint: false,
+            openWorldHint: false,
         },
         async ({ cash, gold_value, silver_value, stocks, retirement, loans, madhab }) => {
 
