@@ -29,7 +29,13 @@ Execute these steps sequentially in an unbroken agentic loop. You should create 
      - Cross-package (e.g., `packages/core` + `apps/web`): `npx vitest run` (full repo)
      - E2E (UI regression): `cd apps/web && npx playwright test e2e/static-pages-a11y.spec.ts`
    - **Mathematically prove** the worker's code did not break the affected package's test contract.
-7. **Merge & Clean & Log**: If (and only if) the QA audit passes, merge the PR natively (`gh pr merge --squash`) and close the issue.
+7. **Merge & Clean & Log**: If (and only if) the QA audit passes, merge the PR natively (`gh pr merge --squash`).
+   - **Post Closing Comment**: Before closing the issue, post a detailed walkthrough comment on the GitHub issue using `gh issue comment <number> --body "..."`. The comment must summarize:
+     - **What changed** (files modified, key diffs)
+     - **Why** (root cause or rationale)
+     - **How it was verified** (test results, build status)
+     - **PR reference** (link to the merged PR)
+   - **Close the issue**: `gh issue close <number> --reason "completed"`
    - Log completion: `npx tsx .agents/telemetry/cli.ts --run_id="$(cat .agents/.current_run)" --agent="/orchestrate" --action="COMPLETED" --reason="PR merged and issue closed."`
    - Finally, run `rm .agents/.current_run .agents/active_handoff.md` to clear the state.
 
