@@ -46,3 +46,19 @@ export interface ComparisonResult {
     type: 'comparison';
     comparisons: MethodologyEntry[];
 }
+
+/** Individual asset added during an interactive session */
+export interface SessionAsset {
+    type: 'cash' | 'gold' | 'silver' | 'stocks' | 'retirement' | 'loans';
+    amount: number;
+}
+
+/** Progress state for an interactive calculation session */
+export interface SessionProgress {
+    type: 'session_progress';
+    sessionId: string;
+    assets: SessionAsset[];
+    runningZakat?: number;
+    methodology: string;
+    nextHint?: string;
+}
