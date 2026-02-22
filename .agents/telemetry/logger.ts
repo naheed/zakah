@@ -38,3 +38,36 @@ export async function appendTelemetryEvent(event: AgentEvent): Promise<void> {
         console.error('Failed to write telemetry event:', error);
     }
 }
+
+/**
+ * Searches the recent log file for the specified run_id's START event and returns its timestamp.
+ */
+export async function getRunStartTime(runId: string): Promise<number | null> {
+    try {
+        const date = new Date();
+        const yearMonth = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+        const filePath = path.join(LOGS_DIR, `${yearMonth}.jsonl`);
+
+        if (!fs.existsSync(filePath)) return null;
+
+        const content = await fs.promises.readFile(filePath, 'utf-8');
+        const lines = content.trim().split('\n');
+
+        for (const line of lines) {
+            if (!line) continue;
+            try {
+                const parsed = JSON.parse(line);
+                if (parsed.run_id === runId && parsed.action === 'START') {
+                    if (parsed.timestamp) {
+                        return new Date(parsed.timestamp).getTime();
+                    }
+                }
+            } catch (e) {
+                // ignore invalid lines
+            }
+        }
+    } catch (e) {
+        console.error('Failed to parse start time:', e);
+    }
+    return null;
+}

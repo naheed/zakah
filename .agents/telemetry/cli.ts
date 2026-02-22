@@ -1,5 +1,6 @@
 import { parseArgs } from 'util';
-import { appendTelemetryEvent } from './logger.js';
+import { execSync } from 'child_process';
+import { appendTelemetryEvent, getRunStartTime } from './logger.js';
 import { AgentEvent } from './types.js';
 
 const { values } = parseArgs({
@@ -22,6 +23,26 @@ async function main() {
         process.exit(1);
     }
 
+    // Auto-calculate efficiency metrics when a run completes
+    let duration_ms: number | undefined;
+    let files_modified: number | undefined;
+
+    if (values.action === 'COMPLETED') {
+        const startTime = await getRunStartTime(values.run_id);
+        if (startTime) {
+            duration_ms = Date.now() - startTime;
+        }
+
+        try {
+            // Get count of modified files (staged, unstaged, untracked) but excluding gitignored
+            const gitStatus = execSync('git status --porcelain', { encoding: 'utf-8' });
+            files_modified = gitStatus.split('\n').filter(line => line.trim().length > 0).length;
+        } catch (e) {
+            // Git might fail if not in a repo, default to undefined
+            console.error('[Telemetry] Failed to get git status footprint.');
+        }
+    }
+
     const event: AgentEvent = {
         run_id: values.run_id,
         active_agent: values.agent,
@@ -29,7 +50,9 @@ async function main() {
         reason: values.reason,
         context_tokens_used: values.context ? parseInt(values.context, 10) : undefined,
         redundant_file_reads: values.redundant_reads ? parseInt(values.redundant_reads, 10) : undefined,
-        hallucination_detected: values.hallucination
+        hallucination_detected: values.hallucination,
+        duration_ms,
+        files_modified
     };
 
     await appendTelemetryEvent(event);
