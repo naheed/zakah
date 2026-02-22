@@ -39,6 +39,7 @@ When required you must produce strategic documents in one of two formats:
    - Break down the approved strategy into actionable chunks in `task.md`.
    - Define exact Google Analytics events and custom backend DB metrics to track KPI impact for the new feature launch.
    - **Bug Reporting:** Always file actionable bug reports directly as **GitHub Issues**. Do *not* create `.md` bug report files in the repository to avoid codebase bloat.
+     - **CRITICAL:** When using the `gh issue create` command, **DO NOT** pass multiline strings directly to the `--body` flag (this causes Bash parsing errors). You MUST write the issue body to a temporary file (e.g., `cat << 'EOF' > /tmp/issue.md`) and use the `--body-file` flag.
 4. **Collaboration & Handoffs**:
    - Hand off standard design requirements to the **UI Designer**.
    - Sync with the **Backend & AI Engineer** regarding backend telemetry.

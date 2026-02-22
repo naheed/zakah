@@ -18,7 +18,7 @@ Execute these steps sequentially in an unbroken agentic loop. You should create 
    - Write the task payload to `.agents/active_handoff.md`.
    - Invoke the worker, explicitly commanding them to read `.agents/active_handoff.md` and implement the solution strictly within their defined sandbox.
    - **Crucial Rule:** Worker personas must verify that their code and tests pass locally *before* they hand off the task. Under no circumstances should a worker push a branch with broken or fundamentally flawed unit tests.
-4. **Commit & Push**: After the worker completes and returns control, read `.agents/active_handoff.md` to get their status. Commit the implementation and push out the feature branch to GitHub (`git push -u origin <branch-name>`).
+4. **Surgical Commit & Push**: After the worker completes and returns control, read `.agents/active_handoff.md` to get their status. Commit the specific files modified (`git add <file1> <file2>`) rather than a blind `git add -A`. Push out the feature branch to GitHub (`git push -u origin <branch-name>`).
 5. **Formal Pull Request**: Open a Pull Request against the `main` branch using `gh pr create`.
 6. **Quality Assurance Audit**: Force a persona switch to the `/qa-engineer`. Audit the new PR:
    - **Write new tests first.** If the implementation added new logic, you MUST create or extend test files before declaring QA complete. Shipping new code without new tests is a DoD violation.
@@ -47,23 +47,9 @@ You must complete all 7 steps autonomously. The **ONLY** reasons you should halt
 
 ---
 
-## 🗺️ Routing Registry (10 Worker Personas)
+## Routing Registry Reference
 
-When orchestrating, map tasks to these Best-in-Class profiles:
-
-| Task Type | Optimal Persona | Sandbox Scope |
-|-----------|-----------------|---------------|
-| **Core PM/Definition** | `/product-manager` | `BACKLOG.md`, Metrics, GitHub Issues |
-| **Cloud Systems/DB/APIs** | `/backend-engineer` | `packages/core/`, Supabase Edge Functions, SQL |
-| **LLMs/MCP/RAG/Safety** | `/ai-engineer` | `apps/mcp-server/`, Prompts, Tool Schemas |
-| **Visuals/UX/Tokens** | `/ui-designer` | Mockups, WCAG Audits, Tailwind Tokens |
-| **React/A11y Implementation** | `/ui-eng-designer` | `apps/web/src/`, `index.css`, UI Build tests |
-| **Copy/Tone/Prompts** | `/ux-writer` | `apps/web/src/content/`, "Dignified Guide" copy |
-| **Developer Relations** | `/developer-relations` | `README.md`, API Docs, Architecture Diagrams |
-| **Legal/Fiqh/Security** | `/product-counsel` | Privacy Docs, ZMCS configurations |
-| **GTM/Changelog/SEO** | `/product-marketing-manager`| Launch copy, `CHANGELOG.md`, Analytics wiring |
-| **Architecture/Systems** | `/senior-tech-lead` | Cross-app design, `package.json` resolutions |
-| **QA/Audit/Testing** | `/qa-engineer` | `__tests__/`, `e2e/`, mathematical test contracts |
+For the full list of worker personas (e.g., `/ui-eng-designer`, `/backend-engineer`, `/product-manager`) and their exact sandbox scopes, refer directly to `AGENTS.md`. DO NOT append this full list into child worker payloads to avoid token bloat.
 
 ---
 

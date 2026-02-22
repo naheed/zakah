@@ -1,6 +1,8 @@
 # Logs
 logs
 !.agents/logs/
+.agents/.current_run
+.agents/active_handoff.md
 *.log
 npm-debug.log*
 yarn-debug.log*
