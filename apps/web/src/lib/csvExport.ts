@@ -141,21 +141,64 @@ export function generateCSV(
         rows.push(["LIABILITIES DEDUCTED"]);
         rows.push(["Type", "Description", "Amount", "Deductible %", "Deduction", "Rule"]);
 
-        const liabilityFields = [
-            { key: 'creditCardBalance', label: 'Credit Card Balance' },
-            { key: 'unpaidBills', label: 'Unpaid Bills' },
-            { key: 'studentLoansDue', label: 'Student Loans' },
-            { key: 'lateTaxPayments', label: 'Late Tax Payments' },
-            { key: 'outstandingDebts', label: 'Other Debts' }
-        ];
+        // Resolve config for methodology rules (analogous to calculateTotalLiabilities)
+        const effectiveConfig = MADHAB_RULES[madhab || 'bradford'] ? (require('@zakatflow/core').ZAKAT_PRESETS[madhab || 'bradford'] || require('@zakatflow/core').DEFAULT_CONFIG) : require('@zakatflow/core').DEFAULT_CONFIG;
+        const liabRules = effectiveConfig.liabilities;
+        const personalRules = liabRules.personal_debt;
+        const types = personalRules.types || {};
 
-        const debtRule = rawRules.debtDeductionMethod === 'twelve_month' ? "12-Month Living Expenses Cap" :
-            rawRules.debtDeductionMethod === 'none' ? "Not Deductible" : "Full Deduction";
+        const liabilityFields = [
+            { key: 'monthlyLivingExpenses', label: 'Living Expenses', ruleType: types.living_expenses, isRecurring: true },
+            { key: 'insuranceExpenses', label: 'Insurance', ruleType: types.insurance, isRecurring: false },
+            { key: 'creditCardBalance', label: 'Credit Card Balance', ruleType: types.credit_cards, isRecurring: false },
+            { key: 'unpaidBills', label: 'Unpaid Bills', ruleType: types.unpaid_bills, isRecurring: false },
+            { key: 'monthlyMortgage', label: 'Housing/Mortgage', ruleType: types.housing, isRecurring: true },
+            { key: 'studentLoansDue', label: 'Student Loans', ruleType: types.student_loans, isRecurring: true },
+            { key: 'propertyTax', label: 'Property Tax', ruleType: types.taxes, isRecurring: false },
+            { key: 'lateTaxPayments', label: 'Late Tax Payments', ruleType: types.taxes, isRecurring: false },
+        ];
 
         liabilityFields.forEach(l => {
             const val = formData[l.key as keyof typeof formData] as number | undefined;
             if (val && val > 0) {
-                rows.push(["Liability", safe(l.label), money(val), "100%", money(val), safe(debtRule)]);
+                // If the user's config doesn't use 'per-type' rules (types undefined), fallback to method
+                let ruleDesc = l.ruleType || "Global Fallback";
+                let deduction = 0;
+                let multiplier = 1;
+
+                if (liabRules.method === 'no_deduction') {
+                    deduction = 0;
+                    ruleDesc = "Not Deductible";
+                } else if (personalRules.deductible) {
+                    if (personalRules.types) {
+                        const rule = l.ruleType;
+                        if (rule === 'full' || rule === '12_months') {
+                            multiplier = l.isRecurring ? 12 : 1;
+                        } else if (rule === 'none') {
+                            multiplier = 0;
+                        } else {
+                            multiplier = 1; // current_due
+                        }
+                    } else {
+                        // Global fallback
+                        const isAnnual = liabRules.method === 'full_deduction' || liabRules.method === '12_month_rule';
+                        multiplier = isAnnual && l.isRecurring ? 12 : 1;
+                    }
+                    deduction = val * multiplier;
+
+                    if (l.isRecurring && multiplier === 12) {
+                        ruleDesc = "Annualized (12 Months)";
+                    } else if (multiplier === 1) {
+                        ruleDesc = l.isRecurring ? "Current Month Only" : "Full Value";
+                    } else if (multiplier === 0) {
+                        ruleDesc = "Not Deductible";
+                    }
+
+                }
+
+                if (deduction > 0) {
+                    rows.push(["Liability", safe(l.label), money(val), "100%", money(deduction), safe(ruleDesc)]);
+                }
             }
         });
         rows.push([]);
