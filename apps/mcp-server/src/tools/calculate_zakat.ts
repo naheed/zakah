@@ -43,16 +43,16 @@ export function registerCalculateZakat(server: McpServer) {
                 silver_jewelry: z.number().optional().describe("Value of wearable silver jewelry in USD."),
 
                 // ─── Crypto & Digital Assets ─────────────────────────────
-                crypto_currency: z.number().optional().describe("Value of major cryptocurrencies held as store of value (BTC, ETH). Treated like currency — 100% zakatable."),
-                crypto_trading: z.number().optional().describe("Value of altcoins, meme coins, NFTs held for trading. Treated as active trade goods — 100% zakatable."),
+                crypto: z.number().optional().describe("Value of all cryptocurrency holdings (Bitcoin, Ethereum, etc). 100% zakatable. If you have detailed DeFi positions, use the fields below instead."),
+                crypto_trading: z.number().optional().describe("Value of altcoins, meme coins, NFTs held for active trading. 100% zakatable."),
                 staked_assets: z.number().optional().describe("Principal value of staked crypto (e.g., staked ETH). Zakatable at market value."),
                 staked_rewards: z.number().optional().describe("Vested staking rewards that can be claimed. Zakatable when vested."),
                 liquidity_pool: z.number().optional().describe("Current redeemable value of liquidity pool positions (e.g., Uniswap LP tokens)."),
 
                 // ─── Investments ─────────────────────────────────────────
-                short_term_investments: z.number().optional().describe("Value of active trading assets, day-trading portfolios, or short-term investments. 100% zakatable."),
-                long_term_investments: z.number().optional().describe("Value of long-term passive hold index funds, ETFs, stocks. Subject to methodology-specific rates (e.g., Bradford 30% proxy, Hanafi 100%)."),
-                reits: z.number().optional().describe("Value of equity REIT investments (avoid mortgage REITs). Treated like passive investments."),
+                stocks: z.number().optional().describe("Value of stocks, index funds, ETFs, mutual funds, or other equity investments. This is the most common investment type. Subject to methodology-specific rates (e.g., Bradford 30%, Hanafi 100%)."),
+                active_trading: z.number().optional().describe("Value of day-trading portfolios or short-term speculative investments. 100% zakatable."),
+                reits: z.number().optional().describe("Value of equity REIT investments (avoid mortgage REITs). Treated like passive stock investments."),
                 dividends: z.number().optional().describe("Total dividends received this year. May require purification if from non-halal sources."),
 
                 // ─── Retirement ──────────────────────────────────────────
@@ -107,8 +107,8 @@ export function registerCalculateZakat(server: McpServer) {
             // Destructure all params
             const {
                 cash, gold_value, gold_grams, gold_jewelry, silver_value, silver_grams, silver_jewelry,
-                crypto_currency, crypto_trading, staked_assets, staked_rewards, liquidity_pool,
-                short_term_investments, long_term_investments, reits, dividends,
+                crypto, crypto_trading, staked_assets, staked_rewards, liquidity_pool,
+                stocks, active_trading, reits, dividends,
                 retirement_total, roth_ira_contributions, roth_ira_earnings, traditional_ira, four_oh_one_k, hsa_balance, age,
                 revocable_trust, irrevocable_trust,
                 real_estate_for_sale, land_banking, rental_income,
@@ -143,16 +143,16 @@ export function registerCalculateZakat(server: McpServer) {
                 silverJewelryValue: silver_jewelry || 0,
 
                 // Crypto
-                cryptoCurrency: crypto_currency || 0,
+                cryptoCurrency: crypto || 0,
                 cryptoTrading: crypto_trading || 0,
                 stakedAssets: staked_assets || 0,
                 stakedRewardsVested: staked_rewards || 0,
                 liquidityPoolValue: liquidity_pool || 0,
-                hasCrypto: !!(crypto_currency || crypto_trading || staked_assets || staked_rewards || liquidity_pool),
+                hasCrypto: !!(crypto || crypto_trading || staked_assets || staked_rewards || liquidity_pool),
 
                 // Investments
-                activeInvestments: short_term_investments || 0,
-                passiveInvestmentsValue: (long_term_investments || 0) + (reits || 0),
+                activeInvestments: active_trading || 0,
+                passiveInvestmentsValue: (stocks || 0) + (reits || 0),
                 dividends: dividends || 0,
 
                 // Retirement
@@ -206,10 +206,27 @@ export function registerCalculateZakat(server: McpServer) {
 
             const result = calculateZakat(formData);
 
-            // Generate deep-link for full report
+            // Generate compact deep-link — strip zero-value and default fields to minimize URL length
             const isDev = process.env.NODE_ENV === 'development';
             const baseUrl = process.env.CLIENT_URL || (isDev ? 'http://localhost:8080' : 'https://zakatflow.org');
-            const encoded = btoa(JSON.stringify(formData));
+            const compactData: Record<string, unknown> = {};
+            for (const [key, value] of Object.entries(formData)) {
+                // Skip zero numbers, empty strings, false booleans, and default values
+                if (value === 0 || value === '' || value === false) continue;
+                if (key === 'entryMethod' && value === 'manual') continue;
+                if (key === 'isHousehold' && value === false) continue;
+                if (key === 'isSimpleMode' && value === false) continue;
+                if (key === 'calendarType' && value === 'lunar') continue;
+                if (key === 'nisabStandard' && value === 'silver') continue;
+                if (key === 'passiveInvestmentIntent' && value === 'mudir') continue;
+                if (key === 'estimatedTaxRate' && value === 0.25) continue;
+                if (key === 'age' && value === 30) continue;
+                if (key === 'retirementWithdrawalAllowed' && value === true) continue;
+                if (key === 'retirementWithdrawalLimit' && value === 1) continue;
+                if (key === 'householdMembers') continue; // Skip array — too large, re-created by web app
+                compactData[key] = value;
+            }
+            const encoded = btoa(JSON.stringify(compactData));
             const reportLink = `${baseUrl}?data=${encoded}&utm_source=chatgpt&utm_medium=widget`;
 
             // Get methodology display name

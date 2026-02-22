@@ -20,11 +20,11 @@ function buildFormDataFromToolInput(input: {
     gold_jewelry?: number;
     silver_value?: number;
     silver_jewelry?: number;
-    crypto_currency?: number;
+    crypto?: number;
     crypto_trading?: number;
     staked_assets?: number;
     stocks?: number;
-    short_term_investments?: number;
+    active_trading?: number;
     reits?: number;
     retirement?: number;
     revocable_trust?: number;
@@ -50,12 +50,12 @@ function buildFormDataFromToolInput(input: {
         goldJewelryValue: input.gold_jewelry || 0,
         silverInvestmentValue: input.silver_value || 0,
         silverJewelryValue: input.silver_jewelry || 0,
-        cryptoCurrency: input.crypto_currency || 0,
+        cryptoCurrency: input.crypto || 0,
         cryptoTrading: input.crypto_trading || 0,
         stakedAssets: input.staked_assets || 0,
-        hasCrypto: !!(input.crypto_currency || input.crypto_trading || input.staked_assets),
+        hasCrypto: !!(input.crypto || input.crypto_trading || input.staked_assets),
         passiveInvestmentsValue: (input.stocks || 0) + (input.reits || 0),
-        activeInvestments: input.short_term_investments || 0,
+        activeInvestments: input.active_trading || 0,
         fourOhOneKVestedBalance: input.retirement || 0,
         revocableTrustValue: input.revocable_trust || 0,
         irrevocableTrustValue: input.irrevocable_trust || 0,
@@ -192,7 +192,7 @@ describe('calculate_zakat — asset category parity', () => {
         const withoutCrypto = calculateZakat(buildFormDataFromToolInput({ cash: 10000 }));
         const withCrypto = calculateZakat(buildFormDataFromToolInput({
             cash: 10000,
-            crypto_currency: 5000,
+            crypto: 5000,
             crypto_trading: 3000,
             staked_assets: 2000,
         }));
@@ -287,7 +287,7 @@ describe('calculate_zakat — asset category parity', () => {
     it('short-term investments are 100% zakatable', () => {
         const withShortTerm = calculateZakat(buildFormDataFromToolInput({
             cash: 5000,
-            short_term_investments: 10000,
+            active_trading: 10000,
             madhab: 'bradford',
         }));
         // Cash 5000 + Short-term 10000 * 100% = 15000 * 0.025 = 375
@@ -405,7 +405,7 @@ describe('compare_madhabs tool — comparison logic', () => {
         const results = methodologies.map((madhab) => {
             const formData = buildFormDataFromToolInput({
                 cash: 5000,
-                crypto_currency: 10000,
+                crypto: 10000,
                 madhab,
             });
             return calculateZakat(formData);

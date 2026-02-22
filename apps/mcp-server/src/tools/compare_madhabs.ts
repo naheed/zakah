@@ -51,13 +51,13 @@ export function registerCompareMadhabs(server: McpServer) {
                 silver_jewelry: z.number().optional().describe("Value of wearable silver jewelry in USD."),
 
                 // ─── Crypto ──────────────────────────────────────────────
-                crypto_currency: z.number().optional().describe("Value of major crypto held as store of value (BTC, ETH)."),
-                crypto_trading: z.number().optional().describe("Value of altcoins, NFTs held for trading."),
+                crypto: z.number().optional().describe("Value of all cryptocurrency holdings (Bitcoin, Ethereum, etc). 100% zakatable."),
+                crypto_trading: z.number().optional().describe("Value of altcoins, NFTs held for active trading."),
                 staked_assets: z.number().optional().describe("Principal value of staked crypto."),
 
                 // ─── Investments ─────────────────────────────────────────
-                stocks: z.number().optional().describe("Value of long-term passive investments (stocks, index funds, ETFs)."),
-                short_term_investments: z.number().optional().describe("Value of active trading assets."),
+                stocks: z.number().optional().describe("Value of stocks, index funds, ETFs, mutual funds."),
+                active_trading: z.number().optional().describe("Value of day-trading portfolios or short-term investments."),
                 reits: z.number().optional().describe("Value of equity REIT investments."),
 
                 // ─── Retirement ──────────────────────────────────────────
@@ -89,8 +89,8 @@ export function registerCompareMadhabs(server: McpServer) {
             const {
                 methodologies, cash,
                 gold_value, gold_jewelry, silver_value, silver_jewelry,
-                crypto_currency, crypto_trading, staked_assets,
-                stocks, short_term_investments, reits,
+                crypto, crypto_trading, staked_assets,
+                stocks, active_trading, reits,
                 retirement,
                 revocable_trust, irrevocable_trust,
                 real_estate_for_sale, rental_income,
@@ -115,12 +115,12 @@ export function registerCompareMadhabs(server: McpServer) {
                     goldJewelryValue: gold_jewelry || 0,
                     silverInvestmentValue: silver_value || 0,
                     silverJewelryValue: silver_jewelry || 0,
-                    cryptoCurrency: crypto_currency || 0,
+                    cryptoCurrency: crypto || 0,
                     cryptoTrading: crypto_trading || 0,
                     stakedAssets: staked_assets || 0,
-                    hasCrypto: !!(crypto_currency || crypto_trading || staked_assets),
+                    hasCrypto: !!(crypto || crypto_trading || staked_assets),
                     passiveInvestmentsValue: (stocks || 0) + (reits || 0),
-                    activeInvestments: short_term_investments || 0,
+                    activeInvestments: active_trading || 0,
                     fourOhOneKVestedBalance: retirement || 0,
                     revocableTrustValue: revocable_trust || 0,
                     irrevocableTrustValue: irrevocable_trust || 0,
