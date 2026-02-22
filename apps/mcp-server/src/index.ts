@@ -27,6 +27,8 @@ import { registerMarketTools } from "./tools/market.js";
 import { registerDiscoveryTools } from "./tools/discovery.js";
 import { registerReportingTools } from "./tools/reporting.js";
 import { registerCompareMadhabs } from "./tools/compare_madhabs.js";
+import { registerDeleteData } from "./tools/delete_data.js";
+import { registerLegalTools } from "./tools/legal.js";
 import { registerWidgetTemplate } from "./widget/template.js";
 
 const app = express();
@@ -62,6 +64,8 @@ const handleMcpConnection = async (req: express.Request, res: express.Response) 
     registerDiscoveryTools(mcp);
     registerReportingTools(mcp);
     registerCompareMadhabs(mcp);
+    registerDeleteData(mcp);
+    registerLegalTools(mcp);
 
     const transport = new SSEServerTransport("/messages", res);
     const sessionId = transport.sessionId;

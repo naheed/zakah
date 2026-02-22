@@ -209,7 +209,7 @@ export const privacySections: SectionContent[] = [
             },
             {
                 title: "4a.4 Session Data Deletion",
-                content: "You may request deletion of your ChatGPT session data at any time by contacting privacy@vora.dev with your ChatGPT user ID. Anonymized aggregate analytics (rounded totals) cannot be deleted as they contain no personally identifiable information."
+                content: "You can delete your ChatGPT session data instantly by asking ChatGPT to use the 'delete_my_data' tool. This will permanently remove your user record and all saved calculation sessions. Alternatively, you may contact privacy@vora.dev. Anonymized aggregate analytics (rounded totals) cannot be deleted as they contain no personally identifiable information."
             },
             {
                 title: "4a.5 Source Tracking",
