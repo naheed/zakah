@@ -190,3 +190,49 @@ export function calculateZakat(
   };
 }
 
+// =============================================================================
+// Multi-Methodology Calculation (Compute All, Filter at Presentation)
+// =============================================================================
+//
+// Runs calculateZakat() for every registered methodology preset, returning a
+// keyed record of results. The presentation layer can then pick the selected
+// methodology's output at render time — enabling instant switching, comparison
+// views, and resilience against methodology selection bugs.
+
+export interface AllMethodologyResults {
+  /** Results keyed by methodology identifier (e.g., 'bradford', 'tahir_anwar') */
+  results: Record<string, ZakatCalculationResult>;
+  /** The methodology IDs that were computed, in registry order */
+  methodologies: string[];
+  /** Wall-clock compute time in milliseconds */
+  computeTimeMs: number;
+}
+
+/**
+ * Calculate Zakat for ALL registered methodologies in a single pass.
+ *
+ * @param data - User's financial form data (madhab field is ignored; all presets are computed)
+ * @param silverPrice - Current silver price per troy ounce (USD)
+ * @param goldPrice - Current gold price per troy ounce (USD)
+ * @returns AllMethodologyResults with results for every preset
+ */
+export function calculateAllMethodologies(
+  data: ZakatFormData,
+  silverPrice: number = DEFAULT_SILVER,
+  goldPrice: number = DEFAULT_GOLD,
+): AllMethodologyResults {
+  const start = performance.now();
+  const results: Record<string, ZakatCalculationResult> = {};
+  const methodologies = Object.keys(ZAKAT_PRESETS);
+
+  for (const methodId of methodologies) {
+    const config = ZAKAT_PRESETS[methodId];
+    // Override the madhab in formData so config resolution uses the right preset
+    const dataForMethod: ZakatFormData = { ...data, madhab: methodId as ZakatFormData['madhab'] };
+    results[methodId] = calculateZakat(dataForMethod, silverPrice, goldPrice, config);
+  }
+
+  const computeTimeMs = performance.now() - start;
+
+  return { results, methodologies, computeTimeMs };
+}
