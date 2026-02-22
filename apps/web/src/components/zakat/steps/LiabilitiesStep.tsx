@@ -33,8 +33,14 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
   const methodId = data.madhab || 'bradford';
   const config = ZAKAT_PRESETS[methodId] || ZAKAT_PRESETS['bradford'];
   const liabMethod = config.liabilities.method;
-  const isAnnual = liabMethod === '12_month_rule' || liabMethod === 'full_deduction';
+  const personalTypes = (config.liabilities.personal_debt?.types || {}) as Record<string, string>;
   const fiqhExplanations = getFiqhExplanations(config);
+
+  // Per-field annualization checks (driven by type rules, not global method)
+  const housingAnnualized = personalTypes.housing === '12_months' || personalTypes.housing === 'full';
+  const livingAnnualized = personalTypes.living_expenses === '12_months' || personalTypes.living_expenses === 'full';
+  const studentLoansAnnualized = personalTypes.student_loans === '12_months' || personalTypes.student_loans === 'full';
+  const isNoDeduction = liabMethod === 'no_deduction';
 
   // Dynamic Content for AssetStepWrapper
   const dynamicContent = {
@@ -43,24 +49,26 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
       ...liabilitiesContent.introByMethodology,
       [methodId]: {
         ...liabilitiesContent.introByMethodology?.[methodId as keyof typeof liabilitiesContent.introByMethodology],
-        summary: isAnnual
-          ? "Only immediate debts due within 12 months are deductible. Long-term mortgage principal and deferred loans don't reduce your Zakatable wealth."
-          : "Only debts due this month are deductible. Future obligations do not reduce your current Zakatable wealth."
+        summary: isNoDeduction
+          ? "Debts are not deductible under this methodology."
+          : housingAnnualized
+            ? "Only immediate debts due within 12 months are deductible. Long-term mortgage principal and deferred loans don't reduce your Zakatable wealth."
+            : "Only what you plan to pay this month is deductible. Future obligations do not reduce your current Zakatable wealth."
       }
     }
   };
 
-  const livingExpensesDesc = isAnnual
-    ? "Rent, utilities, groceries, transport — annualized (×12)"
-    : liabMethod === 'no_deduction'
-      ? "Rent, utilities, groceries, transport — not deductible under this methodology"
-      : "Rent, utilities, groceries, transport — calculated for current month only";
+  const livingExpensesDesc = isNoDeduction
+    ? "Rent, utilities, groceries, transport — not deductible under this methodology"
+    : livingAnnualized
+      ? "Rent, utilities, groceries, transport — annualized (×12)"
+      : "Rent, utilities, groceries, transport — current month only";
 
-  const mortgageDesc = isAnnual
-    ? "12 months deductible under this methodology"
-    : liabMethod === 'no_deduction'
-      ? "Not deductible under this methodology"
-      : "Current month deductible only";
+  const mortgageDesc = isNoDeduction
+    ? "Not deductible under this methodology"
+    : housingAnnualized
+      ? "12 months deductible under this methodology"
+      : "Current month's payment deductible only";
 
   return (
     <AssetStepWrapper
@@ -108,7 +116,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
         documentContributions={getDocumentContributionsForField(uploadedDocuments, 'monthlyMortgage')}
         testId="monthly-mortgage-input"
       />
-      {isAnnual && data.monthlyMortgage > 20000 && (
+      {housingAnnualized && data.monthlyMortgage > 20000 && (
         <div className="p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex gap-2 items-start animate-fade-in">
           <span className="text-xl">⚠️</span>
           <div>
@@ -118,11 +126,13 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
           </div>
         </div>
       )}
-      {!isAnnual && data.monthlyMortgage > 20000 && (
+      {!housingAnnualized && data.monthlyMortgage > 20000 && (
         <div className="p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex gap-2 items-start animate-fade-in">
           <span className="text-xl">⚠️</span>
           <div>
             <strong>High Amount Detected:</strong> Are you entering your <em>total</em> mortgage balance?
+            <br />
+            Please only enter <strong>this month's payment</strong>. Only the current month is deducted.
           </div>
         </div>
       )}
@@ -181,7 +191,7 @@ export function LiabilitiesStep({ data, updateData, uploadedDocuments, onDocumen
           <div>
             <strong>High Amount Detected:</strong> Are you entering your <em>total</em> student loan balance?
             <br />
-            Please only enter <strong>ONE month's payment</strong> installment. The calculator automatically annualizes this for methodologies that deduct 12 months.
+            Please only enter <strong>ONE month's payment</strong>.{studentLoansAnnualized ? ' The calculator automatically annualizes this for the calculation.' : ' Only the current month is deducted under your methodology.'}
           </div>
         </div>
       )}
