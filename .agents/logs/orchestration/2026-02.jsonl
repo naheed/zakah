@@ -1,0 +1,4 @@
+{"timestamp":"2026-02-22T16:08:50.560Z","run_id":"test-1234","active_agent":"/senior-tech-lead","action":"TEST","reason":"Verifying JSONL append logic","context_tokens_used":1500,"redundant_file_reads":0,"hallucination_detected":false}
+{"timestamp":"2026-02-22T16:28:14.166Z","run_id":"0891F377-0D0E-4B5A-9B03-C224BC2A8391","active_agent":"/mock-orchestrator","action":"START","reason":"Initiating synthetic run"}
+{"timestamp":"2026-02-22T16:28:39.593Z","run_id":"0891F377-0D0E-4B5A-9B03-C224BC2A8391","active_agent":"/mock-worker","action":"COMPLETED","reason":"Math completed successfully."}
+{"timestamp":"2026-02-22T16:28:59.873Z","run_id":"0891F377-0D0E-4B5A-9B03-C224BC2A8391","active_agent":"/mock-orchestrator","action":"COMPLETED","reason":"Worker sum received."}

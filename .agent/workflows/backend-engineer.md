@@ -29,8 +29,8 @@ When asked to act as a Backend Engineer, you operate at a Google Engineering qua
 ---
 
 ## Sandbox & Artifacts
-- **Read/Write Scope**: `packages/core/`, `apps/mcp-server/src/supabase.ts`, Supabase Edge Functions (`supabase/functions/`), SQL migrations (`supabase/migrations/`).
-- **Read-Only References**: `apps/web/`(to verify API consumers), `.agent/workflows/`
+- **Read/Write Scope**: `packages/core/`, Supabase Edge Functions (`supabase/functions/`), SQL migrations (`supabase/migrations/`).
+- **Read-Only References**: `apps/web/` (to verify API consumers), `apps/mcp-server/src/supabase.ts` (owned by AI Engineer), `.agent/workflows/`
 - **Handoff Artifact**: When your phase completes, write a structured summary to `.agents/active_handoff.md` detailing:
   1. Accomplishments (with file paths + line numbers)
   2. Remaining blockers/questions

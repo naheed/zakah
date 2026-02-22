@@ -10,7 +10,8 @@ When the user invokes `/orchestrate [Issue/Feature]`, you are acting as the exec
 
 Execute these steps sequentially in an unbroken agentic loop:
 
-1. **State Initialization**: Run `uuidgen > .agents/.current_run` to start the telemetry session.
+1. **State Initialization**: Run `uuidgen > .agents/.current_run` to start the telemetry session. Then log your own start:
+   `npx tsx .agents/telemetry/cli.ts --run_id="$(cat .agents/.current_run)" --agent="/orchestrate" --action="START" --reason="Initiating orchestration run"`
 2. **Branch Creation**: Check out a new feature branch (e.g., `git checkout -b feat/issue-9-evals`).
 3. **Worker Implementation (Durable Handoff)**: 
    - Consult the **Routing Registry** (below) to adopt the appropriate worker persona.
@@ -18,7 +19,7 @@ Execute these steps sequentially in an unbroken agentic loop:
    - Invoke the worker, explicitly commanding them to read `.agents/active_handoff.md` and execute within their defined sandbox.
 4. **Commit & Push**: After the worker completes and returns control, read `.agents/active_handoff.md` to get their status. Commit the implementation and push (`git push -u origin <branch-name>`).
 5. **Formal Pull Request**: Open a Pull Request against the `main` branch using `gh pr create`.
-5. **Quality Assurance Audit**: Force a persona switch to the `/senior-tech-lead`. Audit the new PR:
+6. **Quality Assurance Audit**: Force a persona switch to the `/senior-tech-lead`. Audit the new PR:
    - **Write new tests first.** If the implementation added new logic, you MUST create or extend test files before declaring QA complete. Shipping new code without new tests is a DoD violation.
    - **Scoped testing.** Run tests ONLY for the affected package(s), not the entire monorepo. Use the following commands based on the blast radius:
      - `apps/mcp-server` only: `cd apps/mcp-server && npm test`
@@ -28,6 +29,7 @@ Execute these steps sequentially in an unbroken agentic loop:
      - E2E (UI regression): `cd apps/web && npx playwright test e2e/static-pages-a11y.spec.ts`
    - **Mathematically prove** the worker's code did not break the affected package's test contract.
 7. **Merge & Clean & Log**: If (and only if) the tech lead audit passes, merge the PR natively (`gh pr merge --squash`), close the issue.
+   - Log completion: `npx tsx .agents/telemetry/cli.ts --run_id="$(cat .agents/.current_run)" --agent="/orchestrate" --action="COMPLETED" --reason="PR merged and issue closed."`
    - Finally, run `rm .agents/.current_run .agents/active_handoff.md` to clear the state.
 
 ### Exception Handling & Escalations
@@ -38,7 +40,7 @@ You must complete all 7 steps autonomously. The **ONLY** reasons you should halt
 
 ---
 
-## 🗺️ Routing Registry (The 11-Agent Taxonomy)
+## 🗺️ Routing Registry (9 Worker Personas)
 
 When orchestrating, map tasks to these Best-in-Class profiles:
 
