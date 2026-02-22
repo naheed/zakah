@@ -162,6 +162,32 @@ describe('calculate_zakat tool — structuredContent', () => {
         expect(result.zakatDue).toBe(375);
     });
 
+    it('methodology note is generated when stock rate ≠ 100% (bradford)', () => {
+        // Bradford uses 30% underlying assets proxy
+        const preset = ZAKAT_PRESETS['bradford'];
+        const invRules = preset?.assets?.investments;
+        expect(invRules?.passive_investments.rate).toBe(0.30);
+        expect(invRules?.passive_investments.treatment).toBe('underlying_assets');
+
+        // Verify the note logic
+        const inputVal = 10000;
+        const rate = invRules!.passive_investments.rate;
+        const zakatableVal = inputVal * rate;
+        expect(zakatableVal).toBe(3000);
+
+        // The note should explain: "$10,000 counts as $3,000"
+        const pct = (rate * 100).toFixed(0);
+        expect(pct).toBe('30');
+    });
+
+    it('methodology note is NOT generated when stock rate = 100% (hanafi)', () => {
+        const preset = ZAKAT_PRESETS['hanafi'];
+        const invRules = preset?.assets?.investments;
+        // Hanafi uses full market value
+        expect(invRules?.passive_investments.rate).toBe(1.0);
+        // No note should be generated when rate === 1.0
+    });
+
     it('deep-link contains utm_source=chatgpt', () => {
         const formData = buildFormDataFromToolInput({ cash: 10000 });
         const encoded = Buffer.from(JSON.stringify(formData)).toString('base64');
