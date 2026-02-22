@@ -1,1 +1,4 @@
 project_id = "pcwdpsoheoiiavkeyeyx"
+
+[functions.mcp-gateway]
+verify_jwt = false
