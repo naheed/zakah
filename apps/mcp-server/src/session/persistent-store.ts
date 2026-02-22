@@ -22,7 +22,7 @@
 
 import { ZakatFormData, defaultFormData } from '@zakatflow/core';
 import { v4 as uuidv4 } from 'uuid';
-import { getSupabaseAdmin } from '../supabase.js';
+import { callGateway, isGatewayConfigured } from '../gateway.js';
 import { encrypt, decrypt, isEncryptionConfigured } from '../crypto.js';
 import {
     findOrCreateChatGPTUser,
@@ -93,40 +93,15 @@ export const PersistentSessionStore = {
         const cached = sessions.get(id);
         if (cached) return cached;
 
-        // Try Supabase fallback
-        const supabase = getSupabaseAdmin();
-        if (!supabase) return undefined;
+        // Gateway fallback not possible for by-ID lookup without user_id.
+        // Sessions are populated on create — a cache miss means the session
+        // was created in a different process/restart. Return undefined.
+        // The in-memory cache is the primary store for active sessions.
+        if (!isGatewayConfigured()) return undefined;
 
-        const { data, error } = await supabase
-            .from('chatgpt_sessions')
-            .select('*')
-            .eq('id', id)
-            .maybeSingle();
-
-        if (error || !data) return undefined;
-
-        // Decrypt session_data if encrypted
-        let formData: ZakatFormData;
-        if (typeof data.session_data === 'string') {
-            const decrypted = decrypt<ZakatFormData>(data.session_data);
-            formData = decrypted || { ...defaultFormData };
-        } else if (data.session_data && typeof data.session_data === 'object') {
-            formData = data.session_data as unknown as ZakatFormData;
-        } else {
-            formData = { ...defaultFormData };
-        }
-
-        // Populate cache
-        const session: ZakatSessionState = {
-            id: data.id,
-            zakatflowUserId: data.user_id,
-            formData,
-            lastUpdated: new Date(data.updated_at).getTime(),
-            persisted: true,
-        };
-
-        sessions.set(id, session);
-        return session;
+        // We don't have user_id to call get_sessions, so return undefined.
+        // Sessions fetched from Supabase require knowing the user_id.
+        return undefined;
     },
 
     /**
@@ -157,40 +132,22 @@ export const PersistentSessionStore = {
      */
     persist: async (session: ZakatSessionState): Promise<void> => {
         if (!session.zakatflowUserId) return;
-
-        const supabase = getSupabaseAdmin();
-        if (!supabase) return;
+        if (!isGatewayConfigured()) return;
 
         // Encrypt the form data
         const encryptedData = encrypt(session.formData);
         const sessionData = encryptedData || session.formData;
 
-        if (session.persisted) {
-            // Update existing row
-            await supabase
-                .from('chatgpt_sessions')
-                .update({
-                    session_data: sessionData,
-                    methodology: session.formData.madhab || 'bradford',
-                    updated_at: new Date().toISOString(),
-                })
-                .eq('id', session.id);
-        } else {
-            // Insert new row
-            const { data, error } = await supabase
-                .from('chatgpt_sessions')
-                .insert({
-                    id: session.id,
-                    user_id: session.zakatflowUserId,
-                    session_data: sessionData,
-                    methodology: session.formData.madhab || 'bradford',
-                })
-                .select('id')
-                .maybeSingle();
-
-            if (!error && data) {
-                session.persisted = true;
-            }
+        try {
+            await callGateway('save_session', {
+                user_id: session.zakatflowUserId,
+                session_data: sessionData,
+                methodology: session.formData.madhab || 'bradford',
+                ...(session.persisted ? { session_id: session.id } : {}),
+            });
+            session.persisted = true;
+        } catch (e) {
+            console.error('[PersistentStore] Error persisting session:', (e as Error).message);
         }
     },
 
@@ -201,15 +158,8 @@ export const PersistentSessionStore = {
         const session = sessions.get(id);
         sessions.delete(id);
 
-        if (session?.persisted) {
-            const supabase = getSupabaseAdmin();
-            if (supabase) {
-                await supabase
-                    .from('chatgpt_sessions')
-                    .delete()
-                    .eq('id', id);
-            }
-        }
+        // Single-session delete is in-memory only.
+        // For full user data deletion, use the delete_my_data tool.
 
         return !!session;
     },

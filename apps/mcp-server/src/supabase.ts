@@ -14,16 +14,14 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // ---------------------------------------------------------------------------
 // SUPABASE_URL           — Project URL (e.g. https://pcwdpsoheoiiavkeyeyx.supabase.co)
 // SUPABASE_ANON_KEY      — Publishable anon key (for public reads: nisab_values, currency_rates)
-// SUPABASE_SERVICE_KEY   — Service role key (bypasses RLS, for chatgpt_users/sessions writes)
 //
-// The MCP server uses TWO clients:
-// 1. `supabase` (anon) — for reading public data that respects RLS
-// 2. `supabaseAdmin` (service-role) — for writing ChatGPT user/session data
+// NOTE: The service role key (SUPABASE_SERVICE_KEY) is no longer used directly.
+// All privileged operations are routed through the mcp-gateway edge function
+// via MCP_GATEWAY_SECRET. See gateway.ts for details.
 // ---------------------------------------------------------------------------
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 
 /**
  * Public Supabase client using the anon key.
@@ -32,17 +30,10 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 let _supabase: SupabaseClient | null = null;
 
 /**
- * Admin Supabase client using the service role key.
- * Bypasses RLS — used for ChatGPT user/session management.
- * ⚠️ Never expose this client or the service role key to end users.
- */
-let _supabaseAdmin: SupabaseClient | null = null;
-
-/**
- * Check if Supabase is configured (URL + at least one key present).
+ * Check if Supabase is configured (URL + anon key present).
  */
 export function isSupabaseConfigured(): boolean {
-    return !!(SUPABASE_URL && (SUPABASE_ANON_KEY || SUPABASE_SERVICE_KEY));
+    return !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 
 /**
@@ -58,29 +49,8 @@ export function getSupabase(): SupabaseClient | null {
 }
 
 /**
- * Get the admin Supabase client (service role key, bypasses RLS).
- * Returns null if the service role key is not configured.
- *
- * ⚠️ WARNING: This client bypasses all Row-Level Security policies.
- * Only use for server-side operations (ChatGPT user/session management).
- */
-export function getSupabaseAdmin(): SupabaseClient | null {
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
-    if (!_supabaseAdmin) {
-        _supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false,
-            },
-        });
-    }
-    return _supabaseAdmin;
-}
-
-/**
  * Reset cached clients (used for testing).
  */
 export function resetSupabaseClients(): void {
     _supabase = null;
-    _supabaseAdmin = null;
 }

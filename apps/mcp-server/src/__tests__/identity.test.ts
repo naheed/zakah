@@ -23,10 +23,8 @@ describe('supabase client module', () => {
         // Clear env vars
         const origUrl = process.env.SUPABASE_URL;
         const origAnon = process.env.SUPABASE_ANON_KEY;
-        const origService = process.env.SUPABASE_SERVICE_KEY;
         delete process.env.SUPABASE_URL;
         delete process.env.SUPABASE_ANON_KEY;
-        delete process.env.SUPABASE_SERVICE_KEY;
 
         const { isSupabaseConfigured } = await import('../supabase.js');
         expect(isSupabaseConfigured()).toBe(false);
@@ -34,7 +32,6 @@ describe('supabase client module', () => {
         // Restore
         if (origUrl) process.env.SUPABASE_URL = origUrl;
         if (origAnon) process.env.SUPABASE_ANON_KEY = origAnon;
-        if (origService) process.env.SUPABASE_SERVICE_KEY = origService;
     });
 
     it('getSupabase returns null when URL is not set', async () => {
@@ -44,12 +41,38 @@ describe('supabase client module', () => {
         const { getSupabase } = await import('../supabase.js');
         expect(getSupabase()).toBeNull();
     });
+});
 
-    it('getSupabaseAdmin returns null when service key is not set', async () => {
-        delete process.env.SUPABASE_SERVICE_KEY;
+// ---------------------------------------------------------------------------
+// Gateway Client Module Tests
+// ---------------------------------------------------------------------------
+describe('gateway client module', () => {
 
-        const { getSupabaseAdmin } = await import('../supabase.js');
-        expect(getSupabaseAdmin()).toBeNull();
+    beforeEach(() => {
+        vi.resetModules();
+    });
+
+    it('isGatewayConfigured returns false when no env vars set', async () => {
+        const origUrl = process.env.SUPABASE_URL;
+        const origSecret = process.env.MCP_GATEWAY_SECRET;
+        delete process.env.SUPABASE_URL;
+        delete process.env.MCP_GATEWAY_SECRET;
+
+        const { isGatewayConfigured } = await import('../gateway.js');
+        expect(isGatewayConfigured()).toBe(false);
+
+        // Restore
+        if (origUrl) process.env.SUPABASE_URL = origUrl;
+        if (origSecret) process.env.MCP_GATEWAY_SECRET = origSecret;
+    });
+
+    it('callGateway throws when gateway is not configured', async () => {
+        delete process.env.SUPABASE_URL;
+        delete process.env.MCP_GATEWAY_SECRET;
+
+        const { callGateway } = await import('../gateway.js');
+        await expect(callGateway('find_or_create_user', {}))
+            .rejects.toThrow('MCP Gateway not configured');
     });
 });
 
@@ -58,10 +81,10 @@ describe('supabase client module', () => {
 // ---------------------------------------------------------------------------
 describe('ChatGPT identity service', () => {
 
-    it('findOrCreateChatGPTUser returns null when Supabase is not configured', async () => {
-        // Ensure no Supabase env vars
+    it('findOrCreateChatGPTUser returns null when gateway is not configured', async () => {
+        // Ensure no gateway env vars
         delete process.env.SUPABASE_URL;
-        delete process.env.SUPABASE_SERVICE_KEY;
+        delete process.env.MCP_GATEWAY_SECRET;
 
         vi.resetModules();
         const { findOrCreateChatGPTUser } = await import('../identity/chatgpt.js');
@@ -69,9 +92,9 @@ describe('ChatGPT identity service', () => {
         expect(result).toBeNull();
     });
 
-    it('saveSession returns null when Supabase is not configured', async () => {
+    it('saveSession returns null when gateway is not configured', async () => {
         delete process.env.SUPABASE_URL;
-        delete process.env.SUPABASE_SERVICE_KEY;
+        delete process.env.MCP_GATEWAY_SECRET;
 
         vi.resetModules();
         const { saveSession } = await import('../identity/chatgpt.js');
@@ -84,9 +107,9 @@ describe('ChatGPT identity service', () => {
         expect(result).toBeNull();
     });
 
-    it('getRecentSessions returns empty array when Supabase is not configured', async () => {
+    it('getRecentSessions returns empty array when gateway is not configured', async () => {
         delete process.env.SUPABASE_URL;
-        delete process.env.SUPABASE_SERVICE_KEY;
+        delete process.env.MCP_GATEWAY_SECRET;
 
         vi.resetModules();
         const { getRecentSessions } = await import('../identity/chatgpt.js');
@@ -94,9 +117,9 @@ describe('ChatGPT identity service', () => {
         expect(result).toEqual([]);
     });
 
-    it('updatePreferredMadhab does not throw when Supabase is not configured', async () => {
+    it('updatePreferredMadhab does not throw when gateway is not configured', async () => {
         delete process.env.SUPABASE_URL;
-        delete process.env.SUPABASE_SERVICE_KEY;
+        delete process.env.MCP_GATEWAY_SECRET;
 
         vi.resetModules();
         const { updatePreferredMadhab } = await import('../identity/chatgpt.js');
