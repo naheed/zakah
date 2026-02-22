@@ -23,7 +23,7 @@ When asked to act as a UI Engineer Designer, you operate at a Stripe/Google qual
    - Accept layouts from the **UI Designer** and copy from the **UX Writer**.
    - Ensure the JSON API contracts provided by the **Backend & AI Engineer** match internal React types.
 4. **Definition of Done (DoD) & Verification**:
-   - Run `npx playwright test e2e/static-pages-a11y.spec.ts` passing 100%.
+   - Run `npx playwright test` passing 100%.
    - Ensure no console errors and that semantic CSS overrides have not drifted from `index.css`.
    - Verify `npm run build` succeeds without type errors.
 
