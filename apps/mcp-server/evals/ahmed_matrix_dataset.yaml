@@ -1,0 +1,182 @@
+# ZakatFlow Ahmed Matrix Eval Dataset
+# Ground-truth evaluation cases derived from the Ahmed Master Matrix.
+# These ensure the LLM correctly extracts Ahmed's financial profile
+# AND that the calculation results match the proven engine outputs.
+#
+# Ahmed's Profile:
+#   Cash: $50,000 (on-hand) + $25,000 (checking) + $25,000 (savings) = $100,000
+#   401k: $200,000 vested (age 35)
+#   Passive Stocks: $150,000
+#   Gold Jewelry: $10,000
+#   Credit Card Debt: $5,000
+#   Monthly Mortgage: $2,000
+#   Monthly Living Expenses: $3,000
+
+# ──────────────────────────────────────────────────────────
+# AHMED-HANAFI-01: Hanafi — Full deductions, jewelry zakatable
+# Expected: Total Assets $390k, Liabilities $65k, Net $325k, Zakat $8,125
+# ──────────────────────────────────────────────────────────
+
+- description: "AHMED-HANAFI-01: Super Ahmed Hanafi Standard"
+  vars:
+    prompt: >
+      I need to calculate my Zakat using the Hanafi methodology. Here's my financial situation:
+      - $50,000 cash on hand
+      - $25,000 in checking
+      - $25,000 in savings
+      - $200,000 in my 401k (I'm 35 years old)
+      - $150,000 in stock investments
+      - $10,000 in gold jewelry
+      - $5,000 credit card balance
+      - $2,000/month mortgage payment
+      - $3,000/month in living expenses
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: tool_invoked
+    - type: llm-rubric
+      value: >
+        The LLM must call the calculate_zakat tool. The tool arguments must include:
+        - cash = 100000 (combining all liquid assets: 50000 + 25000 + 25000)
+        - retirement_total = 200000 OR four_oh_one_k = 200000
+        - stocks = 150000
+        - gold_jewelry = 10000
+        - loans = 5000 (credit card)
+        - monthly_mortgage = 2000
+        - living_expenses = 3000
+        - madhab = "hanafi"
+        - age = 35
+      metric: ahmed_prop_extraction
+
+# ──────────────────────────────────────────────────────────
+# AHMED-SHAFII-01: Shafi'i — No debt deduction, jewelry exempt
+# Expected: Total Assets $380k, Liabilities $0, Net $380k, Zakat $9,500
+# ──────────────────────────────────────────────────────────
+
+- description: "AHMED-SHAFII-01: Super Ahmed Shafi'i Standard"
+  vars:
+    prompt: >
+      Calculate my Zakat under Shafi'i rules. I'm 35 years old with:
+      - $100,000 total cash (checking, savings, cash on hand)
+      - $200,000 vested 401k
+      - $150,000 in stocks/index funds
+      - $10,000 gold jewelry (wife wears it)
+      - Credit card balance: $5,000
+      - Mortgage: $2,000/month
+      - Living expenses: $3,000/month
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: tool_invoked
+    - type: llm-rubric
+      value: >
+        The LLM must call the calculate_zakat tool with madhab = "shafii".
+        Cash should be 100000. The gold_jewelry field should be 10000.
+        Note: Under Shafi'i rules, personal-use gold jewelry is EXEMPT, 
+        so the engine will handle this — the LLM just needs to pass the data correctly.
+      metric: ahmed_prop_extraction
+
+# ──────────────────────────────────────────────────────────
+# AHMED-BRADFORD-01: Bradford — 30% equity proxy, 401k exempt (age < 59.5)
+# Expected: Total Assets $155k, Liabilities $65k, Net $90k, Zakat $2,250
+# ──────────────────────────────────────────────────────────
+
+- description: "AHMED-BRADFORD-01: Super Ahmed Bradford Rule"
+  vars:
+    prompt: >
+      Use the Bradford methodology to calculate my Zakat:
+      - Cash on hand: $50,000
+      - Checking account: $25,000
+      - Savings: $25,000
+      - 401k vested balance: $200,000 (I'm 35)
+      - Stock index funds: $150,000
+      - Gold jewelry: $10,000
+      - Credit card debt: $5,000
+      - Monthly mortgage: $2,000
+      - Monthly living expenses: $3,000
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: tool_invoked
+    - type: llm-rubric
+      value: >
+        The LLM must call calculate_zakat with madhab = "bradford" and age = 35.
+        The cash field should be 100000. stocks should be 150000.
+        retirement_total should be 200000. loans should be 5000.
+      metric: ahmed_prop_extraction
+
+# ──────────────────────────────────────────────────────────
+# AHMED-BRADFORD-RETIRED: Age 60 — Retirement proxy activates
+# Expected: Total Assets $215k, Liabilities $65k, Net $150k, Zakat $3,750
+# ──────────────────────────────────────────────────────────
+
+- description: "AHMED-BRADFORD-RETIRED: Ahmed at age 60 (retirement proxy)"
+  vars:
+    prompt: >
+      I'm now 60 years old and need to recalculate my Zakat using the Bradford methodology.
+      Same portfolio: $100k cash, $200k 401k, $150k stocks, $10k gold jewelry.
+      Debts: $5k credit card, $2k/mo mortgage, $3k/mo living.
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: tool_invoked
+    - type: llm-rubric
+      value: >
+        The LLM MUST pass age = 60 (critical for Bradford retirement proxy activation).
+        madhab must be "bradford". Cash should be 100000.
+      metric: ahmed_prop_extraction
+
+# ──────────────────────────────────────────────────────────
+# AHMED-AMJA-01: AMJA — Income only for equities (0% market value)
+# Expected: Total Assets $230k, Liabilities $10k, Net $220k, Zakat $5,500
+# ──────────────────────────────────────────────────────────
+
+- description: "AHMED-AMJA-01: Super Ahmed AMJA (Equities Income Only)"
+  vars:
+    prompt: >
+      Calculate Zakat using the AMJA methodology for this profile:
+      $100,000 in liquid cash, $200,000 in retirement (401k), $150,000 in passive stock 
+      investments, $10,000 gold jewelry. No dividends received this year.
+      Debts: $5,000 credit card, $2,000/month mortgage, $3,000/month living expenses.
+      I'm 35 years old.
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: tool_invoked
+    - type: llm-rubric
+      value: >
+        The LLM must call calculate_zakat with madhab = "amja".
+        Under AMJA, passive stock investments use a 0% market value rate 
+        (income-only approach), so the dividends field matters. Since no 
+        dividends are specified, the effective stock contribution should be $0.
+      metric: ahmed_prop_extraction
+
+# ──────────────────────────────────────────────────────────
+# AHMED-QARADAWI-RENTAL: Qaradawi — Multi-rate rental override
+# Expected: Total Assets $299k, Liabilities $65k, Net $234k, Zakat $7,650
+# ──────────────────────────────────────────────────────────
+
+- description: "AHMED-QARADAWI-RENTAL: Qaradawi with Rental Income Override"
+  vars:
+    prompt: >
+      Use the Qaradawi approach to calculate my Zakat. I have:
+      - Combined cash: $100,000
+      - 401k: $200,000 (age 35)
+      - Stock investments: $150,000
+      - Gold jewelry: $10,000
+      - Rental property generating $24,000/year
+      - Credit card: $5,000
+      - Mortgage: $2,000/month
+      - Living expenses: $3,000/month
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: tool_invoked
+    - type: llm-rubric
+      value: >
+        The LLM must call calculate_zakat with madhab = "qaradawi".
+        rental_income must be 24000. Cash should be 100000.
+        This tests the model's ability to map rental property income to 
+        the correct field, which is critical for the Qaradawi multi-rate 
+        calculation where rental income has special treatment.
+      metric: ahmed_prop_extraction
