@@ -2,12 +2,15 @@
 
 Since remote GitHub issue creation is currently blocked, this document serves as the source of truth for the execution of the Eval Infrastructure project.
 
-## 1. Intent Routing & Text Query Eval Matrix
+> [!NOTE]
+> Terminal tool commands are experiencing hangs in the agent environment. Commands may need to be run manually by the user.
+
+## 1. Intent Routing & Text Query Eval Matrix ✅
 **Objective:** Assert that the MCP Router correctly identifies when to output text vs when to invoke a UI tool, and evaluate the quality/safety of text responses.
-- [ ] Create a golden dataset in Promptfoo/Vitest testing 20 distinct intents (10 UI tasks, 10 simple conversational tasks).
-- [ ] Implement a deterministic `tool_not_called` assertion for text-only Fiqh queries to ensure no UI is rendered.
-- [ ] Implement an LLM-as-a-judge rubric evaluating theological safety and tone for conversational queries (must include necessary caveats like Hawl).
-- [ ] Implement an assertion ensuring no hallucinated markdown leakages (e.g., `assert("|" not in response.text)`).
+- [x] Create a golden dataset in Promptfoo/Vitest testing 20 distinct intents (10 UI tasks, 10 simple conversational tasks).
+- [x] Implement a deterministic `tool_not_called` assertion for text-only Fiqh queries to ensure no UI is rendered.
+- [x] Implement an LLM-as-a-judge rubric evaluating theological safety and tone for conversational queries (must include necessary caveats like Hawl).
+- [x] Implement an assertion ensuring no hallucinated markdown leakages (e.g., `assert("|" not in response.text)`).
 
 ## 2. UI Query "No Redundancy" & Schema Evals
 **Objective:** Ensure the LLM generates correct tool arguments and stops redundantly explaining the math.
