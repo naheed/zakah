@@ -135,27 +135,62 @@ const MASTER_MATRIX = [
 
 
 // The exact schema exposed by the MCP Server for the LLM
+// Expanded to match the full calculate_zakat tool schema in tools/calculate_zakat.ts
 const mcpToolSchema = {
     name: "calculate_zakat",
-    description: "Calculate Zakat based on Islamic financial rules.",
+    description: "Calculate Zakat obligation based on Islamic jurisprudence. Supports ALL asset categories: cash, precious metals, crypto, investments, retirement, trusts, real estate, business, illiquid assets, and detailed liabilities.",
     input_schema: {
         type: "object" as const,
         properties: {
             cash: { type: "number", description: "Total cash assets (checking, savings, cash on hand)." },
-            gold_value: { type: "number", description: "Value of gold investment/jewelry in USD." },
-            gold_grams: { type: "number", description: "Weight of gold in grams." },
-            silver_value: { type: "number", description: "Value of silver investment/jewelry in USD." },
+            gold_value: { type: "number", description: "Value of gold investment in USD." },
+            gold_grams: { type: "number", description: "Weight of gold in grams (for conversion)." },
+            gold_jewelry: { type: "number", description: "Value of personal-use gold jewelry in USD. Zakatability varies by madhab." },
+            silver_value: { type: "number", description: "Value of silver investment in USD." },
             silver_grams: { type: "number", description: "Weight of silver in grams." },
-            short_term_investments: { type: "number", description: "Value of active trading assets or short-term investments (100% zakatable)." },
-            long_term_investments: { type: "number", description: "Value of long-term passive hold assets (stocks, funds) - subject to 30% proxy rule." },
-            retirement_total: { type: "number", description: "Total vested balance of retirement accounts (401k, IRA)." },
-            age: { type: "number", description: "User's age (crucial for retirement exemption rules)." },
-            loans: { type: "number", description: "Start with 0. ONLY include immediate debts due NOW (credit cards, bills, past due). DO NOT include long-term mortgage/student loan balances here." },
-            monthly_mortgage: { type: "number", description: "Monthly payment for primary residence mortgage (deductible for 12 months)." },
+            silver_jewelry: { type: "number", description: "Value of personal-use silver jewelry in USD." },
+            crypto: { type: "number", description: "Value of held cryptocurrency (e.g., Bitcoin, Ethereum)." },
+            crypto_trading: { type: "number", description: "Value of crypto in active trading positions." },
+            staked_assets: { type: "number", description: "Value of staked/locked crypto assets." },
+            staked_rewards: { type: "number", description: "Value of vested staking rewards." },
+            liquidity_pool: { type: "number", description: "Value of DeFi liquidity pool positions." },
+            stocks: { type: "number", description: "Value of long-term passive hold assets (stocks, index funds, ETFs). Rate varies by madhab." },
+            active_trading: { type: "number", description: "Value of short-term/active trading positions (100% zakatable)." },
+            reits: { type: "number", description: "Value of Real Estate Investment Trusts." },
+            dividends: { type: "number", description: "Annual dividends received from passive investments. Critical for AMJA income-only method." },
+            retirement_total: { type: "number", description: "Total vested balance of retirement accounts (401k, IRA). Tax-adjusted by engine." },
+            roth_ira_contributions: { type: "number", description: "Roth IRA contribution principal (tax-free)." },
+            roth_ira_earnings: { type: "number", description: "Roth IRA earnings above contributions." },
+            traditional_ira: { type: "number", description: "Traditional IRA balance." },
+            four_oh_one_k: { type: "number", description: "401k vested balance." },
+            hsa_balance: { type: "number", description: "Health Savings Account balance." },
+            age: { type: "number", description: "User's age. CRITICAL for Bradford retirement exemption (under 59.5 = exempt, over = proxy rate)." },
+            revocable_trust: { type: "number", description: "Revocable trust value (fully zakatable)." },
+            irrevocable_trust: { type: "number", description: "Irrevocable trust value (zakatable if accessible)." },
+            real_estate_for_sale: { type: "number", description: "Value of real estate held for sale (trade goods, 100% zakatable)." },
+            land_banking: { type: "number", description: "Value of land held for investment." },
+            rental_income: { type: "number", description: "Annual rental property income. Special treatment under Qaradawi multi-rate." },
+            business_cash: { type: "number", description: "Business cash and accounts receivable." },
+            business_inventory: { type: "number", description: "Business inventory at cost." },
+            illiquid_assets: { type: "number", description: "Value of illiquid/hard-to-sell assets." },
+            livestock: { type: "number", description: "Value of livestock." },
+            good_debt_owed: { type: "number", description: "Good debt owed TO the user (expected to be repaid)." },
+            bad_debt_recovered: { type: "number", description: "Bad debt recently recovered." },
+            loans: { type: "number", description: "Immediate debts due NOW (credit cards, bills). Do NOT include long-term balances." },
+            unpaid_bills: { type: "number", description: "Unpaid bills and utilities." },
+            monthly_mortgage: { type: "number", description: "Monthly primary residence mortgage payment (annualized for deduction)." },
+            student_loans: { type: "number", description: "Monthly student loan payment." },
+            property_tax: { type: "number", description: "Annual property tax." },
+            living_expenses: { type: "number", description: "Monthly living expenses (annualized for Hanafi/Bradford deduction)." },
             madhab: {
                 type: "string",
-                enum: ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali', 'amja', 'qaradawi'],
-                description: "School of thought for calculation rules."
+                enum: ['bradford', 'hanafi', 'shafii', 'maliki', 'hanbali', 'amja', 'qaradawi', 'tahir_anwar'],
+                description: "School of thought / methodology preset for calculation rules."
+            },
+            nisab_standard: {
+                type: "string",
+                enum: ['silver', 'gold'],
+                description: "Nisab threshold standard. Silver is more conservative (lower threshold)."
             },
         },
         required: ["cash", "madhab"]
@@ -188,6 +223,117 @@ User Situation (${matrixCase.description}):
 
 Extract the relevant information and call the calculate_zakat tool. Do not guess the math; your job is strictly to map these values to the correct arguments in the tool schema.
     `;
+}
+
+// =============================================================================
+// Enhanced Assertion Logic — validates all relevant fields per Ahmed case
+// =============================================================================
+
+interface AssertionResult {
+    passed: boolean;
+    details: string[];
+}
+
+function validateToolArgs(args: Record<string, any>, testCase: any): AssertionResult {
+    const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
+    const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
+    const details: string[] = [];
+    let passed = true;
+
+    // === Required: cash mapping ===
+    if (args.cash !== expectedCash) {
+        details.push(`cash: expected ${expectedCash}, got ${args.cash}`);
+        passed = false;
+    } else {
+        details.push(`✓ cash = ${args.cash}`);
+    }
+
+    // === Required: madhab mapping ===
+    if (args.madhab !== testCase.madhab) {
+        details.push(`madhab: expected "${testCase.madhab}", got "${args.madhab}"`);
+        passed = false;
+    } else {
+        details.push(`✓ madhab = "${args.madhab}"`);
+    }
+
+    // === Age — critical for Bradford retirement proxy ===
+    const expectedAge = inputs.age;
+    if (expectedAge && args.age !== expectedAge) {
+        details.push(`age: expected ${expectedAge}, got ${args.age}`);
+        // Only fail for Bradford retirement cases where age is the differentiator
+        if (testCase.madhab === 'bradford') passed = false;
+    } else if (args.age) {
+        details.push(`✓ age = ${args.age}`);
+    }
+
+    // === Retirement ===
+    if (inputs.fourOhOneKVestedBalance > 0) {
+        const retVal = args.retirement_total || args.four_oh_one_k || 0;
+        if (retVal !== inputs.fourOhOneKVestedBalance) {
+            details.push(`retirement: expected ${inputs.fourOhOneKVestedBalance}, got ${retVal}`);
+        } else {
+            details.push(`✓ retirement = ${retVal}`);
+        }
+    }
+
+    // === Stocks ===
+    if (inputs.passiveInvestmentsValue > 0) {
+        const stockVal = args.stocks || args.long_term_investments || 0;
+        if (stockVal !== inputs.passiveInvestmentsValue) {
+            details.push(`stocks: expected ${inputs.passiveInvestmentsValue}, got ${stockVal}`);
+        } else {
+            details.push(`✓ stocks = ${stockVal}`);
+        }
+    }
+
+    // === Gold Jewelry ===
+    if (inputs.goldJewelryValue > 0) {
+        const goldVal = args.gold_jewelry || args.gold_value || 0;
+        if (goldVal !== inputs.goldJewelryValue) {
+            details.push(`gold_jewelry: expected ${inputs.goldJewelryValue}, got ${goldVal}`);
+        } else {
+            details.push(`✓ gold_jewelry = ${goldVal}`);
+        }
+    }
+
+    // === Loans / Credit Card ===
+    if (inputs.creditCardBalance > 0) {
+        if (args.loans !== inputs.creditCardBalance) {
+            details.push(`loans: expected ${inputs.creditCardBalance}, got ${args.loans}`);
+        } else {
+            details.push(`✓ loans = ${args.loans}`);
+        }
+    }
+
+    // === Monthly Mortgage ===
+    if (inputs.monthlyMortgage > 0) {
+        if (args.monthly_mortgage !== inputs.monthlyMortgage) {
+            details.push(`monthly_mortgage: expected ${inputs.monthlyMortgage}, got ${args.monthly_mortgage}`);
+        } else {
+            details.push(`✓ monthly_mortgage = ${args.monthly_mortgage}`);
+        }
+    }
+
+    // === Living Expenses ===
+    if (inputs.monthlyLivingExpenses > 0) {
+        if (args.living_expenses !== inputs.monthlyLivingExpenses) {
+            details.push(`living_expenses: expected ${inputs.monthlyLivingExpenses}, got ${args.living_expenses} (optional — not all schemas expose this)`);
+        } else {
+            details.push(`✓ living_expenses = ${args.living_expenses}`);
+        }
+    }
+
+    // === Rental Income (Qaradawi case) ===
+    if (inputs.rentalPropertyIncome > 0) {
+        if (args.rental_income !== inputs.rentalPropertyIncome) {
+            details.push(`rental_income: expected ${inputs.rentalPropertyIncome}, got ${args.rental_income}`);
+            passed = false; // Critical for Qaradawi
+        } else {
+            details.push(`✓ rental_income = ${args.rental_income}`);
+        }
+    }
+
+    return { passed, details };
 }
 
 async function evaluateAnthropic(): Promise<{ passed: number, failed: number }> {
@@ -226,19 +372,15 @@ async function evaluateAnthropic(): Promise<{ passed: number, failed: number }> 
             }
 
             const args = toolCall.input as Record<string, any>;
-            const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
-            const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
+            const result = validateToolArgs(args, testCase);
 
-            let casePassed = true;
-            if (args.cash !== expectedCash) casePassed = false;
-            if (args.madhab !== testCase.madhab) casePassed = false;
-            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60 && args.age !== 60) casePassed = false;
-
-            if (casePassed) {
+            if (result.passed) {
                 console.log(`  ✅ Passed`);
+                result.details.forEach(d => console.log(`     ${d}`));
                 passed++;
             } else {
-                console.error(`  ❌ Failed mapping. Expected cash=$${expectedCash}, madhab=${testCase.madhab}. Got:`, args);
+                console.error(`  ❌ Failed mapping:`);
+                result.details.forEach(d => console.error(`     ${d}`));
                 failed++;
             }
         } catch (error) {
@@ -294,19 +436,15 @@ async function evaluateOpenAI(): Promise<{ passed: number, failed: number }> {
             }
 
             const args = JSON.parse(toolCall.function.arguments);
-            const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
-            const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
+            const result = validateToolArgs(args, testCase);
 
-            let casePassed = true;
-            if (args.cash !== expectedCash) casePassed = false;
-            if (args.madhab !== testCase.madhab) casePassed = false;
-            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60 && args.age !== 60) casePassed = false;
-
-            if (casePassed) {
+            if (result.passed) {
                 console.log(`  ✅ Passed`);
+                result.details.forEach(d => console.log(`     ${d}`));
                 passed++;
             } else {
-                console.error(`  ❌ Failed mapping. Expected cash=$${expectedCash}, madhab=${testCase.madhab}. Got:`, args);
+                console.error(`  ❌ Failed mapping:`);
+                result.details.forEach(d => console.error(`     ${d}`));
                 failed++;
             }
         } catch (error) {
@@ -360,19 +498,15 @@ async function evaluateGemini(): Promise<{ passed: number, failed: number }> {
 
             const toolCall = functionCalls[0];
             const args = toolCall.args as Record<string, any>;
-            const inputs = { ...COMMON_AHMED_INPUTS, ...testCase.inputs };
-            const expectedCash = (inputs.checkingAccounts || 0) + (inputs.savingsAccounts || 0) + (inputs.cashOnHand || 0);
+            const result = validateToolArgs(args, testCase);
 
-            let casePassed = true;
-            if (args.cash !== expectedCash) casePassed = false;
-            if (args.madhab !== testCase.madhab) casePassed = false;
-            if (testCase.madhab === 'bradford' && testCase.inputs?.age === 60 && args.age !== 60) casePassed = false;
-
-            if (casePassed) {
+            if (result.passed) {
                 console.log(`  ✅ Passed`);
+                result.details.forEach(d => console.log(`     ${d}`));
                 passed++;
             } else {
-                console.error(`  ❌ Failed mapping. Expected cash=$${expectedCash}, madhab=${testCase.madhab}. Got:`, args);
+                console.error(`  ❌ Failed mapping:`);
+                result.details.forEach(d => console.error(`     ${d}`));
                 failed++;
             }
         } catch (error) {

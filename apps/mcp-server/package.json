@@ -13,7 +13,8 @@
         "test:watch": "vitest",
         "eval": "npm --workspace=apps/mcp-server/src/evals install && npm --workspace=apps/mcp-server/src/evals run evaluate",
         "eval:local": "tsx src/evals/run-agentic-evals.ts",
-        "eval:routing": "npx promptfoo eval --config promptfooconfig.yaml"
+        "eval:routing": "npx promptfoo eval --config promptfooconfig.yaml",
+        "eval:ahmed": "npx promptfoo eval --config promptfooconfig.yaml --tests evals/ahmed_matrix_dataset.yaml"
     },
     "dependencies": {
         "@modelcontextprotocol/ext-apps": "^1.0.1",
