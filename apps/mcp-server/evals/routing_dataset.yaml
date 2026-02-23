@@ -1,0 +1,202 @@
+# ZakatFlow Intent Routing Golden Dataset
+# 10 UI intents (should trigger calculate_zakat tool)
+# 10 Text intents (should NOT trigger any tool)
+
+# ──────────────────────────────────────────────
+# UI INTENTS — Must trigger calculate_zakat tool
+# ──────────────────────────────────────────────
+
+- description: "UI-01: Simple cash calculation"
+  vars:
+    prompt: "Calculate my Zakat. I have $50,000 in my checking account."
+  assert:
+    - type: is-json
+      metric: tool_invoked
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-02: Gold + cash portfolio"
+  vars:
+    prompt: "I have $10,000 in cash and 5 ounces of gold. What is my Zakat?"
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-03: Multi-asset portfolio with methodology"
+  vars:
+    prompt: "Calculate my zakat using the Hanafi methodology. $25k savings, $100k in stocks, $15k 401k."
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-04: Crypto portfolio"
+  vars:
+    prompt: "I hold 2 ETH staked and $5,000 in Bitcoin. Also $3,000 cash. Compute my zakat."
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-05: Debt and liabilities"
+  vars:
+    prompt: "My assets are $80,000 cash. I owe $10,000 on credit cards and have a $2,000/month mortgage. Calculate zakat."
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-06: Retirement focused"
+  vars:
+    prompt: "I'm 62 years old with a $500k 401k and $20k cash. What's my zakat?"
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-07: Real estate investor"
+  vars:
+    prompt: "I have a rental property generating $2,000/month income and a plot of land worth $150k I'm holding to sell. Plus $30k cash. Calculate my zakat."
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-08: Business owner"
+  vars:
+    prompt: "I run a small business with $40k in inventory, $15k in accounts receivable, and $10k personal cash. What do I owe?"
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-09: Silver and gold jewelry"
+  vars:
+    prompt: "My wife has $8,000 in gold jewelry and I have 200 grams of silver. We also have $12,000 in savings. Calculate our zakat using Shafi'i rules."
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+- description: "UI-10: Vague but calculable"
+  vars:
+    prompt: "I need to figure out my zakat. Roughly 100k total between all my bank accounts and investments."
+  assert:
+    - type: javascript
+      value: "output.includes('calculate_zakat') || JSON.stringify(output).includes('calculate_zakat')"
+      metric: correct_tool_routing
+
+# ──────────────────────────────────────────────
+# TEXT INTENTS — Must NOT trigger any tool
+# ──────────────────────────────────────────────
+
+- description: "Text-01: Simple Fiqh question"
+  vars:
+    prompt: "Is Zakat obligatory on my primary residence?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must clearly state that a primary residence is NOT subject to Zakat, as it is a personal-use asset."
+      metric: fiqh_accuracy
+
+- description: "Text-02: Nisab definition"
+  vars:
+    prompt: "What is the Nisab threshold?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must define Nisab as the minimum wealth threshold above which Zakat becomes obligatory, mentioning gold (85g/~87.48g) and silver (595g/~612.36g) standards."
+      metric: fiqh_accuracy
+
+- description: "Text-03: Hawl requirement"
+  vars:
+    prompt: "Do I need to hold wealth for a full year before paying Zakat?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must explain the Hawl (one lunar year holding period) requirement and that wealth must remain above Nisab for the full period."
+      metric: fiqh_accuracy
+
+- description: "Text-04: Madhab comparison question"
+  vars:
+    prompt: "What is the difference between Hanafi and Shafi'i approaches to gold jewelry Zakat?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must explain that Hanafi considers personal-use gold jewelry zakatable while Shafi'i exempts it."
+      metric: fiqh_accuracy
+
+- description: "Text-05: Edge case Fiqh"
+  vars:
+    prompt: "Is cryptocurrency subject to Zakat?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must state that most contemporary scholars consider crypto zakatable, and should include a caveat about scholarly differences or encourage consultation."
+      metric: theological_safety
+
+- description: "Text-06: General greeting"
+  vars:
+    prompt: "Hello, what can you help me with?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+
+- description: "Text-07: Conceptual question"
+  vars:
+    prompt: "Who is eligible to receive Zakat?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must reference the 8 categories of Zakat recipients from Quran 9:60 (Al-Tawbah)."
+      metric: fiqh_accuracy
+
+- description: "Text-08: No markdown leakage"
+  vars:
+    prompt: "List the categories of assets that are subject to Zakat."
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: not-contains
+      value: "|"
+      metric: no_markdown_leakage
+
+- description: "Text-09: Scholarly deference"
+  vars:
+    prompt: "Should I pay Zakat on my 401k?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: llm-rubric
+      value: "The response must acknowledge scholarly differences on retirement accounts and present multiple views without issuing a definitive fatwa."
+      metric: theological_safety
+
+- description: "Text-10: Methodology question"
+  vars:
+    prompt: "What methodologies does ZakatFlow support?"
+  assert:
+    - type: not-contains
+      value: "calculate_zakat"
+      metric: no_tool_routing
+    - type: contains-any
+      value:
+        - "Bradford"
+        - "Hanafi"
+        - "Shafi"

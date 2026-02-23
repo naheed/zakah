@@ -12,7 +12,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "eval": "npm --workspace=apps/mcp-server/src/evals install && npm --workspace=apps/mcp-server/src/evals run evaluate",
-        "eval:local": "tsx src/evals/run-agentic-evals.ts"
+        "eval:local": "tsx src/evals/run-agentic-evals.ts",
+        "eval:routing": "npx promptfoo eval --config promptfooconfig.yaml"
     },
     "dependencies": {
         "@modelcontextprotocol/ext-apps": "^1.0.1",
@@ -34,6 +35,7 @@
         "ngrok": "^5.0.0-beta.2",
         "tsx": "^4.7.2",
         "typescript": "^5.4.5",
+        "promptfoo": "^0.100.0",
         "vitest": "^3.2.4"
     }
 }

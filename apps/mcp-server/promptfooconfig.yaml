@@ -1,0 +1,51 @@
+# ZakatFlow MCP Server - Eval Configuration
+# Phase 1: Intent Routing & Text Query Eval Matrix
+#
+# Run: npm run eval:routing (from apps/mcp-server)
+# Docs: https://www.promptfoo.dev/docs/intro
+
+description: "ZakatFlow Intent Routing & Text Query Evals"
+
+providers:
+  - id: openai:gpt-4o
+    config:
+      temperature: 0.1
+      tools:
+        - type: function
+          function:
+            name: calculate_zakat
+            description: "Calculate Zakat obligation based on Islamic jurisprudence."
+            parameters:
+              type: object
+              properties:
+                cash:
+                  type: number
+                  description: "Total liquid cash"
+                madhab:
+                  type: string
+                  enum: [bradford, hanafi, shafii, maliki, hanbali, amja, qaradawi, tahir_anwar]
+                  description: "School of thought"
+                gold_value:
+                  type: number
+                  description: "Gold investment value in USD"
+                stocks:
+                  type: number
+                  description: "Value of stocks/funds"
+                retirement_total:
+                  type: number
+                  description: "Total vested retirement balance"
+                loans:
+                  type: number
+                  description: "Immediate debts due now"
+                monthly_mortgage:
+                  type: number
+                  description: "Monthly mortgage payment"
+                age:
+                  type: number
+                  description: "User age"
+              required: [cash]
+
+prompts:
+  - "You are ZakatFlow, a dignified Islamic finance guide. Answer user questions accurately. If the user provides financial data for a Zakat calculation, you MUST call the calculate_zakat tool. If the user asks a simple factual or Fiqh question, respond conversationally WITHOUT invoking any tool. Never hallucinate numbers. Always include scholarly caveats.\n\nUser: {{prompt}}"
+
+tests: file://evals/routing_dataset.yaml
