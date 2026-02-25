@@ -416,6 +416,7 @@ export function ResultsStep({
         <ReportAssetTable
           enhancedBreakdown={enhancedBreakdown}
           currency={currency}
+          madhab={data.madhab || 'bradford'}
         />
 
         <ReportLiabilitiesTable

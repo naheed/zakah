@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { formatCurrency, formatPercent, EnhancedAssetBreakdown, CalculatedAssetCategory } from "@zakatflow/core";
+import { formatCurrency, formatPercent, EnhancedAssetBreakdown, CalculatedAssetCategory, Madhab } from "@zakatflow/core";
+import { getAssetRuleExplanations } from "@zakatflow/core";
 import type { IconProps } from "@phosphor-icons/react";
 import {
     Wallet, TrendUp, PiggyBank, Coins, CurrencyBtc,
@@ -26,6 +27,7 @@ import { cn } from "@/lib/utils";
 interface ReportAssetTableProps {
     enhancedBreakdown: EnhancedAssetBreakdown;
     currency: string;
+    madhab?: Madhab | string;
 }
 
 // Icon mapping
@@ -45,20 +47,9 @@ const getAssetIcon = (key: string) => {
     }
 };
 
-// Ruling Text Helper
-const getRulingText = (key: string, cat: CalculatedAssetCategory) => {
-    if (cat.zakatablePercent === 1) return "Fully accessible/zakatable";
-    if (cat.zakatablePercent === 0) return "Exempt below threshold";
+export function ReportAssetTable({ enhancedBreakdown, currency, madhab }: ReportAssetTableProps) {
+    const rules = getAssetRuleExplanations((madhab as Madhab) || 'bradford');
 
-    switch (key) {
-        case 'investments': return "Split Strategy (30% Passive Rule)";
-        case 'retirement': return "Taxed on Vested Balance";
-        case 'trusts': return "Revocable/Accessible portion";
-        default: return `${formatPercent(cat.zakatablePercent)} Weighted`;
-    }
-};
-
-export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTableProps) {
     const assetKeys = [
         'liquidAssets', 'investments', 'retirement', 'preciousMetals',
         'crypto', 'realEstate', 'business', 'debtOwedToYou', 'trusts'
@@ -67,7 +58,9 @@ export function ReportAssetTable({ enhancedBreakdown, currency }: ReportAssetTab
     const rows = assetKeys.map(key => {
         const cat = enhancedBreakdown[key as keyof EnhancedAssetBreakdown] as CalculatedAssetCategory;
         if (!cat) return null;
-        return { key, cat, Icon: getAssetIcon(key), ruling: getRulingText(key, cat) };
+        const ruleInfo = rules[key as keyof typeof rules];
+        const ruling = ruleInfo ? ruleInfo.ruling : `${formatPercent(cat.zakatablePercent)} Weighted`;
+        return { key, cat, Icon: getAssetIcon(key), ruling };
     }).filter((item): item is NonNullable<typeof item> =>
         item !== null && item.cat && item.cat.total > 0
     ) as { key: string; cat: CalculatedAssetCategory; Icon: React.ComponentType<any>; ruling: string }[];
