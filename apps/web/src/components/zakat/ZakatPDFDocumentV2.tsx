@@ -821,6 +821,7 @@ export async function generateZakatPDFV2(
                 interestToPurify: calculations.interestToPurify || 0,
                 dividendsToPurify: calculations.dividendsToPurify || 0,
                 enhancedBreakdown: calculations.enhancedBreakdown as EnhancedAssetBreakdown, // Use actual breakdown!
+                madhab: data.madhab, // Pass methodology for rule explanations
                 generatedAt: new Date().toLocaleDateString(),
                 generatedAtHijri: "1447 AH",
                 reportId: report.meta.reportId, // Use ID from report object
